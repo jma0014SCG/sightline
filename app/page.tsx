@@ -50,6 +50,7 @@ export default function HomePage() {
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [showDemoModal, setShowDemoModal] = useState(false)
 
+
   // Smooth scroll utility function
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -543,86 +544,6 @@ Try Free Now →
         </div>
       </section>
 
-      {/* Why Speed-learn Section */}
-      <section id="features" className="relative py-24 sm:py-32 bg-gray-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Section header */}
-          <div className="mx-auto max-w-2xl text-center mb-20">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
-              🔍 Why Speed-learn?
-            </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-              Stop drowning in content
-            </p>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              We know your pain. Here&apos;s how we fix it.
-            </p>
-          </div>
-
-          {/* Pain points and fixes */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Pain/Fix 1 */}
-            <div className="relative">
-              <div className="rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-xl mb-4">
-                    <X className="h-6 w-6 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The Pain</h3>
-                  <p className="text-gray-700">Endless watch-lists & zero hours</p>
-                </div>
-                <div className="border-t border-gray-200 pt-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Our Fix</h3>
-                  <p className="text-gray-700">AI crunches the key ideas for you in 60 sec.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Pain/Fix 2 */}
-            <div className="relative">
-              <div className="rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-xl mb-4">
-                    <X className="h-6 w-6 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The Pain</h3>
-                  <p className="text-gray-700">Passive watching = low retention</p>
-                </div>
-                <div className="border-t border-gray-200 pt-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Our Fix</h3>
-                  <p className="text-gray-700">We surface actionable takeaways you&apos;ll actually remember.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Pain/Fix 3 */}
-            <div className="relative">
-              <div className="rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-xl mb-4">
-                    <X className="h-6 w-6 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The Pain</h3>
-                  <p className="text-gray-700">Notes scattered everywhere</p>
-                </div>
-                <div className="border-t border-gray-200 pt-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Our Fix</h3>
-                  <p className="text-gray-700">Your summaries live in one tidy, searchable library.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Core Benefits Section */}
       <section className="py-24 sm:py-32 bg-white">
@@ -673,81 +594,7 @@ Try Free Now →
         </div>
       </section>
 
-      {/* Built for People with Too Many Tabs Open Section */}
-      <section className="py-24 sm:py-32 bg-gray-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center mb-20">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
-              👤 Built for People with Too Many Tabs Open
-            </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-              Whatever your hustle, we&apos;ve got you
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Executives & Founders */}
-            <div className="relative group">
-              <div className="rounded-3xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-xl mb-4">
-                    <Briefcase className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Executives & Founders</h3>
-                </div>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Scan market interviews before your next board call.
-                </p>
-                <div className="pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 italic">
-                    "From 2-hour competitor analysis to 5-minute insights"
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Creators & Marketers */}
-            <div className="relative group">
-              <div className="rounded-3xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-purple-600 rounded-xl mb-4">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Creators & Marketers</h3>
-                </div>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Harvest hooks from trending videos without the midnight binge.
-                </p>
-                <div className="pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 italic">
-                    "Extract viral patterns in minutes, not hours"
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Researchers & Analysts */}
-            <div className="relative group">
-              <div className="rounded-3xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-                <div className="mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 bg-green-600 rounded-xl mb-4">
-                    <Search className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Researchers & Analysts</h3>
-                </div>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Digest 20 papers&apos; worth of lectures before the deadline.
-                </p>
-                <div className="pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 italic">
-                    "Turn video marathons into research goldmines"
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Proof in the Numbers Section */}
       <section id="metrics-section" className="py-24 sm:py-32 bg-white">
