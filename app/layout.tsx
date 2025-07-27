@@ -1,0 +1,67 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { AuthProvider } from '@/components/providers/AuthProvider'
+import { TRPCProvider } from '@/components/providers/TRPCProvider'
+import './globals.css'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-inter'
+})
+
+export const metadata: Metadata = {
+  title: 'Sightline.ai - Speed-learn anything on YouTube',
+  description: 'Transform hour-long YouTube videos into concise, searchable summaries with AI-powered insights.',
+  keywords: ['YouTube', 'summarization', 'AI', 'learning', 'productivity'],
+  authors: [{ name: 'Sightline.ai Team' }],
+  openGraph: {
+    title: 'Sightline.ai - Speed-learn anything on YouTube',
+    description: 'Transform hour-long YouTube videos into concise, searchable summaries',
+    url: 'https://sightline.ai',
+    siteName: 'Sightline.ai',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sightline.ai - Speed-learn anything on YouTube',
+    description: 'Transform hour-long YouTube videos into concise, searchable summaries',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} antialiased`}>
+        <AuthProvider>
+          <TRPCProvider>{children}</TRPCProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  )
+}

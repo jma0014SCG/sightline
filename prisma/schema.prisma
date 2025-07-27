@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  name                   String?
+  image                  String?
+  role                   Role      @default(USER)
+  plan                   Plan      @default(FREE)
+  emailVerified          DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Stripe subscription data
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  
+  // Usage tracking
+  summariesUsed          Int       @default(0)
+  summariesLimit         Int       @default(5) // Free tier limit
+
+  // Relations
+  accounts    Account[]
+  sessions    Session[]
+  summaries   Summary[]
+  sharedLinks ShareLink[]
+}
+
+// OAuth account linkage
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// User sessions
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Video summaries
+model Summary {
+  id           String   @id @default(cuid())
+  userId       String
+  videoId      String
+  videoUrl     String
+  videoTitle   String
+  channelName  String
+  channelId    String
+  duration     Int // in seconds
+  thumbnailUrl String?
+  content      String   @db.Text // Markdown content
+  keyPoints    Json? // Array of key points
+  metadata     Json? // Additional metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sharedLinks ShareLink[]
+
+  @@unique([userId, videoId])
+  @@index([userId])
+  @@index([videoId])
+}
+
+// Shareable links for summaries
+model ShareLink {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  summaryId String
+  userId    String
+  isPublic  Boolean   @default(false)
+  expiresAt DateTime?
+  views     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  // Relations
+  summary Summary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}

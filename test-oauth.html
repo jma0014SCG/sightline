@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test OAuth</title>
+    <script>
+        function testDirectOAuth() {
+            console.log('Testing direct OAuth...');
+            window.location.href = 'http://localhost:3000/api/auth/signin/google';
+        }
+        
+        function testFetchOAuth() {
+            console.log('Testing fetch to OAuth endpoint...');
+            fetch('http://localhost:3000/api/auth/signin/google')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Response HTML preview:', html.substring(0, 200));
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>OAuth Testing</h1>
+    <p>Open browser console (F12) to see logs</p>
+    
+    <button onclick="testDirectOAuth()">Test Direct OAuth Redirect</button>
+    <br><br>
+    <button onclick="testFetchOAuth()">Test Fetch OAuth Endpoint</button>
+    
+    <h2>Manual Test</h2>
+    <p>Click this link directly: <a href="http://localhost:3000/api/auth/signin/google" target="_blank">Sign in with Google</a></p>
+</body>
+</html>
