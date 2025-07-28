@@ -225,7 +225,7 @@ export default function LibraryPage() {
                 summary={summary}
                 onDelete={handleDelete}
                 onShare={handleShare}
-                className={viewMode === 'list' ? 'flex-row' : ''}
+                viewMode={viewMode}
               />
             ))}
           </div>

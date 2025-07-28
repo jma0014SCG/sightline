@@ -103,7 +103,10 @@ export function SummaryViewer({
 }: SummaryViewerProps) {
   const [copied, setCopied] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('tldr')
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+  // Progressive disclosure: Start with reference sections collapsed
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(['enrichment', 'learning']) // Start with reference sections collapsed
+  )
 
   const handleCopy = async (content?: string) => {
     try {
@@ -480,15 +483,24 @@ export function SummaryViewer({
   }
 
   const navigationItems = [
-    { id: 'tldr', label: 'TL;DR', icon: '⚡' },
-    { id: 'key-moments', label: 'Key Moments', icon: '🎯' },
-    { id: 'frameworks', label: 'Frameworks', icon: '🏗️' },
-    { id: 'debunked', label: 'Debunked', icon: '❌' },
-    { id: 'practice', label: 'In Practice', icon: '🎬' },
-    { id: 'playbooks', label: 'Playbooks', icon: '📖' },
-    { id: 'enrichment', label: 'Enrichment', icon: '🌟' },
-    { id: 'learning', label: 'Learning Pack', icon: '📚' }
+    { id: 'tldr', label: 'TL;DR', icon: '⚡', importance: 'essential', readTime: '30s' },
+    { id: 'key-moments', label: 'Key Moments', icon: '🎯', importance: 'essential', readTime: '2m' },
+    { id: 'frameworks', label: 'Frameworks', icon: '🏗️', importance: 'recommended', readTime: '3m' },
+    { id: 'debunked', label: 'Debunked', icon: '❌', importance: 'recommended', readTime: '1m' },
+    { id: 'practice', label: 'In Practice', icon: '🎬', importance: 'recommended', readTime: '2m' },
+    { id: 'playbooks', label: 'Playbooks', icon: '📖', importance: 'recommended', readTime: '4m' },
+    { id: 'enrichment', label: 'Enrichment', icon: '🌟', importance: 'reference', readTime: '2m' },
+    { id: 'learning', label: 'Learning Pack', icon: '📚', importance: 'reference', readTime: '8m' }
   ]
+
+  const getImportanceIndicator = (importance: string) => {
+    switch (importance) {
+      case 'essential': return '🔥'
+      case 'recommended': return '⭐'
+      case 'reference': return '📝'
+      default: return ''
+    }
+  }
 
   return (
     <article className={cn("max-w-4xl mx-auto bg-white px-4 sm:px-6 lg:px-8", className)} aria-label="Video summary">
@@ -590,24 +602,56 @@ export function SummaryViewer({
       {/* Quick Navigation Bar */}
       <nav className="sticky top-0 z-10 bg-white border-b border-gray-200 mb-6 sm:mb-8" role="navigation" aria-label="Summary sections">
         <div className="flex items-center gap-1 px-2 py-3 overflow-x-auto scrollbar-hide">
-          {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollToSection(item.id)}
-              className={cn(
-                "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap min-h-[40px]",
-                activeSection === item.id
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200"
-              )}
-              aria-label={`Jump to ${item.label} section`}
-            >
-              <span className="text-base sm:text-lg">{item.icon}</span>
-              <span className="hidden sm:inline">{item.label}</span>
-            </button>
-          ))}
+          {navigationItems.map((item) => {
+            const isCollapsed = collapsedSections.has(item.id)
+            return (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={cn(
+                  "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap min-h-[40px] relative",
+                  activeSection === item.id
+                    ? "bg-blue-100 text-blue-700 border border-blue-200"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200",
+                  isCollapsed && "opacity-60"
+                )}
+                aria-label={`Jump to ${item.label} section`}
+              >
+                {/* Importance indicator */}
+                <span className="text-xs absolute -top-1 -left-1">{getImportanceIndicator(item.importance)}</span>
+                <span className="text-base sm:text-lg">{item.icon}</span>
+                <span className="hidden sm:inline">{item.label}</span>
+                {/* Collapse indicator */}
+                {isCollapsed && <ChevronDown className="h-3 w-3 ml-1" />}
+                {/* Reading time on hover */}
+                <span className="hidden lg:inline text-xs text-gray-400 ml-1">({item.readTime})</span>
+              </button>
+            )
+          })}
         </div>
       </nav>
+
+      {/* Progressive Disclosure Banner */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6 sm:mb-8">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0">
+            <div className="flex items-center gap-1">
+              <span className="text-sm">🔥</span>
+              <span className="text-sm">⭐</span>
+              <span className="text-sm">📝</span>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-blue-900 mb-1">Smart Reading Guide</h3>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              <span className="font-medium">🔥 Essential</span> sections are shown first, 
+              <span className="font-medium"> ⭐ Recommended</span> for deeper insights, 
+              <span className="font-medium"> 📝 Reference</span> sections are collapsed by default. 
+              Click any section header to expand/collapse.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main role="main">
@@ -617,10 +661,11 @@ export function SummaryViewer({
           <div className="bg-amber-500 px-4 sm:px-6 py-4 border-b border-amber-600">
             <h2 className="text-lg sm:text-xl font-bold text-white flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center gap-2">
+                <span className="text-xs">🔥</span>
                 <span className="text-amber-100">⚡</span>
                 <span>00:00 Rapid TL;DR</span>
               </div>
-              <span className="text-xs sm:text-sm font-normal text-amber-100">(≤100 words)</span>
+              <span className="text-xs sm:text-sm font-normal text-amber-100">(30s read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
@@ -657,10 +702,11 @@ export function SummaryViewer({
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-blue-600 px-4 sm:px-6 py-4 border-b border-blue-700">
             <h2 id="key-moments-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xs">🔥</span>
               <span className="text-blue-100">🎯</span>
               <span className="flex flex-col sm:flex-row sm:items-center gap-1">
                 <span>Key Moments</span>
-                <span className="text-xs sm:text-sm font-normal text-blue-100">(Timestamp → Insight)</span>
+                <span className="text-xs sm:text-sm font-normal text-blue-100">(2m read)</span>
               </span>
             </h2>
           </div>
@@ -717,8 +763,10 @@ export function SummaryViewer({
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-green-600 px-4 sm:px-6 py-4 border-b border-green-700">
             <h2 id="frameworks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xs">⭐</span>
               <span className="text-green-100">🏗️</span>
               Strategic Frameworks
+              <span className="text-xs font-normal text-green-100 ml-2">(3m read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
@@ -754,8 +802,10 @@ export function SummaryViewer({
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-red-600 px-4 sm:px-6 py-4 border-b border-red-700">
             <h2 id="debunked-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xs">⭐</span>
               <span className="text-red-100">❌</span>
               Debunked Assumptions
+              <span className="text-xs font-normal text-red-100 ml-2">(1m read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
@@ -791,8 +841,10 @@ export function SummaryViewer({
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-emerald-600 px-4 sm:px-6 py-4 border-b border-emerald-700">
             <h2 id="practice-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xs">⭐</span>
               <span className="text-emerald-100">🎬</span>
               In Practice
+              <span className="text-xs font-normal text-emerald-100 ml-2">(2m read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
@@ -827,8 +879,10 @@ export function SummaryViewer({
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-purple-600 px-4 sm:px-6 py-4 border-b border-purple-700">
             <h2 id="playbooks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xs">⭐</span>
               <span className="text-purple-100">📖</span>
               Playbooks & Heuristics
+              <span className="text-xs font-normal text-purple-100 ml-2">(4m read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
@@ -857,11 +911,24 @@ export function SummaryViewer({
       <section id="enrichment" className="mb-6 sm:mb-8" aria-labelledby="enrichment-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-yellow-500 px-4 sm:px-6 py-4 border-b border-yellow-600">
-            <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-yellow-100">🌟</span>
-              Insight Enrichment
-            </h2>
+            <button
+              onClick={() => toggleSection('enrichment')}
+              className="w-full flex items-center justify-between text-left hover:bg-yellow-600 transition-colors rounded p-1 -m-1"
+              aria-expanded={!collapsedSections.has('enrichment')}
+            >
+              <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">📝</span>
+                <span className="text-yellow-100">🌟</span>
+                Insight Enrichment
+                <span className="text-xs font-normal text-yellow-100 ml-2">(2m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('enrichment') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
+          {!collapsedSections.has('enrichment') && (
           <div className="p-4 sm:p-6">
             {(() => {
               // Prioritize markdown parsing first, then backend data
@@ -925,6 +992,7 @@ export function SummaryViewer({
               );
             })()}
           </div>
+          )}
         </div>
       </section>
 
@@ -934,11 +1002,24 @@ export function SummaryViewer({
       <section id="learning" className="mb-6 sm:mb-8" aria-labelledby="learning-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-indigo-600 px-4 sm:px-6 py-4 border-b border-indigo-700">
-            <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-indigo-100">📚</span>
-              Accelerated Learning Pack
-            </h2>
+            <button
+              onClick={() => toggleSection('learning')}
+              className="w-full flex items-center justify-between text-left hover:bg-indigo-700 transition-colors rounded p-1 -m-1"
+              aria-expanded={!collapsedSections.has('learning')}
+            >
+              <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">📝</span>
+                <span className="text-indigo-100">📚</span>
+                Accelerated Learning Pack
+                <span className="text-xs font-normal text-indigo-100 ml-2">(8m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('learning') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
+          {!collapsedSections.has('learning') && (
           <div className="p-4 sm:p-6 space-y-6">
             {(() => {
               // Prioritize markdown parsing first, then backend data (exclude TL;DR as it's already shown above)
@@ -1074,6 +1155,7 @@ export function SummaryViewer({
               );
             })()}
           </div>
+          )}
         </div>
       </section>
       </main>
