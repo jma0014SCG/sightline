@@ -613,35 +613,41 @@ export function SummaryViewer({
       <main role="main">
         {/* Rapid TL;DR Section */}
         <section id="tldr" className="mb-6 sm:mb-8" aria-labelledby="tldr-heading">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-6">
-          <div className="flex items-start justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="bg-amber-500 px-4 sm:px-6 py-4 border-b border-amber-600">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-amber-600">⚡</span>
+                <span className="text-amber-100">⚡</span>
                 <span>00:00 Rapid TL;DR</span>
               </div>
-              <span className="text-xs sm:text-sm font-normal text-gray-500">(≤100 words)</span>
+              <span className="text-xs sm:text-sm font-normal text-amber-100">(≤100 words)</span>
             </h2>
-            <button
-              onClick={() => handleCopy(summary.metadata?.synopsis || 'TL;DR content')}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-white rounded-lg transition-all min-h-[40px] min-w-[40px] flex-shrink-0"
-              title="Copy TL;DR"
-              aria-label="Copy TL;DR section"
-            >
-              <Copy className="h-4 w-4 mx-auto" />
-            </button>
           </div>
-          <div className="text-gray-800 leading-relaxed text-sm sm:text-base">
-            {(() => {
-              // Prioritize markdown parsing first, then backend data, then fallback
-              const tldrContent = sections.get('tl;dr (≤100 words)') 
-                || sections.get('tl;dr') 
-                || summary.accelerated_learning_pack?.tldr100 
-                || summary.metadata?.synopsis 
-                || 'A concise summary of the key takeaways from this video content.';
-              
-              return tldrContent;
-            })()}
+          <div className="p-4 sm:p-6">
+            <div className="flex items-start justify-between mb-4">
+              <button
+                onClick={() => handleCopy(summary.metadata?.synopsis || 'TL;DR content')}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all min-h-[40px] min-w-[40px] flex-shrink-0"
+                title="Copy TL;DR"
+                aria-label="Copy TL;DR section"
+              >
+                <Copy className="h-4 w-4 mx-auto" />
+              </button>
+            </div>
+            <div className="text-gray-800 leading-relaxed text-base prose prose-base max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                {(() => {
+                  // Prioritize markdown parsing first, then backend data, then fallback
+                  const tldrContent = sections.get('tl;dr (≤100 words)') 
+                    || sections.get('tl;dr') 
+                    || summary.accelerated_learning_pack?.tldr100 
+                    || summary.metadata?.synopsis 
+                    || 'A concise summary of the key takeaways from this video content.';
+                  
+                  return tldrContent;
+                })()}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
       </section>
@@ -649,12 +655,12 @@ export function SummaryViewer({
       {/* Key Moments Section */}
       <section id="key-moments" className="mb-6 sm:mb-8" aria-labelledby="key-moments-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="key-moments-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-blue-600">🎯</span>
+          <div className="bg-blue-600 px-4 sm:px-6 py-4 border-b border-blue-700">
+            <h2 id="key-moments-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-blue-100">🎯</span>
               <span className="flex flex-col sm:flex-row sm:items-center gap-1">
                 <span>Key Moments</span>
-                <span className="text-xs sm:text-sm font-normal text-gray-500">(Timestamp → Insight)</span>
+                <span className="text-xs sm:text-sm font-normal text-blue-100">(Timestamp → Insight)</span>
               </span>
             </h2>
           </div>
@@ -682,8 +688,10 @@ export function SummaryViewer({
                           <Copy className="h-4 w-4 mx-auto" />
                         </button>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-gray-800 leading-relaxed text-sm sm:text-base">{moment.insight}</p>
+                      <div className="flex-1 min-w-0 prose prose-base max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {moment.insight}
+                        </ReactMarkdown>
                       </div>
                       <button
                         onClick={() => handleCopy(moment.insight)}
@@ -707,9 +715,9 @@ export function SummaryViewer({
       {/* Strategic Frameworks Section */}
       <section id="frameworks" className="mb-6 sm:mb-8" aria-labelledby="frameworks-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="frameworks-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-blue-600">🏗️</span>
+          <div className="bg-green-600 px-4 sm:px-6 py-4 border-b border-green-700">
+            <h2 id="frameworks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-green-100">🏗️</span>
               Strategic Frameworks
             </h2>
           </div>
@@ -723,9 +731,13 @@ export function SummaryViewer({
               return frameworks.length > 0 ? (
                 <div className="space-y-4">
                   {frameworks.map((framework, index) => (
-                    <div key={index} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                      <h3 className="font-semibold text-blue-900 mb-2">{framework.name}</h3>
-                      <p className="text-blue-800 text-sm leading-relaxed">{framework.description}</p>
+                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">{framework.name}</h3>
+                      <div className="text-gray-700 text-base leading-relaxed prose prose-base max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {framework.description}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -740,9 +752,9 @@ export function SummaryViewer({
       {/* Debunked Assumptions Section */}
       <section id="debunked" className="mb-6 sm:mb-8" aria-labelledby="debunked-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="debunked-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-red-600">❌</span>
+          <div className="bg-red-600 px-4 sm:px-6 py-4 border-b border-red-700">
+            <h2 id="debunked-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-red-100">❌</span>
               Debunked Assumptions
             </h2>
           </div>
@@ -757,8 +769,12 @@ export function SummaryViewer({
                 <ul className="space-y-2">
                   {assumptions.map((assumption, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <span className="text-red-500 mt-0.5">•</span>
-                      <span className="text-gray-700">{assumption}</span>
+                      <span className="text-gray-400 mt-0.5">•</span>
+                      <div className="text-gray-700 text-base prose prose-base max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {assumption}
+                        </ReactMarkdown>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -773,9 +789,9 @@ export function SummaryViewer({
       {/* In Practice Section */}
       <section id="practice" className="mb-6 sm:mb-8" aria-labelledby="practice-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="practice-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-green-600">🎬</span>
+          <div className="bg-emerald-600 px-4 sm:px-6 py-4 border-b border-emerald-700">
+            <h2 id="practice-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-emerald-100">🎬</span>
               In Practice
             </h2>
           </div>
@@ -789,8 +805,12 @@ export function SummaryViewer({
               return practices.length > 0 ? (
                 <div className="space-y-3">
                   {practices.map((practice, index) => (
-                    <div key={index} className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      <p className="text-green-800 text-sm">{practice}</p>
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="text-gray-700 text-base prose prose-base max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {practice}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -805,9 +825,9 @@ export function SummaryViewer({
       {/* Playbooks & Heuristics Section */}
       <section id="playbooks" className="mb-6 sm:mb-8" aria-labelledby="playbooks-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="playbooks-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-purple-600">📖</span>
+          <div className="bg-purple-600 px-4 sm:px-6 py-4 border-b border-purple-700">
+            <h2 id="playbooks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-purple-100">📖</span>
               Playbooks & Heuristics
             </h2>
           </div>
@@ -836,9 +856,9 @@ export function SummaryViewer({
       {/* Insight Enrichment Section */}
       <section id="enrichment" className="mb-6 sm:mb-8" aria-labelledby="enrichment-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-yellow-600">🌟</span>
+          <div className="bg-yellow-500 px-4 sm:px-6 py-4 border-b border-yellow-600">
+            <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-yellow-100">🌟</span>
               Insight Enrichment
             </h2>
           </div>
@@ -865,9 +885,9 @@ export function SummaryViewer({
                 <div className="space-y-4">
                   {/* Stats, Tools & Links */}
                   {statsToolsLinks.length > 0 && (
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">Stats, Tools & Links</h4>
-                      <ul className="text-sm text-blue-800 space-y-1">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">Stats, Tools & Links</h4>
+                      <ul className="text-base text-gray-700 space-y-1">
                         {statsToolsLinks.map((item, index) => (
                           <li key={index}>• {item}</li>
                         ))}
@@ -876,7 +896,7 @@ export function SummaryViewer({
                   )}
                   
                   {/* Sentiment */}
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-2">Sentiment</h4>
                     <span className={cn(
                       "inline-flex px-3 py-1 rounded-full text-sm font-medium",
@@ -890,9 +910,9 @@ export function SummaryViewer({
                   
                   {/* Risks, Blockers & Questions */}
                   {risksBlockersQuestions.length > 0 && (
-                    <div className="bg-amber-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-amber-900 mb-2">Risks, Blockers & Questions</h4>
-                      <ul className="text-sm text-amber-800 space-y-1">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">Risks, Blockers & Questions</h4>
+                      <ul className="text-base text-gray-700 space-y-1">
                         {risksBlockersQuestions.map((item, index) => (
                           <li key={index}>• {item}</li>
                         ))}
@@ -913,25 +933,19 @@ export function SummaryViewer({
       {/* Accelerated Learning Pack Section */}
       <section id="learning" className="mb-6 sm:mb-8" aria-labelledby="learning-heading">
         <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-indigo-600">📚</span>
+          <div className="bg-indigo-600 px-4 sm:px-6 py-4 border-b border-indigo-700">
+            <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-indigo-100">📚</span>
               Accelerated Learning Pack
             </h2>
           </div>
           <div className="p-4 sm:p-6 space-y-6">
             {(() => {
-              // Prioritize markdown parsing first, then backend data
-              const tldr100 = sections.get('tl;dr (≤100 words)') 
-                || sections.get('tl;dr') 
-                || summary.accelerated_learning_pack?.tldr100 
-                || '';
-                
+              // Prioritize markdown parsing first, then backend data (exclude TL;DR as it's already shown above)
               const flashcardsContent = rawFlashcardsContent ||
                 (summary.accelerated_learning_pack?.feynman_flashcards && summary.accelerated_learning_pack.feynman_flashcards.length > 0
                   ? summary.accelerated_learning_pack.feynman_flashcards.map(card => `Q: ${card.q}\nA: ${card.a}\n`).join('\n')
                   : '');
-              const flashcards = summary.accelerated_learning_pack?.feynman_flashcards || [];
                 
               const glossary = parsedGlossary.length > 0 
                 ? parsedGlossary 
@@ -945,30 +959,17 @@ export function SummaryViewer({
                 ? parsedNovelIdeaMeter 
                 : (summary.accelerated_learning_pack?.novel_idea_meter || []);
               
-              const hasAnyLearningContent = tldr100 || flashcardsContent || glossary.length > 0 || quickQuiz.length > 0 || novelIdeaMeter.length > 0;
+              const hasAnyLearningContent = flashcardsContent || glossary.length > 0 || quickQuiz.length > 0 || novelIdeaMeter.length > 0;
               
               return hasAnyLearningContent ? (
                 <>
-                  {/* TL;DR 100 */}
-                  {tldr100 && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
-                        ⚡ TL;DR-100
-                        <span className="text-xs font-normal text-amber-700">(≤100 words)</span>
-                      </h4>
-                      <p className="text-amber-800 text-sm leading-relaxed">
-                        {tldr100}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Feynman Flashcards */}
                   {flashcardsContent && (
-                    <div className="p-4 bg-pink-50 border border-pink-200 rounded-lg">
-                      <h4 className="font-semibold text-pink-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
                         🗂️ Feynman Flashcards
                       </h4>
-                      <div className="prose prose-sm max-w-none prose-pink">
+                      <div className="prose prose-sm max-w-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {flashcardsContent}
                         </ReactMarkdown>
@@ -978,18 +979,22 @@ export function SummaryViewer({
 
                   {/* Glossary */}
                   {glossary.length > 0 && (
-                    <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                      <h4 className="font-semibold text-indigo-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
                         📖 Glossary
-                        <span className="text-xs font-normal text-indigo-700">
+                        <span className="text-xs font-normal text-gray-600">
                           ({glossary.length} terms)
                         </span>
                       </h4>
                       <div className="space-y-2">
                         {glossary.map((item, index) => (
                           <div key={index} className="flex items-start gap-2">
-                            <span className="font-semibold text-indigo-800 text-sm">{item.term}:</span>
-                            <span className="text-indigo-700 text-sm">{item.definition}</span>
+                            <span className="font-semibold text-gray-900 text-base">{item.term}:</span>
+                            <div className="text-gray-700 text-base prose prose-base max-w-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                                {item.definition}
+                              </ReactMarkdown>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -998,23 +1003,31 @@ export function SummaryViewer({
 
                   {/* Quick Quiz */}
                   {quickQuiz.length > 0 && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      <h4 className="font-semibold text-emerald-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
                         ❓ Quick Quiz
-                        <span className="text-xs font-normal text-emerald-700">
+                        <span className="text-xs font-normal text-gray-600">
                           ({quickQuiz.length} questions)
                         </span>
                       </h4>
                       <div className="space-y-3">
                         {quickQuiz.map((quiz, index) => (
-                          <div key={index} className="p-3 bg-white/50 rounded border border-emerald-100">
+                          <div key={index} className="p-3 bg-white rounded border border-gray-200">
                             <div className="flex items-start gap-3">
-                              <span className="font-mono text-xs text-emerald-600 mt-0.5 flex-shrink-0">
+                              <span className="font-mono text-xs text-gray-500 mt-0.5 flex-shrink-0">
                                 {index + 1}.
                               </span>
                               <div className="flex-1 space-y-1">
-                                <p className="text-sm font-medium text-emerald-900">{quiz.q}</p>
-                                <p className="text-sm text-emerald-700 italic">→ {quiz.a}</p>
+                                <div className="text-base font-medium text-gray-900 prose prose-base max-w-none">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                                    {quiz.q}
+                                  </ReactMarkdown>
+                                </div>
+                                <div className="text-base text-gray-600 italic prose prose-base max-w-none">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                                    {`→ ${quiz.a}`}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1025,22 +1038,26 @@ export function SummaryViewer({
 
                   {/* Novel-Idea Meter */}
                   {novelIdeaMeter.length > 0 && (
-                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                      <h4 className="font-semibold text-orange-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
                         💡 Novel-Idea Meter
-                        <span className="text-xs font-normal text-orange-700">
+                        <span className="text-xs font-normal text-gray-600">
                           ({novelIdeaMeter.length} ideas)
                         </span>
                       </h4>
                       <div className="space-y-2">
                         {novelIdeaMeter.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-white/50 rounded">
-                            <span className="text-sm text-orange-800">{item.insight}</span>
-                            <div className="flex items-center gap-0.5">
+                          <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
+                            <div className="text-base text-gray-700 prose prose-base max-w-none flex-1">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                                {item.insight}
+                              </ReactMarkdown>
+                            </div>
+                            <div className="flex items-center gap-0.5 ml-2">
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <span
                                   key={star}
-                                  className={star <= item.score ? "text-orange-500" : "text-orange-200"}
+                                  className={star <= item.score ? "text-yellow-500" : "text-gray-300"}
                                 >
                                   ★
                                 </span>
