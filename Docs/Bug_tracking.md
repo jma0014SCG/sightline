@@ -28,6 +28,53 @@ This document tracks all bugs, errors, and their resolutions encountered during 
 
 ## Active Bugs
 
+### [BUG-005] - Missing Playbooks & Heuristics and Feynman Flashcards Data in Frontend
+**Date:** 2025-01-28
+**Stage:** Stage 3: Summary Display & Management  
+**Severity:** Medium
+**Status:** In Progress
+
+**Error Details:**
+Playbooks & Heuristics and Feynman Flashcards sections are not displaying data in the frontend SummaryViewer component, despite backend correctly parsing and sending the data.
+
+**Steps to Reproduce:**
+1. Create a summary from a YouTube URL
+2. View the summary in the frontend
+3. Observe that Playbooks & Heuristics and Feynman Flashcards sections show "No data available"
+4. Check browser console logs for parsing debug information
+
+**Expected Behavior:**
+Both sections should display parsed content from the Gumloop markdown output
+
+**Actual Behavior:**  
+Sections appear empty despite backend logs showing successful parsing of:
+- `playbooks & heuristics` section (e.g., "If you can't see a control panel → View ▶ User Interface→toggle Project Browser/Properties")
+- `feynman flashcards` section (e.g., "Q: Why set levels before modeling? A: They're datums; every height-based edit references them")
+
+**Environment:**
+- Frontend: React/Next.js with TypeScript
+- Backend: FastAPI with Gumloop parser
+- Data flow: Backend → tRPC → Frontend SummaryViewer component
+
+**Root Cause Analysis:**
+Backend parsing is working correctly (confirmed via server logs). Issue appears to be in frontend markdown parsing logic:
+1. Section extraction may not be finding the correct section names
+2. Regex patterns in parsing functions may not match the actual content format
+3. Data prioritization logic may be incorrectly falling back to empty backend data
+
+**Current Investigation:**
+- Added debug logging to frontend parsing functions
+- Verified backend is correctly structuring data in API response
+- Testing section name matching and content extraction
+
+**Possible Solutions:**
+1. Fix regex patterns in `parsePlaybooks()` and `parseFeynmanFlashcards()` functions
+2. Verify section name matching is case-insensitive and handles special characters
+3. Ensure markdown content extraction is working correctly
+4. Test with actual Gumloop output format
+
+---
+
 ### [BUG-001] - Localhost Network Connectivity Issue
 **Date:** 2025-07-17
 **Stage:** Stage 1: Foundation & Setup

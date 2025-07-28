@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 class VideoInfo(BaseModel):
@@ -31,13 +31,41 @@ class GlossaryTerm(BaseModel):
     term: str
     definition: str
 
+class Framework(BaseModel):
+    name: str
+    description: str
+
+class Playbook(BaseModel):
+    trigger: str
+    action: str
+
+class NovelIdeaMeter(BaseModel):
+    insight: str
+    score: int
+
+class InsightEnrichment(BaseModel):
+    stats_tools_links: List[str] = []
+    sentiment: str = "neutral"
+    risks_blockers_questions: List[str] = []
+
+class AcceleratedLearningPack(BaseModel):
+    tldr100: str
+    feynman_flashcards: List[Dict[str, str]] = []
+    glossary: List[Dict[str, str]] = []
+    quick_quiz: List[Dict[str, str]] = []
+    novel_idea_meter: List[NovelIdeaMeter] = []
+
 class SummaryMetadata(BaseModel):
     title: str
     channel: str
     duration: Optional[str] = None
     speakers: List[str] = []
+    video_url: Optional[str] = None
+    language: str = "en"
+    generated_on: Optional[str] = None
+    version: str = "v1.0"
     synopsis: str
-    tone: str
+    tone: Optional[str] = None
 
 class Summary(BaseModel):
     content: str  # MARKDOWN content
@@ -69,6 +97,14 @@ class SummarizeResponse(BaseModel):
     # Structured data from Gumloop parsing
     metadata: Optional[SummaryMetadata] = None
     key_moments: List[KeyMoment] = []
+    frameworks: List[Framework] = []
+    debunked_assumptions: List[str] = []
+    in_practice: List[str] = []
+    playbooks: List[Playbook] = []
+    insight_enrichment: Optional[InsightEnrichment] = None
+    accelerated_learning_pack: Optional[AcceleratedLearningPack] = None
+    
+    # Legacy fields for backward compatibility
     flashcards: List[Flashcard] = []
     quiz_questions: List[QuizQuestion] = []
     glossary: List[GlossaryTerm] = []

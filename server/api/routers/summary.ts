@@ -104,15 +104,19 @@ export const summaryRouter = createTRPCRouter({
 
         console.log('📡 Response status:', response.status)
 
+        let data
         if (!response.ok) {
           let errorMessage = 'Failed to summarize video'
           try {
-            const errorData = await response.json()
-            errorMessage = errorData.detail || errorData.error || errorMessage
+            const responseText = await response.text()
+            try {
+              const errorData = JSON.parse(responseText)
+              errorMessage = errorData.detail || errorData.error || errorMessage
+            } catch (e) {
+              errorMessage = responseText || errorMessage
+            }
           } catch (e) {
-            // If can't parse JSON, use text
-            const errorText = await response.text()
-            errorMessage = errorText || errorMessage
+            errorMessage = 'Failed to read error response'
           }
           
           console.error('❌ Backend error:', errorMessage)
@@ -122,7 +126,15 @@ export const summaryRouter = createTRPCRouter({
           })
         }
 
-        const data = await response.json()
+        try {
+          const responseText = await response.text()
+          data = JSON.parse(responseText)
+        } catch (e) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Invalid JSON response from backend',
+          })
+        }
         console.log('✅ Received response from FastAPI:', data)
         
         // Check if we got an error response

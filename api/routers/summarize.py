@@ -54,6 +54,12 @@ async def summarize_video(
         # Initialize default values
         metadata = None
         key_moments = []
+        frameworks = []
+        debunked_assumptions = []
+        in_practice = []
+        playbooks = []
+        insight_enrichment = None
+        accelerated_learning_pack = None
         flashcards = []
         quiz_questions = []
         glossary = []
@@ -89,7 +95,7 @@ async def summarize_video(
                         pass  # Keep original duration if parsing fails
                 
                 # Prepare structured data for frontend
-                from models.responses import SummaryMetadata, KeyMoment, Flashcard, QuizQuestion, GlossaryTerm
+                from models.responses import SummaryMetadata, KeyMoment, Flashcard, QuizQuestion, GlossaryTerm, Framework, Playbook, InsightEnrichment, AcceleratedLearningPack, NovelIdeaMeter
                 
                 metadata = SummaryMetadata(
                     title=gumloop_data.title,
@@ -105,23 +111,108 @@ async def summarize_video(
                     for moment in gumloop_data.key_moments
                 ]
                 
-                flashcards = [
-                    Flashcard(question=card["question"], answer=card["answer"])
-                    for card in gumloop_data.flashcards
+                # Map new structured sections
+                frameworks = [
+                    Framework(name=f.name, description=f.description)
+                    for f in gumloop_data.frameworks
                 ]
                 
-                quiz_questions = [
-                    QuizQuestion(question=q["question"], answer=q["answer"])
-                    for q in gumloop_data.quiz_questions
+                debunked_assumptions = gumloop_data.debunked_assumptions
+                in_practice = gumloop_data.in_practice
+                
+                playbooks = [
+                    Playbook(trigger=p.trigger, action=p.action)
+                    for p in gumloop_data.playbooks
                 ]
                 
-                glossary = [
-                    GlossaryTerm(term=term["term"], definition=term["definition"])
-                    for term in gumloop_data.glossary
-                ]
+                insight_enrichment = None
+                if gumloop_data.insight_enrichment:
+                    insight_enrichment = InsightEnrichment(
+                        stats_tools_links=gumloop_data.insight_enrichment.stats_tools_links,
+                        sentiment=gumloop_data.insight_enrichment.sentiment,
+                        risks_blockers_questions=gumloop_data.insight_enrichment.risks_blockers_questions
+                    )
                 
-                tools = gumloop_data.tools
-                resources = gumloop_data.resources
+                accelerated_learning_pack = None
+                if gumloop_data.accelerated_learning_pack:
+                    try:
+                        # Safely handle glossary field which might be malformed
+                        safe_glossary = []
+                        if gumloop_data.accelerated_learning_pack.glossary:
+                            for item in gumloop_data.accelerated_learning_pack.glossary:
+                                if isinstance(item, dict) and "term" in item and "definition" in item:
+                                    # Ensure both term and definition are strings
+                                    term = str(item["term"]) if item["term"] is not None else ""
+                                    definition = str(item["definition"]) if item["definition"] is not None else ""
+                                    safe_glossary.append({"term": term, "definition": definition})
+                        
+                        # Safely handle flashcards
+                        safe_flashcards = []
+                        if gumloop_data.accelerated_learning_pack.feynman_flashcards:
+                            for item in gumloop_data.accelerated_learning_pack.feynman_flashcards:
+                                if isinstance(item, dict):
+                                    # Handle different key formats
+                                    question = item.get("q", item.get("question", ""))
+                                    answer = item.get("a", item.get("answer", ""))
+                                    if question and answer:
+                                        safe_flashcards.append({"q": str(question), "a": str(answer)})
+                        
+                        # Safely handle quiz questions  
+                        safe_quiz = []
+                        if gumloop_data.accelerated_learning_pack.quick_quiz:
+                            for item in gumloop_data.accelerated_learning_pack.quick_quiz:
+                                if isinstance(item, dict):
+                                    question = item.get("q", item.get("question", ""))
+                                    answer = item.get("a", item.get("answer", ""))
+                                    if question and answer:
+                                        safe_quiz.append({"q": str(question), "a": str(answer)})
+                        
+                        accelerated_learning_pack = AcceleratedLearningPack(
+                            tldr100=str(gumloop_data.accelerated_learning_pack.tldr100) if gumloop_data.accelerated_learning_pack.tldr100 else "",
+                            feynman_flashcards=safe_flashcards,
+                            glossary=safe_glossary,
+                            quick_quiz=safe_quiz,
+                            novel_idea_meter=[
+                                NovelIdeaMeter(insight=idea.insight, score=idea.score)
+                                for idea in gumloop_data.accelerated_learning_pack.novel_idea_meter
+                            ]
+                        )
+                    except Exception as e:
+                        # If accelerated learning pack creation fails, continue without it
+                        print(f"Warning: Failed to create accelerated learning pack: {e}")
+                        accelerated_learning_pack = None
+                
+                flashcards = []
+                quiz_questions = []
+                glossary = []
+                if gumloop_data.accelerated_learning_pack:
+                    flashcards = [
+                        Flashcard(question=card["question"], answer=card["answer"])
+                        for card in gumloop_data.accelerated_learning_pack.feynman_flashcards
+                        if isinstance(card, dict) and "question" in card and "answer" in card
+                    ]
+                    
+                    quiz_questions = [
+                        QuizQuestion(question=q["question"], answer=q["answer"])
+                        for q in gumloop_data.accelerated_learning_pack.quick_quiz
+                        if isinstance(q, dict) and "question" in q and "answer" in q
+                    ]
+                    
+                    glossary = []
+                    if gumloop_data.accelerated_learning_pack.glossary:
+                        for term in gumloop_data.accelerated_learning_pack.glossary:
+                            if isinstance(term, dict) and "term" in term and "definition" in term:
+                                # Ensure both term and definition are strings
+                                term_str = str(term["term"]) if term["term"] is not None else ""
+                                definition_str = str(term["definition"]) if term["definition"] is not None else ""
+                                if term_str and definition_str:
+                                    glossary.append(GlossaryTerm(term=term_str, definition=definition_str))
+                
+                # Extract legacy tools and resources for backward compatibility
+                tools = []
+                resources = []
+                if gumloop_data.insight_enrichment:
+                    tools = gumloop_data.insight_enrichment.stats_tools_links
             else:
                 # Fallback: use LangChain if Gumloop parsing fails
                 summary = await langchain_service.summarize_transcript(
@@ -157,6 +248,12 @@ async def summarize_video(
             user_id="test-user",  # Temporarily using test user ID
             metadata=metadata,
             key_moments=key_moments,
+            frameworks=frameworks,
+            debunked_assumptions=debunked_assumptions,
+            in_practice=in_practice,
+            playbooks=playbooks,
+            insight_enrichment=insight_enrichment,
+            accelerated_learning_pack=accelerated_learning_pack,
             flashcards=flashcards,
             quiz_questions=quiz_questions,
             tools=tools,
