@@ -4,7 +4,7 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import { Copy, Download, Share2, Check, Clock, Calendar, ChevronDown, ChevronUp, User } from 'lucide-react'
+import { Copy, Download, Share2, Check, Clock, Calendar, ChevronDown, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Summary } from '@prisma/client'
 
@@ -12,19 +12,6 @@ import type { Summary } from '@prisma/client'
 interface BackendKeyMoment {
   timestamp: string
   insight: string
-}
-
-interface BackendMetadata {
-  title?: string
-  channel?: string
-  duration?: string
-  speakers?: string[]
-  synopsis?: string
-  video_url?: string
-  language?: string
-  generated_on?: string
-  version?: string
-  tone?: string
 }
 
 interface BackendFlashcard {
@@ -105,7 +92,7 @@ export function SummaryViewer({
   const [activeSection, setActiveSection] = useState<string>('tldr')
   // Progressive disclosure: Start with reference sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
-    new Set(['enrichment', 'learning']) // Start with reference sections collapsed
+    new Set(['frameworks', 'debunked', 'practice', 'playbooks', 'enrichment', 'learning']) // Start with reference sections collapsed
   )
 
   const handleCopy = async (content?: string) => {
@@ -387,7 +374,7 @@ export function SummaryViewer({
       const trimmed = line.trim()
       
       if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-        let content = trimmed.replace(/^[-•]\s*/, '').trim()
+        const content = trimmed.replace(/^[-•]\s*/, '').trim()
         
         // Look for labeled content: "- Tools: content" or "- Stats: content"
         const labelMatch = content.match(/^([^:]+):\s*(.+)$/)
@@ -431,18 +418,285 @@ export function SummaryViewer({
     return { stats_tools_links, sentiment, risks_blockers_questions }
   }
 
+  // Custom markdown parser for clean text formatting with proper HTML lists
+  const parseMarkdownToJSX = (content: string, themeColor: string) => {
+    if (!content.trim()) return null
+
+    const lines = content.split('\n')
+    const elements: React.ReactNode[] = []
+    let currentParagraph: string[] = []
+    let currentListType: 'ul' | 'ol' | null = null
+    let currentListItems: React.ReactNode[] = []
+    let key = 0
+
+    const flushParagraph = () => {
+      if (currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim()
+        if (paragraphText) {
+          elements.push(
+            <p key={key++} className="text-gray-700 leading-relaxed mb-4 text-base">
+              {parseInlineMarkdown(paragraphText, themeColor)}
+            </p>
+          )
+        }
+        currentParagraph = []
+      }
+    }
+
+    const flushCurrentList = () => {
+      if (currentListItems.length > 0 && currentListType) {
+        if (currentListType === 'ul') {
+          elements.push(
+            <ul key={key++} className="list-disc list-outside space-y-2 mb-4 ml-6 pl-2">
+              {currentListItems}
+            </ul>
+          )
+        } else {
+          elements.push(
+            <ol key={key++} className="list-decimal list-outside space-y-3 mb-4 ml-6 pl-2">
+              {currentListItems}
+            </ol>
+          )
+        }
+        currentListItems = []
+        currentListType = null
+      }
+    }
+
+    const parseInlineMarkdown = (text: string, color: string) => {
+      const parts: React.ReactNode[] = []
+      let remaining = text
+      let partKey = 0
+
+      while (remaining.length > 0) {
+        // Handle bold text **text**
+        const boldMatch = remaining.match(/\*\*([^*]+)\*\*/)
+        if (boldMatch) {
+          const beforeBold = remaining.substring(0, boldMatch.index!)
+          if (beforeBold) parts.push(beforeBold)
+          parts.push(
+            <strong key={partKey++} className="font-bold text-gray-900">
+              {boldMatch[1]}
+            </strong>
+          )
+          remaining = remaining.substring(boldMatch.index! + boldMatch[0].length)
+          continue
+        }
+
+        // Handle inline code `code`
+        const codeMatch = remaining.match(/`([^`]+)`/)
+        if (codeMatch) {
+          const beforeCode = remaining.substring(0, codeMatch.index!)
+          if (beforeCode) parts.push(beforeCode)
+          parts.push(
+            <code key={partKey++} className={`px-1.5 py-0.5 rounded text-sm bg-${color}-50 text-${color}-600`}>
+              {codeMatch[1]}
+            </code>
+          )
+          remaining = remaining.substring(codeMatch.index! + codeMatch[0].length)
+          continue
+        }
+
+        // Handle arrows →
+        const arrowMatch = remaining.match(/(→)/)
+        if (arrowMatch) {
+          const beforeArrow = remaining.substring(0, arrowMatch.index!)
+          if (beforeArrow) parts.push(beforeArrow)
+          parts.push(
+            <span key={partKey++} className="text-blue-600 font-medium mx-1">
+              →
+            </span>
+          )
+          remaining = remaining.substring(arrowMatch.index! + arrowMatch[0].length)
+          continue
+        }
+
+        // No more markdown, add remaining text
+        parts.push(remaining)
+        break
+      }
+
+      return parts.length === 1 ? parts[0] : parts
+    }
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      
+      // Skip empty lines but flush current context
+      if (!trimmed) {
+        flushParagraph()
+        flushCurrentList()
+        continue
+      }
+
+      // Handle headings
+      if (trimmed.startsWith('###')) {
+        flushParagraph()
+        flushCurrentList()
+        const headingText = trimmed.replace(/^###\s*/, '')
+        elements.push(
+          <h4 key={key++} className="text-lg font-semibold text-gray-900 mt-6 mb-3">
+            {parseInlineMarkdown(headingText, themeColor)}
+          </h4>
+        )
+        continue
+      }
+      
+      if (trimmed.startsWith('##')) {
+        flushParagraph()
+        flushCurrentList()
+        const headingText = trimmed.replace(/^##\s*/, '')
+        elements.push(
+          <h3 key={key++} className="text-xl font-semibold text-gray-900 mt-6 mb-4">
+            {parseInlineMarkdown(headingText, themeColor)}
+          </h3>
+        )
+        continue
+      }
+
+      // Handle unordered lists (including en dash –)
+      if (trimmed.match(/^[-–*•]\s+/)) {
+        flushParagraph()
+        
+        // Start new list or continue existing unordered list
+        if (currentListType !== 'ul') {
+          flushCurrentList()
+          currentListType = 'ul'
+        }
+        
+        const listItem = trimmed.replace(/^[-–*•]\s+/, '')
+        currentListItems.push(
+          <li key={key++} className="text-gray-700 leading-relaxed text-base">
+            {parseInlineMarkdown(listItem, themeColor)}
+          </li>
+        )
+        continue
+      }
+
+      // Handle ordered lists
+      if (trimmed.match(/^\d+\.\s+/)) {
+        flushParagraph()
+        
+        // Start new list or continue existing ordered list
+        if (currentListType !== 'ol') {
+          flushCurrentList()
+          currentListType = 'ol'
+        }
+        
+        const listItem = trimmed.replace(/^\d+\.\s+/, '')
+        currentListItems.push(
+          <li key={key++} className="text-gray-700 leading-relaxed text-base">
+            {parseInlineMarkdown(listItem, themeColor)}
+          </li>
+        )
+        continue
+      }
+
+      // Regular paragraph text
+      flushCurrentList()
+      currentParagraph.push(trimmed)
+    }
+
+    // Flush any remaining content
+    flushParagraph()
+    flushCurrentList()
+
+    return elements.length > 0 ? <div className="space-y-1">{elements}</div> : null
+  }
+
+  // Custom framework formatter for Strategic Frameworks section
+  const formatFrameworks = (content: string, themeColor: string) => {
+    if (!content.trim()) return null
+
+    const lines = content.split('\n').filter(line => line.trim())
+    const frameworks: Array<{number: string, title: string, description: string}> = []
+    
+    let currentFramework: {number: string, title: string, description: string} | null = null
+    
+    for (const line of lines) {
+      const trimmed = line.trim()
+      
+      // Check for numbered framework titles (e.g., "1. Framework Name" or "**1. Framework Name**")
+      const numberedMatch = trimmed.match(/^(?:\*\*)?(\d+)\.\s*(.+?)(?:\*\*)?$/)
+      if (numberedMatch) {
+        // Save previous framework if exists
+        if (currentFramework) {
+          frameworks.push(currentFramework)
+        }
+        
+        currentFramework = {
+          number: numberedMatch[1],
+          title: numberedMatch[2].replace(/^\*\*|\*\*$/g, ''), // Remove bold markdown
+          description: ''
+        }
+        continue
+      }
+      
+      // Check for bold titles without numbers (e.g., "**Framework Name**")
+      const boldTitleMatch = trimmed.match(/^\*\*(.+?)\*\*$/)
+      if (boldTitleMatch && !currentFramework) {
+        currentFramework = {
+          number: (frameworks.length + 1).toString(),
+          title: boldTitleMatch[1],
+          description: ''
+        }
+        continue
+      }
+      
+      // Add description lines to current framework
+      if (currentFramework && trimmed && !trimmed.startsWith('#')) {
+        if (currentFramework.description) {
+          currentFramework.description += ' ' + trimmed
+        } else {
+          currentFramework.description = trimmed
+        }
+      }
+    }
+    
+    // Save last framework
+    if (currentFramework) {
+      frameworks.push(currentFramework)
+    }
+    
+    // If we found frameworks, render them as cards
+    if (frameworks.length > 0) {
+      return (
+        <div className="space-y-4">
+          {frameworks.map((framework, index) => (
+            <div key={index} className="bg-white p-5 rounded-lg border border-green-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-bold text-sm">
+                    {framework.number}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+                    {framework.title}
+                  </h4>
+                  {framework.description && (
+                    <div className="text-gray-700 leading-relaxed text-base">
+                      {parseMarkdownToJSX(framework.description, themeColor)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    
+    // Fallback to regular markdown parsing if no frameworks detected
+    return parseMarkdownToJSX(content, themeColor)
+  }
+
   // Parse the content and extract data for new sections
   const sections = parseMarkdownSections(summary.content)
-  const parsedFrameworks = parseFrameworks(sections)
-  const parsedDebunkedAssumptions = parseListItems(sections.get('debunked assumptions') || '')
-  const parsedInPractice = parseListItems(sections.get('in practice') || '')
-  const rawPlaybooksContent = getRawPlaybooksContent(sections)
-  const parsedInsightEnrichment = parseInsightEnrichment(sections)
   const parsedKeyMoments = parseKeyMoments(sections)
+  const rawPlaybooksContent = getRawPlaybooksContent(sections)
   const rawFlashcardsContent = getRawFlashcardsContent(sections)
   const parsedGlossary = parseGlossary(sections)
-  const parsedQuickQuiz = parseQuickQuiz(sections)
-  const parsedNovelIdeaMeter = parseNovelIdeaMeter(sections)
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return 'Unknown'
@@ -759,133 +1013,169 @@ export function SummaryViewer({
       </section>
 
       {/* Strategic Frameworks Section */}
-      <section id="frameworks" className="mb-6 sm:mb-8" aria-labelledby="frameworks-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-green-600 px-4 sm:px-6 py-4 border-b border-green-700">
-            <h2 id="frameworks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-xs">⭐</span>
-              <span className="text-green-100">🏗️</span>
-              Strategic Frameworks
-              <span className="text-xs font-normal text-green-100 ml-2">(3m read)</span>
-            </h2>
+      <section id="frameworks" className="mb-8 sm:mb-10" aria-labelledby="frameworks-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 sm:px-8 py-5 border-b border-green-800">
+            <button
+              onClick={() => toggleSection('frameworks')}
+              className="w-full flex items-center justify-between text-left hover:bg-green-700/20 transition-colors rounded p-2 -m-2"
+              aria-expanded={!collapsedSections.has('frameworks')}
+            >
+              <h2 id="frameworks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">⭐</span>
+                <span className="text-green-100">🏗️</span>
+                Strategic Frameworks
+                <span className="text-xs font-normal text-green-100 ml-2">(3m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('frameworks') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
-          <div className="p-4 sm:p-6">
+          {!collapsedSections.has('frameworks') && (
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-green-50">
             {(() => {
-              // Prioritize markdown parsing first, then backend data
-              const frameworks = parsedFrameworks.length > 0 
-                ? parsedFrameworks 
-                : (summary.frameworks || []);
+              // Prioritize markdown content first, then backend data
+              const content = sections.get('strategic frameworks') || 
+                (summary.frameworks && summary.frameworks.length > 0 
+                  ? summary.frameworks.map(f => `**${f.name}**\n${f.description}`).join('\n\n')
+                  : '');
               
-              return frameworks.length > 0 ? (
-                <div className="space-y-4">
-                  {frameworks.map((framework, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h3 className="font-semibold text-gray-900 mb-2">{framework.name}</h3>
-                      <div className="text-gray-700 text-base leading-relaxed prose prose-base max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                          {framework.description}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  ))}
+              return content ? (
+                <div className="p-6 bg-gradient-to-br from-white to-green-50 border border-green-100 rounded-xl shadow-sm">
+                  <div className="text-gray-700">
+                    {formatFrameworks(content, 'green')}
+                  </div>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No strategic frameworks identified in this video.</p>
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-gray-500 italic text-center">No strategic frameworks identified in this video.</p>
+                </div>
               );
             })()}
           </div>
+          )}
         </div>
       </section>
 
       {/* Debunked Assumptions Section */}
-      <section id="debunked" className="mb-6 sm:mb-8" aria-labelledby="debunked-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-red-600 px-4 sm:px-6 py-4 border-b border-red-700">
-            <h2 id="debunked-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-xs">⭐</span>
-              <span className="text-red-100">❌</span>
-              Debunked Assumptions
-              <span className="text-xs font-normal text-red-100 ml-2">(1m read)</span>
-            </h2>
+      <section id="debunked" className="mb-8 sm:mb-10" aria-labelledby="debunked-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 sm:px-8 py-5 border-b border-red-800">
+            <button
+              onClick={() => toggleSection('debunked')}
+              className="w-full flex items-center justify-between text-left hover:bg-red-700/20 transition-colors rounded p-2 -m-2"
+              aria-expanded={!collapsedSections.has('debunked')}
+            >
+              <h2 id="debunked-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">⭐</span>
+                <span className="text-red-100">❌</span>
+                Debunked Assumptions
+                <span className="text-xs font-normal text-red-100 ml-2">(1m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('debunked') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
-          <div className="p-4 sm:p-6">
+          {!collapsedSections.has('debunked') && (
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-red-50">
             {(() => {
-              // Prioritize markdown parsing first, then backend data
-              const assumptions = parsedDebunkedAssumptions.length > 0 
-                ? parsedDebunkedAssumptions 
-                : (summary.debunked_assumptions || []);
+              // Prioritize markdown content first, then backend data
+              const content = sections.get('debunked assumptions') || 
+                (summary.debunked_assumptions && summary.debunked_assumptions.length > 0 
+                  ? summary.debunked_assumptions.map(assumption => `- ${assumption}`).join('\n')
+                  : '');
               
-              return assumptions.length > 0 ? (
-                <ul className="space-y-2">
-                  {assumptions.map((assumption, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="text-gray-400 mt-0.5">•</span>
-                      <div className="text-gray-700 text-base prose prose-base max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                          {assumption}
-                        </ReactMarkdown>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+              return content ? (
+                <div className="p-6 bg-gradient-to-br from-white to-red-50 border border-red-100 rounded-xl shadow-sm">
+                  <div className="text-gray-700">
+                    {parseMarkdownToJSX(content, 'red')}
+                  </div>
+                </div>
               ) : (
-                <p className="text-gray-500 italic">No debunked assumptions in this video.</p>
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-gray-500 italic text-center">No debunked assumptions in this video.</p>
+                </div>
               );
             })()}
           </div>
+          )}
         </div>
       </section>
 
       {/* In Practice Section */}
-      <section id="practice" className="mb-6 sm:mb-8" aria-labelledby="practice-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-emerald-600 px-4 sm:px-6 py-4 border-b border-emerald-700">
-            <h2 id="practice-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-xs">⭐</span>
-              <span className="text-emerald-100">🎬</span>
-              In Practice
-              <span className="text-xs font-normal text-emerald-100 ml-2">(2m read)</span>
-            </h2>
+      <section id="practice" className="mb-8 sm:mb-10" aria-labelledby="practice-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 sm:px-8 py-5 border-b border-emerald-800">
+            <button
+              onClick={() => toggleSection('practice')}
+              className="w-full flex items-center justify-between text-left hover:bg-emerald-700/20 transition-colors rounded p-2 -m-2"
+              aria-expanded={!collapsedSections.has('practice')}
+            >
+              <h2 id="practice-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">⭐</span>
+                <span className="text-emerald-100">🎬</span>
+                In Practice
+                <span className="text-xs font-normal text-emerald-100 ml-2">(2m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('practice') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
-          <div className="p-4 sm:p-6">
+          {!collapsedSections.has('practice') && (
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-emerald-50">
             {(() => {
-              // Prioritize markdown parsing first, then backend data
-              const practices = parsedInPractice.length > 0 
-                ? parsedInPractice 
-                : (summary.in_practice || []);
+              // Prioritize markdown content first, then backend data
+              const content = sections.get('in practice') || 
+                (summary.in_practice && summary.in_practice.length > 0 
+                  ? summary.in_practice.map(practice => `- ${practice}`).join('\n')
+                  : '');
               
-              return practices.length > 0 ? (
-                <div className="space-y-3">
-                  {practices.map((practice, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <div className="text-gray-700 text-base prose prose-base max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                          {practice}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  ))}
+              return content ? (
+                <div className="p-6 bg-gradient-to-br from-white to-emerald-50 border border-emerald-100 rounded-xl shadow-sm">
+                  <div className="text-gray-700">
+                    {parseMarkdownToJSX(content, 'emerald')}
+                  </div>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No practical examples shown in this video.</p>
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-gray-500 italic text-center">No practical examples shown in this video.</p>
+                </div>
               );
             })()}
           </div>
+          )}
         </div>
       </section>
 
       {/* Playbooks & Heuristics Section */}
-      <section id="playbooks" className="mb-6 sm:mb-8" aria-labelledby="playbooks-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-purple-600 px-4 sm:px-6 py-4 border-b border-purple-700">
-            <h2 id="playbooks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-xs">⭐</span>
-              <span className="text-purple-100">📖</span>
-              Playbooks & Heuristics
-              <span className="text-xs font-normal text-purple-100 ml-2">(4m read)</span>
-            </h2>
+      <section id="playbooks" className="mb-8 sm:mb-10" aria-labelledby="playbooks-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 sm:px-8 py-5 border-b border-purple-800">
+            <button
+              onClick={() => toggleSection('playbooks')}
+              className="w-full flex items-center justify-between text-left hover:bg-purple-700/20 transition-colors rounded p-2 -m-2"
+              aria-expanded={!collapsedSections.has('playbooks')}
+            >
+              <h2 id="playbooks-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-xs">⭐</span>
+                <span className="text-purple-100">📖</span>
+                Playbooks & Heuristics
+                <span className="text-xs font-normal text-purple-100 ml-2">(4m read)</span>
+              </h2>
+              <ChevronDown className={cn(
+                "h-5 w-5 text-white transition-transform duration-200",
+                collapsedSections.has('playbooks') ? "rotate-0" : "rotate-180"
+              )} />
+            </button>
           </div>
-          <div className="p-4 sm:p-6">
+          {!collapsedSections.has('playbooks') && (
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-purple-50">
             {(() => {
               // Prioritize markdown content first, then backend data
               const content = rawPlaybooksContent || 
@@ -894,26 +1184,29 @@ export function SummaryViewer({
                   : '');
               
               return content ? (
-                <div className="prose prose-sm max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                    {content}
-                  </ReactMarkdown>
+                <div className="p-6 bg-gradient-to-br from-white to-purple-50 border border-purple-100 rounded-xl shadow-sm">
+                  <div className="text-gray-700">
+                    {parseMarkdownToJSX(content, 'purple')}
+                  </div>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No playbooks or heuristics identified.</p>
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-gray-500 italic text-center">No playbooks or heuristics identified.</p>
+                </div>
               );
             })()}
           </div>
+          )}
         </div>
       </section>
 
       {/* Insight Enrichment Section */}
-      <section id="enrichment" className="mb-6 sm:mb-8" aria-labelledby="enrichment-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-yellow-500 px-4 sm:px-6 py-4 border-b border-yellow-600">
+      <section id="enrichment" className="mb-8 sm:mb-10" aria-labelledby="enrichment-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 px-6 sm:px-8 py-5 border-b border-yellow-700">
             <button
               onClick={() => toggleSection('enrichment')}
-              className="w-full flex items-center justify-between text-left hover:bg-yellow-600 transition-colors rounded p-1 -m-1"
+              className="w-full flex items-center justify-between text-left hover:bg-yellow-600/20 transition-colors rounded p-2 -m-2"
               aria-expanded={!collapsedSections.has('enrichment')}
             >
               <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
@@ -929,66 +1222,26 @@ export function SummaryViewer({
             </button>
           </div>
           {!collapsedSections.has('enrichment') && (
-          <div className="p-4 sm:p-6">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-yellow-50/30">
             {(() => {
-              // Prioritize markdown parsing first, then backend data
-              const hasStats = parsedInsightEnrichment.stats_tools_links.length > 0 || (summary.insight_enrichment?.stats_tools_links?.length || 0) > 0;
-              const hasRisks = parsedInsightEnrichment.risks_blockers_questions.length > 0 || (summary.insight_enrichment?.risks_blockers_questions?.length || 0) > 0;
-              const hasSentiment = parsedInsightEnrichment.sentiment !== 'neutral' || summary.insight_enrichment?.sentiment;
+              // Prioritize markdown content first, then backend data
+              const content = sections.get('insight enrichment') || 
+                (summary.insight_enrichment && (
+                  [
+                    ...(summary.insight_enrichment.stats_tools_links || []).map(item => `- **Tools/Stats**: ${item}`),
+                    summary.insight_enrichment.sentiment && `- **Sentiment**: ${summary.insight_enrichment.sentiment}`,
+                    ...(summary.insight_enrichment.risks_blockers_questions || []).map(item => `- **Risk/Question**: ${item}`)
+                  ].filter(Boolean).join('\n')
+                ) || '');
               
-              const statsToolsLinks = parsedInsightEnrichment.stats_tools_links.length > 0 
-                ? parsedInsightEnrichment.stats_tools_links 
-                : (summary.insight_enrichment?.stats_tools_links || []);
-                
-              const sentiment = parsedInsightEnrichment.sentiment !== 'neutral' 
-                ? parsedInsightEnrichment.sentiment 
-                : (summary.insight_enrichment?.sentiment || 'neutral');
-                
-              const risksBlockersQuestions = parsedInsightEnrichment.risks_blockers_questions.length > 0 
-                ? parsedInsightEnrichment.risks_blockers_questions 
-                : (summary.insight_enrichment?.risks_blockers_questions || []);
-              
-              return hasStats || hasRisks || hasSentiment ? (
-                <div className="space-y-4">
-                  {/* Stats, Tools & Links */}
-                  {statsToolsLinks.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">Stats, Tools & Links</h4>
-                      <ul className="text-base text-gray-700 space-y-1">
-                        {statsToolsLinks.map((item, index) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {/* Sentiment */}
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">Sentiment</h4>
-                    <span className={cn(
-                      "inline-flex px-3 py-1 rounded-full text-sm font-medium",
-                      sentiment === 'positive' && "bg-green-100 text-green-800",
-                      sentiment === 'negative' && "bg-red-100 text-red-800",
-                      sentiment === 'neutral' && "bg-gray-100 text-gray-800"
-                    )}>
-                      {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
-                    </span>
-                  </div>
-                  
-                  {/* Risks, Blockers & Questions */}
-                  {risksBlockersQuestions.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">Risks, Blockers & Questions</h4>
-                      <ul className="text-base text-gray-700 space-y-1">
-                        {risksBlockersQuestions.map((item, index) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+              return content ? (
+                <div className="text-gray-700">
+                  {parseMarkdownToJSX(content, 'yellow')}
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No insight enrichment data available.</p>
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-gray-500 italic text-center">No insight enrichment data available.</p>
+                </div>
               );
             })()}
           </div>
@@ -999,12 +1252,12 @@ export function SummaryViewer({
 
 
       {/* Accelerated Learning Pack Section */}
-      <section id="learning" className="mb-6 sm:mb-8" aria-labelledby="learning-heading">
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <div className="bg-indigo-600 px-4 sm:px-6 py-4 border-b border-indigo-700">
+      <section id="learning" className="mb-8 sm:mb-10" aria-labelledby="learning-heading">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 sm:px-8 py-5 border-b border-indigo-800">
             <button
               onClick={() => toggleSection('learning')}
-              className="w-full flex items-center justify-between text-left hover:bg-indigo-700 transition-colors rounded p-1 -m-1"
+              className="w-full flex items-center justify-between text-left hover:bg-indigo-700/20 transition-colors rounded p-2 -m-2"
               aria-expanded={!collapsedSections.has('learning')}
             >
               <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
@@ -1020,7 +1273,7 @@ export function SummaryViewer({
             </button>
           </div>
           {!collapsedSections.has('learning') && (
-          <div className="p-4 sm:p-6 space-y-6">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-indigo-50/30 space-y-8">
             {(() => {
               // Prioritize markdown parsing first, then backend data (exclude TL;DR as it's already shown above)
               const flashcardsContent = rawFlashcardsContent ||
@@ -1032,25 +1285,27 @@ export function SummaryViewer({
                 ? parsedGlossary 
                 : (summary.accelerated_learning_pack?.glossary || []);
                 
-              const quickQuiz = parsedQuickQuiz.length > 0 
-                ? parsedQuickQuiz 
-                : (summary.accelerated_learning_pack?.quick_quiz || []);
+              const rawQuickQuizContent = sections.get('quick quiz') ||
+                (summary.accelerated_learning_pack?.quick_quiz && summary.accelerated_learning_pack.quick_quiz.length > 0
+                  ? summary.accelerated_learning_pack.quick_quiz.map((quiz, index) => `${index + 1}. ${quiz.q}\n   → ${quiz.a}`).join('\n\n')
+                  : '');
                 
-              const novelIdeaMeter = parsedNovelIdeaMeter.length > 0 
-                ? parsedNovelIdeaMeter 
-                : (summary.accelerated_learning_pack?.novel_idea_meter || []);
+              const rawNovelIdeaMeterContent = sections.get('novel-idea meter') ||
+                (summary.accelerated_learning_pack?.novel_idea_meter && summary.accelerated_learning_pack.novel_idea_meter.length > 0
+                  ? summary.accelerated_learning_pack.novel_idea_meter.map(item => `- ${item.insight}: ${item.score}/5`).join('\n')
+                  : '');
               
-              const hasAnyLearningContent = flashcardsContent || glossary.length > 0 || quickQuiz.length > 0 || novelIdeaMeter.length > 0;
+              const hasAnyLearningContent = flashcardsContent || glossary.length > 0 || rawQuickQuizContent || rawNovelIdeaMeterContent;
               
               return hasAnyLearningContent ? (
                 <>
                   {/* Feynman Flashcards */}
                   {flashcardsContent && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-6 bg-gradient-to-br from-white to-indigo-50 border border-indigo-100 rounded-xl shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
                         🗂️ Feynman Flashcards
                       </h4>
-                      <div className="prose prose-sm max-w-none">
+                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {flashcardsContent}
                         </ReactMarkdown>
@@ -1060,55 +1315,22 @@ export function SummaryViewer({
 
                   {/* Glossary */}
                   {glossary.length > 0 && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <div className="p-6 bg-gradient-to-br from-white to-blue-50 border border-blue-100 rounded-xl shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
                         📖 Glossary
-                        <span className="text-xs font-normal text-gray-600">
-                          ({glossary.length} terms)
+                        <span className="text-sm font-normal text-gray-600 bg-blue-100 px-2 py-1 rounded-full">
+                          {glossary.length} terms
                         </span>
                       </h4>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {glossary.map((item, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="font-semibold text-gray-900 text-base">{item.term}:</span>
-                            <div className="text-gray-700 text-base prose prose-base max-w-none">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                                {item.definition}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quick Quiz */}
-                  {quickQuiz.length > 0 && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
-                        ❓ Quick Quiz
-                        <span className="text-xs font-normal text-gray-600">
-                          ({quickQuiz.length} questions)
-                        </span>
-                      </h4>
-                      <div className="space-y-3">
-                        {quickQuiz.map((quiz, index) => (
-                          <div key={index} className="p-3 bg-white rounded border border-gray-200">
-                            <div className="flex items-start gap-3">
-                              <span className="font-mono text-xs text-gray-500 mt-0.5 flex-shrink-0">
-                                {index + 1}.
-                              </span>
-                              <div className="flex-1 space-y-1">
-                                <div className="text-base font-medium text-gray-900 prose prose-base max-w-none">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                                    {quiz.q}
-                                  </ReactMarkdown>
-                                </div>
-                                <div className="text-base text-gray-600 italic prose prose-base max-w-none">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                                    {`→ ${quiz.a}`}
-                                  </ReactMarkdown>
-                                </div>
+                          <div key={index} className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                            <div className="flex flex-col gap-2">
+                              <span className="font-semibold text-gray-900 text-base">{item.term}</span>
+                              <div className="text-gray-700 text-base prose prose-base max-w-none prose-p:leading-relaxed">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                                  {item.definition}
+                                </ReactMarkdown>
                               </div>
                             </div>
                           </div>
@@ -1117,35 +1339,30 @@ export function SummaryViewer({
                     </div>
                   )}
 
-                  {/* Novel-Idea Meter */}
-                  {novelIdeaMeter.length > 0 && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base flex items-center gap-2">
-                        💡 Novel-Idea Meter
-                        <span className="text-xs font-normal text-gray-600">
-                          ({novelIdeaMeter.length} ideas)
-                        </span>
+                  {/* Quick Quiz */}
+                  {rawQuickQuizContent && (
+                    <div className="p-6 bg-gradient-to-br from-white to-emerald-50 border border-emerald-100 rounded-xl shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
+                        ❓ Quick Quiz
                       </h4>
-                      <div className="space-y-2">
-                        {novelIdeaMeter.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
-                            <div className="text-base text-gray-700 prose prose-base max-w-none flex-1">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                                {item.insight}
-                              </ReactMarkdown>
-                            </div>
-                            <div className="flex items-center gap-0.5 ml-2">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <span
-                                  key={star}
-                                  className={star <= item.score ? "text-yellow-500" : "text-gray-300"}
-                                >
-                                  ★
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                      <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-li:my-3 prose-strong:text-gray-900 prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-600 prose-blockquote:border-emerald-200 prose-blockquote:bg-emerald-50 prose-blockquote:italic prose-ol:space-y-4 prose-ul:space-y-3">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {rawQuickQuizContent}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Novel-Idea Meter */}
+                  {rawNovelIdeaMeterContent && (
+                    <div className="p-6 bg-gradient-to-br from-white to-amber-50 border border-amber-100 rounded-xl shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
+                        💡 Novel-Idea Meter
+                      </h4>
+                      <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-li:my-3 prose-strong:text-gray-900 prose-code:text-amber-600 prose-code:bg-amber-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-600 prose-blockquote:border-amber-200 prose-blockquote:bg-amber-50 prose-blockquote:italic prose-ul:space-y-3">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                          {rawNovelIdeaMeterContent}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   )}

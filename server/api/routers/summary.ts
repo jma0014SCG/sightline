@@ -4,6 +4,8 @@ import { TRPCError } from '@trpc/server'
 import { observable } from '@trpc/server/observable'
 import { EventEmitter } from 'events'
 import jwt from 'jsonwebtoken'
+import { logger } from '@/lib/logger'
+import { sanitizeUrl, sanitizeText, containsSuspiciousContent, isValidYouTubeVideoId } from '@/lib/security'
 
 // Create an event emitter for streaming
 const ee = new EventEmitter()
@@ -28,7 +30,19 @@ function extractVideoId(url: string): string | null {
 export const summaryRouter = createTRPCRouter({
   create: publicProcedure
     .input(z.object({
-      url: z.string().url(),
+      url: z.string()
+        .url('Invalid URL format')
+        .min(1, 'URL is required')
+        .max(2048, 'URL too long')
+        .refine((url) => {
+          // Only allow YouTube URLs
+          const youtubePatterns = [
+            /^https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+          ]
+          return youtubePatterns.some(pattern => pattern.test(url))
+        }, 'Only YouTube URLs are allowed'),
     }))
     .mutation(async ({ ctx, input }) => {
       // For testing: use a default user ID if not authenticated
@@ -76,15 +90,41 @@ export const summaryRouter = createTRPCRouter({
       }
       */
       try {
-        const videoId = extractVideoId(input.url)
-        if (!videoId) {
+        // Sanitize and validate URL
+        const sanitizedUrl = sanitizeUrl(input.url)
+        
+        // Check for suspicious content
+        if (containsSuspiciousContent(input.url)) {
+          logger.warn('Suspicious content detected in URL', {
+            url: input.url,
+            userId: userId,
+            timestamp: new Date().toISOString()
+          })
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Invalid URL content',
+          })
+        }
+
+        const videoId = extractVideoId(sanitizedUrl)
+        if (!videoId || !isValidYouTubeVideoId(videoId)) {
+          logger.warn('Invalid YouTube URL provided', {
+            url: sanitizedUrl,
+            userId: userId,
+            timestamp: new Date().toISOString()
+          })
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'Invalid YouTube URL',
           })
         }
 
-        console.log('🚀 Calling FastAPI backend for video ID:', videoId)
+        logger.info('Summary creation started', {
+          videoId,
+          userId,
+          url: sanitizedUrl,
+          timestamp: new Date().toISOString()
+        })
 
         // For testing without auth, call backend without auth token
         console.log('⚠️  TESTING MODE: Calling backend without authentication')
@@ -99,7 +139,7 @@ export const summaryRouter = createTRPCRouter({
             'Content-Type': 'application/json',
             // No Authorization header for testing
           },
-          body: JSON.stringify({ url: input.url }),
+          body: JSON.stringify({ url: sanitizedUrl }),
         })
 
         console.log('📡 Response status:', response.status)
@@ -119,7 +159,13 @@ export const summaryRouter = createTRPCRouter({
             errorMessage = 'Failed to read error response'
           }
           
-          console.error('❌ Backend error:', errorMessage)
+          logger.error('Backend API error', {
+            error: errorMessage,
+            videoId,
+            userId,
+            status: response.status,
+            timestamp: new Date().toISOString()
+          })
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: errorMessage,
@@ -180,6 +226,11 @@ export const summaryRouter = createTRPCRouter({
           resources: data.resources || []
         }
 
+        // Sanitize content before storing
+        const sanitizedContent = sanitizeText(data.summary || '')
+        const sanitizedTitle = sanitizeText(data.video_title || 'Untitled Video')
+        const sanitizedChannelName = sanitizeText(data.channel_name || 'Unknown Channel')
+
         // Create or update summary in database
         const summary = await ctx.prisma.summary.upsert({
           where: {
@@ -189,13 +240,13 @@ export const summaryRouter = createTRPCRouter({
             },
           },
           update: {
-            videoUrl: data.video_url || input.url,
-            videoTitle: data.video_title || 'Untitled Video',
-            channelName: data.channel_name || 'Unknown Channel',
-            channelId: data.channel_id || '',
+            videoUrl: sanitizedUrl,
+            videoTitle: sanitizedTitle,
+            channelName: sanitizedChannelName,
+            channelId: sanitizeText(data.channel_id || ''),
             duration: data.duration || 0,
             thumbnailUrl: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-            content: data.summary || '',
+            content: sanitizedContent,
             keyPoints: data.key_points || [],
             metadata: metadata,
             updatedAt: new Date(),
@@ -203,13 +254,13 @@ export const summaryRouter = createTRPCRouter({
           create: {
             userId: userId,
             videoId: data.video_id || videoId,
-            videoUrl: data.video_url || input.url,
-            videoTitle: data.video_title || 'Untitled Video',
-            channelName: data.channel_name || 'Unknown Channel',
-            channelId: data.channel_id || '',
+            videoUrl: sanitizedUrl,
+            videoTitle: sanitizedTitle,
+            channelName: sanitizedChannelName,
+            channelId: sanitizeText(data.channel_id || ''),
             duration: data.duration || 0,
             thumbnailUrl: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-            content: data.summary || '',
+            content: sanitizedContent,
             keyPoints: data.key_points || [],
             metadata: metadata,
           },

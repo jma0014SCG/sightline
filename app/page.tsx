@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { api } from '@/components/providers/TRPCProvider'
+import { useToast } from '@/components/providers/ToastProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
 import { 
   Zap, 
@@ -32,7 +33,9 @@ import {
 
 export default function HomePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { isAuthenticated } = useAuth()
+  const { showSuccess, showError } = useToast()
   const [currentSummary, setCurrentSummary] = useState<any>(null)
   const [animatedText, setAnimatedText] = useState('')
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -86,16 +89,13 @@ export default function HomePage() {
 
   const createSummary = api.summary.create.useMutation({
     onSuccess: (data) => {
-      console.log('✅ Summary created successfully:', data)
       setCurrentSummary(data)
       setProgress(0)
       setProcessingStage('')
-      // Optionally navigate to library after success
-      // router.push(`/library/${data.id}`)
+      showSuccess('Summary created successfully!')
     },
     onError: (error) => {
-      console.error('❌ Summarization failed:', error)
-      alert(`Summarization failed: ${error.message}`)
+      showError(`Summarization failed: ${error.message}`)
       setProgress(0)
       setProcessingStage('')
     }
@@ -134,21 +134,37 @@ export default function HomePage() {
   }, [createSummary.isPending])
 
   const handleUrlSubmit = async (url: string) => {
-    console.log('🚀 Starting summarization for URL:', url)
-    console.log('🔐 Authentication status:', isAuthenticated)
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Store the URL in sessionStorage to use after login
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('pendingSummaryUrl', url)
+      }
+      // Redirect to login
+      router.push('/login')
+      return
+    }
     
     // Reset current summary before starting new one
     setCurrentSummary(null)
     
     try {
-      console.log('📤 Calling createSummary mutation...')
       const result = await createSummary.mutateAsync({ url })
-      console.log('✅ Mutation result:', result)
     } catch (error) {
-      console.error('❌ HandleUrlSubmit error:', error)
       // The error will be handled by onError callback
     }
   }
+
+  // Handle URL parameter from login redirect
+  useEffect(() => {
+    const urlParam = searchParams.get('url')
+    if (urlParam && isAuthenticated) {
+      // Automatically submit the URL after a short delay
+      setTimeout(() => {
+        handleUrlSubmit(decodeURIComponent(urlParam))
+      }, 500)
+    }
+  }, [searchParams, isAuthenticated])
 
   // Animated text effect
   useEffect(() => {
@@ -376,10 +392,10 @@ Try Free Now →
               {/* Primary CTA */}
               <div className="mt-12">
                 <button
-                  onClick={focusUrlInput}
+                  onClick={isAuthenticated ? focusUrlInput : () => router.push('/login')}
                   className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
-                  <span>Get My First Summary Free (No Signup Required)</span>
+                  <span>{isAuthenticated ? "Get My First Summary Free" : "Sign In for Free Summary"}</span>
                 </button>
               </div>
             </div>
@@ -397,7 +413,10 @@ Try Free Now →
                       Try it now
                     </h2>
                     <p className="mt-2 text-gray-600">
-                      Paste any YouTube URL to get started
+                      {isAuthenticated 
+                        ? "Paste any YouTube URL to get started"
+                        : "Sign in to get your free summary"
+                      }
                     </p>
                   </div>
 
@@ -415,7 +434,7 @@ Try Free Now →
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      No sign-up required
+                      {isAuthenticated ? "Ready to summarize" : "Quick sign-in"}
                     </div>
                   </div>
 

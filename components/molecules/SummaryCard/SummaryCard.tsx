@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { MoreVertical, Eye, Share2, Trash2, Edit3, Play } from 'lucide-react'
+import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import type { Summary } from '@prisma/client'
@@ -12,9 +12,21 @@ interface SummaryCardProps {
   onDelete?: (id: string) => void
   onShare?: (id: string) => void
   viewMode?: 'grid' | 'list'
+  isSelected?: boolean
+  onSelect?: (id: string, selected: boolean) => void
+  showSelection?: boolean
 }
 
-export function SummaryCard({ summary, className, onDelete, onShare, viewMode = 'grid' }: SummaryCardProps) {
+export function SummaryCard({ 
+  summary, 
+  className, 
+  onDelete, 
+  onShare, 
+  viewMode = 'grid',
+  isSelected = false,
+  onSelect,
+  showSelection = false
+}: SummaryCardProps) {
   const [showActions, setShowActions] = useState(false)
   
   const formatDuration = (seconds: number) => {
@@ -54,9 +66,29 @@ export function SummaryCard({ summary, className, onDelete, onShare, viewMode = 
       <article 
         className={cn(
           "group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-md",
+          isSelected && "border-blue-500 bg-blue-50",
           className
         )}
       >
+        {/* Selection overlay */}
+        {showSelection && (
+          <div className="absolute left-3 top-3 z-10">
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onSelect?.(summary.id, !isSelected)
+              }}
+              className="flex h-5 w-5 items-center justify-center rounded bg-white/90 backdrop-blur-sm hover:bg-white transition-colors"
+            >
+              {isSelected ? (
+                <CheckSquare className="h-4 w-4 text-blue-600" />
+              ) : (
+                <Square className="h-4 w-4 text-gray-400" />
+              )}
+            </button>
+          </div>
+        )}
         <Link href={`/library/${summary.id}`} className="block">
           <div className="flex gap-4 p-4">
             {/* Compact Thumbnail */}
@@ -208,9 +240,29 @@ export function SummaryCard({ summary, className, onDelete, onShare, viewMode = 
     <article 
       className={cn(
         "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-lg",
+        isSelected && "border-blue-500 bg-blue-50",
         className
       )}
     >
+      {/* Selection overlay */}
+      {showSelection && (
+        <div className="absolute left-4 top-4 z-10">
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onSelect?.(summary.id, !isSelected)
+            }}
+            className="flex h-6 w-6 items-center justify-center rounded bg-white/90 backdrop-blur-sm hover:bg-white transition-colors"
+          >
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-blue-600" />
+            ) : (
+              <Square className="h-4 w-4 text-gray-400" />
+            )}
+          </button>
+        </div>
+      )}
       <Link href={`/library/${summary.id}`} className="block">
         <div className="flex items-start gap-4 p-6">
           <div className="flex-1">

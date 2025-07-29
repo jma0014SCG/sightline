@@ -5,16 +5,32 @@ import { Plus, Loader2, Trash2, AlertCircle } from 'lucide-react'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryCard } from '@/components/molecules/SummaryCard'
 import { LibraryControls, type LibraryFilters } from '@/components/molecules/LibraryControls'
+import { QuickActionsBar } from '@/components/molecules/QuickActionsBar'
+import { ShareModal } from '@/components/molecules/ShareModal'
 import { Skeleton } from '@/components/atoms/Skeleton'
 import { api } from '@/components/providers/TRPCProvider'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 export default function LibraryPage() {
   const router = useRouter()
   const [isCreatingSummary, setIsCreatingSummary] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [shareModalState, setShareModalState] = useState<{
+    isOpen: boolean
+    summaryId: string
+    summaryTitle: string
+  }>({
+    isOpen: false,
+    summaryId: '',
+    summaryTitle: '',
+  })
+  
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [showSelection, setShowSelection] = useState(false)
   
   // Filter state
   const [filters, setFilters] = useState<LibraryFilters>({
@@ -105,9 +121,103 @@ export default function LibraryPage() {
   }, [showDeleteConfirm, deleteSummary])
 
   const handleShare = useCallback((summaryId: string) => {
-    // TODO: Implement share functionality
-    console.log('Share summary:', summaryId)
+    const summary = allSummaries.find(s => s.id === summaryId)
+    if (summary) {
+      setShareModalState({
+        isOpen: true,
+        summaryId,
+        summaryTitle: summary.videoTitle,
+      })
+    }
+  }, [allSummaries])
+
+  const handleCloseShareModal = useCallback(() => {
+    setShareModalState({
+      isOpen: false,
+      summaryId: '',
+      summaryTitle: '',
+    })
   }, [])
+
+  // Selection handlers
+  const handleSelectItem = useCallback((id: string, selected: boolean) => {
+    setSelectedIds(prev => 
+      selected 
+        ? [...prev, id]
+        : prev.filter(selectedId => selectedId !== id)
+    )
+  }, [])
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(allSummaries.map(s => s.id))
+    setShowSelection(true)
+  }, [allSummaries])
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds([])
+    setShowSelection(false)
+  }, [])
+
+  const handleBulkDelete = useCallback(async (ids: string[]) => {
+    if (!ids || ids.length === 0) return
+    
+    // Show confirmation dialog
+    if (!confirm(`Are you sure you want to delete ${ids.length} summaries? This action cannot be undone.`)) {
+      return
+    }
+    
+    for (const id of ids) {
+      try {
+        await deleteSummary.mutateAsync({ id })
+      } catch (error) {
+        logger.error(`Failed to delete summary ${id}:`, error)
+      }
+    }
+    setSelectedIds([])
+    setShowSelection(false)
+  }, [deleteSummary])
+
+  const handleBulkShare = useCallback((ids: string[]) => {
+    if (!ids || ids.length === 0) return
+    
+    // For now, just share the first selected summary
+    if (ids.length > 1) {
+      alert('Currently you can only share one summary at a time. Sharing the first selected summary.')
+    }
+    
+    if (ids[0]) {
+      handleShare(ids[0])
+    }
+  }, [handleShare])
+
+  const handleBulkExport = useCallback((ids: string[]) => {
+    if (!ids || ids.length === 0) return
+    
+    try {
+      // Export selected summaries as JSON
+      const selectedSummaries = allSummaries.filter(s => ids.includes(s.id))
+      if (selectedSummaries.length === 0) {
+        logger.error('No summaries found to export')
+        return
+      }
+      
+      const dataStr = JSON.stringify(selectedSummaries, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `summaries-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      logger.error('Failed to export summaries:', error)
+    }
+  }, [allSummaries])
+
+  // Auto-enable selection mode when items are selected
+  const effectiveShowSelection = showSelection || selectedIds.length > 0
 
   return (
     <div>
@@ -188,6 +298,21 @@ export default function LibraryPage() {
         />
       </div>
 
+      {/* Quick Actions Bar */}
+      {allSummaries.length > 0 && (
+        <div className="mb-6">
+          <QuickActionsBar
+            selectedIds={selectedIds}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            onBulkDelete={handleBulkDelete}
+            onBulkShare={handleBulkShare}
+            onBulkExport={handleBulkExport}
+            totalCount={allSummaries.length}
+          />
+        </div>
+      )}
+
       {/* Loading state */}
       {isLoading && (
         <div className={cn(
@@ -226,6 +351,9 @@ export default function LibraryPage() {
                 onDelete={handleDelete}
                 onShare={handleShare}
                 viewMode={viewMode}
+                isSelected={selectedIds.includes(summary.id)}
+                onSelect={handleSelectItem}
+                showSelection={effectiveShowSelection}
               />
             ))}
           </div>
@@ -303,6 +431,14 @@ export default function LibraryPage() {
           </div>
         </div>
       )}
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={shareModalState.isOpen}
+        onClose={handleCloseShareModal}
+        summaryId={shareModalState.summaryId}
+        summaryTitle={shareModalState.summaryTitle}
+      />
     </div>
   )
 }

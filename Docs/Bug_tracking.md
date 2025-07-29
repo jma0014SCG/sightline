@@ -28,11 +28,74 @@ This document tracks all bugs, errors, and their resolutions encountered during 
 
 ## Active Bugs
 
+### [BUG-003] - Tailwind CSS Utility Class Error
+**Date:** 2025-01-18
+**Stage:** Stage 1: Foundation & Setup
+**Severity:** Low
+**Status:** Open
+
+**Error Details:**
+```
+Error: Cannot apply unknown utility class `border-gray-200`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+```
+
+**Steps to Reproduce:**
+1. Start development server with `npm run dev`
+2. Navigate to any page using Tailwind CSS classes
+3. Check server logs for Tailwind compilation errors
+
+**Expected Behavior:**
+Tailwind CSS should compile without errors and apply utility classes correctly
+
+**Actual Behavior:**
+Tailwind CSS is not recognizing standard utility classes like `border-gray-200`
+
+**Environment:**
+- Tailwind CSS 4.1.11
+- Next.js 14.2.30
+- PostCSS 8.5.6
+
+**Root Cause:**
+Tailwind CSS v4 has different configuration requirements and may not be properly configured for the project structure. The error suggests missing `@reference` directive or incorrect configuration.
+
+**Possible Solutions:**
+1. Check Tailwind CSS configuration in `tailwind.config.ts`
+2. Verify PostCSS configuration in `postcss.config.js`
+3. Add `@reference` directive to CSS files if using CSS modules
+4. Consider downgrading to Tailwind CSS v3 if v4 compatibility issues persist
+5. Review Tailwind CSS v4 migration guide
+
+---
+
+## Pending Implementation Issues
+
+### Share Functionality Not Implemented
+**Type:** TODO/Feature Gap
+**Location:** `/app/(dashboard)/library/page.tsx:108`
+**Status:** Pending Implementation
+**Note:** Share button exists but functionality is not implemented. Console log placeholder at line 108-109.
+
+### Usage Limits Disabled for Testing
+**Type:** Configuration Issue
+**Location:** `/server/api/routers/summary.ts:38`
+**Status:** Needs Production Configuration
+**Note:** Usage limits check is commented out with TODO for re-enabling in production.
+
+### Database Saving Not Implemented in Backend
+**Type:** Feature Gap
+**Location:** `/api/routers/summarize.py:235`
+**Status:** Pending Implementation
+**Note:** Backend API doesn't save summaries to database, relies on frontend tRPC layer.
+
+---
+
+## Resolved Bugs
+
 ### [BUG-005] - Missing Playbooks & Heuristics and Feynman Flashcards Data in Frontend
 **Date:** 2025-01-28
 **Stage:** Stage 3: Summary Display & Management  
 **Severity:** Medium
-**Status:** In Progress
+**Status:** Resolved
 
 **Error Details:**
 Playbooks & Heuristics and Feynman Flashcards sections are not displaying data in the frontend SummaryViewer component, despite backend correctly parsing and sending the data.
@@ -62,16 +125,25 @@ Backend parsing is working correctly (confirmed via server logs). Issue appears 
 2. Regex patterns in parsing functions may not match the actual content format
 3. Data prioritization logic may be incorrectly falling back to empty backend data
 
-**Current Investigation:**
-- Added debug logging to frontend parsing functions
-- Verified backend is correctly structuring data in API response
-- Testing section name matching and content extraction
+**Resolution:**
+**Date Resolved:** 2025-07-28
+**Resolution Method:** Fixed the parsing logic in the SummaryViewer component to properly extract and display the Playbooks & Heuristics and Feynman Flashcards sections.
 
-**Possible Solutions:**
-1. Fix regex patterns in `parsePlaybooks()` and `parseFeynmanFlashcards()` functions
-2. Verify section name matching is case-insensitive and handles special characters
-3. Ensure markdown content extraction is working correctly
-4. Test with actual Gumloop output format
+**Resolution Steps:**
+1. **Root Cause Identified:** The `parseMarkdownSections` function was converting section names to lowercase, but the lookup was case-sensitive
+2. **Solution Applied:** Updated the parsing logic to handle case-insensitive section matching
+3. **Data Flow Fixed:** Ensured proper data flow from backend Gumloop parser through tRPC to frontend display
+4. **Verification:** Confirmed both sections now display content correctly
+
+**Technical Details:**
+- Section names in markdown were being normalized to lowercase during parsing
+- Component was looking for exact matches which failed due to case mismatch
+- Fixed by ensuring consistent case handling throughout the parsing pipeline
+
+**Current Status:**
+- ✅ Playbooks & Heuristics section displays content correctly
+- ✅ Feynman Flashcards section displays Q&A pairs properly
+- ✅ All Gumloop-enhanced sections working as expected
 
 ---
 
@@ -252,7 +324,7 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 **Date:** 2025-01-18
 **Stage:** Stage 2: Core Authentication & API Setup
 **Severity:** Medium
-**Status:** Open
+**Status:** Resolved
 
 **Error Details:**
 ```
@@ -284,11 +356,25 @@ Session callback in `lib/auth/auth.ts` line 30 is attempting to access `user.id`
 - Database user record is not being created/found properly
 - Prisma adapter configuration issue
 
-**Possible Solutions:**
-1. Add null checking in session callback
-2. Verify Prisma adapter configuration
-3. Check database connection and user table
-4. Review NextAuth configuration in `lib/auth/auth.ts`
+**Resolution:**
+**Date Resolved:** 2025-07-28
+**Resolution Method:** Added proper null checking in the NextAuth session callback to handle cases where the user object might be undefined.
+
+**Resolution Steps:**
+1. **Root Cause Identified:** Session callback was attempting to access `user.id` without verifying user object existence
+2. **Solution Applied:** Added null/undefined checks before accessing user properties
+3. **Error Handling:** Implemented graceful fallback when user is not available
+4. **Verification:** Confirmed no more session errors in logs
+
+**Technical Details:**
+- Updated session callback in `lib/auth/auth.ts` to check if user exists before accessing properties
+- Added default values for session properties when user is undefined
+- Ensured proper error handling throughout the authentication flow
+
+**Current Status:**
+- ✅ NextAuth session errors resolved
+- ✅ Authentication flow working properly
+- ✅ No more "Cannot read properties of undefined" errors
 
 ---
 

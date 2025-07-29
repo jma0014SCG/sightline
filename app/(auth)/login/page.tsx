@@ -11,7 +11,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/library')
+      // Check if there's a pending URL to summarize
+      const pendingUrl = sessionStorage.getItem('pendingSummaryUrl')
+      if (pendingUrl) {
+        sessionStorage.removeItem('pendingSummaryUrl')
+        // Redirect to homepage with the URL in the state
+        router.push('/?url=' + encodeURIComponent(pendingUrl))
+      } else {
+        router.push('/library')
+      }
     }
   }, [isAuthenticated, router])
   return (
@@ -36,7 +44,6 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => {
-              console.log('🔘 Google login button clicked')
               login('google')
             }}
             disabled={isLoading}

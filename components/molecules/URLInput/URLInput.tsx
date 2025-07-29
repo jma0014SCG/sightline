@@ -61,7 +61,7 @@ export function URLInput({
     } catch (err) {
       // Provide helpful error message for clipboard permission issues
       setError('Clipboard access denied. Please paste manually or enable clipboard permissions.')
-      console.log('Clipboard error:', err)
+      // Silent fail - user will see error message
     }
   }
 

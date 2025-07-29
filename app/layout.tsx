@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
+import { ToastProvider } from '@/components/providers/ToastProvider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -59,7 +60,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
-          <TRPCProvider>{children}</TRPCProvider>
+          <TRPCProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </TRPCProvider>
         </AuthProvider>
       </body>
     </html>

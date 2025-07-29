@@ -10,12 +10,9 @@ export function useAuth() {
 
   const login = useCallback(async (provider = 'google') => {
     try {
-      console.log('🚀 Login function called with provider:', provider)
-      console.log('🔍 About to call signIn...')
-      const result = await signIn(provider, { callbackUrl: '/library' })
-      console.log('✅ signIn result:', result)
+      await signIn(provider, { callbackUrl: '/library' })
     } catch (error) {
-      console.error('❌ Login error:', error)
+      // Handle login error silently - NextAuth will show its own UI
     }
   }, [])
 
@@ -23,7 +20,7 @@ export function useAuth() {
     try {
       await signOut({ callbackUrl: '/' })
     } catch (error) {
-      console.error('Logout error:', error)
+      // Handle logout error silently
     }
   }, [])
 
