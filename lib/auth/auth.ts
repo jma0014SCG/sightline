@@ -55,7 +55,8 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? '.sightlineai.io' : undefined,
+        // Don't set domain for Vercel deployments - let it default to the current domain
+        domain: process.env.NEXTAUTH_URL?.includes('sightlineai.io') ? 'sightlineai.io' : undefined,
       },
     },
   },
