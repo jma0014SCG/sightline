@@ -4,7 +4,8 @@
   "installCommand": "npm install",
   "functions": {
     "app/api/auth/[...nextauth]/route.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "runtime": "nodejs18.x"
     }
   },
   "headers": [

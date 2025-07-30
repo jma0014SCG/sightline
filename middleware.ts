@@ -1,13 +1,12 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { summaryRateLimit, apiRateLimit } from './lib/rateLimit'
+import { getToken } from 'next-auth/jwt'
 
-// Separate middleware function for rate limiting
-function applyRateLimit(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // Skip NextAuth internal routes completely
+  // CRITICAL: Skip all NextAuth routes completely - no processing at all
   if (pathname.startsWith('/api/auth/')) {
     return NextResponse.next()
   }
@@ -56,46 +55,37 @@ function applyRateLimit(req: NextRequest) {
     return response
   }
 
+  // Handle protected routes - check authentication
+  const protectedPaths = ['/library', '/settings', '/billing']
+  const isProtected = protectedPaths.some(path => pathname.startsWith(path))
+  
+  if (isProtected) {
+    try {
+      const token = await getToken({ 
+        req, 
+        secret: process.env.NEXTAUTH_SECRET 
+      })
+      
+      if (!token) {
+        // Redirect to login if not authenticated
+        const url = req.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      // If token verification fails, redirect to login
+      const url = req.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+  }
+
   return NextResponse.next()
 }
 
-export default withAuth(
-  function middleware(req) {
-    // Apply rate limiting logic
-    return applyRateLimit(req)
-  },
-  {
-    callbacks: {
-      authorized: ({ req, token }) => {
-        const pathname = req.nextUrl.pathname
-        
-        // Always allow NextAuth routes
-        if (pathname.startsWith('/api/auth/')) {
-          return true
-        }
-        
-        // Protected routes
-        const protectedPaths = ['/library', '/settings', '/billing']
-        
-        // Check if the current path is protected
-        const isProtected = protectedPaths.some(path => pathname.startsWith(path))
-        
-        // Allow access if not protected or if user is authenticated
-        return !isProtected || !!token
-      },
-    },
-  }
-)
-
 export const config = {
   matcher: [
-    // API routes for rate limiting
-    '/api/:path*',
-    // Protected routes
-    '/library/:path*',
-    '/settings/:path*',
-    '/billing/:path*',
-    // Skip Next.js internals and static files
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Skip NextAuth routes, Next.js internals and static files
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
 }
