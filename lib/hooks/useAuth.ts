@@ -10,9 +10,19 @@ export function useAuth() {
 
   const login = useCallback(async (provider = 'google') => {
     try {
-      await signIn(provider, { callbackUrl: '/library' })
+      const result = await signIn(provider, { 
+        callbackUrl: '/library',
+        redirect: false 
+      })
+      
+      if (result?.error) {
+        console.error('Login error:', result.error)
+      }
+      
+      return result
     } catch (error) {
-      // Handle login error silently - NextAuth will show its own UI
+      console.error('Login failed:', error)
+      throw error
     }
   }, [])
 
