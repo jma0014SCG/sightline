@@ -1,65 +1,81 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
-import { summaryRateLimit, apiRateLimit, authRateLimit } from './lib/rateLimit'
+import type { NextRequest } from 'next/server'
+import { summaryRateLimit, apiRateLimit } from './lib/rateLimit'
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl
+// Separate middleware function for rate limiting
+function applyRateLimit(req: NextRequest) {
+  const { pathname } = req.nextUrl
 
-    // Apply rate limiting to API routes
-    if (pathname.startsWith('/api/')) {
-      let rateLimitResult
-      
-      if (pathname.startsWith('/api/trpc/summary.create')) {
-        rateLimitResult = summaryRateLimit(req)
-      } else if (pathname.startsWith('/api/auth')) {
-        rateLimitResult = authRateLimit(req)
-      } else {
-        rateLimitResult = apiRateLimit(req)
-      }
+  // Skip NextAuth internal routes completely
+  if (pathname.startsWith('/api/auth/')) {
+    return NextResponse.next()
+  }
 
-      // Check if rate limit exceeded
-      if (!rateLimitResult.success) {
-        const response = new NextResponse(
-          JSON.stringify({ 
-            error: 'Too Many Requests',
-            message: 'Rate limit exceeded. Please try again later.',
-            retryAfter: 'retryAfter' in rateLimitResult ? rateLimitResult.retryAfter : 60
-          }), 
-          { 
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json',
-            }
+  // Apply rate limiting to other API routes
+  if (pathname.startsWith('/api/')) {
+    let rateLimitResult
+    
+    if (pathname.startsWith('/api/trpc/summary.create')) {
+      rateLimitResult = summaryRateLimit(req)
+    } else {
+      rateLimitResult = apiRateLimit(req)
+    }
+
+    // Check if rate limit exceeded
+    if (!rateLimitResult.success) {
+      const response = new NextResponse(
+        JSON.stringify({ 
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded. Please try again later.',
+          retryAfter: 'retryAfter' in rateLimitResult ? rateLimitResult.retryAfter : 60
+        }), 
+        { 
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
           }
-        )
-
-        // Add rate limit headers
-        response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString())
-        response.headers.set('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString())
-        
-        if ('retryAfter' in rateLimitResult && rateLimitResult.retryAfter) {
-          response.headers.set('Retry-After', rateLimitResult.retryAfter.toString())
         }
+      )
 
-        return response
-      }
-
-      // Add rate limit headers to successful requests
-      const response = NextResponse.next()
+      // Add rate limit headers
       response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString())
       response.headers.set('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString())
+      
+      if ('retryAfter' in rateLimitResult && rateLimitResult.retryAfter) {
+        response.headers.set('Retry-After', rateLimitResult.retryAfter.toString())
+      }
+
       return response
     }
 
-    return NextResponse.next()
+    // Add rate limit headers to successful requests
+    const response = NextResponse.next()
+    response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString())
+    response.headers.set('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString())
+    return response
+  }
+
+  return NextResponse.next()
+}
+
+export default withAuth(
+  function middleware(req) {
+    // Apply rate limiting logic
+    return applyRateLimit(req)
   },
   {
     callbacks: {
       authorized: ({ req, token }) => {
+        const pathname = req.nextUrl.pathname
+        
+        // Always allow NextAuth routes
+        if (pathname.startsWith('/api/auth/')) {
+          return true
+        }
+        
         // Protected routes
         const protectedPaths = ['/library', '/settings', '/billing']
-        const pathname = req.nextUrl.pathname
         
         // Check if the current path is protected
         const isProtected = protectedPaths.some(path => pathname.startsWith(path))

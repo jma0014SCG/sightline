@@ -3,6 +3,7 @@ import { Inter, Space_Mono } from 'next/font/google'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
+import { MonitoringProvider } from '@/components/providers/MonitoringProvider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -68,13 +69,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
-        <AuthProvider>
-          <TRPCProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </TRPCProvider>
-        </AuthProvider>
+        <MonitoringProvider>
+          <AuthProvider>
+            <TRPCProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </TRPCProvider>
+          </AuthProvider>
+        </MonitoringProvider>
       </body>
     </html>
   )

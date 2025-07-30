@@ -92,7 +92,17 @@ const nextConfig = {
           }
         ],
       },
-      // Cache API responses for a short time
+      // Special headers for auth routes (no caching)
+      {
+        source: '/api/auth/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate'
+          }
+        ],
+      },
+      // Cache other API responses for a short time
       {
         source: '/api/(.*)',
         headers: [
