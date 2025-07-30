@@ -4,35 +4,47 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* New brand colors */
+    --anti-flash-white: 242 243 244;
+    --prussian-blue: 29 45 68;
+    --paynes-gray: 62 92 118;
+    --silver-lake-blue: 116 140 171;
+    --eggshell: 240 235 216;
+    
+    /* Updated system colors */
+    --background: 255 255 255; /* white */
+    --foreground: 29 45 68; /* prussian-blue */
+    
+    /* Success and warning colors */
+    --success: 16 185 129; /* Emerald-500 */
+    --warning: 245 158 15; /* Amber-500 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 255 255 255;
+    --card-foreground: 29 45 68;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 255 255 255;
+    --popover-foreground: 29 45 68;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 116 140 171; /* silver-lake-blue */
+    --primary-foreground: 255 255 255; /* white */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 62 92 118; /* paynes-gray */
+    --secondary-foreground: 31 41 55;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 62 92 118;
+    --muted-foreground: 116 140 171;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 29 45 68; /* prussian-blue */
+    --accent-foreground: 31 41 55;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 62 92 118;
+    --input: 62 92 118;
+    --ring: 116 140 171;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -95,6 +107,12 @@
   .animation-delay-400 {
     animation-delay: 400ms;
   }
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
   
   /* Scrollbar hiding */
   .scrollbar-hide {
@@ -111,5 +129,97 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  /* Glass morphism effects hierarchy */
+  .glass {
+    @apply backdrop-blur-lg bg-white/10 border border-white/20;
+  }
+  
+  .glass-primary {
+    @apply backdrop-blur-xl bg-white/80 border border-paynes-gray/15;
+    box-shadow: 
+      0 8px 32px rgba(62, 92, 118, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-secondary {
+    @apply backdrop-blur-lg bg-white/70 border border-paynes-gray/10;
+    box-shadow: 0 4px 16px rgba(62, 92, 118, 0.1);
+  }
+
+  .glass-subtle {
+    @apply backdrop-blur-md bg-white/50 border border-paynes-gray/5;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-lg bg-white/80 border border-paynes-gray/10;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-silver-lake-blue to-paynes-gray;
+  }
+  
+  /* Animated gradient background */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-anti-flash-white via-eggshell to-silver-lake-blue;
+    background-size: 200% 200%;
+    animation: gradient 8s linear infinite;
+  }
+  
+  /* Enhanced eggshell background with subtle texture */
+  .bg-eggshell-textured {
+    @apply bg-eggshell;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(116, 140, 171, 0.03) 10%, transparent 11%),
+      radial-gradient(circle at 80% 80%, rgba(29, 45, 68, 0.02) 15%, transparent 16%);
+  }
+  
+  /* Perspective for 3D effects */
+  .perspective {
+    perspective: 1000px;
+  }
+  
+  .perspective-child {
+    transform-style: preserve-3d;
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  /* Shine animation for CTA buttons */
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shine-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -200%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.7s;
+  }
+  
+  .shine-effect:hover::before {
+    left: 200%;
+  }
+}
+
+/* Keyframes for animations */
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
   }
 }

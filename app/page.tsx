@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { api } from '@/components/providers/TRPCProvider'
-import { useToast } from '@/components/providers/ToastProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
 import { 
   Zap, 
@@ -33,9 +32,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { isAuthenticated } = useAuth()
-  const { showSuccess, showError } = useToast()
   const [currentSummary, setCurrentSummary] = useState<any>(null)
   const [animatedText, setAnimatedText] = useState('')
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -89,13 +86,16 @@ export default function HomePage() {
 
   const createSummary = api.summary.create.useMutation({
     onSuccess: (data) => {
+      console.log('✅ Summary created successfully:', data)
       setCurrentSummary(data)
       setProgress(0)
       setProcessingStage('')
-      showSuccess('Summary created successfully!')
+      // Optionally navigate to library after success
+      // router.push(`/library/${data.id}`)
     },
     onError: (error) => {
-      showError(`Summarization failed: ${error.message}`)
+      console.error('❌ Summarization failed:', error)
+      alert(`Summarization failed: ${error.message}`)
       setProgress(0)
       setProcessingStage('')
     }
@@ -134,37 +134,22 @@ export default function HomePage() {
   }, [createSummary.isPending])
 
   const handleUrlSubmit = async (url: string) => {
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      // Store the URL in sessionStorage to use after login
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('pendingSummaryUrl', url)
-      }
-      // Redirect to login
-      router.push('/login')
-      return
-    }
+    console.log('🚀 Starting summarization for URL:', url)
+    console.log('🔐 Authentication status:', isAuthenticated)
     
     // Reset current summary before starting new one
     setCurrentSummary(null)
     
     try {
+      console.log('📤 Calling createSummary mutation...')
       const result = await createSummary.mutateAsync({ url })
+      console.log('✅ Mutation result:', result)
     } catch (error) {
+      console.error('❌ HandleUrlSubmit error:', error)
       // The error will be handled by onError callback
     }
   }
 
-  // Handle URL parameter from login redirect
-  useEffect(() => {
-    const urlParam = searchParams.get('url')
-    if (urlParam && isAuthenticated) {
-      // Automatically submit the URL after a short delay
-      setTimeout(() => {
-        handleUrlSubmit(decodeURIComponent(urlParam))
-      }, 500)
-    }
-  }, [searchParams, isAuthenticated])
 
   // Animated text effect
   useEffect(() => {
@@ -309,7 +294,7 @@ export default function HomePage() {
               </button>
               <button
                 onClick={focusUrlInput}
-                className="bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200 min-h-[36px] touch-manipulation"
+                className="bg-prussian-blue text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-colors duration-200 min-h-[36px] touch-manipulation"
               >
 Try Free Now →
               </button>
@@ -334,7 +319,7 @@ Try Free Now →
               <div className="flex items-center space-x-4">
                 <button
                   onClick={focusUrlInput}
-                  className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200 min-h-[36px] touch-manipulation"
+                  className="bg-prussian-blue text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-colors duration-200 min-h-[36px] touch-manipulation"
                 >
   Try Free Now →
                 </button>
@@ -392,10 +377,10 @@ Try Free Now →
               {/* Primary CTA */}
               <div className="mt-12">
                 <button
-                  onClick={isAuthenticated ? focusUrlInput : () => router.push('/login')}
-                  className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                  onClick={focusUrlInput}
+                  className="bg-prussian-blue text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
-                  <span>{isAuthenticated ? "Get My First Summary Free" : "Sign In for Free Summary"}</span>
+                  <span>Get My First Summary Free (No Signup Required)</span>
                 </button>
               </div>
             </div>
@@ -413,10 +398,7 @@ Try Free Now →
                       Try it now
                     </h2>
                     <p className="mt-2 text-gray-600">
-                      {isAuthenticated 
-                        ? "Paste any YouTube URL to get started"
-                        : "Sign in to get your free summary"
-                      }
+                      Paste any YouTube URL to get started
                     </p>
                   </div>
 
@@ -434,7 +416,7 @@ Try Free Now →
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      {isAuthenticated ? "Ready to summarize" : "Quick sign-in"}
+                      No sign-up required
                     </div>
                   </div>
 
@@ -619,58 +601,58 @@ Try Free Now →
       <section id="metrics-section" className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
+            <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
               🌎 Proof in the Numbers
             </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
               Real results from real learners
             </p>
-            <p className="mt-6 text-lg text-gray-600">
+            <p className="mt-6 text-lg text-paynes-gray">
               (Yep, we asked.)
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-4 lg:gap-8">
             <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <Clock className="h-12 w-12 text-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-gray-900">
+              <Clock className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="text-3xl font-bold text-prussian-blue">
                 {counters.hoursView.toLocaleString()}+
               </div>
-              <div className="text-sm text-gray-600 mt-2">hours saved</div>
+              <div className="text-sm text-paynes-gray mt-2">hours saved</div>
             </div>
             <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <Play className="h-12 w-12 text-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-gray-900">
+              <Play className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="text-3xl font-bold text-prussian-blue">
                 {counters.videosView.toLocaleString()}+
               </div>
-              <div className="text-sm text-gray-600 mt-2">videos processed</div>
+              <div className="text-sm text-paynes-gray mt-2">videos processed</div>
             </div>
             <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <Users className="h-12 w-12 text-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-gray-900">
+              <Users className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="text-3xl font-bold text-prussian-blue">
                 {counters.usersView.toLocaleString()}+
               </div>
-              <div className="text-sm text-gray-600 mt-2">early users</div>
+              <div className="text-sm text-paynes-gray mt-2">early users</div>
             </div>
             <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <BarChart3 className="h-12 w-12 text-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-gray-900">
+              <BarChart3 className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="text-3xl font-bold text-prussian-blue">
                 {counters.satisfactionView} %
               </div>
-              <div className="text-sm text-gray-600 mt-2">satisfaction rate</div>
+              <div className="text-sm text-paynes-gray mt-2">satisfaction rate</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 sm:py-32 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+      <section className="py-24 sm:py-32 bg-gradient-to-br from-anti-flash-white via-eggshell/30 to-anti-flash-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
+            <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
               ❤️ What Busy Learners Say
             </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
               Don&apos;t just take our word for it
             </p>
           </div>
@@ -679,51 +661,51 @@ Try Free Now →
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {/* Testimonial 1 */}
             <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-primary-600 mb-6" />
-              <p className="text-gray-700 mb-6 leading-relaxed text-lg">
+              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
+              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Turned a 2-hour conference talk into key insights during my coffee break. Now I actually stay current with industry trends.&rdquo;
               </p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-silver-lake-blue to-paynes-gray flex items-center justify-center text-white font-semibold">
                   JP
                 </div>
                 <div className="ml-4">
-                  <div className="font-semibold text-gray-900">Jordan P.</div>
-                  <div className="text-sm text-gray-500">VC Partner</div>
+                  <div className="font-semibold text-prussian-blue">Jordan P.</div>
+                  <div className="text-sm text-paynes-gray">VC Partner</div>
                 </div>
               </div>
             </div>
 
             {/* Testimonial 2 */}
             <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-primary-600 mb-6" />
-              <p className="text-gray-700 mb-6 leading-relaxed text-lg">
+              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
+              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. My team gets better insights faster than ever.&rdquo;
               </p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-prussian-blue to-paynes-gray flex items-center justify-center text-white font-semibold">
                   PK
                 </div>
                 <div className="ml-4">
-                  <div className="font-semibold text-gray-900">Priya K.</div>
-                  <div className="text-sm text-gray-500">Product Lead at Tech Startup</div>
+                  <div className="font-semibold text-prussian-blue">Priya K.</div>
+                  <div className="text-sm text-paynes-gray">Product Lead at Tech Startup</div>
                 </div>
               </div>
             </div>
 
             {/* Testimonial 3 */}
             <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-primary-600 mb-6" />
-              <p className="text-gray-700 mb-6 leading-relaxed text-lg">
+              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
+              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Finally caught up on 6 months of ML papers in one weekend. Game-changer for work-life balance.&rdquo;
               </p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white font-semibold">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-paynes-gray to-silver-lake-blue flex items-center justify-center text-white font-semibold">
                   DR
                 </div>
                 <div className="ml-4">
-                  <div className="font-semibold text-gray-900">Daniel R.</div>
-                  <div className="text-sm text-gray-500">Data Scientist</div>
+                  <div className="font-semibold text-prussian-blue">Daniel R.</div>
+                  <div className="text-sm text-paynes-gray">Data Scientist</div>
                 </div>
               </div>
             </div>
@@ -734,13 +716,13 @@ Try Free Now →
       {/* Pricing Section */}
       <section id="pricing" className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-base font-semibold leading-7 text-primary-600">
+          <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
             ⚡ Choose Your Learning Speed
           </h2>
-          <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
             Flexible plans for every learner
           </p>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-6 text-lg leading-8 text-paynes-gray">
             → Start free • No credit card
           </p>
         </div>
@@ -748,16 +730,16 @@ Try Free Now →
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-24 sm:py-32 bg-gray-50">
+      <section id="faq" className="py-24 sm:py-32 bg-anti-flash-white">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
+            <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
               🤔 Frequently Asked
             </h2>
-            <h3 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h3 className="mt-2 text-3xl font-bold tracking-tight text-prussian-blue sm:text-4xl">
               Questions we get all the time
             </h3>
-            <p className="mt-6 text-lg text-gray-600">
+            <p className="mt-6 text-lg text-paynes-gray">
               (More questions? Hit the chat bubble in the corner.)
             </p>
           </div>
@@ -777,19 +759,19 @@ Try Free Now →
                 answer: "Already in beta. Sign up today and you'll be first in line."
               }
             ].map((faq, index) => (
-              <div key={index} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+              <div key={index} className="border border-paynes-gray/20 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 min-h-[44px] touch-manipulation"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-anti-flash-white/50 transition-colors duration-200 min-h-[44px] touch-manipulation"
                 >
-                  <span className="font-semibold text-gray-900 pr-4">{faq.question}</span>
-                  <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${
+                  <span className="font-semibold text-prussian-blue pr-4">{faq.question}</span>
+                  <ChevronDown className={`h-5 w-5 text-silver-lake-blue transition-transform duration-200 flex-shrink-0 ${
                     expandedFaq === index ? 'rotate-180' : ''
                   }`} />
                 </button>
                 {expandedFaq === index && (
-                  <div className="px-6 pb-5 border-t border-gray-100">
-                    <p className="text-gray-600 leading-relaxed pt-4">{faq.answer}</p>
+                  <div className="px-6 pb-5 border-t border-paynes-gray/20">
+                    <p className="text-paynes-gray leading-relaxed pt-4">{faq.answer}</p>
                   </div>
                 )}
               </div>
@@ -799,22 +781,22 @@ Try Free Now →
       </section>
 
       {/* CTA Section */}
-      <section className="relative isolate bg-primary-600 px-6 py-24 sm:py-32 lg:px-8">
+      <section className="relative isolate px-6 py-24 sm:py-32 lg:px-8 bg-white">
         <div className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]">
-          <div className="relative left-1/2 -z-10 aspect-[1155/678] w-[36.125rem] max-w-none -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary-400 to-primary-200 opacity-30 sm:left-[calc(50%-40rem)] sm:w-[72.1875rem]"></div>
+          <div className="relative left-1/2 -z-10 aspect-[1155/678] w-[36.125rem] max-w-none -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-silver-lake-blue/30 to-paynes-gray/20 opacity-30 sm:left-[calc(50%-40rem)] sm:w-[72.1875rem]"></div>
         </div>
         
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-prussian-blue sm:text-4xl">
             Ready to outrun information overload?
           </h2>
-          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-primary-100">
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-paynes-gray">
             Stop queuing videos. Start absorbing insights.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <button
               onClick={focusUrlInput}
-              className="rounded-full bg-white px-8 py-4 min-h-[44px] text-sm font-semibold text-primary-600 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all duration-200 hover:scale-105 touch-manipulation"
+              className="rounded-full bg-prussian-blue px-8 py-4 min-h-[44px] text-sm font-semibold text-white shadow-xl hover:bg-paynes-gray focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-prussian-blue transition-all duration-200 hover:scale-105 touch-manipulation"
             >
 Don&apos;t Miss Out - Try Sightline Free
             </button>
@@ -830,7 +812,7 @@ Don&apos;t Miss Out - Try Sightline Free
       }`}>
         <button
           onClick={focusUrlInput}
-          className="group bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 min-h-[56px] touch-manipulation"
+          className="group bg-prussian-blue hover:bg-paynes-gray text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center space-x-2 min-h-[56px] touch-manipulation"
         >
           <Zap className="h-6 w-6" />
           <span className="hidden sm:block font-medium text-sm">Summarize Video</span>
@@ -842,30 +824,30 @@ Don&apos;t Miss Out - Try Sightline Free
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              <div className="absolute inset-0 bg-prussian-blue/80 backdrop-blur-sm"></div>
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-paynes-gray/20">
+              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-prussian-blue">
                     Sightline Demo - YouTube to Summary in Seconds
                   </h3>
                   <button
                     onClick={() => setShowDemoModal(false)}
-                    className="bg-white rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="rounded-md text-paynes-gray hover:text-prussian-blue focus:outline-none focus:ring-2 focus:ring-silver-lake-blue transition-colors duration-200"
                   >
                     <X className="h-6 w-6" />
                   </button>
                 </div>
                 
-                <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="aspect-video bg-prussian-blue/10 rounded-lg flex items-center justify-center border border-paynes-gray/20">
                   <div className="text-center">
-                    <PlayCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Demo video would be embedded here</p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <PlayCircle className="h-16 w-16 text-silver-lake-blue mx-auto mb-4" />
+                    <p className="text-prussian-blue">Demo video would be embedded here</p>
+                    <p className="text-sm text-paynes-gray mt-2">
                       Shows: URL input → Processing → Summary output
                     </p>
                   </div>
@@ -877,7 +859,7 @@ Don&apos;t Miss Out - Try Sightline Free
                       setShowDemoModal(false)
                       focusUrlInput()
                     }}
-                    className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200"
+                    className="bg-prussian-blue text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg"
                   >
 Start My Free Summary
                   </button>

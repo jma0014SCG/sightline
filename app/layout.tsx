@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Space_Mono } from 'next/font/google'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
@@ -10,6 +10,15 @@ const inter = Inter({
   display: 'swap',
   preload: true,
   variable: '--font-inter'
+})
+
+// Using Space Mono as it's the closest Google Font to Geist Mono
+const spaceMono = Space_Mono({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-geist'
 })
 
 export const metadata: Metadata = {
@@ -58,7 +67,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
         <AuthProvider>
           <TRPCProvider>
             <ToastProvider>

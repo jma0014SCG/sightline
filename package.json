@@ -22,7 +22,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "env:setup": "chmod +x scripts/setup-env.sh && scripts/setup-env.sh",
     "env:check": "node -e \"require('./lib/env.ts')\" && echo '✅ Environment variables are valid'",
-    "env:validate": "node -e \"try { require('./lib/env.ts'); console.log('✅ All environment variables are valid'); } catch(e) { console.error('❌ Environment validation failed:', e.message); process.exit(1); }\"",
+    "env:validate": "tsx -e \"try { require('./lib/env.ts').default; console.log('✅ All environment variables are valid'); } catch(e) { console.error('❌ Environment validation failed:', e.message); process.exit(1); }\"",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "vercel:link": "vercel link",
@@ -86,6 +86,7 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "prisma": "^6.12.0",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
     "typescript": "^5.8.3",
     "webpack-bundle-analyzer": "^4.10.2"
   }

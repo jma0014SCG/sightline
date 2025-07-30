@@ -70,7 +70,7 @@ export function URLInput({
       <div className="space-y-2">
         <div className="relative flex gap-2">
           <div className="relative flex-1">
-            <Link2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <Link2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-silver-lake-blue" />
             <input
               type="url"
               value={url}
@@ -83,16 +83,17 @@ export function URLInput({
               placeholder={placeholder}
               disabled={isLoading || disabled}
               className={cn(
-                "w-full rounded-lg border border-gray-300 py-3 pl-10 text-gray-900",
-                "placeholder:text-gray-400 focus:border-primary-500 focus:outline-none",
-                "focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50",
-                error && "border-red-500 focus:border-red-500 focus:ring-red-500",
-                isValid && "border-green-500 focus:border-green-500 focus:ring-green-500",
+                "w-full rounded-lg bg-white border border-paynes-gray/20 py-3 pl-10 text-prussian-blue",
+                "placeholder:text-paynes-gray focus:border-silver-lake-blue focus:outline-none",
+                "focus:ring-2 focus:ring-silver-lake-blue/50 disabled:cursor-not-allowed disabled:opacity-50",
+                "transition-all duration-300",
+                error && "border-red-400 focus:border-red-400 focus:ring-red-400/50",
+                isValid && "border-green-400 focus:border-green-400 focus:ring-green-400/50",
                 isValid ? "pr-10" : "pr-4"
               )}
             />
             {isValid && (
-              <CheckCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500 animate-pulse" />
+              <CheckCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-400 animate-pulse" />
             )}
           </div>
           
@@ -101,10 +102,10 @@ export function URLInput({
             onClick={handlePaste}
             disabled={isLoading || disabled}
             className={cn(
-              "rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium",
-              "text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2",
-              "focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed",
-              "disabled:opacity-50"
+              "rounded-lg bg-white border border-paynes-gray/20 px-4 py-3 text-sm font-medium",
+              "text-paynes-gray hover:bg-anti-flash-white focus:outline-none focus:ring-2",
+              "focus:ring-silver-lake-blue/50 disabled:cursor-not-allowed",
+              "disabled:opacity-50 transition-all duration-300 hover:scale-105"
             )}
           >
             Paste
@@ -114,11 +115,11 @@ export function URLInput({
             type="submit"
             disabled={isLoading || disabled || !url.trim()}
             className={cn(
-              "rounded-lg bg-primary-600 px-6 py-3 text-sm font-semibold text-white",
-              "shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2",
-              "focus-visible:outline-offset-2 focus-visible:outline-primary-600",
+              "rounded-lg bg-prussian-blue-300 px-6 py-3 text-sm font-semibold text-white",
+              "shadow-lg hover:bg-prussian-blue-200 focus-visible:outline focus-visible:outline-2",
+              "focus-visible:outline-offset-2 focus-visible:outline-prussian-blue-300",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "flex items-center gap-2"
+              "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             )}
           >
             {isLoading ? (
@@ -133,7 +134,7 @@ export function URLInput({
         </div>
         
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-400">{error}</p>
         )}
       </div>
     </form>

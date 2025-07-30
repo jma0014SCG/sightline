@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight'
 import { Copy, Download, Share2, Check, Clock, Calendar, ChevronDown, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Summary } from '@prisma/client'
+import { ShareModal } from '@/components/molecules/ShareModal/ShareModal'
 
 // Backend data structure interfaces
 interface BackendKeyMoment {
@@ -90,6 +91,7 @@ export function SummaryViewer({
 }: SummaryViewerProps) {
   const [copied, setCopied] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('tldr')
+  const [showShareModal, setShowShareModal] = useState(false)
   // Progressive disclosure: Start with reference sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     new Set(['frameworks', 'debunked', 'practice', 'playbooks', 'enrichment', 'learning']) // Start with reference sections collapsed
@@ -117,6 +119,9 @@ export function SummaryViewer({
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
+
+  const openShareModal = () => setShowShareModal(true)
+  const closeShareModal = () => setShowShareModal(false)
 
 
   // Parse markdown sections for new Gumloop structure
@@ -434,7 +439,7 @@ export function SummaryViewer({
         const paragraphText = currentParagraph.join(' ').trim()
         if (paragraphText) {
           elements.push(
-            <p key={key++} className="text-gray-700 leading-relaxed mb-4 text-base">
+            <p key={key++} className="text-gray-900 leading-relaxed mb-4 text-base">
               {parseInlineMarkdown(paragraphText, themeColor)}
             </p>
           )
@@ -566,7 +571,7 @@ export function SummaryViewer({
         
         const listItem = trimmed.replace(/^[-–*•]\s+/, '')
         currentListItems.push(
-          <li key={key++} className="text-gray-700 leading-relaxed text-base">
+          <li key={key++} className="text-gray-900 leading-relaxed text-base">
             {parseInlineMarkdown(listItem, themeColor)}
           </li>
         )
@@ -585,7 +590,7 @@ export function SummaryViewer({
         
         const listItem = trimmed.replace(/^\d+\.\s+/, '')
         currentListItems.push(
-          <li key={key++} className="text-gray-700 leading-relaxed text-base">
+          <li key={key++} className="text-gray-900 leading-relaxed text-base">
             {parseInlineMarkdown(listItem, themeColor)}
           </li>
         )
@@ -675,7 +680,7 @@ export function SummaryViewer({
                     {framework.title}
                   </h4>
                   {framework.description && (
-                    <div className="text-gray-700 leading-relaxed text-base">
+                    <div className="text-gray-900 leading-relaxed text-base">
                       {parseMarkdownToJSX(framework.description, themeColor)}
                     </div>
                   )}
@@ -800,7 +805,7 @@ export function SummaryViewer({
             
             {/* Synopsis */}
             {summary.metadata?.synopsis && (
-              <p className="text-gray-700 italic leading-relaxed text-sm sm:text-base">
+              <p className="text-gray-900 italic leading-relaxed text-sm sm:text-base">
                 {summary.metadata.synopsis}
               </p>
             )}
@@ -812,7 +817,7 @@ export function SummaryViewer({
               onClick={() => handleCopy()}
               className={cn(
                 "flex-1 sm:flex-none rounded-lg p-2.5 text-gray-500 hover:bg-white hover:shadow-sm",
-                "hover:text-gray-700 focus:outline-none focus:ring-2",
+                "hover:text-gray-900 focus:outline-none focus:ring-2",
                 "focus:ring-blue-500 focus:ring-offset-2 transition-all min-h-[44px] min-w-[44px]"
               )}
               title="Copy entire summary"
@@ -829,7 +834,7 @@ export function SummaryViewer({
               onClick={handleDownload}
               className={cn(
                 "flex-1 sm:flex-none rounded-lg p-2.5 text-gray-500 hover:bg-white hover:shadow-sm",
-                "hover:text-gray-700 focus:outline-none focus:ring-2",
+                "hover:text-gray-900 focus:outline-none focus:ring-2",
                 "focus:ring-blue-500 focus:ring-offset-2 transition-all min-h-[44px] min-w-[44px]"
               )}
               title="Download as Markdown"
@@ -839,9 +844,10 @@ export function SummaryViewer({
             </button>
             
             <button
+              onClick={openShareModal}
               className={cn(
                 "flex-1 sm:flex-none rounded-lg p-2.5 text-gray-500 hover:bg-white hover:shadow-sm",
-                "hover:text-gray-700 focus:outline-none focus:ring-2",
+                "hover:text-gray-900 focus:outline-none focus:ring-2",
                 "focus:ring-blue-500 focus:ring-offset-2 transition-all min-h-[44px] min-w-[44px]"
               )}
               title="Share summary"
@@ -916,24 +922,24 @@ export function SummaryViewer({
             <h2 className="text-lg sm:text-xl font-bold text-white flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs">🔥</span>
-                <span className="text-amber-100">⚡</span>
+                <span className="text-amber-900">⚡</span>
                 <span>00:00 Rapid TL;DR</span>
               </div>
-              <span className="text-xs sm:text-sm font-normal text-amber-100">(30s read)</span>
+              <span className="text-xs sm:text-sm font-normal text-amber-900">(30s read)</span>
             </h2>
           </div>
           <div className="p-4 sm:p-6">
             <div className="flex items-start justify-between mb-4">
               <button
                 onClick={() => handleCopy(summary.metadata?.synopsis || 'TL;DR content')}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all min-h-[40px] min-w-[40px] flex-shrink-0"
+                className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all min-h-[40px] min-w-[40px] flex-shrink-0"
                 title="Copy TL;DR"
                 aria-label="Copy TL;DR section"
               >
                 <Copy className="h-4 w-4 mx-auto" />
               </button>
             </div>
-            <div className="text-gray-800 leading-relaxed text-base prose prose-base max-w-none">
+            <div className="text-gray-900 leading-relaxed text-base prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900">
               <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                 {(() => {
                   // Prioritize markdown parsing first, then backend data, then fallback
@@ -957,10 +963,10 @@ export function SummaryViewer({
           <div className="bg-blue-600 px-4 sm:px-6 py-4 border-b border-blue-700">
             <h2 id="key-moments-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <span className="text-xs">🔥</span>
-              <span className="text-blue-100">🎯</span>
+              <span className="text-blue-800">🎯</span>
               <span className="flex flex-col sm:flex-row sm:items-center gap-1">
                 <span>Key Moments</span>
-                <span className="text-xs sm:text-sm font-normal text-blue-100">(2m read)</span>
+                <span className="text-xs sm:text-sm font-normal text-blue-800">(2m read)</span>
               </span>
             </h2>
           </div>
@@ -988,7 +994,7 @@ export function SummaryViewer({
                           <Copy className="h-4 w-4 mx-auto" />
                         </button>
                       </div>
-                      <div className="flex-1 min-w-0 prose prose-base max-w-none">
+                      <div className="flex-1 min-w-0 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {moment.insight}
                         </ReactMarkdown>
@@ -1044,8 +1050,10 @@ export function SummaryViewer({
               
               return content ? (
                 <div className="p-6 bg-gradient-to-br from-white to-green-50 border border-green-100 rounded-xl shadow-sm">
-                  <div className="text-gray-700">
-                    {formatFrameworks(content, 'green')}
+                  <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-green-300 prose-th:bg-green-100 prose-th:p-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900 prose-td:border prose-td:border-green-200 prose-td:p-3 prose-td:align-top prose-td:text-gray-900">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                      {content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ) : (
@@ -1091,8 +1099,10 @@ export function SummaryViewer({
               
               return content ? (
                 <div className="p-6 bg-gradient-to-br from-white to-red-50 border border-red-100 rounded-xl shadow-sm">
-                  <div className="text-gray-700">
-                    {parseMarkdownToJSX(content, 'red')}
+                  <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-red-600 prose-code:bg-red-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                      {content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ) : (
@@ -1138,8 +1148,10 @@ export function SummaryViewer({
               
               return content ? (
                 <div className="p-6 bg-gradient-to-br from-white to-emerald-50 border border-emerald-100 rounded-xl shadow-sm">
-                  <div className="text-gray-700">
-                    {parseMarkdownToJSX(content, 'emerald')}
+                  <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                      {content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ) : (
@@ -1185,8 +1197,10 @@ export function SummaryViewer({
               
               return content ? (
                 <div className="p-6 bg-gradient-to-br from-white to-purple-50 border border-purple-100 rounded-xl shadow-sm">
-                  <div className="text-gray-700">
-                    {parseMarkdownToJSX(content, 'purple')}
+                  <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-purple-300 prose-th:bg-purple-100 prose-th:p-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900 prose-td:border prose-td:border-purple-200 prose-td:p-3 prose-td:align-top prose-td:text-gray-900 prose-blockquote:text-gray-900">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                      {content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ) : (
@@ -1211,9 +1225,9 @@ export function SummaryViewer({
             >
               <h2 id="enrichment-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 <span className="text-xs">📝</span>
-                <span className="text-yellow-100">🌟</span>
+                <span className="text-yellow-900">🌟</span>
                 Insight Enrichment
-                <span className="text-xs font-normal text-yellow-100 ml-2">(2m read)</span>
+                <span className="text-xs font-normal text-yellow-900 ml-2">(2m read)</span>
               </h2>
               <ChevronDown className={cn(
                 "h-5 w-5 text-white transition-transform duration-200",
@@ -1235,8 +1249,10 @@ export function SummaryViewer({
                 ) || '');
               
               return content ? (
-                <div className="text-gray-700">
-                  {parseMarkdownToJSX(content, 'yellow')}
+                <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-gray-700 prose-code:bg-yellow-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                    {content}
+                  </ReactMarkdown>
                 </div>
               ) : (
                 <div className="flex items-center justify-center py-8">
@@ -1262,9 +1278,9 @@ export function SummaryViewer({
             >
               <h2 id="learning-heading" className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 <span className="text-xs">📝</span>
-                <span className="text-indigo-100">📚</span>
+                <span className="text-indigo-800">📚</span>
                 Accelerated Learning Pack
-                <span className="text-xs font-normal text-indigo-100 ml-2">(8m read)</span>
+                <span className="text-xs font-normal text-indigo-800 ml-2">(8m read)</span>
               </h2>
               <ChevronDown className={cn(
                 "h-5 w-5 text-white transition-transform duration-200",
@@ -1305,7 +1321,7 @@ export function SummaryViewer({
                       <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
                         🗂️ Feynman Flashcards
                       </h4>
-                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded">
+                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {flashcardsContent}
                         </ReactMarkdown>
@@ -1327,7 +1343,7 @@ export function SummaryViewer({
                           <div key={index} className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
                             <div className="flex flex-col gap-2">
                               <span className="font-semibold text-gray-900 text-base">{item.term}</span>
-                              <div className="text-gray-700 text-base prose prose-base max-w-none prose-p:leading-relaxed">
+                              <div className="text-gray-900 text-base prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                                   {item.definition}
                                 </ReactMarkdown>
@@ -1345,7 +1361,7 @@ export function SummaryViewer({
                       <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
                         ❓ Quick Quiz
                       </h4>
-                      <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-li:my-3 prose-strong:text-gray-900 prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-600 prose-blockquote:border-emerald-200 prose-blockquote:bg-emerald-50 prose-blockquote:italic prose-ol:space-y-4 prose-ul:space-y-3">
+                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900 prose-blockquote:border-emerald-200 prose-blockquote:bg-emerald-50 prose-blockquote:italic">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {rawQuickQuizContent}
                         </ReactMarkdown>
@@ -1359,7 +1375,7 @@ export function SummaryViewer({
                       <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
                         💡 Novel-Idea Meter
                       </h4>
-                      <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-li:leading-relaxed prose-li:my-3 prose-strong:text-gray-900 prose-code:text-amber-600 prose-code:bg-amber-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-600 prose-blockquote:border-amber-200 prose-blockquote:bg-amber-50 prose-blockquote:italic prose-ul:space-y-3">
+                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-gray-700 prose-code:bg-amber-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900 prose-blockquote:border-amber-200 prose-blockquote:bg-amber-50 prose-blockquote:italic">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {rawNovelIdeaMeterContent}
                         </ReactMarkdown>
@@ -1386,6 +1402,14 @@ export function SummaryViewer({
           </div>
         </div>
       )}
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={closeShareModal}
+        summaryId={summary.id || ''}
+        summaryTitle={summary.videoTitle || 'Untitled Summary'}
+      />
     </article>
   )
 }
