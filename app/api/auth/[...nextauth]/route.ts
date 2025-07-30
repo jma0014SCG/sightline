@@ -5,5 +5,6 @@ const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
 
-// Add proper runtime configuration for Vercel
+// Force dynamic rendering for auth routes
+export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
