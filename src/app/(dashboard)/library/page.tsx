@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { Plus, Loader2, Trash2, AlertCircle } from 'lucide-react'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryCard } from '@/components/molecules/SummaryCard'
@@ -12,6 +12,7 @@ import { api } from '@/components/providers/TRPCProvider'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
+import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 
 export default function LibraryPage() {
   const router = useRouter()
@@ -26,6 +27,22 @@ export default function LibraryPage() {
     isOpen: false,
     summaryId: '',
     summaryTitle: '',
+  })
+  
+  // Progress state for summary creation
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
+  
+  // Real-time progress tracking
+  const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
+    taskId: currentTaskId,
+    onComplete: () => {
+      console.log('Progress tracking completed')
+      setCurrentTaskId(null)
+    },
+    onError: (error) => {
+      console.error('Progress tracking error:', error)
+      setCurrentTaskId(null)
+    }
   })
   
   // Selection state
@@ -62,8 +79,19 @@ export default function LibraryPage() {
   // Create summary mutation
   const createSummary = api.summary.create.useMutation({
     onSuccess: (summary) => {
-      router.push(`/library/${summary.id}`)
+      console.log('✅ Summary created successfully:', summary)
+      
+      // Wait a moment for user to see completion, then navigate
+      setTimeout(() => {
+        router.push(`/library/${summary.id}`)
+        setCurrentTaskId(null) // Stop progress tracking
+      }, 1000)
     },
+    onError: (error) => {
+      console.error('❌ Summarization failed:', error)
+      setCurrentTaskId(null) // Stop progress tracking
+      // The error will be handled by the existing error handling
+    }
   })
 
   // Get the utils to invalidate queries
@@ -81,6 +109,7 @@ export default function LibraryPage() {
     },
   })
 
+
   // Flatten data for display
   const allSummaries = useMemo(() => {
     return data?.pages.flatMap(page => page.items) || []
@@ -94,12 +123,24 @@ export default function LibraryPage() {
 
   const handleCreateSummary = async (url: string) => {
     setIsCreatingSummary(true)
+    
+    // Generate a temporary task ID to start progress tracking immediately
+    const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    setCurrentTaskId(tempTaskId)
+    
     try {
-      await createSummary.mutateAsync({ url })
+      const result = await createSummary.mutateAsync({ url })
+      
+      // If the backend returns a real task_id, switch to that for more accurate tracking
+      if (result.task_id && result.task_id !== tempTaskId) {
+        setCurrentTaskId(result.task_id)
+      }
+      
       // Refresh usage stats after creating summary
       utils.billing.getUsageStats.invalidate()
     } catch (error) {
       console.error('Failed to create summary:', error)
+      setCurrentTaskId(null) // Stop progress tracking on error
     } finally {
       setIsCreatingSummary(false)
     }
@@ -277,6 +318,9 @@ export default function LibraryPage() {
       <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
         <URLInput 
           onSubmit={handleCreateSummary}
+          onSuccess={() => {
+            console.log('URL input cleared after successful submission')
+          }}
           isLoading={isCreatingSummary || createSummary.isPending}
           disabled={usage?.isLimitReached}
         />
@@ -284,6 +328,43 @@ export default function LibraryPage() {
           <p className="mt-2 text-sm text-amber-700">
             You&apos;ve reached your monthly limit. Upgrade your plan to create more summaries.
           </p>
+        )}
+
+        {/* Progress indicator */}
+        {createSummary.isPending && (
+          <div className="mt-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center space-x-2 text-primary-700 mb-2">
+                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse"></div>
+                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-200"></div>
+                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-400"></div>
+                </div>
+                <h3 className="font-semibold text-gray-900">Processing your video</h3>
+                <p className="text-sm text-gray-600 mt-1">{processingStage}</p>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-primary-600 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs text-gray-500">
+                  {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 15-30 seconds'}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

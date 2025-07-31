@@ -4,13 +4,10 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url(),
   
-  // NextAuth
-  NEXTAUTH_URL: z.string().url(),
-  NEXTAUTH_SECRET: z.string().min(32),
-  
-  // Google OAuth
-  GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string(),
+  // Clerk Authentication
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
+  CLERK_SECRET_KEY: z.string().startsWith('sk_'),
+  CLERK_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
   
   // OpenAI
   OPENAI_API_KEY: z.string().startsWith('sk-'),

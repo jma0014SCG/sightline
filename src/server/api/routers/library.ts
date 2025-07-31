@@ -14,7 +14,7 @@ export const libraryRouter = createTRPCRouter({
     }))
     .query(async ({ ctx, input }) => {
       const { limit, cursor, search, sortBy, sortOrder, dateRange, durationRange } = input
-      const userId = ctx.session.user.id
+      const userId = ctx.userId
 
       // Build where clause
       const where: any = {
@@ -108,7 +108,7 @@ export const libraryRouter = createTRPCRouter({
     }),
 
   getStats: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session.user.id
+    const userId = ctx.userId
 
     const [totalSummaries, totalDuration, recentSummaries] = await Promise.all([
       ctx.prisma.summary.count({ where: { userId } }),

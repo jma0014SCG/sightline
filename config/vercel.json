@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npx prisma generate && npm run build",
+  "buildCommand": "pnpm prisma generate && pnpm run build",
   "framework": "nextjs",
-  "installCommand": "npm install",
+  "installCommand": "pnpm install",
   "functions": {
     "app/api/auth/[...nextauth]/route.ts": {
       "maxDuration": 30

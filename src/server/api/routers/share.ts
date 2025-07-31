@@ -15,7 +15,7 @@ export const shareRouter = createTRPCRouter({
       const summary = await ctx.prisma.summary.findFirst({
         where: {
           id: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -30,7 +30,7 @@ export const shareRouter = createTRPCRouter({
       const existingLink = await ctx.prisma.shareLink.findFirst({
         where: {
           summaryId: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -39,7 +39,7 @@ export const shareRouter = createTRPCRouter({
         return {
           id: existingLink.id,
           slug: existingLink.slug,
-          url: `${process.env.NEXTAUTH_URL}/share/${existingLink.slug}`,
+          url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${existingLink.slug}`,
           views: existingLink.views,
           expiresAt: existingLink.expiresAt,
           isPublic: existingLink.isPublic,
@@ -74,7 +74,7 @@ export const shareRouter = createTRPCRouter({
         data: {
           slug,
           summaryId: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
           isPublic: true,
           expiresAt: input.expiresAt,
         },
@@ -83,7 +83,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXTAUTH_URL}/share/${shareLink.slug}`,
+        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,
@@ -100,7 +100,7 @@ export const shareRouter = createTRPCRouter({
       const shareLink = await ctx.prisma.shareLink.findFirst({
         where: {
           summaryId: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -111,7 +111,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXTAUTH_URL}/share/${shareLink.slug}`,
+        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,
@@ -204,7 +204,7 @@ export const shareRouter = createTRPCRouter({
       const shareLink = await ctx.prisma.shareLink.findFirst({
         where: {
           summaryId: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -232,7 +232,7 @@ export const shareRouter = createTRPCRouter({
       const shareLink = await ctx.prisma.shareLink.findFirst({
         where: {
           summaryId: input.summaryId,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -251,7 +251,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: updatedLink.id,
         slug: updatedLink.slug,
-        url: `${process.env.NEXTAUTH_URL}/share/${updatedLink.slug}`,
+        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${updatedLink.slug}`,
         views: updatedLink.views,
         expiresAt: updatedLink.expiresAt,
         isPublic: updatedLink.isPublic,
@@ -264,7 +264,7 @@ export const shareRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const shareLinks = await ctx.prisma.shareLink.findMany({
         where: {
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
         include: {
           summary: {
@@ -284,7 +284,7 @@ export const shareRouter = createTRPCRouter({
       return shareLinks.map((link: any) => ({
         id: link.id,
         slug: link.slug,
-        url: `${process.env.NEXTAUTH_URL}/share/${link.slug}`,
+        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${link.slug}`,
         views: link.views,
         expiresAt: link.expiresAt,
         isPublic: link.isPublic,

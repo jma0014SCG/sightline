@@ -10,9 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication
+// User model for authentication (now with Clerk)
 model User {
-  id                     String    @id @default(cuid())
+  id                     String    @id // Clerk user ID
   email                  String    @unique
   name                   String?
   image                  String?
@@ -32,41 +32,12 @@ model User {
   summariesUsed          Int       @default(0)
   summariesLimit         Int       @default(5) // Free tier limit
 
-  // Relations
-  accounts    Account[]
-  sessions    Session[]
+  // Relations (removed NextAuth tables)
   summaries   Summary[]
   sharedLinks ShareLink[]
 }
 
-// OAuth account linkage
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-// User sessions
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// NextAuth models removed - Clerk handles authentication
 
 // Video summaries
 model Summary {

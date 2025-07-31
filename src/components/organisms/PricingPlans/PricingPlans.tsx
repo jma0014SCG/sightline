@@ -112,21 +112,18 @@ export function PricingPlans({ currentPlan, showCurrentPlan = true }: PricingPla
                 ) : (
                   <button
                     onClick={() => handleSelectPlan(plan.paymentLink)}
-                    disabled={isFree || !plan.paymentLink}
+                    disabled={!isFree}
                     className={cn(
                       'mt-10 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-                      isPopular
+                      isFree
                         ? 'bg-primary-600 text-white shadow-sm hover:bg-primary-500 focus-visible:outline-primary-600'
-                        : 'bg-white text-primary-600 ring-1 ring-inset ring-primary-200 hover:ring-primary-300',
-                      (isFree || !plan.paymentLink) && 'cursor-not-allowed opacity-50'
+                        : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     )}
                   >
                     {isFree ? (
                       'Get started'
-                    ) : !plan.paymentLink ? (
-                      'Contact sales'
                     ) : (
-                      `Upgrade to ${plan.name}`
+                      'Coming soon'
                     )}
                   </button>
                 )}

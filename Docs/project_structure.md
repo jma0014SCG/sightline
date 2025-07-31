@@ -31,11 +31,10 @@ sightline/
 Next.js 14 App Router structure with file-based routing
 ```
 app/
-├── (auth)/                       # Auth group layout
-│   ├── login/
-│   │   └── page.tsx             # Login page
-│   └── register/
-│       └── page.tsx             # Registration page
+├── sign-in/[[...sign-in]]/       # Clerk sign-in pages
+│   └── page.tsx                 # Clerk SignIn component
+├── sign-up/[[...sign-up]]/       # Clerk sign-up pages
+│   └── page.tsx                 # Clerk SignUp component
 ├── (dashboard)/                  # Dashboard group layout
 │   ├── layout.tsx               # Dashboard layout wrapper
 │   ├── library/
@@ -52,13 +51,13 @@ app/
 │   └── demo/
 │       └── page.tsx             # Demo page
 ├── api/                          # API routes
-│   ├── auth/[...nextauth]/
-│   │   └── route.ts             # NextAuth handler
 │   ├── trpc/[trpc]/
 │   │   └── route.ts             # tRPC handler
 │   ├── webhooks/
-│   │   └── stripe/
-│   │       └── route.ts         # Stripe webhooks
+│   │   ├── stripe/
+│   │   │   └── route.ts         # Stripe webhooks
+│   │   └── clerk/
+│   │       └── route.ts         # Clerk user sync webhooks
 │   └── health/
 │       └── route.ts             # Health check
 ├── share/[slug]/
@@ -105,10 +104,10 @@ components/
 │       ├── PricingPlans.tsx
 │       └── index.ts
 ├── providers/                   # Context providers
-│   ├── AuthProvider.tsx
-│   ├── TRPCProvider.tsx
-│   ├── ToastProvider.tsx
-│   └── MonitoringProvider.tsx
+│   ├── TRPCProvider.tsx         # tRPC React Query provider
+│   ├── ToastProvider.tsx        # Toast notifications
+│   └── MonitoringProvider.tsx   # Performance monitoring
+│   # Note: AuthProvider removed - using ClerkProvider in layout.tsx
 └── debug/                      # Debug components
     └── DebugPanel.tsx
 ```
@@ -119,12 +118,12 @@ Shared libraries and utilities
 lib/
 ├── api/                         # API client setup
 │   └── trpc.ts                  # tRPC client
-├── auth/                        # Auth utilities
-│   └── auth.ts                  # NextAuth config
+# Note: auth/ directory removed - using Clerk for authentication
 ├── db/                          # Database utilities
 │   └── prisma.ts                # Prisma client singleton
 ├── hooks/                       # Custom React hooks
-│   └── useAuth.ts
+│   ├── useAuth.ts
+│   └── useProgressTracking.ts      # Real-time progress tracking hook
 ├── utils.ts                     # General utilities
 ├── logger.ts                    # Logging utilities
 ├── monitoring.ts                # Performance monitoring
@@ -167,7 +166,10 @@ api/
 ├── main.py                      # FastAPI app entry
 ├── dependencies.py              # Dependency injection
 ├── config.py                    # Configuration
-├── index.py                     # API entry point
+├── index.py                     # API entry point with progress tracking
+│   # Enhanced with real-time progress storage and endpoints:
+│   # - GET /api/progress/{task_id} for progress polling
+│   # - Enhanced /api/summarize with task_id and progress updates
 ├── routers/
 │   ├── __init__.py
 │   ├── summarize.py             # Summarization endpoints
@@ -219,20 +221,29 @@ tests/
 └── test-gumloop-output.md       # Gumloop output tests
 ```
 
-### Configuration Files (/config)
+### Configuration Files
 
+#### Root Level Configuration Files
+```
+/
+├── tailwind.config.ts           # Tailwind CSS config 
+├── postcss.config.js            # PostCSS config
+├── next-env.d.ts               # Next.js types
+└── tsconfig.json                # TypeScript configuration
+```
+
+#### /config Directory
 ```
 config/
 ├── next.config.js               # Next.js configuration
-├── tailwind.config.ts           # Tailwind CSS config
-├── postcss.config.js            # PostCSS config
 ├── .eslintrc.json              # ESLint rules
 ├── .prettierrc                  # Prettier config
 ├── components.json              # shadcn/ui config
 ├── vercel.json                  # Vercel deployment config
-├── .vercelignore                # Vercel ignore rules
-└── next-env.d.ts               # Next.js types
+└── .vercelignore                # Vercel ignore rules
 ```
+
+**Note**: Tailwind and PostCSS configs are in project root for Next.js 14 compatibility.
 
 ### Documentation (/Docs)
 
@@ -316,23 +327,68 @@ ComponentName/
 - Form state: React Hook Form
 - Global UI state: Context providers
 
+## Recent Changes: NextAuth to Clerk Migration
+
+### Authentication System Change (July 2025)
+The project has been migrated from NextAuth.js to Clerk for improved authentication and user management.
+
+#### Files Added:
+- `/src/middleware.ts` - Clerk middleware for route protection
+- `/src/app/sign-in/[[...sign-in]]/page.tsx` - Clerk sign-in component
+- `/src/app/sign-up/[[...sign-up]]/page.tsx` - Clerk sign-up component  
+- `/src/app/api/webhooks/clerk/route.ts` - Clerk user sync webhook
+
+#### Files Removed:
+- `/src/app/api/auth/[...nextauth]/` - NextAuth API routes
+- `/src/lib/auth/auth.ts` - NextAuth configuration
+- `/src/components/providers/AuthProvider.tsx` - NextAuth session provider
+- `/src/app/(auth)/` - Old auth group layout
+- `/middleware.ts` - Old NextAuth middleware (root level)
+
+#### Files Modified:
+- `/src/app/layout.tsx` - Now uses ClerkProvider instead of AuthProvider
+- `/src/lib/hooks/useAuth.ts` - Updated to use Clerk hooks
+- `/src/server/api/trpc.ts` - Updated context to use Clerk's auth()
+- `/src/server/api/routers/auth.ts` - Updated to work with Clerk userId
+- `/prisma/schema.prisma` - Removed NextAuth models (Account, Session)
+- `/.env.local` - Updated environment variables for Clerk
+
+#### Database Changes:
+- User model now uses Clerk user ID as primary key
+- Removed Account and Session models (handled by Clerk)
+- Added webhook endpoint for user synchronization
+
+#### Environment Variables:
+```env
+# Old NextAuth variables (removed):
+NEXTAUTH_URL, NEXTAUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+
+# New Clerk variables:
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY  
+CLERK_WEBHOOK_SECRET
+```
+
 ## Environment-Specific Configurations
 
 ### Development
 - `.env.local` for local development
 - Hot module replacement enabled
 - Source maps enabled
+- Clerk development keys
 
 ### Staging
 - `.env.staging` for staging environment
 - Preview deployments on Vercel
 - Testing integrations enabled
+- Clerk test environment
 
 ### Production
 - `.env.production` for production
 - Optimized builds
 - Error tracking enabled
 - Performance monitoring active
+- Clerk production keys
 
 ## Build Output Structure
 
@@ -340,6 +396,45 @@ ComponentName/
 .next/                         # Next.js build output
 .vercel/                       # Vercel build cache
 ```
+
+## Recent Enhancements: Real-time Progress Tracking
+
+### Progress Tracking System (January 2025)
+A comprehensive real-time progress tracking system has been implemented to provide realistic feedback during video summarization.
+
+#### New Files Added:
+- `/src/lib/hooks/useProgressTracking.ts` - Custom React hook for real-time progress polling
+- Enhanced `/api/index.py` with progress storage and tracking endpoints
+
+#### Backend Progress Tracking:
+- **Progress Storage**: In-memory dictionary storing task progress by UUID
+- **Progress Endpoint**: `GET /api/progress/{task_id}` for real-time polling
+- **Enhanced Summarization**: `/api/summarize` now includes:
+  - Unique task_id generation for each request
+  - Real-time progress updates at actual processing stages:
+    - 10%: "Connecting to YouTube..."
+    - 25%: "Fetching video information..."
+    - 40%: "Downloading transcript..."
+    - 60%: "Analyzing content with AI..."
+    - 80%: "Generating your summary..."
+    - 100%: "Summary ready!"
+
+#### Frontend Progress Integration:
+- **useProgressTracking Hook**: Polls backend every second for real progress
+- **Smart Fallbacks**: Falls back to realistic simulation if backend unavailable
+- **Immediate Feedback**: Progress starts instantly when user submits URL
+- **Temporary Task IDs**: Enables immediate progress display before backend response
+- **Auto-cleanup**: Stops polling when task completes or errors
+
+#### Pages Enhanced:
+- **Landing Page** (`/src/app/page.tsx`): Real progress with auto-scroll to summary
+- **Library Page** (`/src/app/(dashboard)/library/page.tsx`): Real progress with auto-navigation
+
+#### Key Features:
+- **Realistic Progress**: Reflects actual backend processing stages
+- **Resilient**: Works even if progress API fails (graceful fallback)
+- **Responsive**: 1-second polling for smooth progress updates
+- **User-Friendly**: Clear stage messages and completion feedback
 
 This structure supports:
 - Clear separation of concerns
@@ -349,3 +444,5 @@ This structure supports:
 - Efficient collaboration
 - Automated testing
 - Smooth deployment
+- Real-time user feedback
+- Robust progress tracking

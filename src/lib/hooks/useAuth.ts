@@ -1,44 +1,50 @@
 'use client'
 
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useAuth as useClerkAuth, useUser, useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
 export function useAuth() {
-  const { data: session, status } = useSession()
+  const { isSignedIn, isLoaded } = useClerkAuth()
+  const { user } = useUser()
+  const { signOut, openSignIn } = useClerk()
   const router = useRouter()
 
-  const login = useCallback(async (provider = 'google') => {
+  const login = useCallback(async () => {
     try {
-      const result = await signIn(provider, { 
-        callbackUrl: '/library',
-        redirect: false 
+      openSignIn({
+        afterSignInUrl: '/library',
+        afterSignUpUrl: '/library'
       })
-      
-      if (result?.error) {
-        console.error('Login error:', result.error)
-      }
-      
-      return result
     } catch (error) {
       console.error('Login failed:', error)
       throw error
     }
-  }, [])
+  }, [openSignIn])
 
   const logout = useCallback(async () => {
     try {
-      await signOut({ callbackUrl: '/' })
+      await signOut(() => router.push('/'))
     } catch (error) {
-      // Handle logout error silently
+      console.error('Logout failed:', error)
     }
-  }, [])
+  }, [signOut, router])
 
-  const isAuthenticated = !!session?.user
-  const isLoading = status === 'loading'
+  const isAuthenticated = isSignedIn
+  const isLoading = !isLoaded
+
+  // Map Clerk user to our expected user format
+  const mappedUser = user ? {
+    id: user.id,
+    name: user.fullName || user.firstName || '',
+    email: user.primaryEmailAddress?.emailAddress || '',
+    image: user.imageUrl || null,
+    role: 'USER', // Default role - will be synced from database
+    plan: 'FREE' // Default plan - will be synced from database
+  } : null
 
   return {
-    user: session?.user,
+    user: mappedUser,
     isAuthenticated,
     isLoading,
     login,

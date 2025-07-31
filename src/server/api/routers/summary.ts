@@ -28,7 +28,7 @@ function extractVideoId(url: string): string | null {
 }
 
 export const summaryRouter = createTRPCRouter({
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({
       url: z.string()
         .url('Invalid URL format')
@@ -45,8 +45,7 @@ export const summaryRouter = createTRPCRouter({
         }, 'Only YouTube URLs are allowed'),
     }))
     .mutation(async ({ ctx, input }) => {
-      // For testing: use a default user ID if not authenticated
-      const userId = ctx.session?.user?.id || 'test-user-id'
+      const userId = ctx.userId
       
       // Skip usage limits check for testing
       // TODO: Re-enable this for production
@@ -356,7 +355,7 @@ export const summaryRouter = createTRPCRouter({
       const summary = await ctx.prisma.summary.findUnique({
         where: {
           id: input.id,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 
@@ -379,7 +378,7 @@ export const summaryRouter = createTRPCRouter({
       const summary = await ctx.prisma.summary.updateMany({
         where: {
           id: input.id,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
         data: {
           content: input.content,
@@ -405,7 +404,7 @@ export const summaryRouter = createTRPCRouter({
       const summary = await ctx.prisma.summary.deleteMany({
         where: {
           id: input.id,
-          userId: ctx.session.user.id,
+          userId: ctx.userId,
         },
       })
 

@@ -2,8 +2,11 @@ import { z } from 'zod'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/api/trpc'
 
 export const authRouter = createTRPCRouter({
-  getSession: publicProcedure.query(({ ctx }) => {
-    return ctx.session
+  getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUnique({
+      where: { id: ctx.userId },
+    })
+    return user
   }),
 
   getSecretMessage: protectedProcedure.query(() => {
@@ -16,7 +19,7 @@ export const authRouter = createTRPCRouter({
       image: z.string().url().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id
+      const userId = ctx.userId
 
       const updatedUser = await ctx.prisma.user.update({
         where: { id: userId },

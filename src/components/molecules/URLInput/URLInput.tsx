@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link2, Loader2, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface URLInputProps {
   onSubmit: (url: string) => void
+  onSuccess?: () => void
   isLoading?: boolean
   disabled?: boolean
   placeholder?: string
@@ -14,6 +15,7 @@ interface URLInputProps {
 
 export function URLInput({ 
   onSubmit, 
+  onSuccess,
   isLoading = false, 
   disabled = false,
   placeholder = "Paste a YouTube URL to summarize...",
@@ -22,6 +24,19 @@ export function URLInput({
   const [url, setUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isValid, setIsValid] = useState(false)
+  const wasLoadingRef = useRef(false)
+
+  // Clear URL when loading completes successfully
+  useEffect(() => {
+    if (wasLoadingRef.current && !isLoading) {
+      // Loading just finished - clear the URL and call onSuccess
+      setUrl('')
+      setError(null)
+      setIsValid(false)
+      onSuccess?.()
+    }
+    wasLoadingRef.current = isLoading
+  }, [isLoading, onSuccess])
 
   const validateYouTubeUrl = (url: string): boolean => {
     const patterns = [
@@ -115,9 +130,9 @@ export function URLInput({
             type="submit"
             disabled={isLoading || disabled || !url.trim()}
             className={cn(
-              "rounded-lg bg-prussian-blue-300 px-6 py-3 text-sm font-semibold text-white",
-              "shadow-lg hover:bg-prussian-blue-200 focus-visible:outline focus-visible:outline-2",
-              "focus-visible:outline-offset-2 focus-visible:outline-prussian-blue-300",
+              "rounded-lg bg-prussian-blue px-6 py-3 text-sm font-semibold text-white",
+              "shadow-lg hover:bg-paynes-gray focus-visible:outline focus-visible:outline-2",
+              "focus-visible:outline-offset-2 focus-visible:outline-prussian-blue",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             )}

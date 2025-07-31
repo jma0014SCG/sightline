@@ -7,7 +7,7 @@ export const billingRouter = createTRPCRouter({
   // Get current subscription status
   getSubscription: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
-      where: { id: ctx.session.user.id },
+      where: { id: ctx.userId },
       select: {
         plan: true,
         stripeCustomerId: true,
@@ -43,7 +43,7 @@ export const billingRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
-        where: { id: ctx.session.user.id },
+        where: { id: ctx.userId },
       })
 
       if (!user?.email) {
@@ -105,7 +105,7 @@ export const billingRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
-        where: { id: ctx.session.user.id },
+        where: { id: ctx.userId },
       })
 
       if (!user?.stripeCustomerId) {
@@ -128,7 +128,7 @@ export const billingRouter = createTRPCRouter({
   // Get usage stats
   getUsageStats: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
-      where: { id: ctx.session.user.id },
+      where: { id: ctx.userId },
       select: {
         plan: true,
         summariesUsed: true,
@@ -152,7 +152,7 @@ export const billingRouter = createTRPCRouter({
 
     const currentMonthUsage = await ctx.prisma.summary.count({
       where: {
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
         createdAt: {
           gte: startOfMonth,
         },

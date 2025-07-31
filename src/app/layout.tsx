@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Mono } from 'next/font/google'
-import { AuthProvider } from '@/components/providers/AuthProvider'
+import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
 import { MonitoringProvider } from '@/components/providers/MonitoringProvider'
@@ -67,18 +67,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
-        <MonitoringProvider>
-          <AuthProvider>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
+          <MonitoringProvider>
             <TRPCProvider>
               <ToastProvider>
                 {children}
               </ToastProvider>
             </TRPCProvider>
-          </AuthProvider>
-        </MonitoringProvider>
-      </body>
-    </html>
+          </MonitoringProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

@@ -1,8 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { getServerSession } from 'next-auth'
+import { auth } from '@clerk/nextjs/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
-import { authOptions } from '@/lib/auth/auth'
 import { prisma } from '@/lib/db/prisma'
 import { headers } from 'next/headers'
 
@@ -10,11 +9,11 @@ import { headers } from 'next/headers'
  * Create context for each request
  */
 export const createTRPCContext = async () => {
-  const session = await getServerSession(authOptions)
+  const { userId } = await auth()
 
   return {
     prisma,
-    session,
+    userId,
     headers: headers(),
   }
 }
@@ -43,16 +42,49 @@ export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure
 
 /**
- * Protected procedure - requires authentication
+ * Protected procedure - requires authentication and ensures user exists in database
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.userId) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
+
+  // Ensure user exists in our database
+  let user = await ctx.prisma.user.findUnique({
+    where: { id: ctx.userId }
+  })
+
+  // If user doesn't exist, create them with minimal data
+  // The webhook will update with full data when it fires
+  if (!user) {
+    try {
+      user = await ctx.prisma.user.create({
+        data: {
+          id: ctx.userId,
+          email: `temp_${ctx.userId}@placeholder.com`, // Temporary email, webhook will update
+          name: null,
+          image: null,
+          emailVerified: null,
+        },
+      })
+      
+      console.log(`Auto-created minimal user in database: ${ctx.userId}`)
+    } catch (error) {
+      console.error('Failed to create user in database:', error)
+      throw new TRPCError({ 
+        code: 'INTERNAL_SERVER_ERROR', 
+        message: 'Failed to initialize user account' 
+      })
+    }
+  }
+
   return next({
     ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      // infers the `userId` as non-nullable
+      userId: ctx.userId as string,
+      user: user,
+      prisma: ctx.prisma,
+      headers: ctx.headers,
     },
   })
 })

@@ -7,34 +7,31 @@ export const PRICING_PLANS = {
     price: 0,
     paymentLink: null,
     features: [
-      '3-day trial',
-      '20 videos library size',
-      'Markdown export',
-      'Standard processing',
+      '1 free summary',
     ],
   },
   PRO: {
     name: 'Pro',
     description: 'Most popular for individuals',
     price: 9.99,
-    paymentLink: 'https://buy.stripe.com/14A6oG8pd5Zf6L3cuk0ZW00',
+    paymentLink: null, // Disabled for "coming soon"
     features: [
-      '25 summaries / day',
-      '500 videos library size',
-      'Markdown + Notion & Slack export',
-      'Standard priority queue',
+      'Unlimited summaries',
+      'Personal library access',
+      'Markdown exports',
     ],
   },
   COMPLETE: {
     name: 'Complete',
     description: 'For power users',
     price: 24.99,
-    paymentLink: 'https://buy.stripe.com/8x28wOaxl1IZ5GZ0LC0ZW01',
+    paymentLink: null, // Disabled for "coming soon"
     features: [
-      'Unlimited daily summaries',
-      'Unlimited library size',
-      'All export options + PDF & PowerPoint',
-      '⚡ Blazing-fast priority queue',
+      'Summarize entire channels in minutes',
+      'Comprehensive strategy breakdowns and timelines',
+      'Unlimited summaries',
+      'Personal library access',
+      'Markdown export',
     ],
   },
 } as const

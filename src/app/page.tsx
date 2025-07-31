@@ -6,6 +6,7 @@ import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { api } from '@/components/providers/TRPCProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
 import { 
@@ -39,17 +40,27 @@ export default function HomePage() {
   const [metricsVisible, setMetricsVisible] = useState(false)
   const [counters, setCounters] = useState({
     hoursView: 0,
-    videosView: 0,
     usersView: 0,
     satisfactionView: 0
   })
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [showStickyNav, setShowStickyNav] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [processingStage, setProcessingStage] = useState('')
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [showDemoModal, setShowDemoModal] = useState(false)
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
 
+  // Real-time progress tracking
+  const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
+    taskId: currentTaskId,
+    onComplete: () => {
+      console.log('Progress tracking completed')
+      setCurrentTaskId(null)
+    },
+    onError: (error) => {
+      console.error('Progress tracking error:', error)
+      setCurrentTaskId(null)
+    }
+  })
 
   // Smooth scroll utility function
   const scrollToSection = (sectionId: string) => {
@@ -87,51 +98,35 @@ export default function HomePage() {
   const createSummary = api.summary.create.useMutation({
     onSuccess: (data) => {
       console.log('✅ Summary created successfully:', data)
-      setCurrentSummary(data)
-      setProgress(0)
-      setProcessingStage('')
-      // Optionally navigate to library after success
-      // router.push(`/library/${data.id}`)
+      
+      // Wait a moment for user to see completion, then show summary
+      setTimeout(() => {
+        setCurrentSummary(data)
+        setCurrentTaskId(null) // Stop progress tracking
+        
+        // Auto-scroll to summary section
+        setTimeout(() => {
+          const summaryElement = document.getElementById('summary-section')
+          if (summaryElement) {
+            summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 100)
+      }, 1000)
     },
     onError: (error) => {
       console.error('❌ Summarization failed:', error)
       alert(`Summarization failed: ${error.message}`)
-      setProgress(0)
-      setProcessingStage('')
+      setCurrentTaskId(null) // Stop progress tracking
     }
   })
 
-  // Simulate progress when processing starts
+  // Start progress tracking when mutation begins
   useEffect(() => {
-    if (createSummary.isPending) {
-      setProgress(0)
-      const stages = [
-        'Fetching video information...',
-        'Downloading transcript...',
-        'Analyzing content...',
-        'Generating summary...',
-        'Finalizing...'
-      ]
-      
-      let currentStage = 0
-      let currentProgress = 0
-      
-      const progressTimer = setInterval(() => {
-        if (currentProgress < 90) {
-          currentProgress += Math.random() * 15
-          setProgress(Math.min(currentProgress, 90))
-          
-          const stageIndex = Math.floor((currentProgress / 90) * stages.length)
-          if (stageIndex !== currentStage && stageIndex < stages.length) {
-            currentStage = stageIndex
-            setProcessingStage(stages[stageIndex])
-          }
-        }
-      }, 500)
-
-      return () => clearInterval(progressTimer)
+    if (createSummary.isPending && !currentTaskId) {
+      // We'll get the task_id from the mutation response to start tracking
+      console.log('Summary creation started, waiting for task_id...')
     }
-  }, [createSummary.isPending])
+  }, [createSummary.isPending, currentTaskId])
 
   const handleUrlSubmit = async (url: string) => {
     console.log('🚀 Starting summarization for URL:', url)
@@ -140,12 +135,22 @@ export default function HomePage() {
     // Reset current summary before starting new one
     setCurrentSummary(null)
     
+    // Generate a temporary task ID to start progress tracking immediately
+    const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    setCurrentTaskId(tempTaskId)
+    
     try {
       console.log('📤 Calling createSummary mutation...')
       const result = await createSummary.mutateAsync({ url })
       console.log('✅ Mutation result:', result)
+      
+      // If the backend returns a real task_id, switch to that for more accurate tracking
+      if (result.task_id && result.task_id !== tempTaskId) {
+        setCurrentTaskId(result.task_id)
+      }
     } catch (error) {
       console.error('❌ HandleUrlSubmit error:', error)
+      setCurrentTaskId(null) // Stop progress tracking on error
       // The error will be handled by onError callback
     }
   }
@@ -195,10 +200,9 @@ export default function HomePage() {
         if (entry.isIntersecting && !metricsVisible) {
           setMetricsVisible(true)
           // Start counter animations with staggered delays
-          setTimeout(() => animateCounter(0, 1200, 2000, 'hoursView'), 0)
-          setTimeout(() => animateCounter(0, 450, 2000, 'videosView'), 200)
-          setTimeout(() => animateCounter(0, 89, 2000, 'usersView'), 400)
-          setTimeout(() => animateCounter(0, 94, 2000, 'satisfactionView'), 600)
+          setTimeout(() => animateCounter(0, 250, 2000, 'usersView'), 0)
+          setTimeout(() => animateCounter(0, 1200, 2000, 'hoursView'), 200)
+          setTimeout(() => animateCounter(0, 94, 2000, 'satisfactionView'), 400)
         }
       },
       { threshold: 0.5 }
@@ -287,7 +291,7 @@ export default function HomePage() {
             {/* Actions */}
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/sign-in')}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 hidden sm:block min-h-[44px] touch-manipulation"
               >
                 Sign In
@@ -365,13 +369,16 @@ Try Free Now →
 
               {/* Main headline */}
               <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl lg:text-6xl xl:text-7xl leading-tight mb-6" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', margin: '0 0 1.5rem 0' }}>
-                <span className="block">Turn Any YouTube Video Into</span>
-                <span className="block text-primary-600 mt-2">Actionable Insights</span>
-                <span className="block text-2xl font-normal text-gray-600 mt-4">In under 60 seconds</span>
+                <span className="block">Outlearn Everyone.</span>
+                <span className="block text-primary-600 mt-2">In 60 Seconds.</span>
               </h1>
 
               <p className="mt-8 text-xl leading-8 text-gray-600 max-w-lg">
-                Paste any YouTube link. Get an insight-packed summary in under a minute. Stay ahead while everyone else is still buffering.
+                Paste any YouTube link. Get a no-fluff, insight-packed summary in 60 seconds flat.
+              </p>
+              
+              <p className="mt-4 text-lg text-gray-500">
+                Made for people who want to know more — without wasting more time.
               </p>
 
               {/* Primary CTA */}
@@ -380,7 +387,7 @@ Try Free Now →
                   onClick={focusUrlInput}
                   className="bg-prussian-blue text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
-                  <span>Get My First Summary Free (No Signup Required)</span>
+                  <span>1 Free Summary. <span className="text-sm font-normal">(Because we're not running a charity, we're building a brain upgrade.)</span></span>
                 </button>
               </div>
             </div>
@@ -394,30 +401,34 @@ Try Free Now →
                 
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      Try it now
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Try It Now — Your Brain, But Faster
                     </h2>
-                    <p className="mt-2 text-gray-600">
-                      Paste any YouTube URL to get started
+                    <p className="mt-3 text-gray-600 leading-relaxed">
+                      You've got a podcast backlog, a content graveyard, and no time.
                     </p>
+                    <div className="mt-4 space-y-1 text-sm text-gray-500">
+                      <p>Drop a YouTube link.</p>
+                      <p>We'll distill it into a punchy, skimmable summary.</p>
+                      <p className="font-medium text-gray-700">You'll walk away smarter — in less time than it takes to reheat coffee.</p>
+                    </div>
                   </div>
 
                   <URLInput 
                     onSubmit={handleUrlSubmit}
+                    onSuccess={() => {
+                      // Optional: Add any additional success handling here
+                      console.log('URL input cleared after successful submission')
+                    }}
                     isLoading={createSummary.isPending}
                     className="scale-105"
                   />
 
-                  {/* Trust indicators */}
-                  <div className="flex items-center justify-center space-x-6 pt-4">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      Free to try
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      No sign-up required
-                    </div>
+                  {/* CTA */}
+                  <div className="text-center pt-2">
+                    <p className="text-primary-600 font-semibold text-sm">
+                      Try It Free → 1 Summary On Us
+                    </p>
                   </div>
 
                   {/* Security badges */}
@@ -519,7 +530,7 @@ Try Free Now →
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
-                    Estimated time: 10-15 seconds
+                    {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 15-30 seconds'}
                   </p>
                 </div>
               </div>
@@ -538,7 +549,7 @@ Try Free Now →
 
           {/* Summary display */}
           {currentSummary && (
-            <div className="mt-20">
+            <div id="summary-section" className="mt-20">
               <SummaryViewer summary={currentSummary} />
             </div>
           )}
@@ -546,25 +557,104 @@ Try Free Now →
       </section>
 
 
-      {/* Core Benefits Section */}
+      {/* Built for People With More Ambition Than Free Time Section */}
       <section className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center mb-20">
+          <div className="mx-auto max-w-4xl text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-primary-600">
-              ✨ Core Benefits
+              ⚡ Built for People With More Ambition Than Free Time
             </h2>
             <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-              Everything you need to learn faster
+              You know the feeling
+            </p>
+            <p className="mt-6 text-xl leading-8 text-gray-600 max-w-3xl mx-auto">
+              Your reading list is longer than your grocery list. Your podcast queue looks like a small library. 
+              You want to stay sharp, stay curious, stay ahead—but there are only so many hours in the day.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center mb-20">
+            {/* Left Column - Pain Points */}
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <X className="h-4 w-4 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The endless scroll</h3>
+                  <p className="text-gray-600">Bookmarking videos you'll "definitely watch later" (but never do).</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <X className="h-4 w-4 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The guilt cycle</h3>
+                  <p className="text-gray-600">Feeling behind while your peers seem to know everything.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <X className="h-4 w-4 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The time trap</h3>
+                  <p className="text-gray-600">Starting a "quick" video that turns into a 2-hour rabbit hole.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Solution */}
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Learn what matters</h3>
+                  <p className="text-gray-600">Get the key insights without the filler, fluff, or tangents.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay ahead</h3>
+                  <p className="text-gray-600">Be the person who actually knows what's happening in your field.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Reclaim your time</h3>
+                  <p className="text-gray-600">60 seconds of summary = 60 minutes of content consumed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Core Benefits */}
+          <div className="mx-auto max-w-2xl text-center mb-16">
+            <h3 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Everything you need to learn faster
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
             {/* Benefit 1 */}
             <div className="text-center">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
                 <Sparkles className="h-8 w-8 text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">1. Instant Sparks</h3>
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Instant Sparks</h4>
               <p className="text-gray-600 leading-relaxed">
                 Action-ready bullet points, quotes, and next-step ideas—no fluff, no filler.
               </p>
@@ -575,71 +665,69 @@ Try Free Now →
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
                 <BookOpen className="h-8 w-8 text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">2. Personal Library</h3>
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Personal Library</h4>
               <p className="text-gray-600 leading-relaxed">
                 Every summary auto-files itself. Search by topic or timestamp and revisit in seconds.
               </p>
             </div>
+          </div>
 
-            {/* Benefit 3 */}
-            <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-                <Share2 className="h-8 w-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">3. Share & Shine</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Export to Slack, Notion, or email with one click. Look like the most prepared person in the room.
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Life's too short for slow learning
+              </h3>
+              <p className="text-lg text-gray-700 mb-6">
+                Stop letting good content collect digital dust. Start turning knowledge into action.
               </p>
+              <button
+                onClick={focusUrlInput}
+                className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                Try Your First Summary Free
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-
-
-      {/* Proof in the Numbers Section */}
+      {/* Get in Before the Rest Catch On Section */}
       <section id="metrics-section" className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
-              🌎 Proof in the Numbers
+              🚀 Get in Before the Rest Catch On
             </h2>
             <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
-              Real results from real learners
+              Join the smart learners
             </p>
             <p className="mt-6 text-lg text-paynes-gray">
-              (Yep, we asked.)
+              While everyone else is still buffering, you'll be three insights ahead.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3 lg:gap-8">
+            <div className="flex flex-col items-center justify-center p-8 text-center group">
+              <Users className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <div className="text-3xl font-bold text-prussian-blue">
+                250+
+              </div>
+              <div className="text-sm text-paynes-gray mt-2">power users</div>
+            </div>
             <div className="flex flex-col items-center justify-center p-8 text-center group">
               <Clock className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
               <div className="text-3xl font-bold text-prussian-blue">
-                {counters.hoursView.toLocaleString()}+
+                1,200+
               </div>
               <div className="text-sm text-paynes-gray mt-2">hours saved</div>
             </div>
             <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <Play className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-prussian-blue">
-                {counters.videosView.toLocaleString()}+
-              </div>
-              <div className="text-sm text-paynes-gray mt-2">videos processed</div>
-            </div>
-            <div className="flex flex-col items-center justify-center p-8 text-center group">
-              <Users className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-3xl font-bold text-prussian-blue">
-                {counters.usersView.toLocaleString()}+
-              </div>
-              <div className="text-sm text-paynes-gray mt-2">early users</div>
-            </div>
-            <div className="flex flex-col items-center justify-center p-8 text-center group">
               <BarChart3 className="h-12 w-12 text-silver-lake-blue mb-4 group-hover:scale-110 transition-transform duration-300" />
               <div className="text-3xl font-bold text-prussian-blue">
-                {counters.satisfactionView} %
+                94%
               </div>
-              <div className="text-sm text-paynes-gray mt-2">satisfaction rate</div>
+              <div className="text-sm text-paynes-gray mt-2">say they think faster</div>
             </div>
           </div>
         </div>
@@ -697,15 +785,14 @@ Try Free Now →
             <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
               <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
               <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
-                &ldquo;Finally caught up on 6 months of ML papers in one weekend. Game-changer for work-life balance.&rdquo;
+                &ldquo;Built my first AI side project with zero fluff, thanks to these summaries.&rdquo;
               </p>
               <div className="flex items-center">
                 <div className="h-12 w-12 rounded-full bg-gradient-to-r from-paynes-gray to-silver-lake-blue flex items-center justify-center text-white font-semibold">
                   DR
                 </div>
                 <div className="ml-4">
-                  <div className="font-semibold text-prussian-blue">Daniel R.</div>
-                  <div className="text-sm text-paynes-gray">Data Scientist</div>
+                  <div className="font-semibold text-prussian-blue">— Daniel R., Data Scientist</div>
                 </div>
               </div>
             </div>
@@ -715,17 +802,6 @@ Try Free Now →
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 sm:py-32 bg-white">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
-            ⚡ Choose Your Learning Speed
-          </h2>
-          <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
-            Flexible plans for every learner
-          </p>
-          <p className="mt-6 text-lg leading-8 text-paynes-gray">
-            → Start free • No credit card
-          </p>
-        </div>
         <PricingPlans showCurrentPlan={false} />
       </section>
 
