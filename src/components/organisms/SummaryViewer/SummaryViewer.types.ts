@@ -42,6 +42,24 @@ export interface BackendAcceleratedLearningPack {
   novel_idea_meter?: BackendNovelIdea[]
 }
 
+// Define Summary type based on Prisma model
+export interface Summary {
+  id: string
+  userId: string
+  videoId: string
+  videoUrl: string
+  videoTitle: string
+  channelName: string
+  channelId: string
+  duration: number
+  thumbnailUrl: string | null
+  content: string
+  keyPoints: any
+  metadata: any
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface SummaryViewerProps {
   summary: Partial<Summary> & {
     content: string
