@@ -4,14 +4,7 @@ import { useEffect, useState } from 'react'
 import { X, CheckCircle, AlertCircle, XCircle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
-
-interface ToastProps {
-  message: string
-  type?: ToastType
-  duration?: number
-  onClose?: () => void
-}
+import type { ToastType, ToastProps } from './Toast.types'
 
 const icons = {
   success: CheckCircle,

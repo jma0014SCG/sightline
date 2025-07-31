@@ -10,76 +10,17 @@ import type { Summary } from '@prisma/client'
 import { ShareModal } from '@/components/molecules/ShareModal/ShareModal'
 
 // Backend data structure interfaces
-interface BackendKeyMoment {
-  timestamp: string
-  insight: string
-}
-
-interface BackendFlashcard {
-  question: string
-  answer: string
-}
-
-interface BackendQuizQuestion {
-  question: string
-  answer: string
-}
-
-interface BackendFramework {
-  name: string
-  description: string
-}
-
-interface BackendPlaybook {
-  trigger: string
-  action: string
-}
-
-interface BackendNovelIdea {
-  insight: string
-  score: number
-}
-
-interface BackendInsightEnrichment {
-  stats_tools_links?: string[]
-  sentiment?: string
-  risks_blockers_questions?: string[]
-}
-
-interface BackendAcceleratedLearningPack {
-  tldr100: string
-  feynman_flashcards?: Array<{ q: string; a: string }>
-  glossary?: Array<{ term: string; definition: string }>
-  quick_quiz?: Array<{ q: string; a: string }>
-  novel_idea_meter?: BackendNovelIdea[]
-}
-
-interface SummaryViewerProps {
-  summary: Partial<Summary> & {
-    content: string
-    videoTitle: string
-    channelName: string
-    keyPoints?: any // JsonValue from Prisma - can be array or object
-    duration?: number
-    thumbnailUrl?: string | null
-    // Extended data from backend - these could come from JsonValue in metadata field
-    metadata?: any // JsonValue from Prisma that might contain BackendMetadata
-    key_moments?: BackendKeyMoment[]
-    frameworks?: BackendFramework[]
-    debunked_assumptions?: string[]
-    in_practice?: string[]
-    playbooks?: BackendPlaybook[]
-    insight_enrichment?: BackendInsightEnrichment
-    accelerated_learning_pack?: BackendAcceleratedLearningPack
-    flashcards?: BackendFlashcard[]
-    quiz_questions?: BackendQuizQuestion[]
-    glossary?: any[]
-    tools?: string[]
-    resources?: string[]
-  }
-  isStreaming?: boolean
-  className?: string
-}
+import type { 
+  SummaryViewerProps, 
+  BackendKeyMoment, 
+  BackendFlashcard, 
+  BackendQuizQuestion, 
+  BackendFramework, 
+  BackendPlaybook, 
+  BackendNovelIdea, 
+  BackendInsightEnrichment, 
+  BackendAcceleratedLearningPack 
+} from './SummaryViewer.types'
 
 
 

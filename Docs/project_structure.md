@@ -6,10 +6,9 @@
 sightline/
 ├── src/                          # Application source code
 │   ├── app/                      # Next.js 14 App Router
-│   ├── components/               # React components
+│   ├── components/               # React components (atomic design)
 │   ├── lib/                      # Shared utilities and libraries
-│   ├── server/                   # Server-side code
-│   ├── styles/                   # Global styles
+│   ├── server/                   # Server-side code (tRPC)
 │   └── types/                    # TypeScript type definitions
 ├── api/                          # FastAPI backend
 │   ├── routers/                  # API route handlers
@@ -18,7 +17,7 @@ sightline/
 │   └── utils/                    # Utility functions
 ├── prisma/                       # Database schema and migrations
 ├── public/                       # Static assets
-├── docs/                         # Documentation
+├── Docs/                         # Documentation
 ├── tests/                        # Test files
 ├── scripts/                      # Build and deployment scripts
 └── config/                       # Configuration files
@@ -42,19 +41,26 @@ app/
 │   ├── library/
 │   │   ├── page.tsx             # Library page
 │   │   └── [id]/
-│   │       └── page.tsx         # Individual summary page
+│   │       ├── page.tsx         # Individual summary page
+│   │       └── edit/
+│   │           └── page.tsx     # Edit summary page
 │   ├── settings/
 │   │   └── page.tsx             # User settings
 │   └── billing/
 │       └── page.tsx             # Billing management
+├── (demo)/                       # Demo group layout
+│   └── demo/
+│       └── page.tsx             # Demo page
 ├── api/                          # API routes
 │   ├── auth/[...nextauth]/
 │   │   └── route.ts             # NextAuth handler
 │   ├── trpc/[trpc]/
 │   │   └── route.ts             # tRPC handler
-│   └── webhooks/
-│       └── stripe/
-│           └── route.ts         # Stripe webhooks
+│   ├── webhooks/
+│   │   └── stripe/
+│   │       └── route.ts         # Stripe webhooks
+│   └── health/
+│       └── route.ts             # Health check
 ├── share/[slug]/
 │   └── page.tsx                 # Public share pages
 ├── layout.tsx                   # Root layout
@@ -69,30 +75,42 @@ Organized by atomic design principles
 ```
 components/
 ├── atoms/                       # Basic building blocks
-│   ├── Button/
-│   │   ├── Button.tsx
-│   │   ├── Button.test.tsx
+│   ├── Skeleton/
+│   │   ├── Skeleton.tsx
 │   │   └── index.ts
-│   ├── Input/
-│   ├── Card/
-│   └── Badge/
+│   └── Toast/
+│       ├── Toast.tsx
+│       └── index.ts
 ├── molecules/                   # Combinations of atoms
 │   ├── URLInput/
+│   │   ├── URLInput.tsx
+│   │   └── index.ts
 │   ├── SummaryCard/
+│   │   ├── SummaryCard.tsx
+│   │   └── index.ts
 │   ├── ShareModal/
-│   └── PricingCard/
+│   │   ├── ShareModal.tsx
+│   │   └── index.ts
+│   ├── LibraryControls/
+│   │   ├── LibraryControls.tsx
+│   │   └── index.ts
+│   └── QuickActionsBar/
+│       ├── QuickActionsBar.tsx
+│       └── index.ts
 ├── organisms/                   # Complex components
-│   ├── Header/
-│   ├── LibraryTable/
 │   ├── SummaryViewer/
-│   └── PaymentForm/
-├── templates/                   # Page templates
-│   ├── DashboardTemplate/
-│   └── AuthTemplate/
-└── providers/                   # Context providers
-    ├── AuthProvider.tsx
-    ├── ThemeProvider.tsx
-    └── QueryProvider.tsx
+│   │   ├── SummaryViewer.tsx
+│   │   └── index.ts
+│   └── PricingPlans/
+│       ├── PricingPlans.tsx
+│       └── index.ts
+├── providers/                   # Context providers
+│   ├── AuthProvider.tsx
+│   ├── TRPCProvider.tsx
+│   ├── ToastProvider.tsx
+│   └── MonitoringProvider.tsx
+└── debug/                      # Debug components
+    └── DebugPanel.tsx
 ```
 
 #### /src/lib
@@ -100,21 +118,22 @@ Shared libraries and utilities
 ```
 lib/
 ├── api/                         # API client setup
-│   ├── trpc.ts                  # tRPC client
-│   └── client.ts                # HTTP client
+│   └── trpc.ts                  # tRPC client
 ├── auth/                        # Auth utilities
-│   ├── auth.ts                  # NextAuth config
-│   └── session.ts               # Session helpers
+│   └── auth.ts                  # NextAuth config
 ├── db/                          # Database utilities
 │   └── prisma.ts                # Prisma client singleton
-├── utils/                       # General utilities
-│   ├── cn.ts                    # Class name helper
-│   ├── format.ts                # Formatting utilities
-│   └── validation.ts            # Validation schemas
-└── hooks/                       # Custom React hooks
-    ├── useAuth.ts
-    ├── useSummary.ts
-    └── useSubscription.ts
+├── hooks/                       # Custom React hooks
+│   └── useAuth.ts
+├── utils.ts                     # General utilities
+├── logger.ts                    # Logging utilities
+├── monitoring.ts                # Performance monitoring
+├── performance.ts               # Performance utilities
+├── pricing.ts                   # Pricing utilities
+├── rateLimit.ts                 # Rate limiting
+├── security.ts                  # Security utilities
+├── stripe.ts                    # Stripe utilities
+└── stripe-client.ts             # Stripe client
 ```
 
 #### /src/server
@@ -126,13 +145,17 @@ server/
 │   │   ├── auth.ts              # Auth router
 │   │   ├── summary.ts           # Summary router
 │   │   ├── library.ts           # Library router
-│   │   └── billing.ts           # Billing router
+│   │   ├── billing.ts           # Billing router
+│   │   └── share.ts             # Share router
 │   ├── trpc.ts                  # tRPC setup
 │   └── root.ts                  # Root router
-└── services/
-    ├── youtube.ts               # YouTube processing
-    ├── langchain.ts             # LangChain integration
-    └── stripe.ts                # Stripe services
+```
+
+#### /src/types
+TypeScript type definitions
+```
+types/
+└── next-auth.d.ts              # NextAuth type extensions
 ```
 
 ### Backend Structure (/api)
@@ -144,121 +167,110 @@ api/
 ├── main.py                      # FastAPI app entry
 ├── dependencies.py              # Dependency injection
 ├── config.py                    # Configuration
+├── index.py                     # API entry point
 ├── routers/
 │   ├── __init__.py
 │   ├── summarize.py             # Summarization endpoints
-│   ├── transcript.py            # Transcript processing
-│   └── webhooks.py              # Webhook handlers
+│   └── transcript.py            # Transcript processing
 ├── services/
 │   ├── __init__.py
 │   ├── youtube_service.py       # YouTube API integration
 │   ├── langchain_service.py     # LangChain processing
-│   ├── whisper_service.py       # Whisper fallback
-│   └── queue_service.py         # Job queue management
+│   ├── gumloop_service.py       # Gumloop integration
+│   ├── oxylabs_service.py       # Oxylabs integration
+│   ├── reliable_transcript_service.py # Reliable transcript service
+│   ├── transcript_fallback_service.py # Fallback service
+│   ├── youtube_direct_service.py # Direct YouTube service
+│   ├── youtube_transcript_service.py # YouTube transcript service
+│   ├── ytdlp_service.py         # yt-dlp service
+│   └── gumloop_parser.py        # Gumloop parser
 ├── models/
 │   ├── __init__.py
 │   ├── requests.py              # Request models
 │   └── responses.py             # Response models
-└── utils/
-    ├── __init__.py
-    ├── auth.py                  # Auth verification
-    └── errors.py                # Error handling
+└── utils/                       # Utility functions
 ```
 
 ### Database Structure (/prisma)
 
 ```
 prisma/
-├── schema.prisma                # Database schema
-├── migrations/                  # Migration history
-│   └── [timestamp]_init/
-│       └── migration.sql
-└── seed.ts                      # Database seeding
+└── schema.prisma                # Database schema
 ```
 
 ### Testing Structure (/tests)
 
 ```
 tests/
-├── unit/
-│   ├── components/              # Component tests
-│   ├── lib/                     # Utility tests
-│   └── api/                     # API unit tests
-├── integration/
-│   ├── auth.test.ts            # Auth flow tests
-│   └── summary.test.ts         # Summary flow tests
-├── e2e/
-│   ├── user-journey.spec.ts    # E2E user flows
-│   └── fixtures/               # Test fixtures
-└── setup/
-    ├── jest.setup.ts           # Jest configuration
-    └── test-utils.tsx          # Test utilities
+├── test_api_response.py         # API response tests
+├── test_fallback.py             # Fallback service tests
+├── test_full_integration.py     # Full integration tests
+├── test_gumloop_integration.py  # Gumloop integration tests
+├── test_gumloop.py              # Gumloop service tests
+├── test_oxylabs.py              # Oxylabs service tests
+├── test_reliable.py             # Reliable service tests
+├── test_transcript_service.py   # Transcript service tests
+├── test_ytdlp.py                # yt-dlp service tests
+├── test-playbooks-parsing.py    # Playbooks parsing tests
+├── test-parsing.py              # Parsing tests
+├── test-full-flow.js            # Full flow tests
+├── test-oauth.html              # OAuth tests
+├── test-markdown-parsing.md     # Markdown parsing tests
+└── test-gumloop-output.md       # Gumloop output tests
 ```
 
-### Configuration Files (/config & root)
+### Configuration Files (/config)
 
 ```
-Root configuration files:
-├── .env.example                 # Environment variables template
-├── .env.local                   # Local environment (gitignored)
+config/
 ├── next.config.js               # Next.js configuration
 ├── tailwind.config.ts           # Tailwind CSS config
-├── tsconfig.json                # TypeScript config
 ├── postcss.config.js            # PostCSS config
 ├── .eslintrc.json              # ESLint rules
 ├── .prettierrc                  # Prettier config
-├── jest.config.js              # Jest testing config
-├── cypress.config.ts           # Cypress E2E config
-├── vercel.json                 # Vercel deployment config
-├── package.json                # Node dependencies
-├── requirements.txt            # Python dependencies
-└── docker-compose.yml          # Local development setup
-
-config/
-├── sentry.config.ts            # Sentry error tracking
-└── langsmith.config.ts         # LangSmith monitoring
+├── components.json              # shadcn/ui config
+├── vercel.json                  # Vercel deployment config
+├── .vercelignore                # Vercel ignore rules
+└── next-env.d.ts               # Next.js types
 ```
 
-### Static Assets (/public)
+### Documentation (/Docs)
 
 ```
-public/
-├── images/
-│   ├── logo.svg
-│   ├── og-image.png            # Open Graph image
-│   └── icons/                  # App icons
-├── fonts/                      # Custom fonts
-└── manifest.json               # PWA manifest
-```
-
-### Documentation (/docs)
-
-```
-docs/
-├── Implementation.md           # Implementation plan
-├── project_structure.md        # This file
-├── UI_UX_doc.md               # UI/UX documentation
-├── api/                       # API documentation
-│   ├── openapi.json           # OpenAPI spec
-│   └── postman.json           # Postman collection
-├── guides/                    # Developer guides
-│   ├── setup.md              # Setup instructions
-│   ├── deployment.md         # Deployment guide
-│   └── contributing.md       # Contribution guidelines
-└── adr/                      # Architecture Decision Records
-    ├── 001-nextjs-14.md
-    └── 002-langchain.md
+Docs/
+├── Implementation.md            # Implementation plan
+├── project_structure.md         # This file
+├── UI_UX_doc.md                # UI/UX documentation
+├── Bug_tracking.md             # Bug tracking and fixes
+├── PRODUCTION_DEPLOYMENT.md    # Production deployment guide
+├── PRODUCTION_READY.md         # Production readiness checklist
+├── DEPLOYMENT_CHECKLIST.md     # Deployment checklist
+├── DEPLOYMENT.md               # General deployment guide
+├── ENVIRONMENT.md              # Environment setup
+├── ENABLE_USAGE_LIMITS.md     # Usage limits guide
+├── SECURITY_AUDIT.md          # Security audit
+├── IMPLEMENTATION_STATUS.md    # Implementation status
+└── TROUBLESHOOTING.md         # Troubleshooting guide
 ```
 
 ### Build & Deployment (/scripts)
 
 ```
 scripts/
-├── build.sh                   # Build script
-├── deploy.sh                  # Deployment script
-├── migrate.sh                 # Database migration
-├── seed.sh                    # Database seeding
-└── test.sh                    # Test runner
+├── debug-startup.sh            # Debug startup script
+├── deploy-production.sh        # Production deployment
+├── dev.sh                      # Development setup
+├── setup-env.sh                # Environment setup
+├── test-db.js                  # Database testing
+├── test-pipeline.js            # Pipeline testing
+└── test-youtube-transcript.py  # YouTube transcript testing
+```
+
+### Static Assets (/public)
+
+```
+public/
+└── [static assets]             # Static files
 ```
 
 ## File Naming Conventions
@@ -286,9 +298,9 @@ Each component follows this pattern:
 ```
 ComponentName/
 ├── ComponentName.tsx          # Main component
-├── ComponentName.test.tsx     # Tests
+├── ComponentName.test.tsx     # Tests (if needed)
 ├── ComponentName.module.css   # Styles (if needed)
-├── ComponentName.types.ts     # Type definitions
+├── ComponentName.types.ts     # Type definitions (if needed)
 └── index.ts                   # Barrel export
 ```
 
@@ -302,13 +314,12 @@ ComponentName/
 - Server state: TanStack Query + tRPC
 - Client state: React hooks and context
 - Form state: React Hook Form
-- Global UI state: Zustand (if needed)
+- Global UI state: Context providers
 
 ## Environment-Specific Configurations
 
 ### Development
 - `.env.local` for local development
-- `docker-compose.yml` for local services
 - Hot module replacement enabled
 - Source maps enabled
 
@@ -327,8 +338,6 @@ ComponentName/
 
 ```
 .next/                         # Next.js build output
-dist/                          # FastAPI build output
-out/                           # Static export (if used)
 .vercel/                       # Vercel build cache
 ```
 
