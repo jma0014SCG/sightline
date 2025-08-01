@@ -81,11 +81,14 @@ export default function LibraryPage() {
     onSuccess: (summary) => {
       console.log('✅ Summary created successfully:', summary)
       
-      // Wait a moment for user to see completion, then navigate
+      // Invalidate caches to show new summary and updated usage stats
+      utils.library.getAll.invalidate()
+      utils.billing.getUsageStats.invalidate()
+      
+      // Stop progress tracking after a brief moment to show completion
       setTimeout(() => {
-        router.push(`/library/${summary.id}`)
-        setCurrentTaskId(null) // Stop progress tracking
-      }, 1000)
+        setCurrentTaskId(null)
+      }, 1500)
     },
     onError: (error) => {
       console.error('❌ Summarization failed:', error)
@@ -136,8 +139,7 @@ export default function LibraryPage() {
         setCurrentTaskId(result.task_id)
       }
       
-      // Refresh usage stats after creating summary
-      utils.billing.getUsageStats.invalidate()
+      // Cache invalidation is handled by the mutation's onSuccess callback
     } catch (error) {
       console.error('Failed to create summary:', error)
       setCurrentTaskId(null) // Stop progress tracking on error
