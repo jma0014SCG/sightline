@@ -46,7 +46,6 @@ export default function HomePage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [showStickyNav, setShowStickyNav] = useState(false)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
-  const [showDemoModal, setShowDemoModal] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
 
   // Real-time progress tracking
@@ -231,10 +230,6 @@ export default function HomePage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
-      // Escape key closes modals
-      if (e.key === 'Escape') {
-        setShowDemoModal(false)
-      }
       
       // Ctrl+K or Cmd+K focuses URL input
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -342,17 +337,17 @@ Try Free Now →
       {/* Enhanced Background */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-gradient-to-br from-gray-50 via-white to-blue-50">
         {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1d2d44_1px,transparent_1px),linear-gradient(to_bottom,#1d2d44_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10"></div>
         
         {/* Gradient overlays */}
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_20%_80%,#dbeafe,transparent)]"></div>
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_400px_at_80%_20%,#f3e8ff,transparent)]"></div>
+        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_20%_80%,#c5d3e6,transparent)]"></div>
+        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_400px_at_80%_20%,#8ba7cd,transparent)]"></div>
         
         {/* Animated floating elements */}
-        <div className="absolute top-20 left-10 w-16 h-16 bg-primary-100 rounded-full opacity-20 animate-pulse-slow"></div>
-        <div className="absolute top-40 right-20 w-12 h-12 bg-purple-100 rounded-lg opacity-30 animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-40 left-1/4 w-8 h-8 bg-blue-100 rounded-full opacity-25 animate-pulse-slow" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-indigo-100 rounded-full opacity-30 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute top-20 left-10 w-16 h-16 bg-prussian-blue-900 rounded-full opacity-20 animate-pulse-slow"></div>
+        <div className="absolute top-40 right-20 w-12 h-12 bg-prussian-blue-800 rounded-lg opacity-30 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-40 left-1/4 w-8 h-8 bg-prussian-blue-700 rounded-full opacity-25 animate-pulse-slow" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-prussian-blue-600 rounded-full opacity-30 animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
 
       {/* Hero Section */}
@@ -449,48 +444,6 @@ Try Free Now →
                     </div>
                   </div>
 
-                  {/* Demo Video Section */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="text-center mb-4">
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">
-                        See it in action
-                      </h3>
-                    </div>
-                    <button 
-                      onClick={() => setShowDemoModal(true)}
-                      className="relative group cursor-pointer rounded-xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 aspect-video w-full"
-                    >
-                      {/* Video placeholder with play button */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/40"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-white/10 rounded-full blur-xl scale-150 group-hover:scale-175 transition-transform duration-300"></div>
-                          <div className="relative bg-white/90 backdrop-blur-sm rounded-full p-4 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
-                            <PlayCircle className="h-8 w-8 text-primary-600" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Video overlay text */}
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3">
-                          <div className="flex items-center space-x-2 text-white text-sm">
-                            <Volume2 className="h-4 w-4" />
-                            <span>Watch: YouTube video → Summary in 15 seconds</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Hover effect */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </button>
-                    
-                    <div className="mt-3 text-center">
-                      <p className="text-xs text-gray-500">
-                        2 minute demo • No audio required
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -556,12 +509,62 @@ Try Free Now →
         </div>
       </section>
 
+      {/* Video Demo Section */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-prussian-blue-50 via-white to-prussian-blue-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600 mb-2">
+              🎬 See Sightline in Action
+            </h2>
+            <h3 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              From YouTube Link to Smart Summary in 60 Seconds
+            </h3>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Watch how Sightline transforms a lengthy video into actionable insights faster than you can make coffee
+            </p>
+          </div>
+          
+          {/* Video Container */}
+          <div className="mx-auto max-w-6xl">
+            <div className="rounded-2xl overflow-hidden shadow-2xl shadow-prussian-blue-200/50 ring-1 ring-prussian-blue-200">
+              <div style={{ position: 'relative', paddingBottom: '41.25%', height: 0 }}>
+                <iframe 
+                  src="https://www.loom.com/embed/052f63c546ca4026a4ed8b7e584cd276?sid=7750cfc2-e333-4947-b60a-ceb90b845416" 
+                  frameBorder="0" 
+                  webkitAllowFullScreen 
+                  mozAllowFullScreen 
+                  allowFullScreen 
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                  className="rounded-lg"
+                ></iframe>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                2 minute demo • No audio required • See the full workflow
+              </p>
+            </div>
+          </div>
+
+          {/* CTA below video */}
+          <div className="mt-12 text-center">
+            <button
+              onClick={focusUrlInput}
+              className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center space-x-2"
+            >
+              <Play className="h-5 w-5" />
+              <span>Try It Yourself - Free</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Built for People With More Ambition Than Free Time Section */}
       <section className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-primary-600">
+            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600">
               ⚡ Built for People With More Ambition Than Free Time
             </h2>
             <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
@@ -651,8 +654,8 @@ Try Free Now →
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
             {/* Benefit 1 */}
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-                <Sparkles className="h-8 w-8 text-primary-600" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-prussian-blue-900">
+                <Sparkles className="h-8 w-8 text-prussian-blue-500" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Instant Sparks</h4>
               <p className="text-gray-600 leading-relaxed">
@@ -662,8 +665,8 @@ Try Free Now →
 
             {/* Benefit 2 */}
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-                <BookOpen className="h-8 w-8 text-primary-600" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-prussian-blue-900">
+                <BookOpen className="h-8 w-8 text-prussian-blue-500" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Personal Library</h4>
               <p className="text-gray-600 leading-relaxed">
@@ -693,7 +696,7 @@ Try Free Now →
       </section>
 
       {/* Get in Before the Rest Catch On Section */}
-      <section id="metrics-section" className="py-24 sm:py-32 bg-white">
+      <section id="metrics-section" className="py-24 sm:py-32 bg-gradient-to-br from-prussian-blue-50 via-white to-prussian-blue-50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
@@ -737,7 +740,7 @@ Try Free Now →
       <section className="py-24 sm:py-32 bg-gradient-to-br from-anti-flash-white via-eggshell/30 to-anti-flash-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
+            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600">
               ❤️ What Busy Learners Say
             </h2>
             <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
@@ -748,7 +751,7 @@ Try Free Now →
           {/* Testimonials Grid */}
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {/* Testimonial 1 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
               <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
               <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Turned a 2-hour conference talk into key insights during my coffee break. Now I actually stay current with industry trends.&rdquo;
@@ -765,7 +768,7 @@ Try Free Now →
             </div>
 
             {/* Testimonial 2 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
               <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
               <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. My team gets better insights faster than ever.&rdquo;
@@ -782,7 +785,7 @@ Try Free Now →
             </div>
 
             {/* Testimonial 3 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
               <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
               <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
                 &ldquo;Built my first AI side project with zero fluff, thanks to these summaries.&rdquo;
@@ -841,7 +844,7 @@ Try Free Now →
               const isExpanded = expandedFaq === index
               
               return (
-                <div key={faq.id} className="relative border border-paynes-gray/20 rounded-xl bg-white shadow-sm" style={{ zIndex: 10 - index }}>
+                <div key={faq.id} className="relative border-2 border-prussian-blue-100 hover:border-prussian-blue-200 rounded-xl bg-white shadow-sm transition-all duration-200" style={{ zIndex: 10 - index }}>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -919,56 +922,6 @@ Don&apos;t Miss Out - Try Sightline Free
         </button>
       </div>
 
-      {/* Demo Modal */}
-      {showDemoModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-prussian-blue/80 backdrop-blur-sm"></div>
-            </div>
-
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-paynes-gray/20">
-              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-prussian-blue">
-                    Sightline Demo - YouTube to Summary in Seconds
-                  </h3>
-                  <button
-                    onClick={() => setShowDemoModal(false)}
-                    className="rounded-md text-paynes-gray hover:text-prussian-blue focus:outline-none focus:ring-2 focus:ring-silver-lake-blue transition-colors duration-200"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-                
-                <div className="aspect-video bg-prussian-blue/10 rounded-lg flex items-center justify-center border border-paynes-gray/20">
-                  <div className="text-center">
-                    <PlayCircle className="h-16 w-16 text-silver-lake-blue mx-auto mb-4" />
-                    <p className="text-prussian-blue">Demo video would be embedded here</p>
-                    <p className="text-sm text-paynes-gray mt-2">
-                      Shows: URL input → Processing → Summary output
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => {
-                      setShowDemoModal(false)
-                      focusUrlInput()
-                    }}
-                    className="bg-prussian-blue text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg"
-                  >
-Start My Free Summary
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Debug Panel - only in development */}
       {process.env.NODE_ENV === 'development' && <DebugPanel />}
