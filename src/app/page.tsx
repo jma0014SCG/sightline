@@ -376,36 +376,49 @@ Try Free Now →
                 Made for people who want to know more — without wasting more time.
               </p>
 
-              {/* Primary CTA */}
-              <div className="mt-12">
-                <button
-                  onClick={focusUrlInput}
-                  className="bg-prussian-blue text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
-                >
-                  <span>1 Free Summary. <span className="text-sm font-normal">(Because we're not running a charity, we're building a brain upgrade.)</span></span>
-                </button>
-              </div>
             </div>
 
             {/* Right Column - URL Input */}
             <div className="relative">
+              {/* Badge */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="bg-gradient-to-r from-prussian-blue to-prussian-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Try it now - Takes 60 seconds</span>
+                </div>
+              </div>
+              
               {/* Gradient background card */}
-              <div className="relative rounded-3xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-2xl shadow-gray-900/10 ring-1 ring-gray-900/5">
-                <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-primary-300/0 via-primary-300/70 to-primary-300/0"></div>
-                <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-primary-300/0 via-primary-300/70 to-primary-300/0"></div>
+              <div className="relative rounded-3xl bg-gradient-to-br from-white via-prussian-blue-50 to-white p-8 shadow-2xl ring-2 ring-prussian-blue-200 ring-opacity-50">
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-prussian-blue-100 to-silver-lake-blue-100 opacity-10 blur-xl"></div>
+                <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-prussian-blue-300/0 via-prussian-blue-300/70 to-prussian-blue-300/0"></div>
+                <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-prussian-blue-300/0 via-prussian-blue-300/70 to-prussian-blue-300/0"></div>
                 
-                <div className="space-y-6">
+                <div className="space-y-6 relative">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      Try It Now — Your Brain, But Faster
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                      🎯 Try It Now — Your Brain, But Faster
                     </h2>
-                    <p className="mt-3 text-gray-600 leading-relaxed">
-                      You've got a podcast backlog, a content graveyard, and no time.
+                    <div className="inline-flex items-center space-x-2 mb-4">
+                      <div className="flex -space-x-2">
+                        <div className="w-8 h-8 rounded-full bg-prussian-blue-200 flex items-center justify-center text-xs font-bold text-prussian-blue-700">JD</div>
+                        <div className="w-8 h-8 rounded-full bg-prussian-blue-300 flex items-center justify-center text-xs font-bold text-prussian-blue-800">AK</div>
+                        <div className="w-8 h-8 rounded-full bg-prussian-blue-400 flex items-center justify-center text-xs font-bold text-white">+</div>
+                      </div>
+                      <p className="text-sm text-gray-600">Join 250+ smart learners</p>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">
+                      Paste any YouTube URL below and get instant insights
                     </p>
-                    <div className="mt-4 space-y-1 text-sm text-gray-500">
-                      <p>Drop a YouTube link.</p>
-                      <p>We'll distill it into a punchy, skimmable summary.</p>
-                      <p className="font-medium text-gray-700">You'll walk away smarter — in less time than it takes to reheat coffee.</p>
+                    <div className="mt-4 flex items-center justify-center space-x-4 text-sm">
+                      <div className="flex items-center text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <span className="font-medium">Works instantly</span>
+                      </div>
+                      <div className="flex items-center text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <span className="font-medium">100% Free</span>
+                      </div>
                     </div>
                   </div>
 
@@ -421,8 +434,8 @@ Try Free Now →
 
                   {/* CTA */}
                   <div className="text-center pt-2">
-                    <p className="text-primary-600 font-semibold text-sm">
-                      Try It Free → 1 Summary On Us
+                    <p className="text-prussian-blue-600 font-bold text-base">
+                      🎁 Try It Free → Get Your First Summary Now
                     </p>
                   </div>
 
@@ -448,8 +461,8 @@ Try Free Now →
               </div>
 
               {/* Floating elements */}
-              <div className="absolute -left-4 top-4 h-16 w-16 rounded-2xl bg-primary-100 opacity-60 rotate-12 animate-pulse"></div>
-              <div className="absolute -right-4 bottom-4 h-12 w-12 rounded-xl bg-primary-200 opacity-40 -rotate-12 animate-pulse animation-delay-200"></div>
+              <div className="absolute -left-4 top-4 h-16 w-16 rounded-2xl bg-prussian-blue-100 opacity-60 rotate-12"></div>
+              <div className="absolute -right-4 bottom-4 h-12 w-12 rounded-xl bg-prussian-blue-200 opacity-40 -rotate-12"></div>
             </div>
           </div>
 
@@ -555,6 +568,123 @@ Try Free Now →
             >
               <Play className="h-5 w-5" />
               <span>Try It Yourself - Free</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Content Types Section */}
+      <section className="py-24 sm:py-32 bg-white">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-16">
+            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600">
+              🎯 Works Great For Every Video Type
+            </h2>
+            <h3 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              From podcasts to tutorials, we've got you covered
+            </h3>
+            <p className="mt-6 text-lg text-gray-600">
+              Sightline adapts to any video format and extracts the most valuable insights
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Podcast / Interviews */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Volume2 className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Podcast / Interviews</h4>
+              </div>
+              <p className="text-sm text-gray-600">Extract key quotes, insights, and takeaways from conversations and interviews</p>
+            </div>
+
+            {/* Tutorial / How-to / Coding */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <BookOpen className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Tutorial / How-to / Coding</h4>
+              </div>
+              <p className="text-sm text-gray-600">Get step-by-step instructions and key concepts without watching entire tutorials</p>
+            </div>
+
+            {/* Lecture / Conference Talk */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Users className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Lecture / Conference Talk</h4>
+              </div>
+              <p className="text-sm text-gray-600">Capture main themes, research findings, and actionable insights from presentations</p>
+            </div>
+
+            {/* News / Commentary */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Search className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">News / Commentary</h4>
+              </div>
+              <p className="text-sm text-gray-600">Stay informed with key facts, analysis, and different perspectives on current events</p>
+            </div>
+
+            {/* Product Review / Unboxing */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Award className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Product Review / Unboxing</h4>
+              </div>
+              <p className="text-sm text-gray-600">Get pros, cons, and key features to make informed purchasing decisions quickly</p>
+            </div>
+
+            {/* Panel / Webinar */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Briefcase className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Panel / Webinar</h4>
+              </div>
+              <p className="text-sm text-gray-600">Extract diverse viewpoints and expert opinions from multi-speaker discussions</p>
+            </div>
+
+            {/* Documentary / Deep-Dive */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <PlayCircle className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Documentary / Deep-Dive</h4>
+              </div>
+              <p className="text-sm text-gray-600">Understand complex topics and narratives without hours of viewing time</p>
+            </div>
+
+            {/* Short-form Highlights */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-prussian-blue-100 hover:border-prussian-blue-200 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-prussian-blue-900 rounded-lg flex items-center justify-center mr-3">
+                  <Zap className="h-5 w-5 text-prussian-blue-500" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Short-form Highlights</h4>
+              </div>
+              <p className="text-sm text-gray-600">Distill the essence from quick clips, teasers, and highlight reels</p>
+            </div>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <button
+              onClick={focusUrlInput}
+              className="bg-prussian-blue text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-paynes-gray transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Try It With Your Favorite Content
             </button>
           </div>
         </div>
@@ -675,23 +805,6 @@ Try Free Now →
             </div>
           </div>
 
-          {/* Bottom CTA */}
-          <div className="mt-16 text-center">
-            <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Life's too short for slow learning
-              </h3>
-              <p className="text-lg text-gray-700 mb-6">
-                Stop letting good content collect digital dust. Start turning knowledge into action.
-              </p>
-              <button
-                onClick={focusUrlInput}
-                className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                Try Your First Summary Free
-              </button>
-            </div>
-          </div>
         </div>
       </section>
 
