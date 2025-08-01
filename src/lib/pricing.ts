@@ -14,7 +14,7 @@ export const PRICING_PLANS = {
     name: 'Pro',
     description: 'Most popular for individuals',
     price: 9.99,
-    paymentLink: null, // Disabled for "coming soon"
+    paymentLink: 'https://buy.stripe.com/14A6oG8pd5Zf6L3cuk0ZW00',
     features: [
       'Unlimited summaries',
       'Personal library access',

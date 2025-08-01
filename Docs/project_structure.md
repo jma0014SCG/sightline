@@ -44,7 +44,7 @@ app/
 │   │       └── edit/
 │   │           └── page.tsx     # Edit summary page
 │   ├── settings/
-│   │   └── page.tsx             # User settings
+│   │   └── page.tsx             # User settings (Profile, Notifications, Account Management)
 │   └── billing/
 │       └── page.tsx             # Billing management
 ├── (demo)/                       # Demo group layout
@@ -128,7 +128,7 @@ lib/
 ├── logger.ts                    # Logging utilities
 ├── monitoring.ts                # Performance monitoring
 ├── performance.ts               # Performance utilities
-├── pricing.ts                   # Pricing utilities
+├── pricing.ts                   # Pricing utilities (Updated with Stripe integration)
 ├── rateLimit.ts                 # Rate limiting
 ├── security.ts                  # Security utilities
 ├── stripe.ts                    # Stripe utilities
@@ -141,10 +141,10 @@ Server-side code and tRPC routers
 server/
 ├── api/
 │   ├── routers/
-│   │   ├── auth.ts              # Auth router
+│   │   ├── auth.ts              # Auth router (Profile, Notifications, Account Management)
 │   │   ├── summary.ts           # Summary router
 │   │   ├── library.ts           # Library router
-│   │   ├── billing.ts           # Billing router
+│   │   ├── billing.ts           # Billing router (Stripe integration)
 │   │   └── share.ts             # Share router
 │   ├── trpc.ts                  # tRPC setup
 │   └── root.ts                  # Root router
@@ -436,6 +436,58 @@ A comprehensive real-time progress tracking system has been implemented to provi
 - **Responsive**: 1-second polling for smooth progress updates
 - **User-Friendly**: Clear stage messages and completion feedback
 
+## Recent Updates: Payment System & Settings (August 2025)
+
+### Stripe Payment Integration Enhancement
+The PRO plan payment system has been fully implemented with direct Stripe payment links.
+
+#### Changes Made:
+- **Pricing Configuration** (`/src/lib/pricing.ts`):
+  - Updated PRO plan with functional Stripe payment link
+  - Removed "Coming soon" placeholder for PRO plan
+  - Added fallback price ID support
+
+- **PricingPlans Component** (`/src/components/organisms/PricingPlans/PricingPlans.tsx`):
+  - Updated to handle clickable payment buttons
+  - Integrated proper Stripe checkout flow
+  - Dynamic button states based on payment link availability
+  - Button text changes: "Coming soon" → "Subscribe now" for active plans
+
+- **Environment Configuration**:
+  - Added `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID` environment variable
+  - Updated `.env.example` with Stripe price ID requirements
+
+### Complete Settings Page Implementation
+A comprehensive user settings page has been implemented with three main sections.
+
+#### New Features Added:
+
+**1. Settings Page** (`/src/app/(dashboard)/settings/page.tsx`):
+- **Profile Settings**: Name editing, email display, current plan info
+- **Notification Preferences**: Email notifications, weekly digest, account alerts, usage warnings
+- **Account Management**: Data export and account deletion with confirmation
+
+**2. Enhanced Auth Router** (`/src/server/api/routers/auth.ts`):
+- `updateNotificationPreferences`: Store user notification settings
+- `getNotificationPreferences`: Retrieve user preferences with defaults
+- `exportUserData`: Complete user data export (summaries, shared links, stats)
+- `deleteAccount`: Secure account deletion with confirmation validation
+
+**3. User Experience Improvements**:
+- Tabbed interface for easy navigation
+- Real-time form updates with success notifications
+- Modal confirmations for dangerous operations
+- Comprehensive form validation and error handling
+- Data export functionality (JSON download)
+- Secure account deletion requiring "DELETE" confirmation
+
+#### Technical Implementation:
+- **Data Storage**: Notification preferences stored in user metadata (JSON field)
+- **Security**: Account deletion requires exact confirmation text
+- **User Safety**: Export data before deletion capability
+- **Integration**: Seamless tRPC integration with existing patterns
+- **UI/UX**: Consistent design following app's Tailwind + shadcn/ui system
+
 This structure supports:
 - Clear separation of concerns
 - Scalable architecture
@@ -446,3 +498,6 @@ This structure supports:
 - Smooth deployment
 - Real-time user feedback
 - Robust progress tracking
+- Comprehensive user management
+- Secure payment processing
+- Complete settings management

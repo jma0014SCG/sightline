@@ -112,16 +112,18 @@ export function PricingPlans({ currentPlan, showCurrentPlan = true }: PricingPla
                 ) : (
                   <button
                     onClick={() => handleSelectPlan(plan.paymentLink)}
-                    disabled={!isFree}
+                    disabled={!isFree && !plan.paymentLink}
                     className={cn(
                       'mt-10 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-                      isFree
+                      (isFree || plan.paymentLink)
                         ? 'bg-primary-600 text-white shadow-sm hover:bg-primary-500 focus-visible:outline-primary-600'
                         : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     )}
                   >
                     {isFree ? (
                       'Get started'
+                    ) : plan.paymentLink ? (
+                      'Subscribe now'
                     ) : (
                       'Coming soon'
                     )}
