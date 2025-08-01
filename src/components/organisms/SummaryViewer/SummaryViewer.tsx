@@ -65,54 +65,53 @@ export function SummaryViewer({
   const closeShareModal = () => setShowShareModal(false)
 
 
-  // Parse markdown sections for new Gumloop structure
-  const parseMarkdownSections = (content: string): Map<string, string> => {
-    const sections = new Map<string, string>()
+  // Enhanced parsing utilities with normalization and regex-based extraction
+  const normalizeMarkdown = (md: string): string => {
+    return md
+      .replace(/–/g, '-')  // unify bullets (em-dash to regular dash)
+      .replace(/\r\n?/g, '\n')  // normalize newlines
+      .replace(/(#+)\s*([^\n]+)/g, '$1 $2')  // normalize headers
+      .trim();
+  };
+
+  const extractSections = (mdText: string): Map<string, string> => {
+    const normalized = normalizeMarkdown(mdText);
     
     // Extract content between ```markdown blocks if present
-    let markdownContent = content
-    const markdownStart = content.indexOf('```markdown')
-    if (markdownStart !== -1) {
-      const start = markdownStart + '```markdown'.length
-      const markdownEnd = content.indexOf('```', start)
-      if (markdownEnd !== -1) {
-        markdownContent = content.substring(start, markdownEnd)
-      }
+    let content = normalized;
+    const markdownMatch = content.match(/```markdown\n([\s\S]*?)\n```/);
+    if (markdownMatch) {
+      content = markdownMatch[1];
     }
     
-    // Split by section headers
-    const sectionRegex = /^#{2,3}\s+(.+)$/gm
-    const matches = Array.from(markdownContent.matchAll(sectionRegex))
+    // Regex pattern to match ## headers and capture content until next ## or end
+    const pattern = /^##\s+([^\n]+)\n+([\s\S]*?)(?=\n^##\s|\n---|\Z)/gm;
+    const sections = new Map<string, string>();
     
-    for (let i = 0; i < matches.length; i++) {
-      const match = matches[i]
-      const sectionName = match[1].trim().toLowerCase()
-      const startIndex = match.index! + match[0].length
-      
-      // Find the end of this section (either next header, ---, or end of content)
-      let endIndex = markdownContent.length
-      
-      // Check for --- delimiter
-      const delimiterIndex = markdownContent.indexOf('\n---', startIndex)
-      if (delimiterIndex !== -1 && delimiterIndex < endIndex) {
-        endIndex = delimiterIndex
-      }
-      
-      // Check for next section header
-      if (i + 1 < matches.length) {
-        const nextHeaderIndex = matches[i + 1].index!
-        if (nextHeaderIndex < endIndex) {
-          endIndex = nextHeaderIndex
-        }
-      }
-      
-      // Extract section content
-      const sectionContent = markdownContent.substring(startIndex, endIndex).trim()
-      sections.set(sectionName, sectionContent)
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      const sectionName = match[1]?.trim().toLowerCase() || '';
+      const sectionContent = match[2]?.trim() || '';
+      sections.set(sectionName, sectionContent);
     }
     
-    return sections
-  }
+    return sections;
+  };
+
+  const extractSubsections = (sectionText: string): Map<string, string> => {
+    const normalized = normalizeMarkdown(sectionText);
+    const pattern = /^###\s+(.+?)\n([\s\S]*?)(?=\n###\s|\n##\s|\Z)/gm;
+    const subsections = new Map<string, string>();
+    
+    let match;
+    while ((match = pattern.exec(normalized)) !== null) {
+      const title = match[1]?.trim().toLowerCase() || '';
+      const content = match[2]?.trim() || '';
+      subsections.set(title, content);
+    }
+    
+    return subsections;
+  };
 
   // Parse frameworks from Strategic Frameworks section
   const parseFrameworks = (sections: Map<string, string>) => {
@@ -178,16 +177,16 @@ export function SummaryViewer({
     return frameworks
   }
 
-  // Parse list items from sections like Debunked Assumptions, In Practice
+  // Parse list items from sections like Debunked Assumptions, In Practice (simplified for normalized content)
   const parseListItems = (text: string): string[] => {
     const items: string[] = []
     const lines = text.split('\n')
     
     for (const line of lines) {
       const trimmed = line.trim()
-      // Match bullet points or numbered lists
-      if (trimmed.match(/^[-*•]\s+/) || trimmed.match(/^\d+\.\s+/)) {
-        const item = trimmed.replace(/^[-*•]\s+|^\d+\.\s+/, '').trim()
+      // Match bullet points or numbered lists (simplified for normalized dashes)
+      if (trimmed.match(/^[-*]\s+/) || trimmed.match(/^\d+\.\s+/)) {
+        const item = trimmed.replace(/^[-*]\s+|^\d+\.\s+/, '').trim()
         if (item) {
           items.push(item)
         }
@@ -197,17 +196,18 @@ export function SummaryViewer({
     return items
   }
 
-  // Parse key moments from Key Moments section
+  // Parse key moments from Key Moments section (simplified for normalized content)
   const parseKeyMoments = (sections: Map<string, string>) => {
-    const keyMomentsText = sections.get('key moments') || ''
+    const keyMomentsText = sections.get('key moments') || 
+                          sections.get('key moments (5-8 bullets)') || ''
     const moments: Array<{timestamp: string; insight: string}> = []
     
     const lines = keyMomentsText.split('\n')
     for (const line of lines) {
       const trimmed = line.trim()
       
-      // Look for timestamp → insight format (e.g., "– **00:05** → Early sponsors...")
-      const match = trimmed.match(/^[–-]\s*\*\*\\?\*?(\d{1,2}:\d{2}(?::\d{2})?)\*+\s*(?:→|->|→)\s*(.+)$/)
+      // Simplified pattern for normalized content: "- **00:05** → Early sponsors..."
+      const match = trimmed.match(/^-\s*\*\*(\d{1,2}:\d{2}(?::\d{2})?)\*\*\s*→\s*(.+)$/)
       if (match) {
         const timestamp = match[1].trim()
         const insight = match[2].trim()
@@ -228,17 +228,18 @@ export function SummaryViewer({
     return sections.get('feynman flashcards') || ''
   }
 
-  // Parse Glossary from markdown
+  // Parse Glossary from markdown (simplified for normalized content)
   const parseGlossary = (sections: Map<string, string>) => {
-    const glossaryText = sections.get('glossary') || ''
+    const glossaryText = sections.get('glossary') || 
+                        sections.get('glossary (≤15 terms)') || ''
     const glossary: Array<{term: string; definition: string}> = []
     
     const lines = glossaryText.split('\n')
     for (const line of lines) {
       const trimmed = line.trim()
       
-      // Look for **Term** – Definition format
-      const match = trimmed.match(/^\*\*(.+?)\*\*\s*[–-]\s*(.+)$/)
+      // Look for **Term** - Definition format (normalized dash)
+      const match = trimmed.match(/^\*\*(.+?)\*\*\s*-\s*(.+)$/)
       if (match) {
         const term = match[1].trim()
         const definition = match[2].trim()
@@ -249,9 +250,10 @@ export function SummaryViewer({
     return glossary
   }
 
-  // Parse Quick Quiz from markdown
+  // Parse Quick Quiz from markdown (simplified for normalized content)
   const parseQuickQuiz = (sections: Map<string, string>) => {
-    const quizText = sections.get('quick quiz') || ''
+    const quizText = sections.get('quick quiz') || 
+                    sections.get('quick quiz (3 q&a)') || ''
     const quiz: Array<{q: string; a: string}> = []
     
     const lines = quizText.split('\n')
@@ -261,8 +263,8 @@ export function SummaryViewer({
     for (const line of lines) {
       const trimmed = line.trim()
       
-      // Look for numbered questions
-      const questionMatch = trimmed.match(/^\d+\.\s*(.+)$/)
+      // Look for Q1:, Q2: or numbered questions
+      const questionMatch = trimmed.match(/^(?:Q\d+:|Q:|\d+\.)\s*(.+)$/)
       if (questionMatch) {
         // Save previous Q&A if exists
         if (currentQuestion && currentAnswer) {
@@ -270,9 +272,9 @@ export function SummaryViewer({
         }
         currentQuestion = questionMatch[1].trim()
         currentAnswer = ''
-      } else if (trimmed.startsWith('–') && currentQuestion) {
-        // This is likely the answer
-        currentAnswer = trimmed.replace(/^–\s*/, '').trim()
+      } else if ((trimmed.startsWith('A') && trimmed.includes(':')) || (trimmed.startsWith('-') && currentQuestion)) {
+        // This is likely the answer (A1:, A:, or just a dash)
+        currentAnswer = trimmed.replace(/^(?:A\d+:|A:|-)\s*/, '').trim()
       }
     }
     
@@ -284,7 +286,7 @@ export function SummaryViewer({
     return quiz
   }
 
-  // Parse Novel-Idea Meter from markdown
+  // Parse Novel-Idea Meter from markdown (simplified for normalized content)
   const parseNovelIdeaMeter = (sections: Map<string, string>) => {
     const novelText = sections.get('novel-idea meter') || ''
     const novelIdeas: Array<{insight: string; score: number}> = []
@@ -293,8 +295,8 @@ export function SummaryViewer({
     for (const line of lines) {
       const trimmed = line.trim()
       
-      // Look for format: "- Idea name: 4" or "- Idea name → 5"
-      const match = trimmed.match(/^-\s*(.+?)\s*(?:[:→])\s*(\d+)/)
+      // Look for format: "- Idea name: 4/5" or "- Idea name → 5"
+      const match = trimmed.match(/^-\s*(.+?)\s*[:→]\s*(\d+)(?:\/5)?/)
       if (match) {
         const insight = match[1].trim()
         const score = parseInt(match[2])
@@ -380,7 +382,7 @@ export function SummaryViewer({
         const paragraphText = currentParagraph.join(' ').trim()
         if (paragraphText) {
           elements.push(
-            <p key={key++} className="text-gray-900 leading-relaxed mb-4 text-base">
+            <p key={key++} className="text-gray-900 leading-7 mb-6 text-lg">
               {parseInlineMarkdown(paragraphText, themeColor)}
             </p>
           )
@@ -393,13 +395,13 @@ export function SummaryViewer({
       if (currentListItems.length > 0 && currentListType) {
         if (currentListType === 'ul') {
           elements.push(
-            <ul key={key++} className="list-disc list-outside space-y-2 mb-4 ml-6 pl-2">
+            <ul key={key++} className="list-disc list-outside space-y-3 mb-6 ml-6 pl-2">
               {currentListItems}
             </ul>
           )
         } else {
           elements.push(
-            <ol key={key++} className="list-decimal list-outside space-y-3 mb-4 ml-6 pl-2">
+            <ol key={key++} className="list-decimal list-outside space-y-4 mb-6 ml-6 pl-2">
               {currentListItems}
             </ol>
           )
@@ -500,8 +502,8 @@ export function SummaryViewer({
         continue
       }
 
-      // Handle unordered lists (including en dash –)
-      if (trimmed.match(/^[-–*•]\s+/)) {
+      // Handle unordered lists (normalized to regular dash)
+      if (trimmed.match(/^[-*•]\s+/)) {
         flushParagraph()
         
         // Start new list or continue existing unordered list
@@ -510,9 +512,9 @@ export function SummaryViewer({
           currentListType = 'ul'
         }
         
-        const listItem = trimmed.replace(/^[-–*•]\s+/, '')
+        const listItem = trimmed.replace(/^[-*•]\s+/, '')
         currentListItems.push(
-          <li key={key++} className="text-gray-900 leading-relaxed text-base">
+          <li key={key++} className="text-gray-900 leading-7 text-lg">
             {parseInlineMarkdown(listItem, themeColor)}
           </li>
         )
@@ -531,7 +533,7 @@ export function SummaryViewer({
         
         const listItem = trimmed.replace(/^\d+\.\s+/, '')
         currentListItems.push(
-          <li key={key++} className="text-gray-900 leading-relaxed text-base">
+          <li key={key++} className="text-gray-900 leading-7 text-lg">
             {parseInlineMarkdown(listItem, themeColor)}
           </li>
         )
@@ -604,31 +606,22 @@ export function SummaryViewer({
       frameworks.push(currentFramework)
     }
     
-    // If we found frameworks, render them as cards
+    // If we found frameworks, render them as enhanced bullet points
     if (frameworks.length > 0) {
       return (
-        <div className="space-y-4">
-          {frameworks.map((framework, index) => (
-            <div key={index} className="bg-white p-5 rounded-lg border border-green-100 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-bold text-sm">
-                    {framework.number}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
-                    {framework.title}
-                  </h4>
-                  {framework.description && (
-                    <div className="text-gray-900 leading-relaxed text-base">
-                      {parseMarkdownToJSX(framework.description, themeColor)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="p-6 bg-gradient-to-br from-white to-green-50 border border-green-100 rounded-xl shadow-sm">
+          <ul className="list-disc list-outside space-y-3 ml-6 pl-2">
+            {frameworks.map((framework, index) => (
+              <li key={index} className="text-gray-900 leading-relaxed text-base font-normal">
+                <span className="font-semibold">
+                  {framework.title}:
+                </span>{' '}
+                <span className="font-normal">
+                  {framework.description}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )
     }
@@ -638,7 +631,7 @@ export function SummaryViewer({
   }
 
   // Parse the content and extract data for new sections
-  const sections = parseMarkdownSections(summary.content)
+  const sections = extractSections(summary.content)
   const parsedKeyMoments = parseKeyMoments(sections)
   const rawPlaybooksContent = getRawPlaybooksContent(sections)
   const rawFlashcardsContent = getRawFlashcardsContent(sections)
@@ -880,7 +873,7 @@ export function SummaryViewer({
                 <Copy className="h-4 w-4 mx-auto" />
               </button>
             </div>
-            <div className="text-gray-900 leading-relaxed text-base prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900">
+            <div className="text-gray-900 leading-7 text-lg prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-6 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold">
               <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                 {(() => {
                   // Prioritize markdown parsing first, then backend data, then fallback
@@ -919,11 +912,11 @@ export function SummaryViewer({
                 : (summary.key_moments || []);
               
               return keyMoments.length > 0 ? (
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-4 sm:space-y-5">
                   {keyMoments.map((moment, index) => (
-                    <div key={index} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div key={index} className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl hover:from-gray-100 hover:to-blue-50/60 transition-all duration-200 shadow-sm hover:shadow-md">
                       <div className="flex items-center justify-between w-full sm:w-auto sm:flex-shrink-0">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-mono font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-4 py-2 rounded-full text-base font-mono font-bold bg-blue-600 text-white shadow-sm">
                           {moment.timestamp}
                         </span>
                         <button
@@ -935,7 +928,7 @@ export function SummaryViewer({
                           <Copy className="h-4 w-4 mx-auto" />
                         </button>
                       </div>
-                      <div className="flex-1 min-w-0 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded">
+                      <div className="flex-1 min-w-0 text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-0 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-red-600 prose-code:bg-red-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-medium">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {moment.insight}
                         </ReactMarkdown>
@@ -981,7 +974,7 @@ export function SummaryViewer({
             </button>
           </div>
           {!collapsedSections.has('frameworks') && (
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-green-50">
+          <div className="p-8 sm:p-10 bg-gradient-to-br from-white to-green-50">
             {(() => {
               // Prioritize markdown content first, then backend data
               const content = sections.get('strategic frameworks') || 
@@ -990,13 +983,7 @@ export function SummaryViewer({
                   : '');
               
               return content ? (
-                <div className="p-6 bg-gradient-to-br from-white to-green-50 border border-green-100 rounded-xl shadow-sm">
-                  <div className="text-gray-900 prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-green-300 prose-th:bg-green-100 prose-th:p-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900 prose-td:border prose-td:border-green-200 prose-td:p-3 prose-td:align-top prose-td:text-gray-900">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                      {content}
-                    </ReactMarkdown>
-                  </div>
-                </div>
+                formatFrameworks(content, 'green')
               ) : (
                 <div className="flex items-center justify-center py-8">
                   <p className="text-gray-500 italic text-center">No strategic frameworks identified in this video.</p>
@@ -1230,24 +1217,40 @@ export function SummaryViewer({
             </button>
           </div>
           {!collapsedSections.has('learning') && (
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-indigo-50/30 space-y-8">
+          <div className="p-8 sm:p-10 bg-gradient-to-br from-white to-indigo-50/30 space-y-10">
             {(() => {
-              // Prioritize markdown parsing first, then backend data (exclude TL;DR as it's already shown above)
-              const flashcardsContent = rawFlashcardsContent ||
+              // Extract Accelerated Learning Pack subsections using new parser
+              const learningPackContent = sections.get('accelerated learning pack') || '';
+              const learningSubsections = learningPackContent ? extractSubsections(learningPackContent) : new Map<string, string>();
+              
+              // Prioritize subsection parsing first, then backend data (exclude TL;DR as it's already shown above)
+              const flashcardsContent = learningSubsections.get('feynman flashcards') || 
+                learningSubsections.get('feynman flashcards (≤10)') ||
+                rawFlashcardsContent ||
                 (summary.accelerated_learning_pack?.feynman_flashcards && summary.accelerated_learning_pack.feynman_flashcards.length > 0
                   ? summary.accelerated_learning_pack.feynman_flashcards.map(card => `Q: ${card.q}\nA: ${card.a}\n`).join('\n')
                   : '');
                 
-              const glossary = parsedGlossary.length > 0 
-                ? parsedGlossary 
-                : (summary.accelerated_learning_pack?.glossary || []);
+              // Parse glossary from subsections first
+              const glossaryContent = learningSubsections.get('glossary') || 
+                learningSubsections.get('glossary (≤15 terms)') ||
+                sections.get('glossary') || '';
+              
+              const glossary = glossaryContent 
+                ? parseGlossary(new Map([['glossary', glossaryContent]]))
+                : (parsedGlossary.length > 0 
+                  ? parsedGlossary 
+                  : (summary.accelerated_learning_pack?.glossary || []));
                 
-              const rawQuickQuizContent = sections.get('quick quiz') ||
+              const rawQuickQuizContent = learningSubsections.get('quick quiz') ||
+                learningSubsections.get('quick quiz (3 q&a)') ||
+                sections.get('quick quiz') ||
                 (summary.accelerated_learning_pack?.quick_quiz && summary.accelerated_learning_pack.quick_quiz.length > 0
                   ? summary.accelerated_learning_pack.quick_quiz.map((quiz, index) => `${index + 1}. ${quiz.q}\n   → ${quiz.a}`).join('\n\n')
                   : '');
                 
-              const rawNovelIdeaMeterContent = sections.get('novel-idea meter') ||
+              const rawNovelIdeaMeterContent = learningSubsections.get('novel-idea meter') ||
+                sections.get('novel-idea meter') ||
                 (summary.accelerated_learning_pack?.novel_idea_meter && summary.accelerated_learning_pack.novel_idea_meter.length > 0
                   ? summary.accelerated_learning_pack.novel_idea_meter.map(item => `- ${item.insight}: ${item.score}/5`).join('\n')
                   : '');
@@ -1258,11 +1261,12 @@ export function SummaryViewer({
                 <>
                   {/* Feynman Flashcards */}
                   {flashcardsContent && (
-                    <div className="p-6 bg-gradient-to-br from-white to-indigo-50 border border-indigo-100 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
-                        🗂️ Feynman Flashcards
+                    <div className="p-8 bg-gradient-to-br from-white to-indigo-50 border border-indigo-200 rounded-xl shadow-md">
+                      <h4 className="font-bold text-gray-900 mb-6 text-lg sm:text-xl flex items-center gap-3">
+                        <span className="text-2xl">🗂️</span>
+                        Feynman Flashcards
                       </h4>
-                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
+                      <div className="text-gray-900 prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-6 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-indigo-700 prose-code:bg-indigo-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-medium prose-blockquote:text-gray-900 prose-blockquote:border-indigo-300 prose-blockquote:bg-indigo-50/50">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {flashcardsContent}
                         </ReactMarkdown>
@@ -1272,19 +1276,20 @@ export function SummaryViewer({
 
                   {/* Glossary */}
                   {glossary.length > 0 && (
-                    <div className="p-6 bg-gradient-to-br from-white to-blue-50 border border-blue-100 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
-                        📖 Glossary
-                        <span className="text-sm font-normal text-gray-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <div className="p-8 bg-gradient-to-br from-white to-blue-50 border border-blue-200 rounded-xl shadow-md">
+                      <h4 className="font-bold text-gray-900 mb-6 text-lg sm:text-xl flex items-center gap-3">
+                        <span className="text-2xl">📖</span>
+                        Glossary
+                        <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
                           {glossary.length} terms
                         </span>
                       </h4>
-                      <div className="space-y-4">
+                      <div className="space-y-5">
                         {glossary.map((item, index) => (
-                          <div key={index} className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
-                            <div className="flex flex-col gap-2">
-                              <span className="font-semibold text-gray-900 text-base">{item.term}</span>
-                              <div className="text-gray-900 text-base prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900">
+                          <div key={index} className="bg-white p-5 rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <div className="flex flex-col gap-3">
+                              <span className="font-bold text-gray-900 text-lg text-blue-900">{item.term}</span>
+                              <div className="text-gray-900 text-base prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-0 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-blue-700 prose-code:bg-blue-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-medium prose-blockquote:text-gray-900">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                                   {item.definition}
                                 </ReactMarkdown>
@@ -1298,11 +1303,12 @@ export function SummaryViewer({
 
                   {/* Quick Quiz */}
                   {rawQuickQuizContent && (
-                    <div className="p-6 bg-gradient-to-br from-white to-emerald-50 border border-emerald-100 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
-                        ❓ Quick Quiz
+                    <div className="p-8 bg-gradient-to-br from-white to-emerald-50 border border-emerald-200 rounded-xl shadow-md">
+                      <h4 className="font-bold text-gray-900 mb-6 text-lg sm:text-xl flex items-center gap-3">
+                        <span className="text-2xl">❓</span>
+                        Quick Quiz
                       </h4>
-                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900 prose-blockquote:border-emerald-200 prose-blockquote:bg-emerald-50 prose-blockquote:italic">
+                      <div className="text-gray-900 prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-5 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-emerald-800 prose-strong:font-bold prose-code:text-emerald-700 prose-code:bg-emerald-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-medium prose-blockquote:text-gray-900 prose-blockquote:border-emerald-300 prose-blockquote:bg-emerald-50/70 prose-blockquote:italic prose-blockquote:font-medium">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {rawQuickQuizContent}
                         </ReactMarkdown>
@@ -1312,11 +1318,12 @@ export function SummaryViewer({
 
                   {/* Novel-Idea Meter */}
                   {rawNovelIdeaMeterContent && (
-                    <div className="p-6 bg-gradient-to-br from-white to-amber-50 border border-amber-100 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
-                        💡 Novel-Idea Meter
+                    <div className="p-8 bg-gradient-to-br from-white to-amber-50 border border-amber-200 rounded-xl shadow-md">
+                      <h4 className="font-bold text-gray-900 mb-6 text-lg sm:text-xl flex items-center gap-3">
+                        <span className="text-2xl">💡</span>
+                        Novel-Idea Meter
                       </h4>
-                      <div className="prose prose-base max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-code:text-gray-700 prose-code:bg-amber-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:text-gray-900 prose-blockquote:border-amber-200 prose-blockquote:bg-amber-50 prose-blockquote:italic">
+                      <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-5 prose-li:text-gray-900 prose-li:leading-relaxed prose-li:mb-3 prose-strong:text-amber-800 prose-strong:font-bold prose-code:text-amber-700 prose-code:bg-amber-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-medium prose-blockquote:text-gray-900 prose-blockquote:border-amber-300 prose-blockquote:bg-amber-50/70 prose-blockquote:italic prose-blockquote:font-medium">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                           {rawNovelIdeaMeterContent}
                         </ReactMarkdown>

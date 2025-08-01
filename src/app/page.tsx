@@ -806,8 +806,8 @@ Try Free Now →
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-24 sm:py-32 bg-anti-flash-white">
-        <div className="mx-auto max-w-4xl px-6 lg:px-8">
+      <section id="faq" className="py-24 sm:py-32 bg-anti-flash-white relative">
+        <div className="mx-auto max-w-4xl px-6 lg:px-8 relative z-10">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
               🤔 Frequently Asked
@@ -820,38 +820,62 @@ Try Free Now →
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 relative">
             {[
               {
+                id: 'faq-1',
                 question: "How fast are the summaries?",
                 answer: "Under 60 seconds for most videos—our servers double-check the clock so you don't have to."
               },
               {
+                id: 'faq-2',
                 question: "Can I trust the insights?",
                 answer: "We combine speaker tags, NLP, and a human-grade accuracy score. You get clarity over clickbait."
               },
               {
+                id: 'faq-3',
                 question: "Will you add podcast support?",
                 answer: "Already in beta. Sign up today and you'll be first in line."
               }
-            ].map((faq, index) => (
-              <div key={index} className="border border-paynes-gray/20 rounded-xl overflow-hidden bg-white shadow-sm">
-                <button
-                  onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-anti-flash-white/50 transition-colors duration-200 min-h-[44px] touch-manipulation"
-                >
-                  <span className="font-semibold text-prussian-blue pr-4">{faq.question}</span>
-                  <ChevronDown className={`h-5 w-5 text-silver-lake-blue transition-transform duration-200 flex-shrink-0 ${
-                    expandedFaq === index ? 'rotate-180' : ''
-                  }`} />
-                </button>
-                {expandedFaq === index && (
-                  <div className="px-6 pb-5 border-t border-paynes-gray/20">
-                    <p className="text-paynes-gray leading-relaxed pt-4">{faq.answer}</p>
+            ].map((faq, index) => {
+              const isExpanded = expandedFaq === index
+              
+              return (
+                <div key={faq.id} className="relative border border-paynes-gray/20 rounded-xl bg-white shadow-sm" style={{ zIndex: 10 - index }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setExpandedFaq(isExpanded ? null : index)
+                    }}
+                    className="relative w-full px-6 py-5 text-left flex items-center justify-between hover:bg-anti-flash-white/50 transition-colors duration-200 min-h-[44px] touch-manipulation focus:outline-none focus:ring-2 focus:ring-silver-lake-blue focus:ring-offset-2"
+                    style={{ pointerEvents: 'auto', zIndex: 2 }}
+                    aria-expanded={isExpanded}
+                    aria-controls={`${faq.id}-content`}
+                  >
+                    <span className="font-semibold text-prussian-blue pr-4">{faq.question}</span>
+                    <ChevronDown 
+                      className={`h-5 w-5 text-silver-lake-blue transition-transform duration-300 flex-shrink-0 transform ${
+                        isExpanded ? 'rotate-180' : 'rotate-0'
+                      }`} 
+                    />
+                  </button>
+                  <div
+                    id={`${faq.id}-content`}
+                    className={`overflow-hidden transition-all duration-300 ease-in-out`}
+                    style={{
+                      maxHeight: isExpanded ? '500px' : '0px',
+                      opacity: isExpanded ? 1 : 0
+                    }}
+                  >
+                    <div className="px-6 pb-5 pt-4 border-t border-paynes-gray/20">
+                      <p className="text-paynes-gray leading-relaxed">{faq.answer}</p>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
