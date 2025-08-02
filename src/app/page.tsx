@@ -9,6 +9,9 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { api } from '@/components/providers/TRPCProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
+import { SignInModal } from '@/components/modals/SignInModal'
+import { AuthPromptModal } from '@/components/modals/AuthPromptModal'
+import { getBrowserFingerprint, hasUsedFreeSummary, markFreeSummaryUsed } from '@/lib/browser-fingerprint'
 import { 
   Zap, 
   BookOpen, 
@@ -33,7 +36,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, authModal, openAuthModal, closeAuthModal } = useAuth()
   const [currentSummary, setCurrentSummary] = useState<any>(null)
   const [animatedText, setAnimatedText] = useState('')
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -47,6 +50,9 @@ export default function HomePage() {
   const [showStickyNav, setShowStickyNav] = useState(false)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
+  const [anonymousSummaryId, setAnonymousSummaryId] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // Real-time progress tracking
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
@@ -94,9 +100,12 @@ export default function HomePage() {
     'Learn faster. Retain more.'
   ]
 
+  // Authenticated summary creation
   const createSummary = api.summary.create.useMutation({
     onSuccess: (data) => {
       console.log('✅ Summary created successfully:', data)
+      setSuccessMessage('✅ Summary created! Saved to your library.')
+      setTimeout(() => setSuccessMessage(null), 5000)
       
       // Wait a moment for user to see completion, then show summary
       setTimeout(() => {
@@ -119,33 +128,92 @@ export default function HomePage() {
     }
   })
 
+  // Anonymous summary creation
+  const createAnonymousSummary = api.summary.createAnonymous.useMutation({
+    onSuccess: (data) => {
+      console.log('✅ Anonymous summary created successfully:', data)
+      setSuccessMessage('✅ Free summary created! Sign up to save it to your library.')
+      setTimeout(() => setSuccessMessage(null), 5000)
+      
+      // Mark that free summary has been used
+      markFreeSummaryUsed()
+      
+      // Wait a moment for user to see completion, then show summary
+      setTimeout(() => {
+        setCurrentSummary(data)
+        setAnonymousSummaryId(data.id)
+        setCurrentTaskId(null) // Stop progress tracking
+        
+        // Auto-scroll to summary section
+        setTimeout(() => {
+          const summaryElement = document.getElementById('summary-section')
+          if (summaryElement) {
+            summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 100)
+        
+        // Show auth prompt after a short delay
+        setTimeout(() => {
+          setShowAuthPrompt(true)
+        }, 2000)
+      }, 1000)
+    },
+    onError: (error) => {
+      console.error('❌ Anonymous summarization failed:', error)
+      
+      // Check if they've already used their free summary
+      if (error.message.includes('already used')) {
+        setShowAuthPrompt(true)
+      } else {
+        alert(`Summarization failed: ${error.message}`)
+      }
+      setCurrentTaskId(null) // Stop progress tracking
+    }
+  })
+
   // Start progress tracking when mutation begins
   useEffect(() => {
-    if (createSummary.isPending && !currentTaskId) {
+    if ((createSummary.isPending || createAnonymousSummary.isPending) && !currentTaskId) {
       // We'll get the task_id from the mutation response to start tracking
       console.log('Summary creation started, waiting for task_id...')
     }
-  }, [createSummary.isPending, currentTaskId])
+  }, [createSummary.isPending, createAnonymousSummary.isPending, currentTaskId])
 
-  const handleUrlSubmit = async (url: string) => {
+  const handleUrlSubmit = async (url: string, fingerprint?: string) => {
     console.log('🚀 Starting summarization for URL:', url)
     console.log('🔐 Authentication status:', isAuthenticated)
     
     // Reset current summary before starting new one
     setCurrentSummary(null)
+    setAnonymousSummaryId(null)
     
     // Generate a temporary task ID to start progress tracking immediately
     const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     setCurrentTaskId(tempTaskId)
     
     try {
-      console.log('📤 Calling createSummary mutation...')
-      const result = await createSummary.mutateAsync({ url })
-      console.log('✅ Mutation result:', result)
-      
-      // If the backend returns a real task_id, switch to that for more accurate tracking
-      if (result.task_id && result.task_id !== tempTaskId) {
-        setCurrentTaskId(result.task_id)
+      if (isAuthenticated) {
+        console.log('📤 Calling authenticated createSummary mutation...')
+        const result = await createSummary.mutateAsync({ url })
+        console.log('✅ Mutation result:', result)
+        
+        // Keep using the temporary task ID for progress tracking
+      } else {
+        // Check if they've already used their free summary
+        if (hasUsedFreeSummary()) {
+          console.log('❌ Free summary already used')
+          setCurrentTaskId(null)
+          setShowAuthPrompt(true)
+          return
+        }
+        
+        console.log('📤 Calling anonymous createSummary mutation...')
+        // Use the fingerprint provided by URLInput component
+        const browserFingerprint = fingerprint || await getBrowserFingerprint()
+        const result = await createAnonymousSummary.mutateAsync({ url, browserFingerprint })
+        console.log('✅ Anonymous mutation result:', result)
+        
+        // Keep using the temporary task ID for progress tracking
       }
     } catch (error) {
       console.error('❌ HandleUrlSubmit error:', error)
@@ -286,7 +354,7 @@ export default function HomePage() {
             {/* Actions */}
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.push('/sign-in')}
+                onClick={() => openAuthModal('sign-in')}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 hidden sm:block min-h-[44px] touch-manipulation"
               >
                 Sign In
@@ -295,7 +363,7 @@ export default function HomePage() {
                 onClick={focusUrlInput}
                 className="bg-prussian-blue text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-colors duration-200 min-h-[36px] touch-manipulation"
               >
-Try Free Now →
+                Try Free Now →
               </button>
             </div>
           </div>
@@ -428,7 +496,11 @@ Try Free Now →
                       // Optional: Add any additional success handling here
                       console.log('URL input cleared after successful submission')
                     }}
-                    isLoading={createSummary.isPending}
+                    onAuthRequired={() => {
+                      // Show auth modal when anonymous user needs to sign up
+                      setShowAuthPrompt(true)
+                    }}
+                    isLoading={createSummary.isPending || createAnonymousSummary.isPending}
                     className="scale-105"
                   />
 
@@ -467,7 +539,7 @@ Try Free Now →
           </div>
 
           {/* Enhanced Processing state */}
-          {createSummary.isPending && (
+          {(createSummary.isPending || createAnonymousSummary.isPending) && (
             <div className="mt-16 mx-auto max-w-md">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
                 <div className="text-center mb-4">
@@ -504,11 +576,20 @@ Try Free Now →
           )}
           
           {/* Error state */}
-          {createSummary.isError && (
+          {(createSummary.isError || createAnonymousSummary.isError) && (
             <div className="mt-16 mx-auto max-w-md">
               <div className="rounded-xl bg-red-50 border border-red-200 p-6 text-center">
                 <p className="font-semibold text-red-800">Something went wrong</p>
-                <p className="text-sm text-red-600 mt-1">{createSummary.error?.message}</p>
+                <p className="text-sm text-red-600 mt-1">{createSummary.error?.message || createAnonymousSummary.error?.message}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mt-16 mx-auto max-w-md">
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-6 shadow-lg">
+                <p className="text-green-800 text-center font-medium">{successMessage}</p>
               </div>
             </div>
           )}
@@ -1041,6 +1122,36 @@ Don&apos;t Miss Out - Try Sightline Free
       
       {/* Exit Intent Popup placeholder - implement with proper exit intent detection */}
       {/* "Still scrolling? Paste a link—see the magic." */}
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={authModal.isOpen}
+        onClose={closeAuthModal}
+        mode={authModal.mode}
+        afterSignInUrl={authModal.afterSignInUrl}
+        afterSignUpUrl={authModal.afterSignUpUrl}
+      />
+
+      {/* Auth Prompt Modal for Anonymous Users */}
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        onSignIn={() => {
+          setShowAuthPrompt(false)
+          openAuthModal('sign-in', {
+            afterSignInUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library',
+            afterSignUpUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library'
+          })
+        }}
+        onSignUp={() => {
+          setShowAuthPrompt(false)
+          openAuthModal('sign-up', {
+            afterSignInUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library',
+            afterSignUpUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library'
+          })
+        }}
+        summaryTitle={currentSummary?.videoTitle}
+      />
     </main>
   )
 }

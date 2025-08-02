@@ -126,7 +126,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
       stripePriceId: priceId,
       stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       // Reset usage limits based on new plan
-      summariesLimit: plan === 'FREE' ? 5 : -1, // -1 means unlimited
+      summariesLimit: plan === 'FREE' ? 3 : (plan === 'PRO' ? 25 : -1), // FREE: 3 ever, PRO: 25/month, others unlimited
     },
   })
 
@@ -154,7 +154,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
       stripeSubscriptionId: null,
       stripePriceId: null,
       stripeCurrentPeriodEnd: null,
-      summariesLimit: 5, // Free tier limit
+      summariesLimit: 3, // Free tier limit - 3 summaries ever
     },
   })
 

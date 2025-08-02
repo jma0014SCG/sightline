@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link2, Loader2, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { getBrowserFingerprint, hasUsedFreeSummary } from '@/lib/browser-fingerprint'
 
 interface URLInputProps {
-  onSubmit: (url: string) => void
+  onSubmit: (url: string, fingerprint?: string) => void
   onSuccess?: () => void
+  onAuthRequired?: () => void // Callback when anonymous user needs to sign up
   isLoading?: boolean
   disabled?: boolean
   placeholder?: string
@@ -16,6 +19,7 @@ interface URLInputProps {
 export function URLInput({ 
   onSubmit, 
   onSuccess,
+  onAuthRequired,
   isLoading = false, 
   disabled = false,
   placeholder = "Paste a YouTube URL to summarize...",
@@ -25,6 +29,26 @@ export function URLInput({
   const [error, setError] = useState<string | null>(null)
   const [isValid, setIsValid] = useState(false)
   const wasLoadingRef = useRef(false)
+  const { isAuthenticated } = useAuth()
+  const anonymousUsed = hasUsedFreeSummary()
+
+  // Get appropriate button text based on user status
+  const getButtonText = () => {
+    if (isLoading) {
+      return 'Processing...'
+    }
+    
+    if (!isAuthenticated) {
+      if (anonymousUsed) {
+        return 'Sign up to summarize'
+      }
+      return 'Summarize (Free)'
+    }
+    
+    // For authenticated users, we could show remaining summaries here
+    // For now, just show "Summarize"
+    return 'Summarize'
+  }
 
   // Clear URL when loading completes successfully
   useEffect(() => {
@@ -46,7 +70,7 @@ export function URLInput({
     return patterns.some(pattern => pattern.test(url))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
@@ -64,7 +88,25 @@ export function URLInput({
       return
     }
 
-    onSubmit(url)
+    // If anonymous user has already used their free summary, trigger auth
+    if (!isAuthenticated && anonymousUsed) {
+      onAuthRequired?.()
+      return
+    }
+
+    // Generate browser fingerprint for anonymous users
+    let fingerprint: string | undefined
+    if (!isAuthenticated) {
+      try {
+        fingerprint = await getBrowserFingerprint()
+      } catch (error) {
+        console.error('Failed to generate browser fingerprint:', error)
+        setError('Unable to process request. Please try again.')
+        return
+      }
+    }
+
+    onSubmit(url, fingerprint)
   }
 
   const handlePaste = async () => {
@@ -137,14 +179,10 @@ export function URLInput({
               "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             )}
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              'Summarize'
+            {isLoading && (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
             )}
+            {getButtonText()}
           </button>
         </div>
         

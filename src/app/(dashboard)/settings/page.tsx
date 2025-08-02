@@ -44,7 +44,7 @@ export default function SettingsPage() {
     }
   })
 
-  const exportData = api.auth.exportUserData.useQuery({}, { enabled: false })
+  const exportData = api.auth.exportUserData.useQuery(undefined, { enabled: false })
   
   const deleteAccount = api.auth.deleteAccount.useMutation({
     onSuccess: () => {

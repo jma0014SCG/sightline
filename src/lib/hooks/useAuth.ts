@@ -2,25 +2,68 @@
 
 import { useAuth as useClerkAuth, useUser, useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
+
+interface AuthModalState {
+  isOpen: boolean
+  mode: 'sign-in' | 'sign-up'
+  afterSignInUrl?: string
+  afterSignUpUrl?: string
+}
 
 export function useAuth() {
   const { isSignedIn, isLoaded } = useClerkAuth()
   const { user } = useUser()
-  const { signOut, openSignIn } = useClerk()
+  const { signOut, openSignIn, openSignUp } = useClerk()
   const router = useRouter()
+  
+  // Modal state management
+  const [authModal, setAuthModal] = useState<AuthModalState>({
+    isOpen: false,
+    mode: 'sign-in'
+  })
 
-  const login = useCallback(async () => {
+  const openAuthModal = useCallback((mode: 'sign-in' | 'sign-up' = 'sign-in', options?: {
+    afterSignInUrl?: string
+    afterSignUpUrl?: string
+  }) => {
+    setAuthModal({
+      isOpen: true,
+      mode,
+      afterSignInUrl: options?.afterSignInUrl || '/library',
+      afterSignUpUrl: options?.afterSignUpUrl || '/library'
+    })
+  }, [])
+
+  const closeAuthModal = useCallback(() => {
+    setAuthModal(prev => ({ ...prev, isOpen: false }))
+  }, [])
+
+  const login = useCallback(async (options?: {
+    afterSignInUrl?: string
+    afterSignUpUrl?: string
+  }) => {
     try {
-      openSignIn({
-        afterSignInUrl: '/library',
-        afterSignUpUrl: '/library'
-      })
+      // Open in modal mode
+      openAuthModal('sign-in', options)
     } catch (error) {
       console.error('Login failed:', error)
       throw error
     }
-  }, [openSignIn])
+  }, [openAuthModal])
+
+  const signUp = useCallback(async (options?: {
+    afterSignInUrl?: string
+    afterSignUpUrl?: string
+  }) => {
+    try {
+      // Open in modal mode
+      openAuthModal('sign-up', options)
+    } catch (error) {
+      console.error('Sign up failed:', error)
+      throw error
+    }
+  }, [openAuthModal])
 
   const logout = useCallback(async () => {
     try {
@@ -48,6 +91,10 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     login,
+    signUp,
     logout,
+    authModal,
+    openAuthModal,
+    closeAuthModal,
   }
 }

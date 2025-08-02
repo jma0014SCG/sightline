@@ -132,12 +132,9 @@ export default function LibraryPage() {
     setCurrentTaskId(tempTaskId)
     
     try {
-      const result = await createSummary.mutateAsync({ url })
+      await createSummary.mutateAsync({ url })
       
-      // If the backend returns a real task_id, switch to that for more accurate tracking
-      if (result.task_id && result.task_id !== tempTaskId) {
-        setCurrentTaskId(result.task_id)
-      }
+      // Keep using the temporary task ID for progress tracking
       
       // Cache invalidation is handled by the mutation's onSuccess callback
     } catch (error) {

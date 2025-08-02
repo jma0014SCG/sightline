@@ -30,7 +30,7 @@ model User {
   
   // Usage tracking
   summariesUsed          Int       @default(0)
-  summariesLimit         Int       @default(5) // Free tier limit
+  summariesLimit         Int       @default(3) // Free tier limit - 3 summaries ever
 
   // Relations (removed NextAuth tables)
   summaries   Summary[]

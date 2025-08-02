@@ -7,7 +7,7 @@ export const PRICING_PLANS = {
     price: 0,
     paymentLink: null,
     features: [
-      '1 free summary',
+      '3 summaries ever',
     ],
   },
   PRO: {
@@ -16,7 +16,7 @@ export const PRICING_PLANS = {
     price: 9.99,
     paymentLink: 'https://buy.stripe.com/14A6oG8pd5Zf6L3cuk0ZW00',
     features: [
-      'Unlimited summaries',
+      '25 summaries/month',
       'Personal library access',
       'Markdown exports',
     ],

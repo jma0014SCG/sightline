@@ -9,10 +9,10 @@ import asyncio
 from dotenv import load_dotenv
 
 # Add the api directory to the path
-sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'api'))
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+# Load environment variables from api directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', 'api', '.env'))
 
 from services.gumloop_service import GumloopService
 

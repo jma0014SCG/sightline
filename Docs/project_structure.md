@@ -82,7 +82,7 @@ components/
 │       └── index.ts
 ├── molecules/                   # Combinations of atoms
 │   ├── URLInput/
-│   │   ├── URLInput.tsx
+│   │   ├── URLInput.tsx          # Enhanced with dynamic button states
 │   │   └── index.ts
 │   ├── SummaryCard/
 │   │   ├── SummaryCard.tsx
@@ -95,6 +95,13 @@ components/
 │   │   └── index.ts
 │   └── QuickActionsBar/
 │       ├── QuickActionsBar.tsx
+│       └── index.ts
+├── modals/                      # Modal components (NEW)
+│   ├── SignInModal/
+│   │   ├── SignInModal.tsx       # Clerk authentication modal
+│   │   └── index.ts
+│   └── AuthPromptModal/
+│       ├── AuthPromptModal.tsx   # Post-summary auth prompt
 │       └── index.ts
 ├── organisms/                   # Complex components
 │   ├── SummaryViewer/
@@ -368,6 +375,40 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 CLERK_SECRET_KEY  
 CLERK_WEBHOOK_SECRET
 ```
+
+### Modal-Based Authentication & Anonymous Flow (August 2025)
+The authentication system has been enhanced with modal-based login and anonymous user support.
+
+#### New Authentication Flow:
+1. **Anonymous Users**: Can create 1 free summary without signing up
+2. **Modal-Based Auth**: Sign-in/sign-up happens in modals (no page redirects)
+3. **Progressive Registration**: Users see value before being asked to sign up
+4. **Summary Claiming**: Anonymous summaries can be claimed after authentication
+
+#### Files Added for Modal Flow:
+- `/src/components/modals/SignInModal.tsx` - Clerk authentication modal wrapper
+- `/src/components/modals/AuthPromptModal.tsx` - Post-summary authentication prompt
+- `/src/lib/browser-fingerprint.ts` - Anonymous user tracking via browser fingerprinting
+- `/src/hooks/useToast.ts` - Toast notification system for success feedback
+- `/scripts/init-anonymous-user.js` - Database setup for anonymous user account
+
+#### Files Modified for Anonymous Flow:
+- `/src/components/molecules/URLInput/URLInput.tsx` - Dynamic button states and auth callbacks
+- `/src/app/page.tsx` - Integrated modal flow with success notifications
+- `/src/lib/hooks/useAuth.ts` - Added modal state management
+- `/src/server/api/routers/summary.ts` - Anonymous summary procedures and enhanced limit checking
+
+#### Enhanced Summary Limits:
+- **Anonymous**: 1 summary ever (browser fingerprint + IP tracking)
+- **Free Plan**: 3 summaries ever (total lifetime limit)
+- **Pro Plan**: 25 summaries/month (monthly reset on 1st)
+- **Complete Plan**: Unlimited summaries
+
+#### Database Changes:
+- Special "ANONYMOUS_USER" account for anonymous summaries
+- Enhanced limit checking logic (total vs monthly based on plan)
+- Browser fingerprint storage in summary metadata
+- No schema changes required (avoided migrations)
 
 ## Environment-Specific Configurations
 
