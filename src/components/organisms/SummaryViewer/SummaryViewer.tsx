@@ -29,6 +29,8 @@ export function SummaryViewer({
   className,
 }: SummaryViewerProps) {
   const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedSections, setCopiedSections] = useState<Set<string>>(new Set());
+  
   // Progressive disclosure: Start with reference sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     new Set([
@@ -137,6 +139,25 @@ export function SummaryViewer({
       }
       return newSet;
     });
+  };
+
+  // Handle copying content to clipboard
+  const handleCopy = async (content: string, sectionId?: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      if (sectionId) {
+        setCopiedSections((prev) => new Set(prev).add(sectionId));
+        setTimeout(() => {
+          setCopiedSections((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(sectionId);
+            return newSet;
+          });
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy content:', err);
+    }
   };
 
   // Format duration from seconds to readable format
@@ -299,7 +320,9 @@ export function SummaryViewer({
             playerReady={playerReady}
             sections={sections}
             collapsedSections={collapsedSections}
+            copiedSections={copiedSections}
             toggleSection={toggleSection}
+            handleCopy={handleCopy}
             formatDuration={formatDuration}
           />
         </div>
@@ -315,6 +338,10 @@ export function SummaryViewer({
               keyMoments={keyMoments}
               onTimestampClick={handleTimestampClick}
               playerReady={playerReady}
+              collapsedSections={collapsedSections}
+              copiedSections={copiedSections}
+              toggleSection={toggleSection}
+              handleCopy={handleCopy}
             />
           )}
 
@@ -335,10 +362,21 @@ export function SummaryViewer({
               sections.get("quick quiz") || sections.get("quiz")
             }
             novelIdeasContent={novelIdeasContent}
+            collapsedSections={collapsedSections}
+            copiedSections={copiedSections}
+            toggleSection={toggleSection}
+            handleCopy={handleCopy}
           />
 
           {/* Insight Enrichment */}
-          <InsightEnrichment data={insightEnrichment} content={insightEnrichmentContent} />
+          <InsightEnrichment 
+            data={insightEnrichment} 
+            content={insightEnrichmentContent}
+            collapsedSections={collapsedSections}
+            copiedSections={copiedSections}
+            toggleSection={toggleSection}
+            handleCopy={handleCopy}
+          />
         </div>
       </div>
 

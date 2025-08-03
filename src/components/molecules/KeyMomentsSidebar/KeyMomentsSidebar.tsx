@@ -1,19 +1,28 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { ChevronDown, Copy, Check } from 'lucide-react'
 import type { BackendKeyMoment } from '@/components/organisms/SummaryViewer/SummaryViewer.types'
 
 interface KeyMomentsSidebarProps {
   keyMoments: BackendKeyMoment[]
   onTimestampClick: (timestamp: string) => void
   playerReady: boolean
+  collapsedSections: Set<string>
+  copiedSections: Set<string>
+  toggleSection: (sectionId: string) => void
+  handleCopy: (content: string, sectionId?: string) => void
   className?: string
 }
 
 export function KeyMomentsSidebar({ 
   keyMoments, 
   onTimestampClick, 
-  playerReady, 
+  playerReady,
+  collapsedSections,
+  copiedSections,
+  toggleSection,
+  handleCopy,
   className 
 }: KeyMomentsSidebarProps) {
   if (!keyMoments || keyMoments.length === 0) {
@@ -23,16 +32,48 @@ export function KeyMomentsSidebar({
   return (
     <div className={cn("bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200", className)}>
       <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <span className="text-blue-100">🔥</span>
-          <span>Key Moments ({keyMoments.length})</span>
-        </h3>
+        <div className="flex items-center justify-between gap-4">
+          {/* Collapsible Button Wrapper */}
+          <button
+            onClick={() => toggleSection('key-moments')}
+            className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
+            aria-expanded={!collapsedSections.has('key-moments')}
+            aria-controls="key-moments-content"
+          >
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <span className="text-blue-100">🔥</span>
+              <span>Key Moments ({keyMoments.length})</span>
+            </h3>
+            <ChevronDown className={cn(
+              "h-5 w-5 text-white transition-transform duration-200",
+              collapsedSections.has('key-moments') ? "rotate-0" : "rotate-180"
+            )} />
+          </button>
+
+          {/* Standalone Copy Button */}
+          <button
+            onClick={() => {
+              const content = keyMoments.map(m => `${m.timestamp} → ${m.insight}`).join('\n');
+              handleCopy(content, 'key-moments');
+            }}
+            className="p-2 text-blue-100 hover:text-white hover:bg-blue-500 rounded-lg transition-all flex-shrink-0"
+            title="Copy Key Moments"
+            aria-label="Copy Key Moments"
+          >
+            {copiedSections.has('key-moments') ? (
+              <Check className="h-5 w-5 text-green-300" />
+            ) : (
+              <Copy className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
       
-      <div className="p-6">
-        <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="space-y-3">
-            {keyMoments.map((moment, index) => (
+      {!collapsedSections.has('key-moments') && (
+        <div id="key-moments-content" className="p-6">
+          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="space-y-3">
+              {keyMoments.map((moment, index) => (
               <button
                 key={index}
                 onClick={() => onTimestampClick(moment.timestamp)}
@@ -66,17 +107,18 @@ export function KeyMomentsSidebar({
                 </div>
               </button>
             ))}
+            </div>
           </div>
+          
+          {!playerReady && (
+            <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-xs text-yellow-700 text-center">
+                Video player loading... Timestamps will be clickable once ready.
+              </p>
+            </div>
+          )}
         </div>
-        
-        {!playerReady && (
-          <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-700 text-center">
-              Video player loading... Timestamps will be clickable once ready.
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }

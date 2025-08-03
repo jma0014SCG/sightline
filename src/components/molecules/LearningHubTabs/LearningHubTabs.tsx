@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { cn } from "@/lib/utils";
+import { ChevronDown, Copy, Check } from "lucide-react";
 import type {
   BackendFramework,
   BackendFlashcard,
@@ -22,6 +23,10 @@ interface LearningHubTabsProps {
   flashcardsContent?: string;
   quickQuizContent?: string;
   novelIdeasContent?: string;
+  collapsedSections: Set<string>;
+  copiedSections: Set<string>;
+  toggleSection: (sectionId: string) => void;
+  handleCopy: (content: string, sectionId?: string) => void;
   className?: string;
 }
 
@@ -42,6 +47,10 @@ export function LearningHubTabs({
   flashcardsContent = "",
   quickQuizContent = "",
   novelIdeasContent = "",
+  collapsedSections,
+  copiedSections,
+  toggleSection,
+  handleCopy,
   className,
 }: LearningHubTabsProps) {
   const [activeTab, setActiveTab] = useState<TabType>("frameworks");
@@ -96,6 +105,36 @@ export function LearningHubTabs({
   if (availableTabs.length === 0) {
     return null;
   }
+
+  // Function to get content for copying based on active tab
+  const getCopyContent = () => {
+    switch (activeTab) {
+      case "frameworks":
+        if (frameworks.length > 0) {
+          return frameworks.map(f => `${f.name}: ${f.description}`).join('\n\n');
+        }
+        return frameworksContent;
+      case "flashcards":
+        if (flashcards.length > 0) {
+          return flashcards.map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
+        }
+        return flashcardsContent;
+      case "glossary":
+        return glossary.map(g => `${g.term}: ${g.definition}`).join('\n\n');
+      case "quiz":
+        if (quizQuestions.length > 0) {
+          return quizQuestions.map((q, i) => `${i + 1}. ${q.question}\nAnswer: ${q.answer}`).join('\n\n');
+        }
+        return quickQuizContent;
+      case "ideas":
+        if (novelIdeas.length > 0) {
+          return novelIdeas.map(i => `${i.insight} (Novelty: ${i.score}/5)`).join('\n\n');
+        }
+        return novelIdeasContent;
+      default:
+        return '';
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -286,16 +325,48 @@ export function LearningHubTabs({
       )}
     >
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 rounded-t-xl">
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <span className="text-indigo-100">📚</span>
-          Learning Hub
-        </h3>
+        <div className="flex items-center justify-between gap-4">
+          {/* Collapsible Button Wrapper */}
+          <button
+            onClick={() => toggleSection('learning-hub')}
+            className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
+            aria-expanded={!collapsedSections.has('learning-hub')}
+            aria-controls="learning-hub-content"
+          >
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <span className="text-indigo-100">📚</span>
+              Learning Hub
+            </h3>
+            <ChevronDown className={cn(
+              "h-5 w-5 text-white transition-transform duration-200",
+              collapsedSections.has('learning-hub') ? "rotate-0" : "rotate-180"
+            )} />
+          </button>
+
+          {/* Standalone Copy Button */}
+          <button
+            onClick={() => {
+              const content = getCopyContent();
+              handleCopy(content || '', `learning-hub-${activeTab}`);
+            }}
+            className="p-2 text-indigo-100 hover:text-white hover:bg-indigo-500 rounded-lg transition-all flex-shrink-0"
+            title={`Copy ${activeTab} content`}
+            aria-label={`Copy ${activeTab} content`}
+          >
+            {copiedSections.has(`learning-hub-${activeTab}`) ? (
+              <Check className="h-5 w-5 text-green-300" />
+            ) : (
+              <Copy className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
 
-      <div className="p-6">
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-1 mb-4 p-1 bg-gray-100 rounded-lg">
-          {availableTabs.map((tab) => (
+      {!collapsedSections.has('learning-hub') && (
+        <div id="learning-hub-content" className="p-6">
+          {/* Tab Navigation */}
+          <div className="flex flex-wrap gap-1 mb-4 p-1 bg-gray-100 rounded-lg">
+            {availableTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -325,11 +396,12 @@ export function LearningHubTabs({
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          {renderContent()}
+          {/* Tab Content */}
+          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {renderContent()}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
