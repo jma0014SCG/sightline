@@ -160,12 +160,12 @@ class YouTubeService:
         """
         # Try Gumloop service first as it's designed for this specific task
         if self.gumloop_service and self.gumloop_service.is_available():
-            logger.info(f"🔄 Attempting Gumloop transcript extraction for video {video_id}")
+            logger.info(f"🔄 Attempting Gumloop extraction for video {video_id}")
             try:
                 video_url = f"https://www.youtube.com/watch?v={video_id}"
                 transcript = await self.gumloop_service.get_transcript(video_url)
                 if transcript:
-                    logger.info(f"✅ Successfully retrieved transcript via Gumloop ({len(transcript)} characters)")
+                    logger.info(f"✅ Successfully retrieved content via Gumloop")
                     return transcript, True  # Return with Gumloop flag
             except Exception as e:
                 logger.warning(f"⚠️ Gumloop service failed: {str(e)}")
@@ -176,7 +176,7 @@ class YouTubeService:
             transcript = await self.reliable_service.get_transcript(video_id)
             if transcript:
                 logger.info(f"✅ Successfully retrieved transcript via reliable service ({len(transcript)} characters)")
-                return transcript, False
+                return transcript, False  # Regular transcript, not from Gumloop
         except Exception as e:
             logger.warning(f"⚠️ Reliable service failed: {str(e)}")
         
@@ -187,7 +187,7 @@ class YouTubeService:
                 transcript = await self.ytdlp_service.get_transcript(video_id)
                 if transcript:
                     logger.info(f"✅ Successfully retrieved transcript via yt-dlp ({len(transcript)} characters)")
-                    return transcript, False
+                    return transcript, False  # Regular transcript, not from Gumloop
             except Exception as e:
                 logger.warning(f"⚠️ yt-dlp failed: {str(e)}")
         
@@ -198,7 +198,7 @@ class YouTubeService:
                 transcript = await self.transcript_service.get_transcript_direct(video_id)
                 if transcript:
                     logger.info(f"✅ Successfully retrieved transcript via direct API ({len(transcript)} characters)")
-                    return transcript, False
+                    return transcript, False  # Regular transcript, not from Gumloop
             except Exception as e:
                 logger.warning(f"⚠️ Direct API failed: {str(e)}")
         
@@ -207,7 +207,7 @@ class YouTubeService:
             logger.info(f"🔄 Attempting to get transcript via Oxylabs for video {video_id}")
             oxylabs_transcript = await self._get_transcript_via_oxylabs(video_id)
             if oxylabs_transcript:
-                return oxylabs_transcript, False
+                return oxylabs_transcript, False  # Regular transcript, not from Gumloop
             logger.warning(f"⚠️ Oxylabs failed, falling back to regular methods")
         
         max_retries = 3
@@ -228,14 +228,14 @@ class YouTubeService:
                     full_transcript = self._clean_transcript(full_transcript)
                     
                     logger.info(f"✅ Successfully retrieved transcript for {video_id} ({len(full_transcript)} characters)")
-                    return full_transcript, False
+                    return full_transcript, False  # Regular transcript, not from Gumloop
                 
             except (TranscriptsDisabled, NoTranscriptFound) as e:
                 logger.warning(f"⚠️ No transcript available for {video_id}: {type(e).__name__}")
                 # Try Whisper fallback for videos without captions
                 logger.info(f"🔄 Attempting Whisper fallback for {video_id}...")
                 whisper_transcript = await self._get_whisper_transcript(video_id)
-                return whisper_transcript, False
+                return whisper_transcript, False  # Regular transcript, not from Gumloop
                 
             except VideoUnavailable as e:
                 logger.error(f"❌ Video {video_id} is unavailable: {str(e)}")

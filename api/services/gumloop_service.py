@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 from gumloop import GumloopClient
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class GumloopService:
             video_url: Full YouTube URL (e.g., https://www.youtube.com/watch?v=Xq0xJl-2D_s)
         
         Returns:
-            Transcript text if successful, None otherwise
+            Transcript string if available, None otherwise
         """
         if not self.client:
             logger.error("❌ Gumloop client not initialized")
@@ -45,7 +45,7 @@ class GumloopService:
             return None
         
         try:
-            logger.info(f"🔄 Attempting to get transcript via Gumloop for URL: {video_url}")
+            logger.info(f"🔄 Attempting to get content via Gumloop for URL: {video_url}")
             
             # Run the Gumloop flow with the video URL
             output = self.client.run_flow(
@@ -55,55 +55,61 @@ class GumloopService:
                 }
             )
             
-            # Extract transcript from the output
-            # Based on your pipeline, it returns a summary instead of raw transcript
-            # We'll extract the content from the markdown summary
+            # Extract summary, transcript, and category from the output
+            summary = None
             transcript = None
+            category = None
+            
             if isinstance(output, dict):
-                # Try different possible keys where content might be stored
-                raw_content = (
-                    output.get("transcript") or 
-                    output.get("summary") or 
-                    output.get("text") or 
-                    output.get("content") or
-                    output.get("result")
-                )
+                # Extract the three top-level keys from your new Gumloop flow
+                summary = output.get("summary")
+                transcript = output.get("transcript") 
+                category = output.get("category")
                 
-                # If we got the summary markdown, extract useful content from it
-                if raw_content and isinstance(raw_content, str):
-                    # Check if it's a markdown summary and extract meaningful content
-                    if "```markdown" in raw_content or "## Video Context" in raw_content:
-                        # Extract the main summary content for now
-                        # You could parse this more sophisticatedly if needed
-                        transcript = raw_content
-                    else:
-                        transcript = raw_content
+                # Fallback to old format if new keys not found
+                if not summary and not transcript:
+                    fallback_content = (
+                        output.get("text") or 
+                        output.get("content") or
+                        output.get("result")
+                    )
+                    if fallback_content:
+                        summary = fallback_content
                         
             elif isinstance(output, str):
-                transcript = output
+                # If output is just a string, treat it as summary
+                summary = output
             elif isinstance(output, list) and len(output) > 0:
                 # If output is a list, try to get the first item
                 first_item = output[0]
                 if isinstance(first_item, dict):
-                    transcript = (
-                        first_item.get("transcript") or 
-                        first_item.get("summary") or
-                        first_item.get("text") or 
-                        first_item.get("content") or
-                        first_item.get("result")
-                    )
+                    summary = first_item.get("summary")
+                    transcript = first_item.get("transcript")
+                    category = first_item.get("category")
                 elif isinstance(first_item, str):
-                    transcript = first_item
+                    summary = first_item
             
-            if transcript and len(str(transcript).strip()) > 50:  # Ensure we got substantial content
-                logger.info(f"✅ Successfully retrieved transcript via Gumloop ({len(transcript)} characters)")
-                return str(transcript).strip()
-            else:
-                logger.warning(f"⚠️ Gumloop returned insufficient transcript content: {output}")
-                return None
+            # Validate and clean the extracted data
+            if summary and isinstance(summary, str):
+                summary = summary.strip()
+            if transcript and isinstance(transcript, str):
+                transcript = transcript.strip()
+            if category and isinstance(category, str):
+                category = category.strip()
+            
+            # Return transcript if available (with structure for later parsing)
+            if summary or transcript:
+                # Return the complete structured content for parsing
+                full_content = summary if summary else transcript
+                if full_content:
+                    logger.info(f"✅ Successfully retrieved content via Gumloop: {len(full_content)} characters")
+                    return full_content
+            
+            logger.warning(f"⚠️ Gumloop returned no usable content: {output}")
+            return None
                 
         except Exception as e:
-            logger.error(f"❌ Gumloop transcript extraction failed: {str(e)}")
+            logger.error(f"❌ Gumloop content extraction failed: {str(e)}")
             return None
     
     def is_available(self) -> bool:

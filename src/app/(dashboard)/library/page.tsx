@@ -359,7 +359,7 @@ export default function LibraryPage() {
               
               <div className="text-center">
                 <p className="text-xs text-gray-500">
-                  {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 15-30 seconds'}
+                  {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 60-120 seconds'}
                 </p>
               </div>
             </div>

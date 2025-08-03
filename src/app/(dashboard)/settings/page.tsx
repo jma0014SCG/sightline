@@ -193,7 +193,7 @@ export default function SettingsPage() {
                   disabled
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-50 text-gray-500 cursor-not-allowed"
                 />
-                <p className="mt-1 text-xs text-gray-500">Email cannot be changed as it's linked to your Google account</p>
+                <p className="mt-1 text-xs text-gray-500">Email cannot be changed as it&apos;s linked to your Google account</p>
               </div>
 
               <div>
@@ -228,7 +228,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Notification Preferences</h2>
-              <p className="text-sm text-gray-600">Choose what notifications you'd like to receive</p>
+              <p className="text-sm text-gray-600">Choose what notifications you&apos;d like to receive</p>
             </div>
 
             {preferencesLoading ? (
@@ -265,16 +265,16 @@ export default function SettingsPage() {
                       <p className="text-sm text-gray-500">{item.description}</p>
                     </div>
                     <button
-                      onClick={() => handlePreferenceChange(item.key, !preferences?.[item.key])}
+                      onClick={() => handlePreferenceChange(item.key, !(preferences as any)?.[item.key])}
                       className={cn(
                         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                        preferences?.[item.key] ? 'bg-primary-600' : 'bg-gray-200'
+                        (preferences as any)?.[item.key] ? 'bg-primary-600' : 'bg-gray-200'
                       )}
                     >
                       <span
                         className={cn(
                           'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                          preferences?.[item.key] ? 'translate-x-6' : 'translate-x-1'
+                          (preferences as any)?.[item.key] ? 'translate-x-6' : 'translate-x-1'
                         )}
                       />
                     </button>

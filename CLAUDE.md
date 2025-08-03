@@ -60,6 +60,9 @@ node scripts/test-pipeline.js     # Test summarization pipeline
 # Python API tests
 cd api && python -m pytest        # Run all Python tests
 python tests/test_full_integration.py  # Full integration test
+
+# Run specific Python tests
+cd api && python -m pytest tests/test_gumloop.py -v  # Run with verbose output
 ```
 
 ## Architecture Overview
@@ -108,6 +111,14 @@ python tests/test_full_integration.py  # Full integration test
 3. **Error handling**: Check `/Docs/Bug_tracking.md` before fixing issues
 4. **Project structure**: Follow patterns in `/Docs/project_structure.md`
 
+### Cursor Workflow Integration
+When working with complex subtasks:
+- Create a todo list for tasks with multiple steps
+- Check documentation links in `/Docs/Implementation.md`
+- Follow UI/UX specifications in `/Docs/UI_UX_doc.md`
+- Verify project structure compliance before creating files
+- Document all errors and solutions in `/Docs/Bug_tracking.md`
+
 ## Environment Variables
 
 Critical variables needed:
@@ -135,9 +146,18 @@ Critical variables needed:
 2. Monitor webhooks at `/api/webhooks/stripe`
 3. Check subscription status in database
 
+### Working with the Python API
+1. Virtual environment is at `../venv/` relative to api directory
+2. Run API tests from project root: `cd api && python -m pytest`
+3. For specific service testing: `python tests/test_<service>.py`
+4. Check `api/services/` for available transcript fallback services
+
 ## Security Considerations
 - All API routes are protected by Clerk authentication
 - Rate limiting implemented via custom middleware
 - Input validation using Zod schemas
 - Environment variables validated on startup
 - XSS protection via DOMPurify for markdown rendering
+
+## Package Manager
+This project uses pnpm (v10.13.1) as specified in package.json. Always use pnpm for dependency management.

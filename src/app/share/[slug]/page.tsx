@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/atoms/Skeleton'
 import { api } from '@/components/providers/TRPCProvider'
 import { Share2, Eye, ExternalLink, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function SharedSummaryPage() {
   const params = useParams()
@@ -146,9 +147,11 @@ export default function SharedSummaryPage() {
           <div className="mx-auto max-w-4xl px-4 py-3">
             <div className="flex items-center gap-3">
               {sharedSummary.summary.author.image && (
-                <img
+                <Image
                   src={sharedSummary.summary.author.image}
                   alt={sharedSummary.summary.author.name || 'User avatar'}
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full"
                 />
               )}

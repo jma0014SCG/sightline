@@ -94,6 +94,7 @@ class SummarizeResponse(BaseModel):
     user_id: str
     created_at: datetime = datetime.utcnow()
     
+    
     # Structured data from Gumloop parsing
     metadata: Optional[SummaryMetadata] = None
     key_moments: List[KeyMoment] = []

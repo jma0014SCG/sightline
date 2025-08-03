@@ -51,11 +51,11 @@ async def test_gumloop_service():
         transcript = await gumloop_service.get_transcript(test_url)
         
         if transcript:
-            print(f"✅ SUCCESS! Retrieved transcript ({len(transcript)} characters)")
-            print("📝 First 200 characters:")
-            print(f"   {transcript[:200]}...")
+            print("✅ SUCCESS! Retrieved content from Gumloop:")
+            print(f"   📝 Transcript: {len(transcript)} characters") 
+            print(f"      Preview: {transcript[:150]}...")
         else:
-            print("❌ FAILED: No transcript returned")
+            print("❌ FAILED: No content returned")
             
     except Exception as e:
         print(f"❌ ERROR: {str(e)}")

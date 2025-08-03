@@ -1,0 +1,1 @@
+export { LearningHubTabs } from './LearningHubTabs'

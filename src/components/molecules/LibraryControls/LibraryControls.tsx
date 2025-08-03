@@ -280,7 +280,7 @@ export function LibraryControls({
       {/* Expanded Filters */}
       {showFilters && (
         <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
             {/* Sort By */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Sort by</label>
@@ -339,6 +339,7 @@ export function LibraryControls({
                 <option value="long">Long (&gt;20 min)</option>
               </select>
             </div>
+
           </div>
         </div>
       )}

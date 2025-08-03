@@ -97,7 +97,7 @@ export function AuthPromptModal({
             </h2>
             {summaryTitle && (
               <p className="text-lg text-gray-700 mb-2 font-medium">
-                "{summaryTitle}"
+                &quot;{summaryTitle}&quot;
               </p>
             )}
             <p className="text-gray-600">

@@ -43,7 +43,7 @@ async def summarize_video(
                 detail="Video is too long. Maximum duration is 2 hours."
             )
         
-        # Get transcript
+        # Get transcript from YouTube service
         transcript, is_gumloop = await youtube_service.get_transcript(video_id)
         if not transcript:
             raise HTTPException(
@@ -66,9 +66,9 @@ async def summarize_video(
         tools = []
         resources = []
         
-        # Check if this is a Gumloop-formatted summary
-        if is_gumloop or is_gumloop_summary(transcript):
-            # Parse Gumloop format directly
+        # Check if transcript is in Gumloop format
+        if is_gumloop and is_gumloop_summary(transcript):
+            # Parse Gumloop format
             gumloop_data = parse_gumloop_summary(transcript)
             
             if gumloop_data:
@@ -214,7 +214,7 @@ async def summarize_video(
                 if gumloop_data.insight_enrichment:
                     tools = gumloop_data.insight_enrichment.stats_tools_links
             else:
-                # Fallback: use LangChain if Gumloop parsing fails
+                # Fallback to LangChain if Gumloop parsing fails
                 summary = await langchain_service.summarize_transcript(
                     transcript=transcript,
                     video_title=video_info.title,
@@ -223,7 +223,7 @@ async def summarize_video(
                 summary_content = summary.content
                 key_points = summary.key_points
         else:
-            # Use LangChain for raw transcripts
+            # Use LangChain for regular transcripts
             summary = await langchain_service.summarize_transcript(
                 transcript=transcript,
                 video_title=video_info.title,

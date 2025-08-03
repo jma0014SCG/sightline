@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
@@ -95,10 +96,11 @@ export function SummaryCard({
             <div className="relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {summary.thumbnailUrl ? (
                 <>
-                  <img
+                  <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
@@ -324,10 +326,11 @@ export function SummaryCard({
             <div className="relative h-24 w-40 overflow-hidden rounded-lg bg-gray-100">
               {summary.thumbnailUrl ? (
                 <>
-                  <img
+                  <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">

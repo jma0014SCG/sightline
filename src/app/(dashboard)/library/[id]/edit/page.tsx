@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { api } from '@/components/providers/TRPCProvider'
@@ -116,9 +117,11 @@ export default function EditSummaryPage() {
       <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
         <div className="flex items-start gap-4">
           {summary.thumbnailUrl && (
-            <img
+            <Image
               src={summary.thumbnailUrl}
               alt={summary.videoTitle}
+              width={160}
+              height={96}
               className="h-24 w-40 rounded-lg object-cover flex-shrink-0"
             />
           )}

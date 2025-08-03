@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
@@ -93,12 +93,12 @@ export default function HomePage() {
     }, 500) // Wait for scroll to complete
   }
   
-  const phrases = [
+  const phrases = useMemo(() => [
     'Turn 60-minute videos into 3-minute power briefs',
     'Stop queuing videos. Start absorbing insights.',
     'Stay ahead while everyone else is still buffering',
     'Learn faster. Retain more.'
-  ]
+  ], [])
 
   // Authenticated summary creation
   const createSummary = api.summary.create.useMutation({
@@ -242,10 +242,10 @@ export default function HomePage() {
     }, 50)
 
     return () => clearInterval(timer)
-  }, [currentPhraseIndex])
+  }, [currentPhraseIndex, phrases])
 
   // Animated counter hook
-  const animateCounter = (start: number, end: number, duration: number, key: keyof typeof counters) => {
+  const animateCounter = useCallback((start: number, end: number, duration: number, key: keyof typeof counters) => {
     const startTime = Date.now()
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime
@@ -258,7 +258,7 @@ export default function HomePage() {
         clearInterval(timer)
       }
     }, 16)
-  }
+  }, [])
 
   // Intersection observer for metrics section
   useEffect(() => {
@@ -281,7 +281,7 @@ export default function HomePage() {
     }
 
     return () => observer.disconnect()
-  }, [metricsVisible])
+  }, [metricsVisible, animateCounter])
 
   // Sticky navigation and floating button scroll effect
   useEffect(() => {
@@ -478,16 +478,6 @@ export default function HomePage() {
                     <p className="text-gray-700 leading-relaxed font-medium">
                       Paste any YouTube URL below and get instant insights
                     </p>
-                    <div className="mt-4 flex items-center justify-center space-x-4 text-sm">
-                      <div className="flex items-center text-green-600">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        <span className="font-medium">Works instantly</span>
-                      </div>
-                      <div className="flex items-center text-green-600">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        <span className="font-medium">100% Free</span>
-                      </div>
-                    </div>
                   </div>
 
                   <URLInput 
@@ -568,7 +558,7 @@ export default function HomePage() {
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
-                    {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 15-30 seconds'}
+                    {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 60-120 seconds'}
                   </p>
                 </div>
               </div>
@@ -621,12 +611,10 @@ export default function HomePage() {
           {/* Video Container */}
           <div className="mx-auto max-w-6xl">
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-prussian-blue-200/50 ring-1 ring-prussian-blue-200">
-              <div style={{ position: 'relative', paddingBottom: '41.25%', height: 0 }}>
+              <div style={{ position: 'relative', paddingBottom: '62.42774566473989%', height: 0 }}>
                 <iframe 
-                  src="https://www.loom.com/embed/052f63c546ca4026a4ed8b7e584cd276?sid=7750cfc2-e333-4947-b60a-ceb90b845416" 
+                  src="https://www.loom.com/embed/e50a9b923880450d903b09aad245d370?sid=89cc6760-df7a-49cd-a5e5-858b0e69449a" 
                   frameBorder="0" 
-                  webkitAllowFullScreen 
-                  mozAllowFullScreen 
                   allowFullScreen 
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                   className="rounded-lg"
@@ -662,7 +650,7 @@ export default function HomePage() {
               🎯 Works Great For Every Video Type
             </h2>
             <h3 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              From podcasts to tutorials, we've got you covered
+              From podcasts to tutorials, we&apos;ve got you covered
             </h3>
             <p className="mt-6 text-lg text-gray-600">
               Sightline adapts to any video format and extracts the most valuable insights
@@ -796,7 +784,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">The endless scroll</h3>
-                  <p className="text-gray-600">Bookmarking videos you'll "definitely watch later" (but never do).</p>
+                  <p className="text-gray-600">Bookmarking videos you&apos;ll &quot;definitely watch later&quot; (but never do).</p>
                 </div>
               </div>
               
@@ -816,7 +804,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">The time trap</h3>
-                  <p className="text-gray-600">Starting a "quick" video that turns into a 2-hour rabbit hole.</p>
+                  <p className="text-gray-600">Starting a &quot;quick&quot; video that turns into a 2-hour rabbit hole.</p>
                 </div>
               </div>
             </div>
@@ -839,7 +827,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay ahead</h3>
-                  <p className="text-gray-600">Be the person who actually knows what's happening in your field.</p>
+                  <p className="text-gray-600">Be the person who actually knows what&apos;s happening in your field.</p>
                 </div>
               </div>
               
@@ -893,14 +881,8 @@ export default function HomePage() {
       <section id="metrics-section" className="py-24 sm:py-32 bg-gradient-to-br from-prussian-blue-50 via-white to-prussian-blue-50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-silver-lake-blue">
-              🚀 Get in Before the Rest Catch On
-            </h2>
             <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
-              Join the smart learners
-            </p>
-            <p className="mt-6 text-lg text-paynes-gray">
-              While everyone else is still buffering, you'll be three insights ahead.
+              Take back your most valuable asset: Time
             </p>
           </div>
 
