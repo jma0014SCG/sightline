@@ -1,0 +1,1 @@
+export { InsightEnrichment } from "./InsightEnrichment";

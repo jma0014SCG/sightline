@@ -61,13 +61,13 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
           {copied ? (
             <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
           ) : (
-            <Copy className="h-5 w-5 text-gray-700 flex-shrink-0" />
+            <Copy className="h-5 w-5 text-gray-900 flex-shrink-0" />
           )}
           <div className="flex-1">
             <div className="text-sm font-semibold text-gray-900">
               {copied ? 'Copied!' : 'Copy Summary'}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-gray-900">
               Copy entire summary to clipboard
             </div>
           </div>
@@ -83,10 +83,10 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
           )}
           aria-label="Download as Markdown file"
         >
-          <Download className="h-5 w-5 text-gray-700 flex-shrink-0" />
+          <Download className="h-5 w-5 text-gray-900 flex-shrink-0" />
           <div className="flex-1">
             <div className="text-sm font-semibold text-gray-900">Export Markdown</div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-gray-900">
               Download as .md file
             </div>
           </div>
@@ -102,10 +102,10 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
           )}
           aria-label="Share summary"
         >
-          <Share2 className="h-5 w-5 text-gray-700 flex-shrink-0" />
+          <Share2 className="h-5 w-5 text-gray-900 flex-shrink-0" />
           <div className="flex-1">
             <div className="text-sm font-semibold text-gray-900">Share</div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-gray-900">
               Create shareable link
             </div>
           </div>
