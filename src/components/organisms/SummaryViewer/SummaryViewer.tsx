@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
@@ -38,6 +38,11 @@ export function SummaryViewer({
     new Set(['frameworks', 'debunked', 'practice', 'playbooks', 'enrichment', 'learning']) // Start with reference sections collapsed
   )
 
+  // YouTube player state management
+  const [player, setPlayer] = useState<any>(null)
+  const [playerReady, setPlayerReady] = useState(false)
+  const playerRef = useRef<HTMLDivElement>(null)
+
   const handleCopy = async (content?: string) => {
     try {
       const textToCopy = content || summary.content
@@ -64,6 +69,82 @@ export function SummaryViewer({
   const openShareModal = () => setShowShareModal(true)
   const closeShareModal = () => setShowShareModal(false)
 
+  // Initialize YouTube player
+  const initializePlayer = useCallback(() => {
+    if (!playerRef.current || !summary.videoId) return
+
+    const newPlayer = new (window as any).YT.Player(playerRef.current, {
+      height: '315',
+      width: '560',
+      videoId: summary.videoId,
+      playerVars: {
+        'modestbranding': 1,
+        'rel': 0,
+        'showinfo': 0,
+      },
+      events: {
+        'onReady': (event: any) => {
+          setPlayerReady(true)
+        },
+        'onError': (event: any) => {
+          console.error('YouTube player error:', event.data)
+        }
+      },
+    })
+    setPlayer(newPlayer)
+  }, [summary.videoId])
+
+  // YouTube player initialization and API loading
+  useEffect(() => {
+    // Only load player if we have a valid videoId
+    if (!summary.videoId) return
+
+    // Check if YouTube API is already loaded
+    if (typeof window !== 'undefined' && (window as any).YT && (window as any).YT.Player) {
+      initializePlayer()
+      return
+    }
+
+    // Load YouTube IFrame Player API
+    const tag = document.createElement('script')
+    tag.src = "https://www.youtube.com/iframe_api"
+    const firstScriptTag = document.getElementsByTagName('script')[0]
+    if (firstScriptTag.parentNode) {
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+    }
+
+    // Set up callback for when API is ready
+    ;(window as any).onYouTubeIframeAPIReady = () => {
+      initializePlayer()
+    }
+
+    return () => {
+      // Cleanup: remove the global callback
+      ;(window as any).onYouTubeIframeAPIReady = null
+    }
+  }, [summary.videoId, initializePlayer])
+
+  // Handle timestamp click navigation
+  const handleTimestampClick = (timestamp: string) => {
+    if (player && playerReady) {
+      const seconds = parseTimestampToSeconds(timestamp)
+      player.seekTo(seconds, true)
+      player.playVideo()
+    }
+  }
+
+  // Parse timestamp string to seconds
+  const parseTimestampToSeconds = (timestamp: string): number => {
+    const timeParts = timestamp.split(':').map(Number)
+    if (timeParts.length === 2) {
+      // MM:SS format
+      return timeParts[0] * 60 + timeParts[1]
+    } else if (timeParts.length === 3) {
+      // HH:MM:SS format
+      return timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2]
+    }
+    return 0
+  }
 
   // Enhanced parsing utilities with normalization and regex-based extraction
   const normalizeMarkdown = (md: string): string => {
@@ -793,6 +874,26 @@ export function SummaryViewer({
         </div>
       </header>
 
+      {/* YouTube Player */}
+      {summary.videoId && (
+        <div className="mb-6 sm:mb-8">
+          <div className="relative w-full bg-black rounded-xl overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+            <div 
+              ref={playerRef}
+              className="absolute top-0 left-0 w-full h-full"
+            />
+            {!playerReady && (
+              <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-r-transparent mx-auto mb-2" />
+                  <p className="text-sm text-gray-300">Loading video player...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Quick Navigation Bar */}
       <nav className="sticky top-0 z-10 bg-white border-b border-gray-200 mb-6 sm:mb-8" role="navigation" aria-label="Summary sections">
         <div className="flex items-center gap-1 px-2 py-3 overflow-x-auto scrollbar-hide">
@@ -916,9 +1017,14 @@ export function SummaryViewer({
                   {keyMoments.map((moment, index) => (
                     <div key={index} className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl hover:from-gray-100 hover:to-blue-50/60 transition-all duration-200 shadow-sm hover:shadow-md">
                       <div className="flex items-center justify-between w-full sm:w-auto sm:flex-shrink-0">
-                        <span className="inline-flex items-center px-4 py-2 rounded-full text-base font-mono font-bold bg-blue-600 text-white shadow-sm">
+                        <button 
+                          onClick={() => handleTimestampClick(moment.timestamp)}
+                          className="inline-flex items-center px-4 py-2 rounded-full text-base font-mono font-bold bg-blue-600 text-white shadow-sm hover:bg-blue-700 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          title={`Jump to ${moment.timestamp} in video`}
+                          aria-label={`Jump to ${moment.timestamp} in video`}
+                        >
                           {moment.timestamp}
-                        </span>
+                        </button>
                         <button
                           onClick={() => handleCopy(moment.insight)}
                           className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white rounded transition-all sm:hidden min-h-[36px] min-w-[36px]"
