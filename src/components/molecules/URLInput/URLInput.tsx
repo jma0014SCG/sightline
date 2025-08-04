@@ -159,10 +159,11 @@ export function URLInput({
             onClick={handlePaste}
             disabled={isLoading || disabled}
             className={cn(
-              "rounded-lg bg-white border border-paynes-gray/20 px-4 py-3 text-sm font-medium",
+              "rounded-lg bg-white border border-paynes-gray/20 px-4 py-3 sm:px-4 sm:py-3 text-sm font-medium",
               "text-paynes-gray hover:bg-anti-flash-white focus:outline-none focus:ring-2",
               "focus:ring-silver-lake-blue/50 disabled:cursor-not-allowed",
-              "disabled:opacity-50 transition-all duration-300 hover:scale-105"
+              "disabled:opacity-50 transition-all duration-300 hover:scale-105",
+              "min-h-[44px] min-w-[64px]" // Mobile touch target minimum
             )}
           >
             Paste
@@ -172,11 +173,12 @@ export function URLInput({
             type="submit"
             disabled={isLoading || disabled || !url.trim()}
             className={cn(
-              "rounded-lg bg-prussian-blue px-6 py-3 text-sm font-semibold text-white",
+              "rounded-lg bg-prussian-blue px-4 sm:px-6 py-3 text-sm font-semibold text-white",
               "shadow-lg hover:bg-paynes-gray focus-visible:outline focus-visible:outline-2",
               "focus-visible:outline-offset-2 focus-visible:outline-prussian-blue",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl",
+              "min-h-[44px]" // Mobile touch target minimum
             )}
           >
             {isLoading && (

@@ -377,24 +377,26 @@ export default function HomePage() {
           : '-translate-y-full opacity-0'
       }`}>
         <div className="bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-14 sm:h-16">
               <div className="flex items-center space-x-2">
-                <Sparkles className="h-6 w-6 text-primary-600" />
-                <span className="font-bold text-xl text-gray-900">Sightline</span>
+                <Sparkles className="h-5 sm:h-6 w-5 sm:w-6 text-primary-600" />
+                <span className="font-bold text-lg sm:text-xl text-gray-900">Sightline</span>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
                   onClick={focusUrlInput}
-                  className="bg-prussian-blue text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-colors duration-200 min-h-[36px] touch-manipulation"
+                  className="bg-primary-600 text-white px-4 sm:px-6 py-2 rounded-full text-sm font-semibold hover:bg-primary-700 transition-colors duration-200 min-h-[40px] touch-manipulation shadow-md"
                 >
-  Try Free Now →
+                  <span className="hidden sm:inline">Try Free Now →</span>
+                  <span className="sm:hidden">Try Free</span>
                 </button>
                 <button
                   onClick={() => router.push('/library')}
-                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 min-h-[36px] flex items-center touch-manipulation"
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 min-h-[40px] flex items-center touch-manipulation px-3"
                 >
-                  Library
+                  <BookOpen className="h-4 w-4 sm:hidden" />
+                  <span className="hidden sm:inline">Library</span>
                 </button>
               </div>
             </div>
@@ -419,64 +421,93 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-6 py-24 sm:py-32 lg:px-8 bg-white">
+      <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-32 bg-white">
         <div className="mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Left Column - Content */}
             <div className="relative">
               {/* Floating badge */}
-              <div className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-gray-700 shadow-sm mb-8">
-                <Sparkles className="h-4 w-4 mr-2 text-primary-600" />
-                AI-Powered Learning
+              <div className="inline-flex items-center rounded-full bg-primary-600 text-white px-4 py-2 text-sm font-semibold shadow-md mb-8 animate-pulse">
+                <Sparkles className="h-4 w-4 mr-2" />
+                #1 YouTube Summarizer
               </div>
 
               {/* Main headline */}
-              <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl lg:text-6xl xl:text-7xl leading-tight mb-6" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', margin: '0 0 1.5rem 0' }}>
-                <span className="block">Outlearn Everyone.</span>
-                <span className="block text-primary-600 mt-2">In 60 Seconds.</span>
+              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-5xl xl:text-6xl leading-[1.1] mb-6">
+                <span className="block">Turn YouTube videos into</span>
+                <span className="block bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mt-1">instant insights</span>
               </h1>
 
-              <p className="mt-8 text-xl leading-8 text-gray-600 max-w-lg">
-                Paste any YouTube link. Get a no-fluff, insight-packed summary in 60 seconds flat.
+              <p className="mt-6 text-xl sm:text-2xl leading-relaxed text-gray-700 max-w-xl font-light">
+                Skip the fluff. Get key insights from any YouTube video in <span className="font-semibold text-primary-600">under 60 seconds</span>.
               </p>
               
-              <p className="mt-4 text-lg text-gray-500">
-                Made for people who want to know more — without wasting more time.
-              </p>
+              {/* Enhanced social proof */}
+              <div className="mt-8 space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-md">JM</div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-md">SK</div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600 to-primary-800 border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-md">AL</div>
+                    <div className="w-10 h-10 rounded-full bg-gray-900 border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-md">+247</div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 font-semibold">
+                      Join 250+ professionals
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      saving 10+ hours per week
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Rating */}
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">4.9/5</span>
+                  <span className="text-sm text-gray-600">(127 reviews)</span>
+                </div>
+              </div>
+              
+              {/* CTA Buttons for mobile */}
+              <div className="mt-8 flex gap-4 lg:hidden">
+                <button
+                  onClick={focusUrlInput}
+                  className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  Try it free
+                </button>
+                <button
+                  onClick={() => scrollToSection('how-it-works')}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:border-primary-300 hover:text-primary-700 transition-all duration-200"
+                >
+                  See how it works
+                </button>
+              </div>
 
             </div>
 
             {/* Right Column - URL Input */}
             <div className="relative">
-              {/* Badge */}
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                <div className="bg-gradient-to-r from-prussian-blue to-prussian-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center space-x-2">
-                  <Zap className="h-4 w-4" />
-                  <span>Try it now - Takes 60 seconds</span>
-                </div>
-              </div>
-              
-              {/* Gradient background card */}
-              <div className="relative rounded-3xl bg-gradient-to-br from-white via-prussian-blue-50 to-white p-8 shadow-2xl ring-2 ring-prussian-blue-200 ring-opacity-50">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-prussian-blue-100 to-silver-lake-blue-100 opacity-10 blur-xl"></div>
-                <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-prussian-blue-300/0 via-prussian-blue-300/70 to-prussian-blue-300/0"></div>
-                <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-prussian-blue-300/0 via-prussian-blue-300/70 to-prussian-blue-300/0"></div>
-                
+              {/* Simplified CTA card */}
+              <div className="relative rounded-2xl bg-white p-6 sm:p-8 shadow-xl ring-1 ring-gray-200">
                 <div className="space-y-6 relative">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                      🎯 Try It Now — Your Brain, But Faster
-                    </h2>
-                    <div className="inline-flex items-center space-x-2 mb-4">
-                      <div className="flex -space-x-2">
-                        <div className="w-8 h-8 rounded-full bg-prussian-blue-200 flex items-center justify-center text-xs font-bold text-prussian-blue-700">JD</div>
-                        <div className="w-8 h-8 rounded-full bg-prussian-blue-300 flex items-center justify-center text-xs font-bold text-prussian-blue-800">AK</div>
-                        <div className="w-8 h-8 rounded-full bg-prussian-blue-400 flex items-center justify-center text-xs font-bold text-white">+</div>
-                      </div>
-                      <p className="text-sm text-gray-600">Join 250+ smart learners</p>
+                    <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                      <Zap className="h-4 w-4" />
+                      <span>Free • No signup required</span>
                     </div>
-                    <p className="text-gray-700 leading-relaxed font-medium">
-                      Paste any YouTube URL below and get instant insights
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      Try it now
+                    </h2>
+                    <p className="text-gray-600">
+                      Paste any YouTube URL to get started
                     </p>
                   </div>
 
@@ -494,27 +525,20 @@ export default function HomePage() {
                     className="scale-105"
                   />
 
-                  {/* CTA */}
+                  {/* Trust indicators */}
                   <div className="text-center pt-2">
-                    <p className="text-prussian-blue-600 font-bold text-base">
-                      🎁 Try It Free → Get Your First Summary Now
-                    </p>
-                  </div>
-
-                  {/* Security badges */}
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex items-center justify-center space-x-8 text-xs text-gray-500">
-                      <div className="flex items-center">
-                        <Shield className="h-3 w-3 mr-1" />
-                        SOC 2 Compliant
+                    <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        <span>Secure</span>
                       </div>
-                      <div className="flex items-center">
-                        <Lock className="h-3 w-3 mr-1" />
-                        256-bit SSL
+                      <div className="flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        <span>Private</span>
                       </div>
-                      <div className="flex items-center">
-                        <Award className="h-3 w-3 mr-1" />
-                        GDPR Ready
+                      <div className="flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        <span>60s results</span>
                       </div>
                     </div>
                   </div>
@@ -614,9 +638,8 @@ export default function HomePage() {
               <div style={{ position: 'relative', paddingBottom: '62.42774566473989%', height: 0 }}>
                 <iframe 
                   src="https://www.loom.com/embed/e50a9b923880450d903b09aad245d370?sid=89cc6760-df7a-49cd-a5e5-858b0e69449a" 
-                  frameBorder="0" 
-                  allowFullScreen 
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  allowFullScreen
                   className="rounded-lg"
                 ></iframe>
               </div>
@@ -1084,16 +1107,17 @@ Don&apos;t Miss Out - Try Sightline Free
       </section>
 
       {/* Floating Action Button */}
-      <div className={`fixed bottom-6 right-6 z-40 transition-all duration-300 ${
+      <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 transition-all duration-300 ${
         showFloatingButton 
           ? 'translate-y-0 opacity-100 scale-100' 
           : 'translate-y-16 opacity-0 scale-75 pointer-events-none'
       }`}>
         <button
           onClick={focusUrlInput}
-          className="group bg-prussian-blue hover:bg-paynes-gray text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center space-x-2 min-h-[56px] touch-manipulation"
+          className="group bg-primary-600 hover:bg-primary-700 text-white rounded-full p-3 sm:p-4 shadow-2xl hover:shadow-3xl transition-all duration-200 flex items-center space-x-2 min-h-[48px] sm:min-h-[56px] touch-manipulation"
+          aria-label="Summarize a video"
         >
-          <Zap className="h-6 w-6" />
+          <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
           <span className="hidden sm:block font-medium text-sm">Summarize Video</span>
         </button>
       </div>
