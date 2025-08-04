@@ -40,6 +40,7 @@ export function SummaryViewer({
       "playbooks",
       "enrichment",
       "learning",
+      "full-summary", // Collapse full summary by default for above-the-fold optimization
     ]), // Start with reference sections collapsed
   );
 
@@ -317,15 +318,15 @@ export function SummaryViewer({
   return (
     <article
       className={cn(
-        "max-w-7xl mx-auto bg-slate-50 px-6 sm:px-8 lg:px-12 py-8",
+        "max-w-7xl mx-auto bg-slate-50 px-4 sm:px-6 lg:px-8 py-6",
         className,
       )}
       aria-label="Video summary"
     >
-      {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-        {/* Main Content Column (3/5 width on large screens) */}
-        <div className="lg:col-span-3">
+      {/* Optimized Layout - 2/3 + 1/3 split */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Main Content Column (2/3 width on large screens) */}
+        <div className="lg:col-span-2">
           <MainContentColumn
             summary={summary}
             playerRef={playerRef}
@@ -339,8 +340,8 @@ export function SummaryViewer({
           />
         </div>
 
-        {/* Sidebar (2/5 width on large screens) */}
-        <div className="lg:col-span-2 space-y-10">
+        {/* Sidebar (1/3 width on large screens) */}
+        <div className="lg:col-span-1 space-y-6">
           {/* Actions Sidebar */}
           <ActionsSidebar summary={summary} onShare={openShareModal} />
 
