@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -21,6 +21,92 @@ interface MainContentColumnProps {
   className?: string;
 }
 
+// Actionable Intelligence Card Component with Tabs
+const ActionableIntelligenceCard = ({ 
+  inPracticeContent, 
+  playbooksContent, 
+  copiedSections, 
+  handleCopy 
+}: { 
+  inPracticeContent: string; 
+  playbooksContent: string; 
+  copiedSections: Set<string>;
+  handleCopy: (content: string, sectionId?: string) => void;
+}) => {
+  const [activeTab, setActiveTab] = useState('practice');
+
+  return (
+    <section className="bg-white border border-gray-200 border-t-4 border-t-orange-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="bg-slate-100 px-6 py-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <span className="text-orange-600">🛠️</span>
+            <span>Actionable Intelligence</span>
+          </h2>
+          <div className="flex items-center gap-2">
+            {/* Tab Navigation */}
+            <div className="bg-white p-1 rounded-lg border border-gray-300 shadow-sm">
+              <nav className="flex items-center gap-1">
+                <button 
+                  onClick={() => setActiveTab('practice')} 
+                  className={cn(
+                    "px-4 py-1.5 text-sm font-semibold rounded-md transition-colors",
+                    activeTab === 'practice' 
+                      ? 'bg-orange-600 text-white shadow' 
+                      : 'text-gray-600 hover:bg-gray-200'
+                  )}
+                >
+                  In Practice
+                </button>
+                <button 
+                  onClick={() => setActiveTab('playbooks')} 
+                  className={cn(
+                    "px-4 py-1.5 text-sm font-semibold rounded-md transition-colors",
+                    activeTab === 'playbooks' 
+                      ? 'bg-orange-600 text-white shadow' 
+                      : 'text-gray-600 hover:bg-gray-200'
+                  )}
+                >
+                  Playbooks
+                </button>
+              </nav>
+            </div>
+            
+            {/* Copy Button */}
+            <button
+              onClick={() => {
+                const content = activeTab === 'practice' ? inPracticeContent : playbooksContent;
+                const sectionId = activeTab === 'practice' ? 'actionable-practice' : 'actionable-playbooks';
+                handleCopy(content, sectionId);
+              }}
+              className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all flex-shrink-0"
+              title={`Copy ${activeTab === 'practice' ? 'In Practice' : 'Playbooks'} section`}
+              aria-label={`Copy ${activeTab === 'practice' ? 'In Practice' : 'Playbooks'} section`}
+            >
+              {copiedSections.has(activeTab === 'practice' ? 'actionable-practice' : 'actionable-playbooks') ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Copy className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-6 lg:p-8 bg-white">
+        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-6 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
+            {activeTab === 'practice' ? inPracticeContent : playbooksContent}
+          </ReactMarkdown>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export function MainContentColumn({
   summary,
   playerRef,
@@ -39,7 +125,7 @@ export function MainContentColumn({
       <header className="bg-white border border-gray-200 rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="space-y-4">
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
             {summary.videoTitle}
           </h1>
 
@@ -172,150 +258,26 @@ export function MainContentColumn({
 
       {/* Core Summary Sections */}
       <div className="space-y-10">
-        {/* In Practice Section */}
-        {sections.get("in practice") && (
-          <section className="bg-white border border-gray-200 border-t-4 border-t-green-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between gap-4 p-6 bg-slate-100">
-              <button
-                onClick={() => toggleSection("practice")}
-                className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
-                aria-expanded={!collapsedSections.has("practice")}
-                aria-controls="practice-content"
-              >
-                <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                  <span className="text-green-600">⭐</span>
-                  <span>In Practice</span>
-                </h2>
-                <ChevronDown
-                  className={cn(
-                    "h-5 w-5 text-gray-700 transition-transform duration-200",
-                    collapsedSections.has("practice") ? "" : "rotate-180",
-                  )}
-                />
-              </button>
-
-              {/* Copy Button */}
-              <button
-                onClick={() => handleCopy(sections.get("in practice") || '', 'practice')}
-                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all flex-shrink-0"
-                title="Copy In Practice section"
-                aria-label="Copy In Practice section"
-              >
-                {copiedSections.has('practice') ? (
-                  <Check className="h-5 w-5 text-green-600" />
-                ) : (
-                  <Copy className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-            {!collapsedSections.has("practice") && (
-              <div id="practice-content" className="p-6 lg:p-8">
-                <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-6 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeHighlight]}
-                  >
-                    {sections.get("in practice")}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Playbooks Section */}
-        {((summary.playbooks && summary.playbooks.length > 0) ||
+        {/* Actionable Intelligence Card - Combines In Practice and Playbooks */}
+        {(sections.get("in practice") ||
+          summary.playbooks && summary.playbooks.length > 0 ||
           sections.get("playbooks") ||
           sections.get("playbooks & heuristics")) && (
-          <section className="bg-white border border-gray-200 border-t-4 border-t-purple-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between gap-4 p-6 bg-slate-100">
-              <button
-                onClick={() => toggleSection("playbooks")}
-                className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
-                aria-expanded={!collapsedSections.has("playbooks")}
-                aria-controls="playbooks-content"
-              >
-                <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                  <span className="text-purple-600">📋</span>
-                  <span>Playbooks & Heuristics</span>
-                  {summary.playbooks && summary.playbooks.length > 0 && (
-                    <span className="text-sm font-medium text-gray-600">
-                      ({summary.playbooks.length} playbooks)
-                    </span>
-                  )}
-                </h2>
-                <ChevronDown
-                  className={cn(
-                    "h-5 w-5 text-gray-700 transition-transform duration-200",
-                    collapsedSections.has("playbooks") ? "" : "rotate-180",
-                  )}
-                />
-              </button>
-
-              {/* Copy Button */}
-              <button
-                onClick={() => {
-                  let content = '';
-                  if (summary.playbooks && summary.playbooks.length > 0) {
-                    content = summary.playbooks.map(p => `TRIGGER: ${p.trigger}\nACTION: ${p.action}`).join('\n\n');
-                  } else {
-                    content = sections.get("playbooks") || sections.get("playbooks & heuristics") || '';
-                  }
-                  handleCopy(content, 'playbooks');
-                }}
-                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all flex-shrink-0"
-                title="Copy Playbooks section"
-                aria-label="Copy Playbooks section"
-              >
-                {copiedSections.has('playbooks') ? (
-                  <Check className="h-5 w-5 text-green-600" />
-                ) : (
-                  <Copy className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-            {!collapsedSections.has("playbooks") && (
-              <div id="playbooks-content" className="p-6 lg:p-8">
-                {summary.playbooks && summary.playbooks.length > 0 ? (
-                  <div className="space-y-4">
-                    {summary.playbooks.map((playbook, index) => (
-                      <div
-                        key={index}
-                        className="p-5 bg-purple-50 border border-purple-100 rounded-lg shadow-sm"
-                      >
-                        <div className="mb-3">
-                          <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full mb-2">
-                            TRIGGER
-                          </span>
-                          <p className="text-gray-900 font-medium leading-relaxed">
-                            {playbook.trigger}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full mb-2">
-                            ACTION
-                          </span>
-                          <p className="text-gray-900 leading-relaxed">
-                            {playbook.action}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-7 prose-p:mb-6 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeHighlight]}
-                    >
-                      {sections.get("playbooks") ||
-                        sections.get("playbooks & heuristics")}
-                    </ReactMarkdown>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
+          <ActionableIntelligenceCard
+            inPracticeContent={
+              sections.get("in practice") ||
+              (summary.in_practice && summary.in_practice.length > 0
+                ? summary.in_practice.map(p => `- ${p}`).join('\n')
+                : 'No practical examples identified.')
+            }
+            playbooksContent={
+              summary.playbooks && summary.playbooks.length > 0
+                ? summary.playbooks.map(p => `**TRIGGER:** ${p.trigger}\n\n**ACTION:** ${p.action}`).join('\n\n---\n\n')
+                : sections.get("playbooks") || sections.get("playbooks & heuristics") || 'No playbooks identified.'
+            }
+            copiedSections={copiedSections}
+            handleCopy={handleCopy}
+          />
         )}
 
         {/* Debunked Assumptions Section */}

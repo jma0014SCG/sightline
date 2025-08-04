@@ -238,10 +238,22 @@ export function SummaryViewer({
       ],
       ["glossary", ["terms", "definitions", "key terms", "terminology"]],
       [
+        "glossary (≤15 terms)", 
+        ["glossary (≤15 terms)", "glossary", "terms", "definitions"]
+      ],
+      [
         "frameworks",
         ["strategic frameworks", "mental models", "framework", "models"],
       ],
       ["tl;dr", ["tl;dr (≤100 words)", "summary", "quick summary", "overview"]],
+      [
+        "feynman flashcards (≤10)", 
+        ["feynman flashcards (≤10)", "feynman flashcards", "flashcards", "flash cards"]
+      ],
+      [
+        "quick quiz (3 q&a)", 
+        ["quick quiz (3 q&a)", "quick quiz", "quiz"]
+      ],
       [
         "novel idea meter",
         ["novel-idea meter", "novel ideas", "innovation", "new concepts", "fresh insights"],
@@ -311,9 +323,9 @@ export function SummaryViewer({
       aria-label="Video summary"
     >
       {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-        {/* Main Content Column (2/3 width on large screens) */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+        {/* Main Content Column (3/5 width on large screens) */}
+        <div className="lg:col-span-3">
           <MainContentColumn
             summary={summary}
             playerRef={playerRef}
@@ -327,8 +339,8 @@ export function SummaryViewer({
           />
         </div>
 
-        {/* Sidebar (1/3 width on large screens) */}
-        <div className="lg:col-span-1 space-y-10">
+        {/* Sidebar (2/5 width on large screens) */}
+        <div className="lg:col-span-2 space-y-10">
           {/* Actions Sidebar */}
           <ActionsSidebar summary={summary} onShare={openShareModal} />
 
@@ -356,10 +368,10 @@ export function SummaryViewer({
               sections.get("frameworks") || sections.get("strategic frameworks")
             }
             flashcardsContent={
-              sections.get("feynman flashcards") || sections.get("flashcards")
+              sections.get("feynman flashcards (≤10)") || sections.get("feynman flashcards") || sections.get("flashcards")
             }
             quickQuizContent={
-              sections.get("quick quiz") || sections.get("quiz")
+              sections.get("quick quiz (3 q&a)") || sections.get("quick quiz") || sections.get("quiz")
             }
             novelIdeasContent={novelIdeasContent}
             collapsedSections={collapsedSections}
