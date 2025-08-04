@@ -140,17 +140,17 @@ export function LearningHubTabs({
     switch (activeTab) {
       case "frameworks":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {frameworks.length > 0 ? (
               frameworks.map((framework, index) => (
                 <div
                   key={index}
-                  className="p-4 bg-white border border-blue-100 rounded-lg shadow-sm"
+                  className="p-3 bg-white border border-blue-100 rounded-lg shadow-sm"
                 >
-                  <h4 className="font-semibold text-blue-900 mb-2">
+                  <h4 className="font-semibold text-blue-900 mb-1.5">
                     {framework.name}
                   </h4>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 leading-snug">
                     {framework.description}
                   </p>
                 </div>
@@ -171,17 +171,17 @@ export function LearningHubTabs({
 
       case "flashcards":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {flashcards.length > 0 ? (
               flashcards.map((flashcard, index) => (
                 <div
                   key={index}
-                  className="p-4 bg-white border border-indigo-100 rounded-lg shadow-sm"
+                  className="p-3 bg-white border border-indigo-100 rounded-lg shadow-sm"
                 >
-                  <h4 className="font-semibold text-indigo-900 mb-2">
+                  <h4 className="font-semibold text-indigo-900 mb-1.5">
                     {flashcard.question}
                   </h4>
-                  <p className="text-sm text-gray-900">{flashcard.answer}</p>
+                  <p className="text-sm text-gray-900 leading-snug">{flashcard.answer}</p>
                 </div>
               ))
             ) : flashcardsContent ? (
@@ -199,13 +199,13 @@ export function LearningHubTabs({
 
       case "glossary":
         return (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {glossary.map((item, index) => (
               <div
                 key={index}
-                className="p-4 bg-white border border-blue-100 rounded-lg shadow-sm"
+                className="p-3 bg-white border border-blue-100 rounded-lg shadow-sm"
               >
-                <h4 className="font-semibold text-blue-900 mb-2">
+                <h4 className="font-semibold text-blue-900 mb-1">
                   {item.term}
                 </h4>
                 <div className="text-sm prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
@@ -223,17 +223,17 @@ export function LearningHubTabs({
 
       case "quiz":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {quizQuestions.length > 0 ? (
               quizQuestions.map((quiz, index) => (
                 <div
                   key={index}
-                  className="p-4 bg-white border border-purple-100 rounded-lg shadow-sm"
+                  className="p-3 bg-white border border-purple-100 rounded-lg shadow-sm"
                 >
-                  <h4 className="font-semibold text-purple-900 mb-2">
+                  <h4 className="font-semibold text-purple-900 mb-1.5">
                     {index + 1}. {quiz.question}
                   </h4>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 leading-snug">
                     <span className="font-medium text-purple-700">Answer:</span>{" "}
                     {quiz.answer}
                   </p>
@@ -324,7 +324,7 @@ export function LearningHubTabs({
         className,
       )}
     >
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 rounded-t-xl">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 rounded-t-xl">
         <div className="flex items-center justify-between gap-4">
           {/* Collapsible Button Wrapper */}
           <button
@@ -333,12 +333,12 @@ export function LearningHubTabs({
             aria-expanded={!collapsedSections.has('learning-hub')}
             aria-controls="learning-hub-content"
           >
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <span className="text-indigo-100">📚</span>
               Learning Hub
             </h3>
             <ChevronDown className={cn(
-              "h-5 w-5 text-white transition-transform duration-200",
+              "h-4 w-4 text-white transition-transform duration-200",
               collapsedSections.has('learning-hub') ? "rotate-0" : "rotate-180"
             )} />
           </button>
@@ -354,24 +354,24 @@ export function LearningHubTabs({
             aria-label={`Copy ${activeTab} content`}
           >
             {copiedSections.has(`learning-hub-${activeTab}`) ? (
-              <Check className="h-5 w-5 text-green-300" />
+              <Check className="h-4 w-4 text-green-300" />
             ) : (
-              <Copy className="h-5 w-5" />
+              <Copy className="h-4 w-4" />
             )}
           </button>
         </div>
       </div>
 
       {!collapsedSections.has('learning-hub') && (
-        <div id="learning-hub-content" className="p-6">
+        <div id="learning-hub-content" className="p-4">
           {/* Tab Navigation */}
-          <div className="flex flex-wrap gap-1 mb-4 p-1 bg-gray-100 rounded-lg">
+          <div className="flex flex-wrap gap-1 mb-3 p-1 bg-gray-100 rounded-lg">
             {availableTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all",
+                "flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all",
                 "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
                 activeTab === tab.id
                   ? "bg-blue-50 text-blue-700 shadow-sm border border-blue-200"

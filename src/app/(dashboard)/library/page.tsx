@@ -285,106 +285,82 @@ export default function LibraryPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Your Library</h1>
-        <p className="mt-2 text-gray-600">All your video summaries in one place</p>
-      </div>
-
-      {/* Usage Warning */}
-      {usage?.isLimitReached && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
-            <div>
-              <h3 className="font-medium text-amber-800">Monthly limit reached</h3>
-              <p className="text-sm text-amber-700">
-                You&apos;ve created {usage.currentMonthUsage} of {usage.monthlyLimit} summaries this month.{' '}
-                <button 
-                  onClick={() => router.push('/billing')}
-                  className="underline hover:no-underline"
-                >
-                  Upgrade to Pro
-                </button>{' '}
-                for unlimited summaries.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Usage Stats */}
-      {usage && !usage.isLimitReached && usage.monthlyLimit > 0 && (
-        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-800">Monthly Usage</p>
-              <p className="text-sm text-blue-700">
-                {usage.currentMonthUsage} of {usage.monthlyLimit} summaries used
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="h-2 w-32 rounded-full bg-blue-200">
-                <div
-                  className="h-2 rounded-full bg-blue-600"
-                  style={{
-                    width: `${Math.min((usage.currentMonthUsage / usage.monthlyLimit) * 100, 100)}%`
-                  }}
-                />
+      {/* Compact Header with Inline URL Input */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-gray-900">Library</h1>
+            {usage && usage.monthlyLimit > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>{usage.currentMonthUsage}/{usage.monthlyLimit}</span>
+                <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      usage.isLimitReached ? "bg-amber-500" : "bg-blue-600"
+                    )}
+                    style={{
+                      width: `${Math.min((usage.currentMonthUsage / usage.monthlyLimit) * 100, 100)}%`
+                    }}
+                  />
+                </div>
+                {usage.isLimitReached && (
+                  <button 
+                    onClick={() => router.push('/billing')}
+                    className="text-xs text-amber-600 hover:text-amber-700 underline hover:no-underline"
+                  >
+                    Upgrade
+                  </button>
+                )}
               </div>
-            </div>
+            )}
+          </div>
+          
+          {/* Compact URL Input */}
+          <div className="flex-shrink-0 max-w-md">
+            <URLInput 
+              onSubmit={handleCreateSummary}
+              onSuccess={() => {
+                console.log('URL input cleared after successful submission')
+              }}
+              isLoading={isCreatingSummary || createSummary.isPending}
+              disabled={usage?.isLimitReached}
+              placeholder="Paste YouTube URL..."
+              className="compact"
+            />
           </div>
         </div>
-      )}
 
-      {/* URL Input */}
-      <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
-        <URLInput 
-          onSubmit={handleCreateSummary}
-          onSuccess={() => {
-            console.log('URL input cleared after successful submission')
-          }}
-          isLoading={isCreatingSummary || createSummary.isPending}
-          disabled={usage?.isLimitReached}
-        />
+        {/* Usage warning message only if limit reached */}
         {usage?.isLimitReached && (
-          <p className="mt-2 text-sm text-amber-700">
-            You&apos;ve reached your monthly limit. Upgrade your plan to create more summaries.
-          </p>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-sm">
+            <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+            <p className="text-amber-700">
+              Monthly limit reached. Upgrade for unlimited summaries.
+            </p>
+          </div>
         )}
 
-        {/* Progress indicator */}
+        {/* Compact progress indicator */}
         {createSummary.isPending && (
-          <div className="mt-6">
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-              <div className="text-center mb-4">
-                <div className="inline-flex items-center space-x-2 text-primary-700 mb-2">
-                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse"></div>
-                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-200"></div>
-                  <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-400"></div>
-                </div>
-                <h3 className="font-semibold text-gray-900">Processing your video</h3>
-                <p className="text-sm text-gray-600 mt-1">{processingStage}</p>
+          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex space-x-1">
+                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse animation-delay-200"></div>
+                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse animation-delay-400"></div>
               </div>
-              
-              {/* Progress bar */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                  <span>Progress</span>
+              <div className="flex-1">
+                <div className="flex items-center justify-between text-xs text-blue-700 mb-1">
+                  <span className="font-medium">{processingStage}</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-blue-200 rounded-full h-1.5">
                   <div 
-                    className="bg-primary-600 h-2 rounded-full transition-all duration-500 ease-out"
+                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
-                  ></div>
+                  />
                 </div>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-xs text-gray-500">
-                  {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 60-120 seconds'}
-                </p>
               </div>
             </div>
           </div>
@@ -392,7 +368,7 @@ export default function LibraryPage() {
       </div>
 
       {/* Library Controls */}
-      <div className="mb-6">
+      <div className="mb-4">
         <LibraryControls
           filters={filters}
           onFiltersChange={setFilters}
@@ -406,7 +382,7 @@ export default function LibraryPage() {
 
       {/* Quick Actions Bar */}
       {allSummaries.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-4">
           <QuickActionsBar
             selectedIds={selectedIds}
             onSelectAll={handleSelectAll}
@@ -422,20 +398,20 @@ export default function LibraryPage() {
       {/* Loading state */}
       {isLoading && (
         <div className={cn(
-          "grid gap-4",
+          "grid gap-3",
           viewMode === 'grid' 
-            ? "sm:grid-cols-1 lg:grid-cols-2" 
+            ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
             : "grid-cols-1"
         )}>
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-lg border border-gray-200 bg-white p-6">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="mt-2 h-4 w-1/2" />
-              <div className="mt-4 flex gap-4">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="rounded-lg border border-gray-200 bg-white p-4">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="mt-2 h-3 w-1/2" />
+              <div className="mt-3 flex gap-2">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="h-3 w-12" />
               </div>
-              <Skeleton className="mt-3 h-12 w-full" />
+              <Skeleton className="mt-2 h-10 w-full" />
             </div>
           ))}
         </div>
@@ -445,9 +421,9 @@ export default function LibraryPage() {
       {!isLoading && allSummaries.length > 0 && (
         <>
           <div className={cn(
-            "grid gap-4",
+            "grid gap-3",
             viewMode === 'grid' 
-              ? "sm:grid-cols-1 lg:grid-cols-2" 
+              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
               : "grid-cols-1"
           )}>
             {allSummaries.map((summary) => (
@@ -466,7 +442,7 @@ export default function LibraryPage() {
 
           {/* Load More */}
           {hasNextPage && (
-            <div className="mt-8 text-center">
+            <div className="mt-6 text-center">
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}

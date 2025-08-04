@@ -233,42 +233,94 @@ export function LibraryControls({
           )}
         </div>
 
-        {/* Quick Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 hidden sm:block">Quick filters:</span>
-          
-          {quickFilters.map((filter) => {
-            const Icon = filter.icon
-            return (
+        {/* Quick Filters with Popular Tags */}
+        <div className="space-y-2">
+          {/* Quick Filters Row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-700 hidden sm:block">Filters:</span>
+            
+            {quickFilters.map((filter) => {
+              const Icon = filter.icon
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => handleQuickFilterClick(filter.filter)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                    filter.active
+                      ? "bg-blue-100 text-blue-700 border border-blue-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
+                  )}
+                >
+                  <Icon className="h-3 w-3" />
+                  {filter.label}
+                </button>
+              )
+            })}
+            
+            {hasActiveFilters && (
               <button
-                key={filter.id}
-                onClick={() => handleQuickFilterClick(filter.filter)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                  filter.active
-                    ? "bg-blue-100 text-blue-700 border border-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
-                )}
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
               >
-                <Icon className="h-3 w-3" />
-                {filter.label}
+                <X className="h-3 w-3" />
+                Clear all
               </button>
-            )
-          })}
-          
-          {hasActiveFilters && (
-            <button
-              onClick={clearAllFilters}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
-            >
-              <X className="h-3 w-3" />
-              Clear all
-            </button>
+            )}
+          </div>
+
+          {/* Popular Tags Row */}
+          {availableTags && availableTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">Popular:</span>
+              
+              {availableTags.slice(0, 6).map((tag) => {
+                const getTagColor = (type: string) => {
+                  switch (type) {
+                    case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
+                    case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
+                    case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
+                    case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
+                    case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                    case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                    case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
+                    default: return 'bg-gray-100 text-gray-700 border-gray-200'
+                  }
+                }
+                
+                return (
+                  <button
+                    key={tag.id}
+                    onClick={() => handleTagToggle(tag.name)}
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
+                      filters.tags?.includes(tag.name)
+                        ? getTagColor(tag.type)
+                        : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                    )}
+                  >
+                    {tag.name}
+                    <span className="ml-1 text-xs opacity-60">
+                      {tag.count}
+                    </span>
+                  </button>
+                )
+              })}
+              
+              {availableTags.length > 6 && (
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                >
+                  +{availableTags.length - 6} more
+                </button>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Smart Collections */}
-        {((availableCategories && availableCategories.length > 0) || (availableTags && availableTags.length > 0)) && (
+        {/* Advanced Filters - Collapsible */}
+        {showFilters && ((availableCategories && availableCategories.length > 0) || (availableTags && availableTags.length > 0)) && (
           <div className="border-t border-gray-200 pt-3">
             <div className="space-y-3">
               {/* Categories */}
@@ -276,20 +328,20 @@ export function LibraryControls({
                 <div>
                   <span className="text-sm font-medium text-gray-700 block mb-2">Categories:</span>
                   <div className="flex flex-wrap gap-2">
-                    {availableCategories.slice(0, 8).map((category) => (
+                    {availableCategories.map((category) => (
                       <button
                         key={category.id}
                         onClick={() => handleCategoryToggle(category.name)}
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                          "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
                           filters.categories?.includes(category.name)
-                            ? "bg-purple-100 text-purple-700 border border-purple-200"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
+                            ? "bg-purple-100 text-purple-700 border-purple-200"
+                            : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
                         )}
                       >
-                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                         {category.name}
-                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/60 rounded">
+                        <span className="ml-1 text-xs opacity-60">
                           {category.count}
                         </span>
                       </button>
@@ -298,12 +350,12 @@ export function LibraryControls({
                 </div>
               )}
 
-              {/* Tags */}
-              {availableTags && availableTags.length > 0 && (
+              {/* All Tags */}
+              {availableTags && availableTags.length > 6 && (
                 <div>
-                  <span className="text-sm font-medium text-gray-700 block mb-2">Tags:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {availableTags.slice(0, 12).map((tag) => {
+                  <span className="text-sm font-medium text-gray-700 block mb-2">All Tags:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {availableTags.slice(6).map((tag) => {
                       const getTagColor = (type: string) => {
                         switch (type) {
                           case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
@@ -322,14 +374,14 @@ export function LibraryControls({
                           key={tag.id}
                           onClick={() => handleTagToggle(tag.name)}
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
                             filters.tags?.includes(tag.name)
                               ? getTagColor(tag.type)
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent"
+                              : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
                           )}
                         >
                           {tag.name}
-                          <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/60 rounded">
+                          <span className="ml-1 text-xs opacity-60">
                             {tag.count}
                           </span>
                         </button>

@@ -40,18 +40,18 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
   }
 
   return (
-    <div className={cn("bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200", className)}>
-      <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+    <div className={cn("bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200", className)}>
+      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
         <span className="text-blue-600">⚡</span>
         Quick Actions
       </h3>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         {/* Copy Summary */}
         <button
           onClick={handleCopy}
           className={cn(
-            "w-full flex items-center gap-3 p-4 rounded-lg text-left transition-all duration-200",
+            "w-full flex items-center gap-2 p-3 rounded-lg text-left transition-all duration-200",
             "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
             "border border-slate-200 hover:border-blue-300 hover:shadow-sm",
             copied && "bg-green-50 border-green-300"
@@ -59,16 +59,16 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
           aria-label="Copy entire summary"
         >
           {copied ? (
-            <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
           ) : (
-            <Copy className="h-5 w-5 text-gray-900 flex-shrink-0" />
+            <Copy className="h-4 w-4 text-gray-900 flex-shrink-0" />
           )}
           <div className="flex-1">
             <div className="text-sm font-semibold text-gray-900">
               {copied ? 'Copied!' : 'Copy Summary'}
             </div>
-            <div className="text-xs text-gray-900">
-              Copy entire summary to clipboard
+            <div className="text-xs text-gray-600">
+              Full text to clipboard
             </div>
           </div>
         </button>
@@ -77,17 +77,17 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
         <button
           onClick={handleDownload}
           className={cn(
-            "w-full flex items-center gap-3 p-4 rounded-lg text-left transition-all duration-200",
+            "w-full flex items-center gap-2 p-3 rounded-lg text-left transition-all duration-200",
             "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
             "border border-slate-200 hover:border-blue-300 hover:shadow-sm"
           )}
           aria-label="Download as Markdown file"
         >
-          <Download className="h-5 w-5 text-gray-900 flex-shrink-0" />
+          <Download className="h-4 w-4 text-gray-900 flex-shrink-0" />
           <div className="flex-1">
-            <div className="text-sm font-semibold text-gray-900">Export Markdown</div>
-            <div className="text-xs text-gray-900">
-              Download as .md file
+            <div className="text-sm font-semibold text-gray-900">Export</div>
+            <div className="text-xs text-gray-600">
+              Download as .md
             </div>
           </div>
         </button>
@@ -96,17 +96,17 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
         <button
           onClick={onShare}
           className={cn(
-            "w-full flex items-center gap-3 p-4 rounded-lg text-left transition-all duration-200",
+            "w-full flex items-center gap-2 p-3 rounded-lg text-left transition-all duration-200",
             "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
             "border border-slate-200 hover:border-blue-300 hover:shadow-sm"
           )}
           aria-label="Share summary"
         >
-          <Share2 className="h-5 w-5 text-gray-900 flex-shrink-0" />
+          <Share2 className="h-4 w-4 text-gray-900 flex-shrink-0" />
           <div className="flex-1">
             <div className="text-sm font-semibold text-gray-900">Share</div>
-            <div className="text-xs text-gray-900">
-              Create shareable link
+            <div className="text-xs text-gray-600">
+              Create public link
             </div>
           </div>
         </button>

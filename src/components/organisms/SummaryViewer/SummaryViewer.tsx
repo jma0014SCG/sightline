@@ -318,13 +318,13 @@ export function SummaryViewer({
   return (
     <article
       className={cn(
-        "max-w-7xl mx-auto bg-slate-50 px-4 sm:px-6 lg:px-8 py-6",
+        "max-w-7xl mx-auto bg-slate-50 px-3 sm:px-4 lg:px-6 py-4",
         className,
       )}
       aria-label="Video summary"
     >
       {/* Optimized Layout - 2/3 + 1/3 split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Main Content Column (2/3 width on large screens) */}
         <div className="lg:col-span-2">
           <MainContentColumn
@@ -341,7 +341,7 @@ export function SummaryViewer({
         </div>
 
         {/* Sidebar (1/3 width on large screens) */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-4">
           {/* Actions Sidebar */}
           <ActionsSidebar summary={summary} onShare={openShareModal} />
 

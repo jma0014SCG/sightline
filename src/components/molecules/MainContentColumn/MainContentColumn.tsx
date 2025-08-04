@@ -109,7 +109,7 @@ const PrimaryContentTabs = ({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                "flex-1 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors",
                 activeTab === tab.id ? "bg-white" : "hover:bg-gray-100",
                 activeTab === tab.id && tab.color === 'amber' && "border-amber-500 text-amber-700",
                 activeTab === tab.id && tab.color === 'orange' && "border-orange-500 text-orange-700", 
@@ -125,7 +125,7 @@ const PrimaryContentTabs = ({
           ))}
           
           {/* Copy Button */}
-          <div className="flex items-center px-3">
+          <div className="flex items-center px-2">
             <button
               onClick={() => handleCopy(currentTab?.content || '', activeTab)}
               className={cn(
@@ -174,7 +174,7 @@ export function MainContentColumn({
   formatDuration,
   className,
 }: MainContentColumnProps) {
-  const [playerMode, setPlayerMode] = useState<'standard' | 'compact' | 'wide'>('standard');
+  const [playerMode, setPlayerMode] = useState<'standard' | 'compact' | 'wide'>('wide');
   
   // Video aspect ratios for different modes
   const aspectRatios = {

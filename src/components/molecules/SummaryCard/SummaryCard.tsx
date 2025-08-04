@@ -161,9 +161,9 @@ export function SummaryCard({
           </div>
         )}
         <Link href={`/library/${summary.id}`} className="block">
-          <div className="flex gap-4 p-4">
+          <div className="flex gap-3 p-3">
             {/* Compact Thumbnail */}
-            <div className="relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative h-16 w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
@@ -196,29 +196,27 @@ export function SummaryCard({
             {/* Content */}
             <div className="flex-1 min-w-0">
               {/* Header with channel info */}
-              <div className="mb-2 flex items-center gap-2 text-sm">
+              <div className="mb-1 flex items-center gap-2 text-xs">
                 <span className="font-medium text-blue-600">{summary.channelName}</span>
                 <span className="text-gray-400">•</span>
                 <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
               </div>
 
               {/* Title */}
-              <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+              <h3 className="mb-1.5 line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
                 {summary.videoTitle}
               </h3>
 
-              {/* Key insights preview - compact */}
+              {/* Key insights preview - single line */}
               {keyInsights.length > 0 && (
-                <div className="mb-2">
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {keyInsights[0].length > 120 ? `${keyInsights[0].substring(0, 120)}...` : keyInsights[0]}
-                  </p>
-                </div>
+                <p className="text-xs text-gray-600 line-clamp-1 mb-1.5 leading-snug">
+                  {keyInsights[0].length > 100 ? `${keyInsights[0].substring(0, 100)}...` : keyInsights[0]}
+                </p>
               )}
 
-              {/* Tags and Categories - compact for list view */}
+              {/* Tags and Categories - inline */}
               {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
-                <div className="mb-2 space-y-1">
+                <div className="mb-1.5 flex flex-wrap gap-1">
                   {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 1)}
                   {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 2)}
                 </div>
@@ -226,27 +224,60 @@ export function SummaryCard({
 
               {/* Footer */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" />
-                    View Summary
+                    View
                   </span>
                   {keyInsights.length > 1 && (
-                    <span className="text-blue-600">+{keyInsights.length - 1} more insights</span>
+                    <span className="text-blue-600">+{keyInsights.length - 1} more</span>
                   )}
                 </div>
                 
-                {/* Quick actions button */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setShowActions(!showActions)
-                  }}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                  aria-label="More actions"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
+                {/* Hover Actions - appear on card hover */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {onShare && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onShare(summary.id)
+                      }}
+                      className="rounded-lg p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      aria-label="Share summary"
+                      title="Share"
+                    >
+                      <Share2 className="h-3 w-3" />
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onDelete(summary.id)
+                      }}
+                      className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      aria-label="Delete summary"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
+                  
+                  {/* Fallback more actions button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setShowActions(!showActions)
+                    }}
+                    className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                    aria-label="More actions"
+                    title="More"
+                  >
+                    <MoreVertical className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -344,7 +375,7 @@ export function SummaryCard({
         </div>
       )}
       <Link href={`/library/${summary.id}`} className="block">
-        <div className="flex items-start gap-4 p-6">
+        <div className="flex items-start gap-4 p-4">
           <div className="flex-1">
             {/* Header with channel info */}
             <div className="mb-2 flex items-center gap-2 text-sm">
@@ -354,72 +385,87 @@ export function SummaryCard({
             </div>
 
             {/* Title */}
-            <h3 className="mb-3 line-clamp-2 text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+            <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
               {summary.videoTitle}
             </h3>
 
-            {/* Key insights preview */}
+            {/* Key insights preview - single line */}
             {keyInsights.length > 0 && (
-              <div className="mb-4 space-y-2">
-                <h4 className="text-sm font-medium text-gray-700">Key Insights:</h4>
-                {keyInsights.slice(0, 2).map((insight, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <div className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                      {insight.length > 100 ? `${insight.substring(0, 100)}...` : insight}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-gray-600 line-clamp-1 mb-3 leading-snug">
+                {keyInsights[0].length > 80 ? `${keyInsights[0].substring(0, 80)}...` : keyInsights[0]}
+              </p>
             )}
 
-            {/* Tags and Categories */}
+            {/* Tags and Categories - inline without labels */}
             {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
-              <div className="mb-4 space-y-2">
-                {summary.categories && summary.categories.length > 0 && (
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 mb-1 block">Categories:</span>
-                    {renderCategories(summary.categories, 2)}
-                  </div>
-                )}
-                {summary.tags && summary.tags.length > 0 && (
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 mb-1 block">Tags:</span>
-                    {renderTags(summary.tags, 4)}
-                  </div>
-                )}
+              <div className="mb-3 flex flex-wrap gap-1">
+                {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 1)}
+                {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 3)}
               </div>
             )}
 
-            {/* Footer with stats and actions */}
+            {/* Footer with stats and hover actions */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500">
                 <span className="flex items-center gap-1">
                   <Eye className="h-3 w-3" />
-                  View Summary
+                  View
                 </span>
-                {keyInsights.length > 2 && (
-                  <span className="text-blue-600">+{keyInsights.length - 2} more insights</span>
+                {keyInsights.length > 1 && (
+                  <span className="text-blue-600">+{keyInsights.length - 1} more</span>
                 )}
               </div>
               
-              {/* Quick actions button */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  setShowActions(!showActions)
-                }}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                aria-label="More actions"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </button>
+              {/* Hover Actions - appear on card hover */}
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {onShare && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onShare(summary.id)
+                    }}
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    aria-label="Share summary"
+                    title="Share"
+                  >
+                    <Share2 className="h-3 w-3" />
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onDelete(summary.id)
+                    }}
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    aria-label="Delete summary"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+                
+                {/* Fallback more actions button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setShowActions(!showActions)
+                  }}
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                  aria-label="More actions"
+                  title="More"
+                >
+                  <MoreVertical className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Thumbnail - back to original smaller size */}
-          <div className="ml-6 flex-shrink-0">
-            <div className="relative h-24 w-40 overflow-hidden rounded-lg bg-gray-100">
+          {/* Compact Thumbnail */}
+          <div className="ml-4 flex-shrink-0">
+            <div className="relative h-20 w-32 overflow-hidden rounded-lg bg-gray-100">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
