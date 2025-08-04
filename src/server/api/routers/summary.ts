@@ -6,6 +6,7 @@ import { EventEmitter } from 'events'
 import jwt from 'jsonwebtoken'
 import { logger } from '@/lib/logger'
 import { sanitizeUrl, sanitizeText, containsSuspiciousContent, isValidYouTubeVideoId } from '@/lib/security'
+import { classifySummaryContent } from '@/lib/classificationService'
 
 // Create an event emitter for streaming
 const ee = new EventEmitter()
@@ -240,6 +241,15 @@ export const summaryRouter = createTRPCRouter({
             metadata: metadata,
           },
         })
+
+        // Classify summary content asynchronously (fire and forget)
+        classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)
+          .catch((error) => {
+            logger.error('Classification failed for anonymous summary', { 
+              summaryId: summary.id, 
+              error: error instanceof Error ? error.message : 'Unknown error'
+            })
+          })
 
         // Return summary with anonymous flag
         return {
@@ -519,6 +529,16 @@ export const summaryRouter = createTRPCRouter({
             },
           })
         }
+
+        // Classify summary content asynchronously (fire and forget)
+        classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)
+          .catch((error) => {
+            logger.error('Classification failed for authenticated summary', { 
+              summaryId: summary.id, 
+              userId,
+              error: error instanceof Error ? error.message : 'Unknown error'
+            })
+          })
 
         return summary
       } catch (error) {

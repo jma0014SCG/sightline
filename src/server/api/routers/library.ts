@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
+import { getTagsForUser, getCategoriesForUser } from '@/lib/classificationService'
 
 export const libraryRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -11,9 +12,11 @@ export const libraryRouter = createTRPCRouter({
       sortOrder: z.enum(['asc', 'desc']).default('desc'),
       dateRange: z.enum(['day', 'week', 'month', 'year']).optional(),
       durationRange: z.enum(['short', 'medium', 'long']).optional(),
+      categories: z.array(z.string()).optional(),
+      tags: z.array(z.string()).optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, search, sortBy, sortOrder, dateRange, durationRange } = input
+      const { limit, cursor, search, sortBy, sortOrder, dateRange, durationRange, categories, tags } = input
       const userId = ctx.userId
 
       // Build where clause
@@ -70,6 +73,27 @@ export const libraryRouter = createTRPCRouter({
         }
       }
 
+      // Add category filter
+      if (categories && categories.length > 0) {
+        where.categories = {
+          some: {
+            name: {
+              in: categories
+            }
+          }
+        }
+      }
+
+      // Add tag filter
+      if (tags && tags.length > 0) {
+        where.tags = {
+          some: {
+            name: {
+              in: tags
+            }
+          }
+        }
+      }
 
       // Build orderBy clause
       let orderBy: any
@@ -94,6 +118,25 @@ export const libraryRouter = createTRPCRouter({
         take: limit + 1,
         cursor: cursor ? { id: cursor } : undefined,
         orderBy,
+        include: {
+          categories: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+        },
       })
 
       let nextCursor: typeof cursor | undefined = undefined
@@ -134,6 +177,26 @@ export const libraryRouter = createTRPCRouter({
       totalSummaries,
       totalDuration: totalDuration._sum.duration || 0,
       recentSummaries,
+    }
+  }),
+
+  getTags: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.userId
+    try {
+      return await getTagsForUser(userId)
+    } catch (error) {
+      console.error('Failed to fetch tags for user:', userId, error)
+      return []
+    }
+  }),
+
+  getCategories: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.userId
+    try {
+      return await getCategoriesForUser(userId)
+    } catch (error) {
+      console.error('Failed to fetch categories for user:', userId, error)
+      return []
     }
   }),
 })

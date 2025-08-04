@@ -85,13 +85,13 @@ components/
 │   │   ├── URLInput.tsx          # Enhanced with dynamic button states
 │   │   └── index.ts
 │   ├── SummaryCard/
-│   │   ├── SummaryCard.tsx
+│   │   ├── SummaryCard.tsx           # Enhanced with colored tag badges and category display
 │   │   └── index.ts
 │   ├── ShareModal/
 │   │   ├── ShareModal.tsx
 │   │   └── index.ts
 │   ├── LibraryControls/
-│   │   ├── LibraryControls.tsx
+│   │   ├── LibraryControls.tsx      # Enhanced with Smart Collections filtering
 │   │   └── index.ts
 │   └── QuickActionsBar/
 │       ├── QuickActionsBar.tsx
@@ -139,7 +139,8 @@ lib/
 ├── rateLimit.ts                 # Rate limiting
 ├── security.ts                  # Security utilities
 ├── stripe.ts                    # Stripe utilities
-└── stripe-client.ts             # Stripe client
+├── stripe-client.ts             # Stripe client
+└── classificationService.ts     # AI-powered content classification (NEW - Smart Collections)
 ```
 
 #### /src/server
@@ -149,8 +150,8 @@ server/
 ├── api/
 │   ├── routers/
 │   │   ├── auth.ts              # Auth router (Profile, Notifications, Account Management)
-│   │   ├── summary.ts           # Summary router
-│   │   ├── library.ts           # Library router
+│   │   ├── summary.ts           # Summary router (Enhanced with AI classification)
+│   │   ├── library.ts           # Library router (Enhanced with Smart Collections filtering)
 │   │   ├── billing.ts           # Billing router (Stripe integration)
 │   │   └── share.ts             # Share router
 │   ├── trpc.ts                  # tRPC setup
@@ -542,3 +543,133 @@ This structure supports:
 - Comprehensive user management
 - Secure payment processing
 - Complete settings management
+
+## Recent Updates: Smart Collections (AI-Powered Tagging) - August 2025
+
+### Overview
+Smart Collections is an AI-powered feature that automatically analyzes and categorizes video summaries, enabling intelligent content organization and filtering.
+
+### New Architecture Components
+
+#### 1. Classification Service (`/src/lib/classificationService.ts`)
+**Purpose**: AI-powered content analysis and tagging service
+- **OpenAI Integration**: Uses GPT-4o-mini for cost-effective content classification
+- **Lazy Initialization**: OpenAI client loaded only when needed to prevent module failures
+- **Entity Extraction**: Identifies 7 types of entities (PERSON, COMPANY, TECHNOLOGY, PRODUCT, CONCEPT, FRAMEWORK, TOOL)
+- **Category Assignment**: Maps content to 14 predefined categories (Productivity, Technology, Business, etc.)
+- **Database Integration**: Automatically creates and associates tags/categories using Prisma
+- **Error Resilience**: Classification failures are logged but don't break summary creation
+
+#### 2. Enhanced Database Schema
+**New Models Added to `prisma/schema.prisma`**:
+```prisma
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  summaries Summary[] @relation("SummaryCategories")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  type      String    // PERSON, COMPANY, TECHNOLOGY, etc.
+  summaries Summary[] @relation("SummaryTags")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  @@index([type])
+}
+```
+
+**Enhanced Summary Model**:
+- Added many-to-many relations: `categories Category[] @relation("SummaryCategories")`
+- Added many-to-many relations: `tags Tag[] @relation("SummaryTags")`
+
+#### 3. Enhanced API Routers
+
+**Summary Router (`/src/server/api/routers/summary.ts`)**:
+- **Automatic Classification**: Both authenticated and anonymous summaries trigger classification
+- **Fire-and-Forget**: Classification runs asynchronously to not block UX
+- **Error Handling**: Classification failures are caught and logged, don't affect summary creation
+
+**Library Router (`/src/server/api/routers/library.ts`)**:
+- **Enhanced getAll**: Includes tags and categories in summary queries
+- **New Procedures**: `getTags` and `getCategories` for filtering UI
+- **Smart Filtering**: Supports filtering by tag names and category names
+- **User-Scoped**: Only returns tags/categories from user's summaries
+
+#### 4. Enhanced UI Components
+
+**LibraryControls (`/src/components/molecules/LibraryControls/LibraryControls.tsx`)**:
+- **Smart Collections Section**: New collapsible section for tag/category filtering
+- **Tag Filtering**: Color-coded tag buttons with usage counts
+- **Category Filtering**: Purple category badges with usage counts  
+- **Interactive**: Click to toggle filters, visual feedback for active filters
+- **Responsive**: Adapts to available tags and categories
+
+**SummaryCard (`/src/components/molecules/SummaryCard/SummaryCard.tsx`)**:
+- **Colored Tag Badges**: 7 distinct colors based on tag type
+- **Category Badges**: Purple badges with dot indicators
+- **Overflow Handling**: Shows "+N more" for space management
+- **Type Definitions**: Enhanced TypeScript support for optional relations
+- **Backward Compatible**: Works with summaries that don't have classifications
+
+#### 5. Enhanced Library Page (`/src/app/(dashboard)/library/page.tsx`)
+- **Smart Filtering Integration**: Connects LibraryControls filters to API queries
+- **Tag/Category Queries**: Fetches available tags and categories for filtering
+- **Filter State Management**: Proper debouncing and state handling
+- **Clean Filter Logic**: Only passes defined filter values to prevent query errors
+
+### Technical Implementation Details
+
+#### Tag Types and Color Coding
+- **PERSON** (Blue): Individual people, influencers, creators, experts
+- **COMPANY** (Green): Organizations, businesses, brands
+- **TECHNOLOGY** (Orange): Technologies, programming languages, platforms
+- **PRODUCT** (Pink): Specific products, apps, services
+- **CONCEPT** (Indigo): Abstract concepts, methodologies, principles
+- **FRAMEWORK** (Yellow): Frameworks, libraries, systems
+- **TOOL** (Teal): Tools, software, applications
+
+#### Predefined Categories
+Productivity, Technology, Business, Marketing, Finance, Health, Personal Development, Art & Design, Education, Entertainment, Science, Startup, Programming, AI & Machine Learning
+
+#### Classification Workflow
+1. **Summary Creation**: User creates summary via URL input
+2. **Content Processing**: Summary content and title extracted
+3. **AI Analysis**: OpenAI analyzes content using structured prompt
+4. **Entity Extraction**: AI identifies relevant people, companies, technologies, etc.
+5. **Category Assignment**: Content mapped to appropriate categories
+6. **Database Storage**: Tags and categories created and associated via Prisma
+7. **UI Update**: Colored badges appear on summary cards
+8. **Filtering Enabled**: Users can filter library using generated classifications
+
+#### Error Handling Strategy
+- **OpenAI API Failures**: Gracefully logged, don't break summary creation
+- **Missing API Key**: Service detects and skips classification with warning
+- **Database Errors**: Individual classification failures are isolated
+- **UI Resilience**: Components handle missing classification data gracefully
+- **Lazy Loading**: OpenAI client initialized only when needed to prevent startup failures
+
+#### Performance Considerations
+- **Asynchronous Processing**: Classification doesn't block summary creation UX
+- **Cost Optimization**: Uses GPT-4o-mini model for cost-effective classification
+- **Token Limiting**: Content truncated to 8000 characters to manage API costs
+- **Selective Classification**: Only processes new summaries, not existing ones
+- **Efficient Queries**: Database queries include only necessary fields
+
+### Environment Configuration
+**Required Environment Variable**:
+```bash
+OPENAI_API_KEY="sk-proj-your-openai-api-key-here"
+```
+
+### User Experience Enhancements
+- **Automatic Organization**: Users get instant content organization without manual work
+- **Visual Clarity**: Color-coded tags make content types immediately recognizable  
+- **Smart Discovery**: Filter large libraries by topic, person, company, or technology
+- **Progressive Enhancement**: Feature works seamlessly alongside existing functionality
+- **Mobile Responsive**: Smart Collections UI adapts to smaller screens
+
+This implementation significantly enhances the platform's value proposition by providing intelligent content organization and discovery capabilities.

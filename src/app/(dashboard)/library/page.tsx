@@ -56,14 +56,34 @@ export default function LibraryPage() {
     sortOrder: 'desc',
     dateRange: undefined,
     durationRange: undefined,
+    categories: undefined,
+    tags: undefined,
   })
 
-  // Debounced filters for API calls (convert 'all' to undefined)
-  const debouncedFilters = useMemo(() => ({
-    ...filters,
-    dateRange: filters.dateRange,
-    durationRange: filters.durationRange,
-  }), [filters])
+  // Debounced filters for API calls - only include defined values
+  const debouncedFilters = useMemo(() => {
+    const cleanFilters: any = {
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    }
+    
+    // Only include search if it has a value
+    if (filters.search && filters.search.trim()) {
+      cleanFilters.search = filters.search
+    }
+    
+    // Only add optional filters if they have values
+    if (filters.dateRange) cleanFilters.dateRange = filters.dateRange
+    if (filters.durationRange) cleanFilters.durationRange = filters.durationRange
+    if (filters.categories && filters.categories.length > 0) {
+      cleanFilters.categories = filters.categories
+    }
+    if (filters.tags && filters.tags.length > 0) {
+      cleanFilters.tags = filters.tags
+    }
+    
+    return cleanFilters
+  }, [filters])
   
   // Fetch summaries with filters
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = api.library.getAll.useInfiniteQuery(
@@ -102,6 +122,10 @@ export default function LibraryPage() {
   
   // Get usage stats
   const { data: usage } = api.billing.getUsageStats.useQuery()
+
+  // Get tags and categories for smart filtering
+  const { data: availableTags } = api.library.getTags.useQuery()
+  const { data: availableCategories } = api.library.getCategories.useQuery()
 
   // Delete summary mutation
   const deleteSummary = api.summary.delete.useMutation({
@@ -375,6 +399,8 @@ export default function LibraryPage() {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           totalCount={totalCount}
+          availableTags={availableTags || []}
+          availableCategories={availableCategories || []}
         />
       </div>
 

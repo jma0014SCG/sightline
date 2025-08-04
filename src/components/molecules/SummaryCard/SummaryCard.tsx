@@ -5,10 +5,15 @@ import Image from 'next/image'
 import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
-import type { Summary } from '@prisma/client'
+import type { Summary, Category, Tag } from '@prisma/client'
+
+type SummaryWithRelations = Summary & {
+  categories?: Category[]
+  tags?: Tag[]
+}
 
 interface SummaryCardProps {
-  summary: Summary
+  summary: SummaryWithRelations
   className?: string
   onDelete?: (id: string) => void
   onShare?: (id: string) => void
@@ -61,6 +66,71 @@ export function SummaryCard({
   }
 
   const keyInsights = getKeyInsights()
+
+  // Helper function to render tags with colors
+  const renderTags = (tags: Tag[], limit = 3) => {
+    const getTagColor = (type: string) => {
+      switch (type) {
+        case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
+        case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
+        case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
+        case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
+        case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
+        case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+        case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
+        default: return 'bg-gray-100 text-gray-700 border-gray-200'
+      }
+    }
+
+    const displayTags = tags.slice(0, limit)
+    const remainingCount = tags.length - limit
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {displayTags.map((tag) => (
+          <span
+            key={tag.id}
+            className={cn(
+              "inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border",
+              getTagColor(tag.type)
+            )}
+          >
+            {tag.name}
+          </span>
+        ))}
+        {remainingCount > 0 && (
+          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
+            +{remainingCount} more
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  // Helper function to render categories
+  const renderCategories = (categories: Category[], limit = 2) => {
+    const displayCategories = categories.slice(0, limit)
+    const remainingCount = categories.length - limit
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {displayCategories.map((category) => (
+          <span
+            key={category.id}
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 border border-purple-200"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+            {category.name}
+          </span>
+        ))}
+        {remainingCount > 0 && (
+          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
+            +{remainingCount} more
+          </span>
+        )}
+      </div>
+    )
+  }
 
   if (viewMode === 'list') {
     return (
@@ -143,6 +213,14 @@ export function SummaryCard({
                   <p className="text-sm text-gray-600 line-clamp-2">
                     {keyInsights[0].length > 120 ? `${keyInsights[0].substring(0, 120)}...` : keyInsights[0]}
                   </p>
+                </div>
+              )}
+
+              {/* Tags and Categories - compact for list view */}
+              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
+                <div className="mb-2 space-y-1">
+                  {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 1)}
+                  {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 2)}
                 </div>
               )}
 
@@ -292,6 +370,24 @@ export function SummaryCard({
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Tags and Categories */}
+            {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
+              <div className="mb-4 space-y-2">
+                {summary.categories && summary.categories.length > 0 && (
+                  <div>
+                    <span className="text-xs font-medium text-gray-500 mb-1 block">Categories:</span>
+                    {renderCategories(summary.categories, 2)}
+                  </div>
+                )}
+                {summary.tags && summary.tags.length > 0 && (
+                  <div>
+                    <span className="text-xs font-medium text-gray-500 mb-1 block">Tags:</span>
+                    {renderTags(summary.tags, 4)}
+                  </div>
+                )}
               </div>
             )}
 
