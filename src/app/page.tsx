@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
@@ -521,7 +522,7 @@ export default function HomePage() {
                   <div className="text-center">
                     <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
                       <Zap className="h-4 w-4" />
-                      <span>Free • No signup required</span>
+                      <span>1 Free Trial • No signup required</span>
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                       Try it now
@@ -603,7 +604,7 @@ export default function HomePage() {
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
                     {progress === 100 ? 'Complete! 🎉' : 
-                     currentTaskId?.startsWith('temp_') ? 'Estimated time: 60-120 seconds' : 
+                     currentTaskId?.startsWith('temp_') ? 'Estimated time: 45-60 seconds' : 
                      'Live progress tracking active'}
                   </p>
                 </div>
@@ -651,7 +652,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Social Proof Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-10 bg-gray-50 relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <p className="text-sm font-semibold text-gray-600 mb-4">
@@ -681,6 +682,193 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        
+        {/* Visual connector */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-primary-300 to-transparent"></div>
+      </section>
+
+      {/* Enhanced Trusted Sources Section */}
+      <section className="pb-20 pt-16 bg-white" aria-labelledby="trusted-sources-heading">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <BarChart3 className="w-4 h-4" />
+              Platform Versatility
+            </div>
+            <h2 id="trusted-sources-heading" className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
+              Works with Your Favorite YouTube Channels
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              From cutting-edge research to business insights, Sightline delivers precise summaries 
+              across all content categories your audience values most
+            </p>
+          </div>
+          
+          <div className="relative">
+            {/* Background pattern for premium feel */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-50/30 to-transparent blur-3xl"></div>
+            
+            <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
+              {/* Huberman Lab */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Huberman Lab - Science & Health content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/huberman-lab.png"
+                      alt="Huberman Lab"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Huberman Lab
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Science & Health
+                  </p>
+                </div>
+              </div>
+              
+              {/* Lex Fridman Podcast */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Lex Fridman Podcast - Tech & AI content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/lex-fridman.png"
+                      alt="Lex Fridman Podcast"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Lex Fridman
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Tech & AI
+                  </p>
+                </div>
+              </div>
+              
+              {/* The Colin & Samir Show */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Colin & Samir Show - Creator Economy content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/colin-samir.png"
+                      alt="The Colin & Samir Show"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Colin & Samir
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Creator Economy
+                  </p>
+                </div>
+              </div>
+              
+              {/* Coding with Mosh */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Coding with Mosh - Programming Tutorials content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/mosh.png"
+                      alt="Coding with Mosh"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Coding with Mosh
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Programming Tutorials
+                  </p>
+                </div>
+              </div>
+              
+              {/* The Diary of a CEO */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Diary of a CEO - Business & Leadership content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/diary-of-ceo.png"
+                      alt="The Diary of a CEO"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Diary of a CEO
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Business & Leadership
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Capability footer */}
+          <div className="text-center pt-12 mt-12 border-t border-gray-200">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+              <CheckCircle className="w-4 h-4 text-primary-500" />
+              Supporting 15+ content categories with consistent quality
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Video Demo Section */}
@@ -701,9 +889,9 @@ export default function HomePage() {
           {/* Video Container */}
           <div className="mx-auto max-w-6xl">
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-prussian-blue-200/50 ring-1 ring-prussian-blue-200">
-              <div style={{ position: 'relative', paddingBottom: '62.42774566473989%', height: 0 }}>
+              <div style={{ position: 'relative', paddingBottom: '41.25%', height: 0 }}>
                 <iframe 
-                  src="https://www.loom.com/embed/e50a9b923880450d903b09aad245d370?sid=89cc6760-df7a-49cd-a5e5-858b0e69449a" 
+                  src="https://www.loom.com/embed/60df8f98f6c34a57b7bc71049b445f91?sid=a3115793-e470-4812-bb41-1d2e6d99854b" 
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                   allowFullScreen
                   className="rounded-lg"
@@ -1069,7 +1257,7 @@ Don&apos;t Miss Out - Try Sightline Free
 
 
       {/* Debug Panel - only in development */}
-      {process.env.NODE_ENV === 'development' && <DebugPanel />}
+      {typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && <DebugPanel />}
       
       {/* Exit Intent Popup placeholder - implement with proper exit intent detection */}
       {/* "Still scrolling? Paste a link—see the magic." */}
