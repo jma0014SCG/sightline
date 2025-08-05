@@ -157,7 +157,10 @@ except ImportError as e:
                 "summary": summary.content,
                 "key_points": summary.key_points,
                 "user_id": "test-user",
-                "task_id": task_id
+                "task_id": task_id,
+                "metadata": {
+                    "task_id": task_id
+                }
             }
             
         except Exception as e:

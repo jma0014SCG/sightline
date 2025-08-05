@@ -209,7 +209,7 @@ export function SummaryViewer({
     }
 
     // Add common section name variations for better content extraction
-    const sectionAliases = new Map([
+    const sectionAliases = new Map<string, string[]>([
       [
         "playbooks",
         [

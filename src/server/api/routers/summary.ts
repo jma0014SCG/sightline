@@ -251,11 +251,12 @@ export const summaryRouter = createTRPCRouter({
             })
           })
 
-        // Return summary with anonymous flag
+        // Return summary with anonymous flag and task_id
         return {
           ...summary,
           isAnonymous: true,
           canSave: false, // Anonymous summaries can't be saved permanently
+          task_id: data.task_id, // Include task_id for progress tracking
         }
       } catch (error) {
         if (error instanceof TRPCError) {
@@ -540,7 +541,11 @@ export const summaryRouter = createTRPCRouter({
             })
           })
 
-        return summary
+        // Return summary with task_id for progress tracking
+        return {
+          ...summary,
+          task_id: data.task_id, // Include task_id from backend
+        }
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error

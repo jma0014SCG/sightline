@@ -148,7 +148,7 @@ export default function LibraryPage() {
       : undefined
   }, [data])
 
-  const handleCreateSummary = async (url: string) => {
+  const handleCreateSummary = async (url: string, fingerprint?: string) => {
     setIsCreatingSummary(true)
     
     // Generate a temporary task ID to start progress tracking immediately
@@ -159,6 +159,7 @@ export default function LibraryPage() {
       await createSummary.mutateAsync({ url })
       
       // Keep using the temporary task ID for progress tracking
+      // Note: fingerprint parameter is not needed for authenticated users in library
       
       // Cache invalidation is handled by the mutation's onSuccess callback
     } catch (error) {

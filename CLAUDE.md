@@ -16,7 +16,7 @@ pnpm install
 # Set up Python virtual environment (if not exists)
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt.disabled
+pip install -r requirements.txt
 
 # Start development servers
 pnpm dev                    # Frontend only (port 3000)
@@ -57,10 +57,12 @@ pnpm db:seed               # Seed database with test data
 pnpm build                 # Production build
 pnpm build:prod            # Production build with NODE_ENV=production
 pnpm build:analyze         # Analyze bundle size
+pnpm start                 # Start production server
 pnpm deploy                # Deploy to Vercel production
 pnpm deploy:preview        # Deploy preview to Vercel
 pnpm vercel:link           # Link to Vercel project
 pnpm vercel:env            # Pull environment variables from Vercel
+pnpm prepare               # Install git hooks (Husky)
 ```
 
 ### Testing
@@ -220,30 +222,66 @@ Before starting any development task, **ALWAYS** consult these files in order:
 1. **Task Assessment**: Read subtask from `/Docs/Implementation.md`
    - **Simple subtask**: Implement directly
    - **Complex subtask**: Create a todo list and break down further
+   - Check task dependencies and prerequisites
+   - Verify scope understanding
 
 2. **Documentation Research**: Check relevant documentation links in the subtask before implementing
 
-3. **Implementation**: Follow established patterns and project structure guidelines
+3. **UI/UX Implementation**: Consult `/Docs/UI_UX_doc.md` before implementing any UI/UX elements
 
-4. **Error Handling**: Document all errors and solutions in `/Docs/Bug_tracking.md`
+4. **Project Structure Compliance**: Check `/Docs/project_structure.md` before:
+   - Running commands
+   - Creating files/folders
+   - Making structural changes
+   - Adding dependencies
 
-5. **Task Completion**: Mark complete only when:
+5. **Implementation**: Follow established patterns and project structure guidelines
+
+6. **Error Handling**: 
+   - Check `/Docs/Bug_tracking.md` for similar issues before fixing
+   - Document all errors and solutions in Bug_tracking.md
+   - Include error details, root cause, and resolution steps
+
+7. **Task Completion**: Mark complete only when:
    - All functionality implemented correctly
    - Code follows project structure guidelines
    - UI/UX matches specifications (if applicable)
    - No errors or warnings remain
+   - All task list items completed (if applicable)
+
+### Critical Rules
+- **NEVER** skip documentation consultation
+- **NEVER** mark tasks complete without proper testing
+- **NEVER** ignore project structure guidelines
+- **NEVER** implement UI without checking UI_UX_doc.md
+- **NEVER** fix errors without checking Bug_tracking.md first
+- **ALWAYS** document errors and solutions
+- **ALWAYS** follow the established workflow process
 
 ### Component Architecture
+The codebase follows atomic design pattern with clear component hierarchy:
+
+**Component Structure:**
+- **Atoms** (`src/components/atoms/`): Basic building blocks (Skeleton, Toast)
+- **Molecules** (`src/components/molecules/`): Simple components with specific functionality (URLInput, SummaryCard, LibraryControls)
+- **Organisms** (`src/components/organisms/`): Complex components (SummaryViewer, PricingPlans)
+- **Modals** (`src/components/modals/`): Modal components (SignInModal, AuthPromptModal)
+- **Providers** (`src/components/providers/`): Context providers (TRPCProvider, ToastProvider)
+
+**File Structure Pattern:**
+```
+ComponentName/
+├── ComponentName.tsx
+├── ComponentName.types.ts (if needed)
+└── index.ts
+```
+
+**Modals**: Place in `src/components/modals/` as standalone files (not in folders)
+
 When creating new components:
 - Use the atomic design pattern consistently
-- Place modals in `src/components/modals/`
-- Follow the established file structure:
-  ```
-  ComponentName/
-  ├── ComponentName.tsx
-  ├── ComponentName.types.ts (if needed)
-  └── index.ts
-  ```
+- Choose appropriate hierarchy level based on complexity
+- Follow established file structure and naming conventions
 
 ### tRPC Procedures
 When adding new procedures:
@@ -255,16 +293,39 @@ When adding new procedures:
 
 ## Environment Variables
 
-Critical variables needed:
+### Core Application Variables
 - `DATABASE_URL` - Postgres connection string (Neon)
-- `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk auth
-- `CLERK_WEBHOOK_SECRET` - Clerk webhook verification
-- `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe payments
-- `STRIPE_WEBHOOK_SECRET` - Stripe webhook verification
+- `NEXT_PUBLIC_APP_URL` - Application base URL
+
+### Authentication (Clerk)
+- `CLERK_SECRET_KEY` - Clerk server-side secret key
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk client-side publishable key
+- `CLERK_WEBHOOK_SECRET` - Clerk webhook verification secret
+
+### Payments (Stripe)
+- `STRIPE_SECRET_KEY` - Stripe server-side secret key
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe client-side publishable key
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook verification secret
 - `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID` - Stripe Pro plan price ID
-- `OPENAI_API_KEY` - AI summarization
-- `YOUTUBE_API_KEY` - YouTube data access
-- `GUMLOOP_API_KEY`, `OXYLABS_USERNAME/PASSWORD` - Transcript services
+- `NEXT_PUBLIC_STRIPE_COMPLETE_PRICE_ID` - Stripe Complete plan price ID (if applicable)
+
+### AI Services
+- `OPENAI_API_KEY` - OpenAI API key for summarization and Smart Collections classification
+- `YOUTUBE_API_KEY` - YouTube Data API key for video metadata
+
+### Transcript Services (Fallback Chain)
+- `GUMLOOP_API_KEY` - Gumloop API key for enhanced transcript processing
+- `OXYLABS_USERNAME` - Oxylabs proxy service username
+- `OXYLABS_PASSWORD` - Oxylabs proxy service password
+
+### Optional Services
+- `SENTRY_DSN` - Sentry error tracking (optional)
+- `UPSTASH_REDIS_URL` - Upstash Redis connection (optional caching)
+
+**Configuration Commands:**
+- `pnpm env:check` - Validate required environment variables
+- `pnpm env:validate` - Comprehensive environment validation
+- `pnpm env:setup` - Run environment setup script
 
 ## Common Tasks
 
@@ -275,8 +336,8 @@ Critical variables needed:
 
 ### Modifying the database
 1. Update schema in `prisma/schema.prisma`
-2. Run `npm run db:generate` to update client
-3. Run `npm run db:push` for development or `npm run db:migrate` for production
+2. Run `pnpm db:generate` to update client
+3. Run `pnpm db:push` for development or `pnpm db:migrate` for production
 4. Test locally before deploying migrations
 
 ### Testing payment flows
@@ -286,10 +347,10 @@ Critical variables needed:
 4. Test both success and failure scenarios
 
 ### Working with the Python API
-1. Virtual environment is at `../venv/` relative to api directory
-2. Activate venv: `source ../venv/bin/activate` (from api directory)
-3. Run API directly: `npm run api:dev`
-4. Test API health: `npm run api:test`
+1. Virtual environment is at `venv/` in project root (accessed as `../venv/` from api directory)
+2. Activate venv: `source venv/bin/activate` (from project root) or `source ../venv/bin/activate` (from api directory)
+3. Run API directly: `pnpm api:dev`
+4. Test API health: `pnpm api:test`
 5. Check `api/services/` for available transcript fallback services
 
 ### Adding YouTube timestamp navigation
@@ -367,10 +428,12 @@ The SummaryViewer uses a responsive multi-column layout:
 
 ## Debugging Tips
 - Check browser console for tRPC errors
-- Use Prisma Studio (`npm run db:studio`) to inspect database
+- Use Prisma Studio (`pnpm db:studio`) to inspect database
 - Monitor Python API logs in development console
 - Check Vercel Functions logs for production issues
 - Use React Query Devtools for debugging data fetching
 
 ## Package Manager
 This project uses pnpm (v10.13.1) as specified in package.json. Always use pnpm for dependency management to ensure lockfile compatibility.
+
+**Note**: There's currently an inconsistency in `package.json` where the `dev:full` script uses `npm run dev` instead of `pnpm dev`. This should be updated for consistency.

@@ -15,7 +15,7 @@ import { getBrowserFingerprint, hasUsedFreeSummary, markFreeSummaryUsed } from '
 import { 
   Zap, 
   BookOpen, 
-  Share2, 
+  Share2,
   Clock, 
   Users, 
   CheckCircle,
@@ -104,8 +104,14 @@ export default function HomePage() {
   const createSummary = api.summary.create.useMutation({
     onSuccess: (data) => {
       console.log('✅ Summary created successfully:', data)
-      setSuccessMessage('✅ Summary created! Saved to your library.')
+      setSuccessMessage('✅ Summary created and saved to your library!')
       setTimeout(() => setSuccessMessage(null), 5000)
+      
+      // If we got a real task_id from backend, switch to using it
+      if (data.task_id && data.task_id !== currentTaskId) {
+        console.log('🔄 Switching to real task_id:', data.task_id)
+        setCurrentTaskId(data.task_id)
+      }
       
       // Wait a moment for user to see completion, then show summary
       setTimeout(() => {
@@ -134,6 +140,12 @@ export default function HomePage() {
       console.log('✅ Anonymous summary created successfully:', data)
       setSuccessMessage('✅ Free summary created! Sign up to save it to your library.')
       setTimeout(() => setSuccessMessage(null), 5000)
+      
+      // If we got a real task_id from backend, switch to using it
+      if (data.task_id && data.task_id !== currentTaskId) {
+        console.log('🔄 Switching to real task_id:', data.task_id)
+        setCurrentTaskId(data.task_id)
+      }
       
       // Mark that free summary has been used
       markFreeSummaryUsed()
@@ -197,7 +209,11 @@ export default function HomePage() {
         const result = await createSummary.mutateAsync({ url })
         console.log('✅ Mutation result:', result)
         
-        // Keep using the temporary task ID for progress tracking
+        // Switch to real task_id if we got one
+        if (result.task_id && result.task_id !== tempTaskId) {
+          console.log('🔄 Switching to real task_id from mutation:', result.task_id)
+          setCurrentTaskId(result.task_id)
+        }
       } else {
         // Check if they've already used their free summary
         if (hasUsedFreeSummary()) {
@@ -213,7 +229,11 @@ export default function HomePage() {
         const result = await createAnonymousSummary.mutateAsync({ url, browserFingerprint })
         console.log('✅ Anonymous mutation result:', result)
         
-        // Keep using the temporary task ID for progress tracking
+        // Switch to real task_id if we got one
+        if (result.task_id && result.task_id !== tempTaskId) {
+          console.log('🔄 Switching to real task_id from mutation:', result.task_id)
+          setCurrentTaskId(result.task_id)
+        }
       }
     } catch (error) {
       console.error('❌ HandleUrlSubmit error:', error)
@@ -582,7 +602,9 @@ export default function HomePage() {
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
-                    {progress === 100 ? 'Complete! 🎉' : 'Estimated time: 60-120 seconds'}
+                    {progress === 100 ? 'Complete! 🎉' : 
+                     currentTaskId?.startsWith('temp_') ? 'Estimated time: 60-120 seconds' : 
+                     'Live progress tracking active'}
                   </p>
                 </div>
               </div>
@@ -595,6 +617,17 @@ export default function HomePage() {
               <div className="rounded-xl bg-red-50 border border-red-200 p-6 text-center">
                 <p className="font-semibold text-red-800">Something went wrong</p>
                 <p className="text-sm text-red-600 mt-1">{createSummary.error?.message || createAnonymousSummary.error?.message}</p>
+                <button
+                  onClick={() => {
+                    // Reset error states
+                    createSummary.reset()
+                    createAnonymousSummary.reset()
+                    setCurrentTaskId(null)
+                  }}
+                  className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+                >
+                  Try Again
+                </button>
               </div>
             </div>
           )}
@@ -617,8 +650,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Quick Social Proof Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <p className="text-sm font-semibold text-gray-600 mb-4">
+              Trusted by 250+ professionals at top companies
+            </p>
+            <div className="flex items-center justify-center gap-8 opacity-60">
+              <div className="text-lg font-bold text-gray-700">Google</div>
+              <div className="text-lg font-bold text-gray-700">Microsoft</div>
+              <div className="text-lg font-bold text-gray-700">Y Combinator</div>
+              <div className="text-lg font-bold text-gray-700">OpenAI</div>
+            </div>
+          </div>
+          
+          {/* Key testimonial */}
+          <div className="max-w-2xl mx-auto text-center">
+            <blockquote className="text-xl text-gray-700 italic mb-4">
+              &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. My team gets better insights faster than ever.&rdquo;
+            </blockquote>
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+                PK
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-gray-900">Priya K.</div>
+                <div className="text-sm text-gray-600">Product Lead at Tech Startup</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Video Demo Section */}
-      <section className="py-16 sm:py-24 bg-gradient-to-b from-prussian-blue-50 via-white to-prussian-blue-50">
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-white via-gray-50 to-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-base font-semibold leading-7 text-prussian-blue-600 mb-2">
@@ -782,121 +848,66 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Built for People With More Ambition Than Free Time Section */}
-      <section className="py-24 sm:py-32 bg-white">
+      {/* Benefits & Use Cases Section */}
+      <section className="py-16 sm:py-20 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600">
-              ⚡ Built for People With More Ambition Than Free Time
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Perfect for busy professionals
             </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-              You know the feeling
-            </p>
-            <p className="mt-6 text-xl leading-8 text-gray-600 max-w-3xl mx-auto">
-              Your reading list is longer than your grocery list. Your podcast queue looks like a small library. 
-              You want to stay sharp, stay curious, stay ahead—but there are only so many hours in the day.
+            <p className="mt-4 text-lg text-gray-600">
+              Turn any YouTube video into actionable insights in under 60 seconds
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center mb-20">
-            {/* Left Column - Pain Points */}
-            <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <X className="h-4 w-4 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The endless scroll</h3>
-                  <p className="text-gray-600">Bookmarking videos you&apos;ll &quot;definitely watch later&quot; (but never do).</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <X className="h-4 w-4 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The guilt cycle</h3>
-                  <p className="text-gray-600">Feeling behind while your peers seem to know everything.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <X className="h-4 w-4 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">The time trap</h3>
-                  <p className="text-gray-600">Starting a &quot;quick&quot; video that turns into a 2-hour rabbit hole.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Solution */}
-            <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Learn what matters</h3>
-                  <p className="text-gray-600">Get the key insights without the filler, fluff, or tangents.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay ahead</h3>
-                  <p className="text-gray-600">Be the person who actually knows what&apos;s happening in your field.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Reclaim your time</h3>
-                  <p className="text-gray-600">60 seconds of summary = 60 minutes of content consumed.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Core Benefits */}
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h3 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Everything you need to learn faster
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            {/* Benefit 1 */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-12">
+            {/* Use Case 1 */}
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-prussian-blue-900">
-                <Sparkles className="h-8 w-8 text-prussian-blue-500" />
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
+                <BookOpen className="h-6 w-6 text-primary-600" />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-4">Instant Sparks</h4>
-              <p className="text-gray-600 leading-relaxed">
-                Action-ready bullet points, quotes, and next-step ideas—no fluff, no filler.
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Learning & Development</h3>
+              <p className="text-gray-600 text-sm">Get key insights from tutorials, conferences, and educational content</p>
             </div>
 
-            {/* Benefit 2 */}
+            {/* Use Case 2 */}
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-prussian-blue-900">
-                <BookOpen className="h-8 w-8 text-prussian-blue-500" />
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
+                <BarChart3 className="h-6 w-6 text-primary-600" />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-4">Personal Library</h4>
-              <p className="text-gray-600 leading-relaxed">
-                Every summary auto-files itself. Search by topic or timestamp and revisit in seconds.
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Market Research</h3>
+              <p className="text-gray-600 text-sm">Analyze product reviews, industry talks, and competitor content</p>
+            </div>
+
+            {/* Use Case 3 */}
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
+                <Users className="h-6 w-6 text-primary-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Team Knowledge</h3>
+              <p className="text-gray-600 text-sm">Share summaries with your team and build collective intelligence</p>
             </div>
           </div>
 
+          {/* Simple transformation story */}
+          <div className="bg-gradient-to-r from-gray-50 to-primary-50 rounded-2xl p-8 text-center">
+            <div className="max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div>
+                  <div className="text-2xl mb-2">😵‍💫</div>
+                  <p className="text-sm text-gray-600">Hours of video backlog</p>
+                </div>
+                <div>
+                  <div className="text-2xl mb-2">→</div>
+                  <p className="text-sm font-semibold text-primary-600">60 seconds with Sightline</p>
+                </div>
+                <div>
+                  <div className="text-2xl mb-2">🧠</div>
+                  <p className="text-sm text-gray-600">Key insights, ready to use</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -935,72 +946,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-24 sm:py-32 bg-gradient-to-br from-anti-flash-white via-eggshell/30 to-anti-flash-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-base font-semibold leading-7 text-prussian-blue-600">
-              ❤️ What Busy Learners Say
-            </h2>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-prussian-blue sm:text-5xl">
-              Don&apos;t just take our word for it
-            </p>
-          </div>
-
-          {/* Testimonials Grid */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Testimonial 1 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
-              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
-                &ldquo;Turned a 2-hour conference talk into key insights during my coffee break. Now I actually stay current with industry trends.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-silver-lake-blue to-paynes-gray flex items-center justify-center text-white font-semibold">
-                  JP
-                </div>
-                <div className="ml-4">
-                  <div className="font-semibold text-prussian-blue">Jordan P.</div>
-                  <div className="text-sm text-paynes-gray">VC Partner</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
-              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
-                &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. My team gets better insights faster than ever.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-prussian-blue to-paynes-gray flex items-center justify-center text-white font-semibold">
-                  PK
-                </div>
-                <div className="ml-4">
-                  <div className="font-semibold text-prussian-blue">Priya K.</div>
-                  <div className="text-sm text-paynes-gray">Product Lead at Tech Startup</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="group relative rounded-3xl bg-white/90 backdrop-blur-xl p-8 shadow-2xl border-2 border-prussian-blue-100 hover:border-prussian-blue-300 hover:shadow-3xl transition-all duration-300">
-              <Quote className="h-8 w-8 text-silver-lake-blue mb-6" />
-              <p className="text-paynes-gray mb-6 leading-relaxed text-lg">
-                &ldquo;Built my first AI side project with zero fluff, thanks to these summaries.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-r from-paynes-gray to-silver-lake-blue flex items-center justify-center text-white font-semibold">
-                  DR
-                </div>
-                <div className="ml-4">
-                  <div className="font-semibold text-prussian-blue">— Daniel R., Data Scientist</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 sm:py-32 bg-white">

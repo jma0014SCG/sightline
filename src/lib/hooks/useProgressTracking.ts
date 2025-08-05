@@ -38,20 +38,22 @@ export function useProgressTracking({
       try {
         // Check if this is a temporary task ID (fallback to simulated progress)
         if (taskId?.startsWith('temp_')) {
-          // Simulate progress for temporary tasks
+          // Simulate progress for temporary tasks (extended to 120 seconds)
           const startTime = parseInt(taskId.split('_')[1])
           const elapsed = Date.now() - startTime
-          const simulatedProgress = Math.min(Math.floor((elapsed / 30000) * 90), 90) // 90% in 30 seconds
+          const simulatedProgress = Math.min(Math.floor((elapsed / 120000) * 95), 95) // 95% in 120 seconds
           
           const stages = [
             'Connecting to YouTube...',
             'Downloading transcript...',
+            'Processing video metadata...',
             'Analyzing content with AI...',
             'Extracting key insights...',
-            'Generating your summary...'
+            'Generating comprehensive summary...',
+            'Finalizing your results...'
           ]
           
-          const stageIndex = Math.floor((simulatedProgress / 90) * stages.length)
+          const stageIndex = Math.floor((simulatedProgress / 95) * stages.length)
           const currentStage = stages[Math.min(stageIndex, stages.length - 1)]
           
           setProgress(simulatedProgress)
@@ -67,7 +69,7 @@ export function useProgressTracking({
           // If real progress tracking fails, fall back to simulation
           if (response.status === 404) {
             const elapsed = Date.now() - (parseInt(taskId || '0') || Date.now())
-            const simulatedProgress = Math.min(Math.floor((elapsed / 30000) * 90), 90)
+            const simulatedProgress = Math.min(Math.floor((elapsed / 120000) * 95), 95)
             setProgress(simulatedProgress)
             setStage('Processing your video...')
             setStatus('processing')
@@ -101,7 +103,7 @@ export function useProgressTracking({
         console.error('Progress tracking error:', error)
         // Fallback to basic simulation on error
         const elapsed = Date.now() - (parseInt(taskId?.split('_')[1] || '0') || Date.now())
-        const simulatedProgress = Math.min(Math.floor((elapsed / 30000) * 90), 90)
+        const simulatedProgress = Math.min(Math.floor((elapsed / 120000) * 95), 95)
         setProgress(simulatedProgress)
         setStage('Processing your video...')
         setStatus('processing')

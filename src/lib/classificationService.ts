@@ -53,13 +53,19 @@ const TAG_TYPES = {
 
 export async function classifySummaryContent(summaryId: string, content: string, videoTitle?: string) {
   try {
+    console.log('🏷️ [CLASSIFICATION] Starting classification for summary:', summaryId)
+    console.log('🏷️ [CLASSIFICATION] Video title:', videoTitle)
+    console.log('🏷️ [CLASSIFICATION] Content length:', content.length)
+    
     // Get OpenAI client (lazy-loaded)
     const client = getOpenAIClient()
     if (!client) {
+      console.warn('🏷️ [CLASSIFICATION] OpenAI client not available, skipping classification', { summaryId })
       logger.warn('OpenAI client not available, skipping classification', { summaryId })
       return null
     }
 
+    console.log('🏷️ [CLASSIFICATION] OpenAI client available, proceeding with classification')
     logger.info('Starting content classification', { summaryId })
     
     // Create input text from content and title
@@ -103,6 +109,7 @@ Respond with ONLY a valid JSON object in this format:
   ]
 }`
 
+    console.log('🏷️ [CLASSIFICATION] Sending request to OpenAI...')
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini", // Using the faster, cheaper model for classification
       messages: [{ role: "user", content: prompt }],
@@ -111,11 +118,16 @@ Respond with ONLY a valid JSON object in this format:
       max_tokens: 500
     })
 
+    console.log('🏷️ [CLASSIFICATION] Received response from OpenAI')
+
     if (!response.choices[0]?.message?.content) {
+      console.error('🏷️ [CLASSIFICATION] No response content from OpenAI')
       throw new Error('No response from OpenAI')
     }
 
+    console.log('🏷️ [CLASSIFICATION] Raw response:', response.choices[0].message.content)
     const result = JSON.parse(response.choices[0].message.content) as ClassificationResult
+    console.log('🏷️ [CLASSIFICATION] Parsed result:', result)
 
     // Validate the response structure
     if (!result.categories || !Array.isArray(result.categories)) {
@@ -140,6 +152,9 @@ Respond with ONLY a valid JSON object in this format:
       )
       .slice(0, 8) // Limit to 8 tags max
 
+    console.log('🏷️ [CLASSIFICATION] Valid categories:', validCategories)
+    console.log('🏷️ [CLASSIFICATION] Valid tags:', validTags)
+    
     logger.info('Classification completed', { 
       summaryId, 
       categoriesCount: validCategories.length,
@@ -147,9 +162,11 @@ Respond with ONLY a valid JSON object in this format:
     })
 
     // Store the classification in database
+    console.log('🏷️ [CLASSIFICATION] Starting database transaction...')
     await prisma.$transaction(async (tx) => {
       // Connect categories
       if (validCategories.length > 0) {
+        console.log('🏷️ [CLASSIFICATION] Connecting categories:', validCategories)
         await tx.summary.update({
           where: { id: summaryId },
           data: {
@@ -161,10 +178,12 @@ Respond with ONLY a valid JSON object in this format:
             },
           },
         })
+        console.log('🏷️ [CLASSIFICATION] Categories connected successfully')
       }
 
       // Connect tags
       if (validTags.length > 0) {
+        console.log('🏷️ [CLASSIFICATION] Connecting tags:', validTags)
         await tx.summary.update({
           where: { id: summaryId },
           data: {
@@ -179,21 +198,25 @@ Respond with ONLY a valid JSON object in this format:
             },
           },
         })
+        console.log('🏷️ [CLASSIFICATION] Tags connected successfully')
       }
     })
 
+    console.log('🏷️ [CLASSIFICATION] Database transaction completed successfully')
     logger.info('Classification stored successfully', { 
       summaryId,
       categories: validCategories,
       tags: validTags.map(t => `${t.name} (${t.type})`)
     })
 
+    console.log('🏷️ [CLASSIFICATION] ✅ Classification completed successfully for summary:', summaryId)
     return {
       categories: validCategories,
       tags: validTags
     }
 
   } catch (error) {
+    console.error('🏷️ [CLASSIFICATION] ❌ Classification failed for summary:', summaryId, error)
     logger.error('Failed to classify summary content', { 
       summaryId, 
       error: error instanceof Error ? error.message : 'Unknown error'
