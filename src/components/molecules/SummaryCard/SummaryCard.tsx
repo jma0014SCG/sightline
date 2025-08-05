@@ -247,7 +247,7 @@ export function SummaryCard({
                       aria-label="Share summary"
                       title="Share"
                     >
-                      <Share2 className="h-3 w-3" />
+                      <Share2 className="h-4 w-4" />
                     </button>
                   )}
                   {onDelete && (
@@ -261,7 +261,7 @@ export function SummaryCard({
                       aria-label="Delete summary"
                       title="Delete"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                   
@@ -275,7 +275,7 @@ export function SummaryCard({
                     aria-label="More actions"
                     title="More"
                   >
-                    <MoreVertical className="h-3 w-3" />
+                    <MoreVertical className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -375,97 +375,53 @@ export function SummaryCard({
         </div>
       )}
       <Link href={`/library/${summary.id}`} className="block">
-        <div className="flex items-start gap-4 p-4">
-          <div className="flex-1">
-            {/* Header with channel info */}
-            <div className="mb-2 flex items-center gap-2 text-sm">
-              <span className="font-medium text-blue-600">{summary.channelName}</span>
-              <span className="text-gray-400">•</span>
-              <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
+        <div className="flex items-stretch gap-4 p-4 pb-12 min-h-[120px]">
+          <div className="flex-1 flex flex-col justify-between">
+            {/* Main content area */}
+            <div>
+              {/* Header with channel info */}
+              <div className="mb-2 flex items-center gap-2 text-sm">
+                <span className="font-medium text-blue-600">{summary.channelName}</span>
+                <span className="text-gray-400">•</span>
+                <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
+              </div>
+
+              {/* Title */}
+              <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                {summary.videoTitle}
+              </h3>
+
+              {/* Key insights preview - expanded for wider cards */}
+              {keyInsights.length > 0 && (
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+                  {keyInsights[0].length > 140 ? `${keyInsights[0].substring(0, 140)}...` : keyInsights[0]}
+                </p>
+              )}
+
+              {/* Tags and Categories - inline without labels */}
+              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
+                <div className="mb-2 flex flex-wrap gap-1">
+                  {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 2)}
+                  {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 4)}
+                </div>
+              )}
             </div>
 
-            {/* Title */}
-            <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-              {summary.videoTitle}
-            </h3>
-
-            {/* Key insights preview - single line */}
-            {keyInsights.length > 0 && (
-              <p className="text-sm text-gray-600 line-clamp-1 mb-3 leading-snug">
-                {keyInsights[0].length > 80 ? `${keyInsights[0].substring(0, 80)}...` : keyInsights[0]}
-              </p>
-            )}
-
-            {/* Tags and Categories - inline without labels */}
-            {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
-              <div className="mb-3 flex flex-wrap gap-1">
-                {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 1)}
-                {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 3)}
-              </div>
-            )}
-
-            {/* Footer with stats and hover actions */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  View
-                </span>
-                {keyInsights.length > 1 && (
-                  <span className="text-blue-600">+{keyInsights.length - 1} more</span>
-                )}
-              </div>
-              
-              {/* Hover Actions - appear on card hover */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                {onShare && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onShare(summary.id)
-                    }}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    aria-label="Share summary"
-                    title="Share"
-                  >
-                    <Share2 className="h-3 w-3" />
-                  </button>
-                )}
-                {onDelete && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onDelete(summary.id)
-                    }}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                    aria-label="Delete summary"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
-                
-                {/* Fallback more actions button */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setShowActions(!showActions)
-                  }}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                  aria-label="More actions"
-                  title="More"
-                >
-                  <MoreVertical className="h-3 w-3" />
-                </button>
-              </div>
+            {/* Footer - simplified */}
+            <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+              <span className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                Summary
+              </span>
+              {keyInsights.length > 1 && (
+                <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
+              )}
             </div>
           </div>
 
-          {/* Compact Thumbnail */}
+          {/* Enhanced Thumbnail */}
           <div className="ml-4 flex-shrink-0">
-            <div className="relative h-20 w-32 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative h-20 w-36 overflow-hidden rounded-lg bg-gray-100">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
@@ -497,6 +453,51 @@ export function SummaryCard({
           </div>
         </div>
       </Link>
+
+      {/* Always visible action buttons in bottom-right corner */}
+      <div className="absolute bottom-3 right-3 flex items-center gap-1">
+        {onShare && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onShare(summary.id)
+            }}
+            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-blue-600 shadow-sm transition-colors"
+            aria-label="Share summary"
+            title="Share"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onDelete(summary.id)
+            }}
+            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-red-600 shadow-sm transition-colors"
+            aria-label="Delete summary"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+        
+        {/* More actions button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            setShowActions(!showActions)
+          }}
+          className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-700 shadow-sm transition-colors"
+          aria-label="More actions"
+          title="More"
+        >
+          <MoreVertical className="h-4 w-4" />
+        </button>
+      </div>
 
       {/* Actions Dropdown */}
       {showActions && (

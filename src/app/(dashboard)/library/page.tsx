@@ -399,9 +399,9 @@ export default function LibraryPage() {
       {/* Loading state */}
       {isLoading && (
         <div className={cn(
-          "grid gap-3",
+          "grid gap-4",
           viewMode === 'grid' 
-            ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+            ? "sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" 
             : "grid-cols-1"
         )}>
           {[...Array(8)].map((_, i) => (
@@ -422,9 +422,9 @@ export default function LibraryPage() {
       {!isLoading && allSummaries.length > 0 && (
         <>
           <div className={cn(
-            "grid gap-3",
+            "grid gap-4",
             viewMode === 'grid' 
-              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+              ? "sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" 
               : "grid-cols-1"
           )}>
             {allSummaries.map((summary) => (
