@@ -11,7 +11,26 @@ import { classifySummaryContent } from '@/lib/classificationService'
 // Create an event emitter for streaming
 const ee = new EventEmitter()
 
-// Helper to extract video ID from URL
+/**
+ * Extract YouTube video ID from various YouTube URL formats
+ * 
+ * Parses YouTube URLs and extracts the 11-character video ID using multiple regex patterns
+ * to handle different URL formats including youtu.be, youtube.com/watch, and youtube.com/embed.
+ * Used for normalizing video IDs before API calls and database operations.
+ * 
+ * @param {string} url - The YouTube URL to parse
+ * @returns {string | null} The extracted video ID, or null if no valid ID found
+ * @example
+ * ```typescript
+ * const id1 = extractVideoId('https://youtube.com/watch?v=dQw4w9WgXcQ')  // 'dQw4w9WgXcQ'
+ * const id2 = extractVideoId('https://youtu.be/dQw4w9WgXcQ')            // 'dQw4w9WgXcQ'
+ * const id3 = extractVideoId('https://youtube.com/embed/dQw4w9WgXcQ')   // 'dQw4w9WgXcQ'
+ * const invalid = extractVideoId('https://example.com')                 // null
+ * ```
+ * 
+ * @category API
+ * @since 1.0.0
+ */
 function extractVideoId(url: string): string | null {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
@@ -32,7 +51,32 @@ function extractVideoId(url: string): string | null {
 const ANONYMOUS_USER_ID = 'ANONYMOUS_USER'
 
 export const summaryRouter = createTRPCRouter({
-  // Anonymous summary creation (no auth required, uses special user)
+  /**
+   * Create video summary for anonymous users without authentication
+   * 
+   * Allows unauthenticated users to create one free summary using browser fingerprinting
+   * for tracking. Implements rate limiting (1 summary per browser/IP) and validates YouTube URLs.
+   * Stores summary under special ANONYMOUS_USER account for later claiming after signup.
+   * 
+   * @param {Object} input - Summary creation parameters
+   * @param {string} input.url - YouTube video URL (validated for format and domain)
+   * @param {string} input.browserFingerprint - Browser fingerprint for anonymous tracking
+   * @returns {Promise<Summary & {isAnonymous: true, canSave: false, task_id: string}>} Created summary with metadata
+   * @throws {TRPCError} FORBIDDEN if user has already created anonymous summary
+   * @throws {TRPCError} BAD_REQUEST if URL is invalid or suspicious
+   * @throws {TRPCError} INTERNAL_SERVER_ERROR if backend processing fails
+   * @example
+   * ```typescript
+   * const summary = await api.summary.createAnonymous.mutate({
+   *   url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+   *   browserFingerprint: 'fp_abc123'
+   * })
+   * // Returns summary with isAnonymous: true, canSave: false
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   createAnonymous: publicProcedure
     .input(z.object({
       url: z.string()
@@ -269,6 +313,32 @@ export const summaryRouter = createTRPCRouter({
       }
     }),
 
+  /**
+   * Create video summary for authenticated users with usage limit checking
+   * 
+   * Creates or updates video summaries for authenticated users with plan-based usage limits.
+   * FREE plan: 3 summaries lifetime, PRO plan: 25 summaries per month, ENTERPRISE: unlimited.
+   * Integrates with AI backend for content processing and Smart Collections classification.
+   * 
+   * @param {Object} input - Summary creation parameters
+   * @param {string} input.url - YouTube video URL (validated for format and domain)
+   * @returns {Promise<Summary & {task_id: string}>} Created/updated summary with backend task ID
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} FORBIDDEN if user has exceeded plan limits
+   * @throws {TRPCError} BAD_REQUEST if URL is invalid or suspicious
+   * @throws {TRPCError} NOT_FOUND if user record doesn't exist
+   * @throws {TRPCError} INTERNAL_SERVER_ERROR if backend processing fails
+   * @example
+   * ```typescript
+   * const summary = await api.summary.create.mutate({
+   *   url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
+   * })
+   * // Returns summary with task_id for progress tracking
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   create: protectedProcedure
     .input(z.object({
       url: z.string()
@@ -557,7 +627,37 @@ export const summaryRouter = createTRPCRouter({
       }
     }),
 
-  // Streaming version for real-time updates
+  /**
+   * Create video summary with real-time streaming updates (experimental)
+   * 
+   * Experimental streaming implementation for real-time summary generation updates.
+   * Currently returns mock data for development purposes. Future implementation will
+   * integrate with actual AI backend streaming endpoints for live progress updates.
+   * 
+   * @param {Object} input - Streaming parameters
+   * @param {string} input.url - YouTube video URL to process
+   * @returns {Observable<StreamEvent>} Observable stream of processing events
+   * @returns {'status'} returns.type - Status update event type
+   * @returns {'content'} returns.type - Content chunk event type  
+   * @returns {'error'} returns.type - Error event type
+   * @returns {'complete'} returns.type - Completion event type
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @example
+   * ```typescript
+   * const subscription = api.summary.createStream.useSubscription(
+   *   { url: 'https://youtube.com/watch?v=dQw4w9WgXcQ' },
+   *   {
+   *     onData: (event) => {
+   *       if (event.type === 'content') console.log(event.data)
+   *     }
+   *   }
+   * )
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   * @experimental
+   */
   createStream: protectedProcedure
     .input(z.object({
       url: z.string().url(),
@@ -615,6 +715,27 @@ export const summaryRouter = createTRPCRouter({
       })
     }),
 
+  /**
+   * Get summary by ID for authenticated user
+   * 
+   * Retrieves a specific summary by its unique identifier. Only returns summaries
+   * owned by the authenticated user for security and privacy. Used for individual
+   * summary viewing and editing operations.
+   * 
+   * @param {Object} input - Query parameters
+   * @param {string} input.id - Unique summary identifier
+   * @returns {Promise<Summary>} The requested summary object
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} NOT_FOUND if summary doesn't exist or user doesn't own it
+   * @example
+   * ```typescript
+   * const summary = await api.summary.getById.useQuery({ id: 'clm123abc' })
+   * console.log(summary.videoTitle) // Access summary data
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   getById: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -637,6 +758,30 @@ export const summaryRouter = createTRPCRouter({
       return summary
     }),
 
+  /**
+   * Update summary content for authenticated user
+   * 
+   * Allows users to edit and update the content of their existing summaries.
+   * Only the summary content can be modified - metadata and video information
+   * remain unchanged. Updates the modification timestamp automatically.
+   * 
+   * @param {Object} input - Update parameters
+   * @param {string} input.id - Unique summary identifier to update
+   * @param {string} input.content - New summary content (markdown format)
+   * @returns {Promise<{success: boolean}>} Update success confirmation
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} NOT_FOUND if summary doesn't exist or user doesn't own it
+   * @example
+   * ```typescript
+   * await api.summary.update.mutate({
+   *   id: 'clm123abc',
+   *   content: '# Updated Summary\n\nNew content here...'
+   * })
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   update: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -664,6 +809,27 @@ export const summaryRouter = createTRPCRouter({
       return { success: true }
     }),
 
+  /**
+   * Delete summary for authenticated user
+   * 
+   * Permanently removes a summary from the user's library. Only the summary owner
+   * can delete their summaries. This action cannot be undone and will remove all
+   * associated metadata, tags, and categories.
+   * 
+   * @param {Object} input - Deletion parameters
+   * @param {string} input.id - Unique summary identifier to delete
+   * @returns {Promise<{success: boolean}>} Deletion success confirmation
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} NOT_FOUND if summary doesn't exist or user doesn't own it
+   * @example
+   * ```typescript
+   * await api.summary.delete.mutate({ id: 'clm123abc' })
+   * // Summary permanently deleted from user's library
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   delete: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -686,7 +852,33 @@ export const summaryRouter = createTRPCRouter({
       return { success: true }
     }),
 
-  // Claim anonymous summary when user signs up
+  /**
+   * Claim anonymous summary when user signs up
+   * 
+   * Transfers ownership of an anonymous summary to the authenticated user during signup.
+   * Validates browser fingerprint match and handles duplicate video scenarios.
+   * If user already has the same video, deletes the anonymous version and returns existing.
+   * 
+   * @param {Object} input - Claim parameters
+   * @param {string} input.summaryId - ID of anonymous summary to claim
+   * @param {string} [input.browserFingerprint] - Browser fingerprint for validation
+   * @returns {Promise<Summary & {isAnonymous: false, canSave: true}>} Claimed summary
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} NOT_FOUND if anonymous summary doesn't exist
+   * @throws {TRPCError} BAD_REQUEST if summary is not anonymous or already owned
+   * @throws {TRPCError} FORBIDDEN if browser fingerprint doesn't match
+   * @example
+   * ```typescript
+   * const claimedSummary = await api.summary.claimAnonymous.mutate({
+   *   summaryId: 'anon_abc123',
+   *   browserFingerprint: 'fp_abc123'
+   * })
+   * // Anonymous summary now belongs to authenticated user
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   claimAnonymous: protectedProcedure
     .input(z.object({
       summaryId: z.string(),
@@ -778,7 +970,31 @@ export const summaryRouter = createTRPCRouter({
       }
     }),
 
-  // Get anonymous summary by ID (public access)
+  /**
+   * Get anonymous summary by ID with public access
+   * 
+   * Retrieves anonymous summaries without authentication for viewing before signup.
+   * Validates that the summary belongs to the anonymous user and optionally checks
+   * browser fingerprint for additional security. Used for anonymous summary viewing.
+   * 
+   * @param {Object} input - Query parameters
+   * @param {string} input.id - Anonymous summary identifier
+   * @param {string} [input.browserFingerprint] - Browser fingerprint for validation
+   * @returns {Promise<Summary & {isAnonymous: true, canSave: false}>} Anonymous summary
+   * @throws {TRPCError} NOT_FOUND if summary doesn't exist
+   * @throws {TRPCError} FORBIDDEN if summary requires authentication or fingerprint mismatch
+   * @example
+   * ```typescript
+   * const summary = await api.summary.getAnonymous.useQuery({
+   *   id: 'anon_abc123',
+   *   browserFingerprint: 'fp_abc123'
+   * })
+   * // Returns anonymous summary with isAnonymous: true
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   getAnonymous: publicProcedure
     .input(z.object({
       id: z.string(),

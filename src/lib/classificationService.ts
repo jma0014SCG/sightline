@@ -5,6 +5,24 @@ import { logger } from '@/lib/logger'
 // Lazy initialization to prevent module load failures
 let openai: OpenAI | null = null
 
+/**
+ * Get or initialize the OpenAI client instance
+ * 
+ * Uses lazy initialization to prevent module load failures when OpenAI API key
+ * is not available. Returns null if the API key is missing or initialization fails.
+ * 
+ * @returns {OpenAI | null} The OpenAI client instance, or null if unavailable
+ * @example
+ * ```typescript
+ * const client = getOpenAIClient()
+ * if (client) {
+ *   // Use client for API calls
+ * }
+ * ```
+ * 
+ * @category AI
+ * @since 1.0.0
+ */
 function getOpenAIClient(): OpenAI | null {
   if (!openai && process.env.OPENAI_API_KEY) {
     try {
@@ -51,6 +69,34 @@ const TAG_TYPES = {
   TOOL: 'TOOL'
 } as const
 
+/**
+ * Classify video summary content using AI to extract categories and tags
+ * 
+ * Uses OpenAI's GPT-4o-mini model to analyze video content and automatically extract
+ * relevant categories and entity tags. Handles the complete workflow from AI analysis
+ * to database storage. Gracefully handles failures without breaking summary creation.
+ * 
+ * @param {string} summaryId - The unique identifier of the summary to classify
+ * @param {string} content - The video summary content to analyze
+ * @param {string} [videoTitle] - Optional video title for additional context
+ * @returns {Promise<ClassificationResult | null>} Classification results or null if failed
+ * @example
+ * ```typescript
+ * const result = await classifySummaryContent(
+ *   'summary-123',
+ *   'This video covers React hooks and state management...',
+ *   'React Hooks Tutorial'
+ * )
+ * 
+ * if (result) {
+ *   console.log('Categories:', result.categories)
+ *   console.log('Tags:', result.tags)
+ * }
+ * ```
+ * 
+ * @category AI
+ * @since 1.0.0
+ */
 export async function classifySummaryContent(summaryId: string, content: string, videoTitle?: string) {
   try {
     console.log('🏷️ [CLASSIFICATION] Starting classification for summary:', summaryId)
@@ -228,6 +274,26 @@ Respond with ONLY a valid JSON object in this format:
   }
 }
 
+/**
+ * Get all tags associated with a user's summaries
+ * 
+ * Retrieves tags from summaries belonging to the specified user, including usage counts.
+ * Tags are ordered by frequency (most used first) then alphabetically. Skips processing
+ * for anonymous users and handles database errors gracefully.
+ * 
+ * @param {string} userId - The user ID to fetch tags for
+ * @returns {Promise<Array<{id: string, name: string, type: string, count: number}>>} Array of tags with usage counts
+ * @example
+ * ```typescript
+ * const userTags = await getTagsForUser('user-123')
+ * userTags.forEach(tag => {
+ *   console.log(`${tag.name} (${tag.type}): used ${tag.count} times`)
+ * })
+ * ```
+ * 
+ * @category AI
+ * @since 1.0.0
+ */
 export async function getTagsForUser(userId: string) {
   try {
     // Skip for anonymous users
@@ -274,6 +340,26 @@ export async function getTagsForUser(userId: string) {
   }
 }
 
+/**
+ * Get all categories associated with a user's summaries
+ * 
+ * Retrieves categories from summaries belonging to the specified user, including usage counts.
+ * Categories are ordered by frequency (most used first) then alphabetically. Skips processing
+ * for anonymous users and handles database errors gracefully.
+ * 
+ * @param {string} userId - The user ID to fetch categories for
+ * @returns {Promise<Array<{id: string, name: string, count: number}>>} Array of categories with usage counts
+ * @example
+ * ```typescript
+ * const userCategories = await getCategoriesForUser('user-123')
+ * userCategories.forEach(category => {
+ *   console.log(`${category.name}: used ${category.count} times`)
+ * })
+ * ```
+ * 
+ * @category AI
+ * @since 1.0.0
+ */
 export async function getCategoriesForUser(userId: string) {
   try {
     // Skip for anonymous users

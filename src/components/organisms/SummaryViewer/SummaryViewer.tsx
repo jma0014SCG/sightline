@@ -118,7 +118,24 @@ export function SummaryViewer({
     }
   };
 
-  // Parse timestamp string to seconds
+  /**
+   * Parse timestamp string to seconds for YouTube player navigation
+   * 
+   * Converts timestamp strings in MM:SS or HH:MM:SS format to total seconds.
+   * Used for YouTube player seekTo functionality when users click timestamps.
+   * 
+   * @param {string} timestamp - Time string in MM:SS or HH:MM:SS format
+   * @returns {number} Total seconds as integer
+   * @example
+   * ```typescript
+   * parseTimestampToSeconds('5:30')    // 330 seconds
+   * parseTimestampToSeconds('1:05:45') // 3945 seconds
+   * parseTimestampToSeconds('invalid') // 0
+   * ```
+   * 
+   * @category UI
+   * @since 1.0.0
+   */
   const parseTimestampToSeconds = (timestamp: string): number => {
     const parts = timestamp.split(":").map(Number);
     if (parts.length === 2) {
@@ -161,7 +178,25 @@ export function SummaryViewer({
     }
   };
 
-  // Format duration from seconds to readable format
+  /**
+   * Format duration from seconds to human-readable time format
+   * 
+   * Converts total seconds to HH:MM:SS or MM:SS format depending on duration.
+   * Used for displaying video durations and progress times in the UI.
+   * Handles padding with zeros for consistent formatting.
+   * 
+   * @param {number} seconds - Duration in seconds
+   * @returns {string} Formatted time string (HH:MM:SS or MM:SS)
+   * @example
+   * ```typescript
+   * formatDuration(90)   // '1:30'
+   * formatDuration(3665) // '1:01:05'
+   * formatDuration(0)    // '0:00'
+   * ```
+   * 
+   * @category UI
+   * @since 1.0.0
+   */
   const formatDuration = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -290,7 +325,31 @@ export function SummaryViewer({
   const novelIdeasContent = sections.get("novel idea meter") || sections.get("novel ideas") || "";
   const insightEnrichmentContent = sections.get("insight enrichment") || sections.get("additional insights") || "";
 
-  // Parse glossary from content
+  /**
+   * Parse glossary content into structured term-definition pairs
+   * 
+   * Extracts glossary terms and definitions from markdown content using pattern matching.
+   * Looks for bold terms followed by colons and definitions. Used to populate
+   * the Learning Hub glossary tab with key concepts from video content.
+   * 
+   * @param {string} content - Raw markdown content containing glossary items
+   * @returns {Array<{term: string, definition: string}>} Array of term-definition objects
+   * @example
+   * ```typescript
+   * const content = `
+   * **React:** A JavaScript library for building user interfaces
+   * **JSX:** A syntax extension for JavaScript
+   * `
+   * const glossary = parseSectionToGlossary(content)
+   * // [
+   * //   { term: 'React', definition: 'A JavaScript library for building user interfaces' },
+   * //   { term: 'JSX', definition: 'A syntax extension for JavaScript' }
+   * // ]
+   * ```
+   * 
+   * @category UI
+   * @since 1.0.0
+   */
   const parseSectionToGlossary = (
     content: string,
   ): Array<{ term: string; definition: string }> => {

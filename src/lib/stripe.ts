@@ -68,7 +68,26 @@ export const PRICING_PLANS = {
 
 export type PricingPlan = keyof typeof PRICING_PLANS
 
-// Helper functions
+/**
+ * Get pricing plan by Stripe price ID
+ * 
+ * Maps Stripe price IDs back to internal pricing plan keys. Used to determine
+ * which plan a user is subscribed to based on their Stripe subscription.
+ * Returns null if the price ID doesn't match any known plan.
+ * 
+ * @param {string} priceId - The Stripe price ID to look up
+ * @returns {PricingPlan | null} The corresponding plan key or null if not found
+ * @example
+ * ```typescript
+ * const plan = getPlanByPriceId('price_1234567890')
+ * if (plan === 'PRO') {
+ *   // User has Pro plan
+ * }
+ * ```
+ * 
+ * @category Payments
+ * @since 1.0.0
+ */
 export function getPlanByPriceId(priceId: string): PricingPlan | null {
   for (const [planKey, plan] of Object.entries(PRICING_PLANS)) {
     if (plan.priceId === priceId) {
@@ -78,6 +97,24 @@ export function getPlanByPriceId(priceId: string): PricingPlan | null {
   return null
 }
 
+/**
+ * Format price as USD currency string
+ * 
+ * Converts numeric price to properly formatted USD currency string using
+ * Intl.NumberFormat. Used throughout the application for consistent price display.
+ * 
+ * @param {number} price - Price amount in dollars (not cents)
+ * @returns {string} Formatted currency string (e.g., '$9.99')
+ * @example
+ * ```typescript
+ * formatPrice(9.99)  // '$9.99'
+ * formatPrice(0)     // '$0.00'
+ * formatPrice(100)   // '$100.00'
+ * ```
+ * 
+ * @category Payments
+ * @since 1.0.0
+ */
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -86,6 +123,26 @@ export function formatPrice(price: number): string {
   }).format(price)
 }
 
+/**
+ * Check if user's plan meets or exceeds required plan level
+ * 
+ * Compares user's current plan against a required plan using plan hierarchy.
+ * Plans are ordered FREE < PRO < ENTERPRISE, so Pro users can access Free features,
+ * Enterprise users can access Pro and Free features, etc.
+ * 
+ * @param {string} userPlan - The user's current plan
+ * @param {PricingPlan} requiredPlan - The minimum required plan level
+ * @returns {boolean} True if user's plan meets or exceeds required level
+ * @example
+ * ```typescript
+ * isUserOnPlan('PRO', 'FREE')       // true (Pro user can access Free features)
+ * isUserOnPlan('FREE', 'PRO')       // false (Free user cannot access Pro features)
+ * isUserOnPlan('ENTERPRISE', 'PRO') // true (Enterprise user can access Pro features)
+ * ```
+ * 
+ * @category Payments
+ * @since 1.0.0
+ */
 export function isUserOnPlan(userPlan: string, requiredPlan: PricingPlan): boolean {
   const planHierarchy = ['FREE', 'PRO', 'ENTERPRISE']
   const userPlanIndex = planHierarchy.indexOf(userPlan)

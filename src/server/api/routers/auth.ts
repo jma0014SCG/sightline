@@ -3,6 +3,25 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/
 import { TRPCError } from '@trpc/server'
 
 export const authRouter = createTRPCRouter({
+  /**
+   * Get the current authenticated user's profile data
+   * 
+   * Retrieves the complete user record for the authenticated user from the database.
+   * Requires valid authentication token. Used for profile display and user management.
+   * 
+   * @returns {Promise<User | null>} The user object or null if not found
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @example
+   * ```typescript
+   * const user = await api.auth.getCurrentUser.useQuery()
+   * if (user) {
+   *   console.log(`Welcome, ${user.name}!`)
+   * }
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
       where: { id: ctx.userId },
@@ -14,6 +33,30 @@ export const authRouter = createTRPCRouter({
     return "You can see this secret message because you're authenticated!"
   }),
 
+  /**
+   * Update the authenticated user's profile information
+   * 
+   * Allows users to update their display name and profile image URL.
+   * All fields are optional - only provided fields will be updated.
+   * Used by the settings page for profile management.
+   * 
+   * @param {Object} input - Profile update data
+   * @param {string} [input.name] - New display name (minimum 1 character)
+   * @param {string} [input.image] - New profile image URL (must be valid URL)
+   * @returns {Promise<User>} The updated user object
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} BAD_REQUEST if validation fails
+   * @example
+   * ```typescript
+   * const updatedUser = await api.auth.updateProfile.mutate({
+   *   name: 'John Doe',
+   *   image: 'https://example.com/avatar.jpg'
+   * })
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   updateProfile: protectedProcedure
     .input(z.object({
       name: z.string().min(1).optional(),
@@ -59,7 +102,31 @@ export const authRouter = createTRPCRouter({
     }
   }),
 
-  // Export user data
+  /**
+   * Export all user data for data portability and privacy compliance
+   * 
+   * Retrieves a comprehensive export of all user data including profile information,
+   * summaries, shared links, and usage statistics. Used for GDPR compliance and
+   * data portability features. Returns structured data ready for JSON export.
+   * 
+   * @returns {Promise<Object>} Complete user data export
+   * @returns {Object} returns.profile - User profile information
+   * @returns {Array} returns.summaries - All user summaries with content
+   * @returns {Array} returns.sharedLinks - All shared links created by user
+   * @returns {Object} returns.stats - Usage statistics and totals
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} NOT_FOUND if user record doesn't exist
+   * @example
+   * ```typescript
+   * const exportData = await api.auth.exportUserData.useQuery()
+   * const blob = new Blob([JSON.stringify(exportData, null, 2)], 
+   *   { type: 'application/json' })
+   * // Download as file
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   exportUserData: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
       where: { id: ctx.userId },
@@ -109,7 +176,30 @@ export const authRouter = createTRPCRouter({
     }
   }),
 
-  // Delete user account
+  /**
+   * Permanently delete user account with confirmation requirement
+   * 
+   * Securely deletes the user account and all associated data including summaries,
+   * shared links, and metadata. Requires explicit confirmation text ("DELETE") to prevent
+   * accidental deletion. Handles Stripe subscription cleanup in production environments.
+   * 
+   * @param {Object} input - Deletion confirmation data
+   * @param {string} input.confirmationText - Must be exactly "DELETE" to confirm
+   * @returns {Promise<{success: boolean}>} Deletion success confirmation
+   * @throws {TRPCError} UNAUTHORIZED if user is not authenticated
+   * @throws {TRPCError} BAD_REQUEST if confirmation text is incorrect
+   * @throws {TRPCError} NOT_FOUND if user record doesn't exist
+   * @example
+   * ```typescript
+   * await api.auth.deleteAccount.mutate({
+   *   confirmationText: 'DELETE'
+   * })
+   * // User account and all data permanently deleted
+   * ```
+   * 
+   * @category API
+   * @since 1.0.0
+   */
   deleteAccount: protectedProcedure
     .input(z.object({
       confirmationText: z.string().min(1, 'Confirmation text is required'),
