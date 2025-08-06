@@ -142,6 +142,16 @@ jest.mock('@clerk/nextjs', () => ({
   UserButton: () => <div>User Button</div>,
 }))
 
+// Mock superjson to avoid ES module import issues
+jest.mock('superjson', () => ({
+  default: {
+    serialize: jest.fn((obj) => obj),
+    deserialize: jest.fn((obj) => obj),
+  },
+  serialize: jest.fn((obj) => obj),
+  deserialize: jest.fn((obj) => obj),
+}))
+
 // Mock tRPC - temporarily disabled to fix module resolution
 // jest.mock('../src/lib/api/trpc', () => ({
 //   api: {
