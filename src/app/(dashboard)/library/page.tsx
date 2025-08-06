@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Plus, Loader2, Trash2, AlertCircle } from 'lucide-react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { Plus, Loader2, Trash2, AlertCircle, Search } from 'lucide-react'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryCard } from '@/components/molecules/SummaryCard'
 import { LibraryControls, type LibraryFilters } from '@/components/molecules/LibraryControls'
 import { QuickActionsBar } from '@/components/molecules/QuickActionsBar'
 import { ShareModal } from '@/components/molecules/ShareModal'
 import { Skeleton } from '@/components/atoms/Skeleton'
+import { FloatingActionButton } from '@/components/atoms/FloatingActionButton'
 import { api } from '@/components/providers/TRPCProvider'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -19,6 +20,8 @@ export default function LibraryPage() {
   const [isCreatingSummary, setIsCreatingSummary] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [showFab, setShowFab] = useState(true)
+  const createSummaryRef = useRef<HTMLDivElement>(null)
   const [shareModalState, setShareModalState] = useState<{
     isOpen: boolean
     summaryId: string
@@ -284,13 +287,38 @@ export default function LibraryPage() {
   // Auto-enable selection mode when items are selected
   const effectiveShowSelection = showSelection || selectedIds.length > 0
 
+  // Handle FAB click - scroll to create summary section
+  const handleFabClick = useCallback(() => {
+    createSummaryRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    })
+  }, [])
+
+  // Hide FAB when near create summary section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!createSummaryRef.current) return
+      
+      const rect = createSummaryRef.current.getBoundingClientRect()
+      const isNearCreateSection = rect.top <= window.innerHeight && rect.bottom >= 0
+      
+      setShowFab(!isNearCreateSection)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Check initial position
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div>
-      {/* Compact Header with Inline URL Input */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-3">
+      {/* Page Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">Library</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Library</h1>
             {usage && usage.monthlyLimit > 0 && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>{usage.currentMonthUsage}/{usage.monthlyLimit}</span>
@@ -316,25 +344,35 @@ export default function LibraryPage() {
               </div>
             )}
           </div>
-          
-          {/* Compact URL Input */}
-          <div className="flex-shrink-0 max-w-md">
-            <URLInput 
-              onSubmit={handleCreateSummary}
-              onSuccess={() => {
-                console.log('URL input cleared after successful submission')
-              }}
-              isLoading={isCreatingSummary || createSummary.isPending}
-              disabled={usage?.isLimitReached}
-              placeholder="Paste YouTube URL..."
-              className="compact"
-            />
+        </div>
+      </div>
+
+      {/* Create New Summary Section */}
+      <div ref={createSummaryRef} className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-lg">
+            <Plus className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Create New Summary</h2>
+            <p className="text-sm text-gray-600">Paste a YouTube URL to generate an AI summary</p>
           </div>
         </div>
+        
+        <URLInput 
+          onSubmit={handleCreateSummary}
+          onSuccess={() => {
+            console.log('URL input cleared after successful submission')
+          }}
+          isLoading={isCreatingSummary || createSummary.isPending}
+          disabled={usage?.isLimitReached}
+          placeholder="Paste YouTube URL here..."
+          className="create-summary"
+        />
 
         {/* Usage warning message only if limit reached */}
         {usage?.isLimitReached && (
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-sm">
+          <div className="flex items-center gap-2 p-3 mt-3 rounded-lg bg-amber-50 border border-amber-200 text-sm">
             <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
             <p className="text-amber-700">
               Monthly limit reached. Upgrade for unlimited summaries.
@@ -342,23 +380,23 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Compact progress indicator */}
+        {/* Progress indicator */}
         {createSummary.isPending && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mt-4 p-4 bg-white/70 border border-blue-300 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="flex space-x-1">
-                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse"></div>
-                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse animation-delay-200"></div>
-                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-pulse animation-delay-400"></div>
+                <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse"></div>
+                <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse animation-delay-200"></div>
+                <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse animation-delay-400"></div>
               </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between text-xs text-blue-700 mb-1">
+                <div className="flex items-center justify-between text-sm text-blue-700 mb-2">
                   <span className="font-medium">{processingStage}</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-1.5">
+                <div className="w-full bg-blue-200 rounded-full h-2">
                   <div 
-                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out"
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -368,8 +406,15 @@ export default function LibraryPage() {
         )}
       </div>
 
-      {/* Library Controls */}
-      <div className="mb-4">
+      {/* Search and Filter Section */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center justify-center w-6 h-6 bg-gray-100 rounded">
+            <Search className="h-4 w-4 text-gray-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900">Search & Filter Your Summaries</h3>
+        </div>
+        
         <LibraryControls
           filters={filters}
           onFiltersChange={setFilters}
@@ -522,6 +567,15 @@ export default function LibraryPage() {
         summaryId={shareModalState.summaryId}
         summaryTitle={shareModalState.summaryTitle}
       />
+
+      {/* Floating Action Button */}
+      {showFab && (
+        <FloatingActionButton 
+          onClick={handleFabClick}
+          disabled={usage?.isLimitReached}
+          tooltip={usage?.isLimitReached ? "Upgrade to create more summaries" : "Create new summary"}
+        />
+      )}
     </div>
   )
 }

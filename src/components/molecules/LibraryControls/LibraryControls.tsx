@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, Filter, Grid, List, SortDesc, Clock, Calendar, Play, Star, Zap, X } from 'lucide-react'
+import { Search, Filter, Grid, List, SortDesc, Clock, Calendar, Play, Star, Zap, X, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface LibraryFilters {
@@ -48,6 +48,7 @@ export function LibraryControls({
 }: LibraryControlsProps) {
   const [showFilters, setShowFilters] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
+  const [showUrlHint, setShowUrlHint] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
   // Quick filter presets
@@ -92,7 +93,26 @@ export function LibraryControls({
     'Web development',
   ]
 
+  // URL detection helper
+  const isYouTubeUrl = (text: string): boolean => {
+    const patterns = [
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)/,
+      /youtube\.com\/watch\?.*v=/,
+      /youtu\.be\//
+    ]
+    return patterns.some(pattern => pattern.test(text.trim()))
+  }
+
   const handleSearchChange = (value: string) => {
+    // Check if the input looks like a YouTube URL
+    if (value.trim() && isYouTubeUrl(value)) {
+      setShowUrlHint(true)
+      // Auto-hide the hint after 5 seconds
+      setTimeout(() => setShowUrlHint(false), 5000)
+    } else {
+      setShowUrlHint(false)
+    }
+    
     onFiltersChange({ ...filters, search: value })
   }
 
@@ -191,21 +211,21 @@ export function LibraryControls({
       <div className="space-y-3">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
           <input
             ref={searchRef}
             type="text"
-            placeholder="Search in titles, channels, and content... (⌘K)"
+            placeholder="Search your summaries... (⌘K)"
             value={filters.search}
             onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-            className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-12 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+            className="w-full rounded-lg border-2 border-gray-200 bg-gray-50/50 pl-11 pr-12 py-3 text-sm text-gray-700 placeholder:text-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-300/30 transition-all"
           />
           {filters.search && (
             <button
               onClick={() => handleSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -213,7 +233,7 @@ export function LibraryControls({
           
           {/* Search Suggestions */}
           {searchFocused && !filters.search && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
               <div className="p-3 border-b border-gray-100">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Popular searches</p>
               </div>
@@ -222,12 +242,35 @@ export function LibraryControls({
                   <button
                     key={index}
                     onClick={() => handleSearchChange(suggestion)}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2 transition-colors"
                   >
                     <Search className="h-3 w-3 text-gray-400" />
                     {suggestion}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* URL Detection Hint */}
+          {showUrlHint && filters.search && isYouTubeUrl(filters.search) && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-blue-50 border border-blue-200 rounded-lg shadow-lg z-10 p-3">
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                  <Plus className="h-3 w-3 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-900">Want to create a new summary?</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    This looks like a YouTube URL. Use the &quot;Create New Summary&quot; section above to generate an AI summary.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowUrlHint(false)}
+                  className="flex-shrink-0 text-blue-400 hover:text-blue-600 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
           )}

@@ -18,6 +18,11 @@
  * @since 1.0.0
  */
 export async function generateBrowserFingerprint(): Promise<string> {
+  // Return early if running on server-side
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return 'server-side-fingerprint'
+  }
+
   const components: string[] = []
 
   // User agent
@@ -98,7 +103,10 @@ export async function generateBrowserFingerprint(): Promise<string> {
  * @since 1.0.0
  */
 export function hasUsedFreeSummary(): boolean {
-  if (typeof window === 'undefined') return false
+  // Return false during SSR to maintain consistency
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return false
+  }
   
   try {
     return localStorage.getItem('hasUsedFreeSummary') === 'true'
@@ -127,7 +135,9 @@ export function hasUsedFreeSummary(): boolean {
  * @since 1.0.0
  */
 export function markFreeSummaryUsed(): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return
+  }
   
   try {
     localStorage.setItem('hasUsedFreeSummary', 'true')
@@ -160,7 +170,9 @@ export function markFreeSummaryUsed(): void {
  * @since 1.0.0
  */
 export async function getBrowserFingerprint(): Promise<string> {
-  if (typeof window === 'undefined') return 'server-side'
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return 'server-side'
+  }
   
   try {
     // Check if we have a stored fingerprint
@@ -173,6 +185,10 @@ export async function getBrowserFingerprint(): Promise<string> {
     return fingerprint
   } catch {
     // Fallback to generating without storing
-    return generateBrowserFingerprint()
+    try {
+      return await generateBrowserFingerprint()
+    } catch {
+      return 'fallback-' + Date.now().toString(36)
+    }
   }
 }

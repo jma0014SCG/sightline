@@ -115,7 +115,7 @@ export const summaryRouter = createTRPCRouter({
       if (existingAnonymousSummary) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Welcome back! You\'ve already used your free summary. Sign up now to get 3 free summaries!',
+          message: 'Welcome back! You\'ve already used your free trial. Sign up now to get 3 summaries every month!',
         })
       }
 
@@ -133,7 +133,7 @@ export const summaryRouter = createTRPCRouter({
       if (existingByIP) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'A free summary has already been used from this location. Sign up now to get 3 free summaries!',
+          message: 'A free summary has already been used from this location. Sign up now to get 3 summaries every month!',
         })
       }
 
@@ -317,7 +317,7 @@ export const summaryRouter = createTRPCRouter({
    * Create video summary for authenticated users with usage limit checking
    * 
    * Creates or updates video summaries for authenticated users with plan-based usage limits.
-   * FREE plan: 3 summaries lifetime, PRO plan: 25 summaries per month, ENTERPRISE: unlimited.
+   * FREE plan: 3 summaries per month, PRO plan: 25 summaries per month, ENTERPRISE: unlimited.
    * Integrates with AI backend for content processing and Smart Collections classification.
    * 
    * @param {Object} input - Summary creation parameters
@@ -378,15 +378,24 @@ export const summaryRouter = createTRPCRouter({
       // Check usage limits based on plan
       if (user.summariesLimit > 0) {
         if (user.plan === 'FREE') {
-          // FREE plan: Check total summaries ever (3 max)
-          const totalUsage = await ctx.prisma.summary.count({
-            where: { userId: userId },
+          // FREE plan: Check monthly usage (3 max per month, same as PRO plan logic)
+          const startOfMonth = new Date()
+          startOfMonth.setDate(1)
+          startOfMonth.setHours(0, 0, 0, 0)
+
+          const currentMonthUsage = await ctx.prisma.summary.count({
+            where: {
+              userId: userId,
+              createdAt: {
+                gte: startOfMonth,
+              },
+            },
           })
 
-          if (totalUsage >= user.summariesLimit) {
+          if (currentMonthUsage >= user.summariesLimit) {
             throw new TRPCError({
               code: 'FORBIDDEN',
-              message: `You've used all ${user.summariesLimit} of your free summaries! Upgrade to Pro for 25 summaries every month.`,
+              message: `You've reached your monthly limit of ${user.summariesLimit} summaries. Your limit resets on the 1st of next month. Upgrade to Pro for 25 summaries per month!`,
             })
           }
         } else if (user.plan === 'PRO') {

@@ -28,9 +28,16 @@ export function URLInput({
   const [url, setUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isValid, setIsValid] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
+  const [clientAnonymousUsed, setClientAnonymousUsed] = useState(false)
   const wasLoadingRef = useRef(false)
-  const { isAuthenticated } = useAuth()
-  const anonymousUsed = hasUsedFreeSummary()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsHydrated(true)
+    setClientAnonymousUsed(hasUsedFreeSummary())
+  }, [])
 
   // Get appropriate button text based on user status
   const getButtonText = () => {
@@ -38,11 +45,16 @@ export function URLInput({
       return 'Processing...'
     }
     
+    // Show loading state during hydration and auth loading
+    if (!isHydrated || authLoading) {
+      return 'Loading...'
+    }
+    
     if (!isAuthenticated) {
-      if (anonymousUsed) {
-        return 'Sign up to summarize'
+      if (clientAnonymousUsed) {
+        return 'Sign up for 3/month'
       }
-      return 'Summarize (Free)'
+      return 'Try Free (No signup)'
     }
     
     // For authenticated users, we could show remaining summaries here
@@ -89,7 +101,7 @@ export function URLInput({
     }
 
     // If anonymous user has already used their free summary, trigger auth
-    if (!isAuthenticated && anonymousUsed) {
+    if (!isAuthenticated && clientAnonymousUsed) {
       onAuthRequired?.()
       return
     }
@@ -122,12 +134,18 @@ export function URLInput({
     }
   }
 
+  // Apply different styling based on className context
+  const isCreateSummaryContext = className?.includes('create-summary')
+  
   return (
     <form onSubmit={handleSubmit} className={cn("w-full", className)}>
       <div className="space-y-2">
         <div className="relative flex gap-2">
           <div className="relative flex-1">
-            <Link2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-silver-lake-blue" />
+            <Link2 className={cn(
+              "absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2",
+              isCreateSummaryContext ? "text-blue-600" : "text-silver-lake-blue"
+            )} />
             <input
               type="url"
               value={url}
@@ -140,10 +158,18 @@ export function URLInput({
               placeholder={placeholder}
               disabled={isLoading || disabled}
               className={cn(
-                "w-full rounded-lg bg-white border border-paynes-gray/20 py-3 pl-10 text-prussian-blue",
-                "placeholder:text-paynes-gray focus:border-silver-lake-blue focus:outline-none",
-                "focus:ring-2 focus:ring-silver-lake-blue/50 disabled:cursor-not-allowed disabled:opacity-50",
-                "transition-all duration-300",
+                "w-full rounded-lg py-3 pl-10 transition-all duration-300",
+                isCreateSummaryContext ? (
+                  // Create summary styling - more prominent
+                  "bg-white border-2 border-blue-200 text-gray-900 placeholder:text-gray-600 " +
+                  "focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 " +
+                  "disabled:cursor-not-allowed disabled:opacity-50"
+                ) : (
+                  // Default styling
+                  "bg-white border border-paynes-gray/20 text-prussian-blue placeholder:text-paynes-gray " +
+                  "focus:border-silver-lake-blue focus:outline-none focus:ring-2 focus:ring-silver-lake-blue/50 " +
+                  "disabled:cursor-not-allowed disabled:opacity-50"
+                ),
                 error && "border-red-400 focus:border-red-400 focus:ring-red-400/50",
                 isValid && "border-green-400 focus:border-green-400 focus:ring-green-400/50",
                 isValid ? "pr-10" : "pr-4"
@@ -159,11 +185,14 @@ export function URLInput({
             onClick={handlePaste}
             disabled={isLoading || disabled}
             className={cn(
-              "rounded-lg bg-white border border-paynes-gray/20 px-4 py-3 sm:px-4 sm:py-3 text-sm font-medium",
-              "text-paynes-gray hover:bg-anti-flash-white focus:outline-none focus:ring-2",
-              "focus:ring-silver-lake-blue/50 disabled:cursor-not-allowed",
-              "disabled:opacity-50 transition-all duration-300 hover:scale-105",
-              "min-h-[44px] min-w-[64px]" // Mobile touch target minimum
+              "rounded-lg px-4 py-3 sm:px-4 sm:py-3 text-sm font-medium transition-all duration-300",
+              "focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "min-h-[44px] min-w-[64px] hover:scale-105",
+              isCreateSummaryContext ? (
+                "bg-white border-2 border-blue-200 text-gray-700 hover:bg-blue-50 focus:ring-blue-500/20"
+              ) : (
+                "bg-white border border-paynes-gray/20 text-paynes-gray hover:bg-anti-flash-white focus:ring-silver-lake-blue/50"
+              )
             )}
           >
             Paste
@@ -173,12 +202,15 @@ export function URLInput({
             type="submit"
             disabled={isLoading || disabled || !url.trim()}
             className={cn(
-              "rounded-lg bg-prussian-blue px-4 sm:px-6 py-3 text-sm font-semibold text-white",
-              "shadow-lg hover:bg-paynes-gray focus-visible:outline focus-visible:outline-2",
-              "focus-visible:outline-offset-2 focus-visible:outline-prussian-blue",
-              "disabled:cursor-not-allowed disabled:opacity-50",
-              "flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl",
-              "min-h-[44px]" // Mobile touch target minimum
+              "rounded-lg px-4 sm:px-6 py-3 text-sm font-semibold text-white shadow-lg",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+              "disabled:cursor-not-allowed disabled:opacity-50 flex items-center gap-2",
+              "transition-all duration-300 hover:scale-105 hover:shadow-xl min-h-[44px]",
+              isCreateSummaryContext ? (
+                "bg-blue-600 hover:bg-blue-700 focus-visible:outline-blue-600"
+              ) : (
+                "bg-prussian-blue hover:bg-paynes-gray focus-visible:outline-prussian-blue"
+              )
             )}
           >
             {isLoading && (

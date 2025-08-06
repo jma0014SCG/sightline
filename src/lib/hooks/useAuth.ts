@@ -73,11 +73,11 @@ export function useAuth() {
     }
   }, [signOut, router])
 
-  const isAuthenticated = isSignedIn
+  const isAuthenticated = isLoaded ? isSignedIn : false
   const isLoading = !isLoaded
 
   // Map Clerk user to our expected user format
-  const mappedUser = user ? {
+  const mappedUser = isLoaded && user ? {
     id: user.id,
     name: user.fullName || user.firstName || '',
     email: user.primaryEmailAddress?.emailAddress || '',

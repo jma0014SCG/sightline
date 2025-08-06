@@ -1,29 +1,18 @@
 # Sightline.ai
 
-A YouTube video summarization platform that uses AI to create concise, accurate summaries of video content.
+**AI-Powered YouTube Video Summarization Platform**
 
-## 🚀 Features
+Transform long-form YouTube videos into actionable insights with AI-powered summarization, Smart Collections tagging, and intelligent content organization.
 
-### Core Features
-- **Instant Summarization**: Generate summaries in under 15 seconds for 20-minute videos
-- **YouTube Integration**: Direct URL processing with automatic transcript extraction
-- **Smart Fallbacks**: Whisper AI for videos without captions
-- **Real-time Progress**: Live progress tracking with realistic stage updates
-- **User Management**: Secure authentication with Clerk and personal libraries
+## 🎯 Core Features
 
-### Pro Features
-- **Unlimited Summaries**: No monthly limits on video processing
-- **Advanced Export**: Markdown and PDF export capabilities
-- **Personal Library**: Searchable, organized summary collection
-- **Priority Support**: Dedicated support for Pro subscribers
-- **Extended Video Length**: Process videos up to 2 hours
-
-### User Experience
-- **Responsive Design**: Optimized for desktop and mobile
-- **Sharing & Export**: Copy to clipboard, public sharing links, data export
-- **Comprehensive Settings**: Profile management, notification preferences, account controls
-- **Secure Payments**: Integrated Stripe payment processing
-- **Data Portability**: Complete data export and account management
+- **⚡ Instant Summarization**: AI-powered summaries in 15-30 seconds
+- **🧠 Smart Collections**: Automatic AI tagging and categorization  
+- **👤 Anonymous Trial**: Try without signup (1 free summary)
+- **📊 Real-time Progress**: Live processing updates
+- **🏷️ Intelligent Organization**: Filter by people, companies, technologies
+- **📱 Responsive Design**: Optimized for all devices
+- **🔒 Secure Authentication**: Clerk-powered user management
 
 ## 📁 Project Structure
 
@@ -109,26 +98,34 @@ sightline/
 
 ## 📚 Documentation
 
-- [Implementation Plan](Docs/Implementation.md)
-- [Project Structure](Docs/project_structure.md) - Complete codebase organization
-- [UI/UX Documentation](Docs/UI_UX_doc.md)
-- [Deployment Guide](Docs/PRODUCTION_DEPLOYMENT.md) - Production deployment steps
-- [Security Audit](Docs/SECURITY_AUDIT.md)
-- [Troubleshooting Guide](Docs/TROUBLESHOOTING.md)
+**📖 [Complete Platform Documentation](SIGHTLINE_PLATFORM_DOCUMENTATION.md)** - Comprehensive technical documentation
 
-## ✨ Recent Updates
+### Additional Resources
+- [Development Setup](CLAUDE.md) - Claude Code development instructions
+- [Project Structure](Docs/project_structure.md) - Detailed codebase organization  
+- [UI/UX Guidelines](Docs/UI_UX_doc.md) - Design system and patterns
+- [Production Deployment](Docs/PRODUCTION_DEPLOYMENT.md) - Deployment procedures
+- [Troubleshooting](Docs/TROUBLESHOOTING.md) - Common issues and solutions
 
-### August 2025
-- **🎯 Complete Settings Page**: Profile management, notification preferences, and secure account deletion
-- **💳 Stripe Payment Integration**: Fully functional Pro plan subscriptions with direct payment links  
-- **📊 Enhanced User Management**: Data export, notification controls, and comprehensive account settings
-- **🔒 Security Improvements**: Secure account deletion with confirmation requirements
-- **🎨 UI/UX Enhancements**: Tabbed interface, real-time form updates, and success notifications
+## ✨ Latest Features
 
-### Previous Updates
-- **📈 Real-time Progress Tracking**: Live progress updates during video summarization with realistic stage feedback
-- **🔐 Clerk Authentication**: Modern authentication system replacing NextAuth with improved security
-- **⚡ Performance Optimizations**: Enhanced caching, faster load times, and improved user experience
+### Smart Collections (August 2025)
+- **🤖 AI-Powered Tagging**: Automatic extraction of people, companies, technologies
+- **🎨 Color-Coded Organization**: 7 distinct tag types with visual coding
+- **🔍 Intelligent Filtering**: Filter library by tags and categories
+- **📊 Usage Analytics**: Tag/category counts and insights
+
+### Anonymous User Experience (August 2025)  
+- **🆓 Try Before Signup**: 1 free summary without registration
+- **🔗 Modal Authentication**: Seamless in-app login flow
+- **📱 Browser Fingerprinting**: Secure anonymous user tracking
+- **🎯 Progressive Registration**: Experience value before commitment
+
+### Core Platform
+- **⚡ Real-time Progress**: Live processing updates with accurate stages
+- **🔐 Clerk Authentication**: Modern, secure user management  
+- **💳 Stripe Integration**: Seamless Pro plan subscriptions ($9.99/month)
+- **📊 Personal Library**: Searchable, organized summary collection
 
 ## 🧪 Testing
 

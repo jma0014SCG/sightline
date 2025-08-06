@@ -3,11 +3,12 @@
 export const PRICING_PLANS = {
   FREE: {
     name: 'Free',
-    description: 'Try before you buy',
+    description: 'Perfect for getting started',
     price: 0,
     paymentLink: null,
     features: [
-      '3 summaries ever',
+      '3 summaries/month',
+      'Personal library access',
     ],
   },
   PRO: {

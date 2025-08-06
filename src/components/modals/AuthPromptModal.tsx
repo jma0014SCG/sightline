@@ -103,7 +103,7 @@ export function AuthPromptModal({
               </p>
             )}
             <p className="text-gray-600 max-w-sm mx-auto">
-              You&apos;ve used your free trial. Create an account to save this summary and get 3 more free!
+              You&apos;ve used your free trial! Create an account to save this summary and get 3 more summaries every month.
             </p>
           </div>
 
