@@ -41,6 +41,30 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
 
+# Global progress tracking storage - persistent across function calls
+progress_storage = {}
+
+# Progress tracking endpoint - always available
+@app.get("/api/progress/{task_id}")
+async def get_progress(task_id: str):
+    """Get progress for a task ID. Returns default values if task not found."""
+    progress = progress_storage.get(task_id, {
+        "progress": 0, 
+        "stage": "Starting...", 
+        "status": "processing",
+        "task_id": task_id
+    })
+    return progress
+
+# Progress cleanup endpoint for completed tasks
+@app.delete("/api/progress/{task_id}")
+async def cleanup_progress(task_id: str):
+    """Clean up completed progress data to prevent memory leaks."""
+    if task_id in progress_storage:
+        del progress_storage[task_id]
+        return {"status": "cleaned"}
+    return {"status": "not_found"}
+
 # Import and include routers
 try:
     from routers import summarize, transcript
@@ -55,21 +79,17 @@ except ImportError as e:
         for file in os.listdir(routers_dir):
             print(f"  - {file}")
     
-    # Progress tracking storage
-    progress_storage = {}
-    
-    # Progress tracking endpoint
-    @app.get("/api/progress/{task_id}")
-    async def get_progress(task_id: str):
-        progress = progress_storage.get(task_id, {"progress": 0, "stage": "Starting...", "status": "processing"})
-        return progress
-    
     # Create working summarize endpoint as fallback
     @app.post("/api/summarize")
     async def working_summarize(request: dict):
+        import uuid
+        import asyncio
+        import re
+        
+        # Generate task ID immediately
+        task_id = str(uuid.uuid4())
+        
         try:
-            import uuid
-            import asyncio
             # Import required modules here to avoid import issues
             import sys
             import os
@@ -80,14 +100,13 @@ except ImportError as e:
             
             url = request.get("url", "")
             if not url:
-                return {"error": "URL is required"}
+                progress_storage[task_id] = {"progress": 0, "stage": "Error: URL is required", "status": "error", "task_id": task_id}
+                return {"error": "URL is required", "task_id": task_id}
             
-            # Generate task ID for progress tracking
-            task_id = str(uuid.uuid4())
-            progress_storage[task_id] = {"progress": 0, "stage": "Starting...", "status": "processing", "task_id": task_id}
+            # Initialize progress tracking immediately
+            progress_storage[task_id] = {"progress": 5, "stage": "Initializing...", "status": "processing", "task_id": task_id}
             
             # Extract video ID
-            import re
             patterns = [
                 r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})',
                 r'youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})'
@@ -101,21 +120,20 @@ except ImportError as e:
                     break
             
             if not video_id:
-                progress_storage[task_id] = {"progress": 0, "stage": "Error: Invalid URL", "status": "error", "task_id": task_id}
+                progress_storage[task_id] = {"progress": 0, "stage": "Error: Invalid YouTube URL", "status": "error", "task_id": task_id}
                 return {"error": "Invalid YouTube URL", "task_id": task_id}
             
             # Initialize services
+            progress_storage[task_id] = {"progress": 10, "stage": "Connecting to YouTube...", "status": "processing", "task_id": task_id}
+            await asyncio.sleep(0.1)  # Brief pause to ensure progress is visible
+            
             youtube_service = YouTubeService()
             langchain_service = LangChainService()
-            
-            # Update progress: Connecting to YouTube
-            progress_storage[task_id] = {"progress": 10, "stage": "Connecting to YouTube...", "status": "processing", "task_id": task_id}
-            await asyncio.sleep(0.5)  # Small delay to make progress visible
             
             # Get real video info and transcript
             print(f"🔄 Processing video ID: {video_id}")
             
-            # Update progress: Getting video info
+            # Update progress: Getting video info  
             progress_storage[task_id] = {"progress": 25, "stage": "Fetching video information...", "status": "processing", "task_id": task_id}
             video_info = await youtube_service.get_video_info(video_id)
             print(f"📹 Video info: {video_info.title} by {video_info.channel_name}")
@@ -132,7 +150,7 @@ except ImportError as e:
             
             # Update progress: Analyzing content
             progress_storage[task_id] = {"progress": 60, "stage": "Analyzing content with AI...", "status": "processing", "task_id": task_id}
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.1)
             
             # Update progress: Generating summary
             progress_storage[task_id] = {"progress": 80, "stage": "Generating your summary...", "status": "processing", "task_id": task_id}
@@ -143,10 +161,11 @@ except ImportError as e:
                 video_url=url
             )
             
-            # Update progress: Complete
+            # Update progress: Complete - this is critical for frontend coordination
             progress_storage[task_id] = {"progress": 100, "stage": "Summary ready!", "status": "completed", "task_id": task_id}
+            print(f"✅ Progress marked as complete for task {task_id}")
             
-            return {
+            result = {
                 "video_id": video_id,
                 "video_url": url,
                 "video_title": video_info.title,
@@ -163,12 +182,15 @@ except ImportError as e:
                 }
             }
             
+            print(f"🎯 Returning result with task_id: {task_id}")
+            return result
+            
         except Exception as e:
-            # Update progress with error state if we have a task_id
-            if 'task_id' in locals():
-                progress_storage[task_id] = {"progress": 0, "stage": f"Error: {str(e)}", "status": "error", "task_id": task_id}
-                return {"error": f"Summarization failed: {str(e)}", "task_id": task_id}
-            return {"error": f"Summarization failed: {str(e)}"}
+            # Always update progress with error state
+            error_msg = f"Summarization failed: {str(e)}"
+            progress_storage[task_id] = {"progress": 0, "stage": f"Error: {str(e)}", "status": "error", "task_id": task_id}
+            print(f"❌ Error in summarization (task {task_id}): {error_msg}")
+            return {"error": error_msg, "task_id": task_id}
     
     # Create a test endpoint to debug
     @app.post("/api/test-summarize")

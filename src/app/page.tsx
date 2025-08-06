@@ -58,9 +58,10 @@ export default function HomePage() {
   // Real-time progress tracking
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
     taskId: currentTaskId,
-    onComplete: () => {
-      console.log('Progress tracking completed')
-      setCurrentTaskId(null)
+    onComplete: (data) => {
+      console.log('Progress tracking completed:', data)
+      // Don't immediately clear task ID - let the summary display handle it
+      // This prevents the progress bar from disappearing before the summary shows
     },
     onError: (error) => {
       console.error('Progress tracking error:', error)
@@ -108,25 +109,52 @@ export default function HomePage() {
       setSuccessMessage('✅ Summary created and saved to your library!')
       setTimeout(() => setSuccessMessage(null), 5000)
       
-      // If we got a real task_id from backend, switch to using it
+      // If we got a real task_id from backend, switch to using it for progress tracking
       if (data.task_id && data.task_id !== currentTaskId) {
         console.log('🔄 Switching to real task_id:', data.task_id)
         setCurrentTaskId(data.task_id)
       }
       
-      // Wait a moment for user to see completion, then show summary
-      setTimeout(() => {
-        setCurrentSummary(data)
-        setCurrentTaskId(null) // Stop progress tracking
-        
-        // Auto-scroll to summary section
-        setTimeout(() => {
-          const summaryElement = document.getElementById('summary-section')
-          if (summaryElement) {
-            summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Wait for progress to complete (100%) or a maximum timeout before showing summary
+      const waitForProgressCompletion = () => {
+        const checkProgress = async () => {
+          if (progressStatus === 'completed' || progress >= 100) {
+            console.log('📊 Progress completed, showing summary immediately')
+            setCurrentSummary(data)
+            setCurrentTaskId(null) // Clear task ID after showing summary
+            
+            // Auto-scroll to summary section
+            setTimeout(() => {
+              const summaryElement = document.getElementById('summary-section')
+              if (summaryElement) {
+                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }, 100)
+          } else {
+            // Check again in 500ms if progress isn't complete yet
+            setTimeout(checkProgress, 500)
           }
-        }, 100)
-      }, 1000)
+        }
+        
+        // Start checking immediately, but with a 3-second safety timeout
+        checkProgress()
+        setTimeout(() => {
+          if (!currentSummary) {
+            console.log('⏰ Progress timeout, showing summary anyway')
+            setCurrentSummary(data)
+            setCurrentTaskId(null)
+            
+            setTimeout(() => {
+              const summaryElement = document.getElementById('summary-section')
+              if (summaryElement) {
+                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }, 100)
+          }
+        }, 3000)
+      }
+      
+      waitForProgressCompletion()
     },
     onError: (error) => {
       console.error('❌ Summarization failed:', error)
@@ -142,7 +170,7 @@ export default function HomePage() {
       setSuccessMessage('✅ Free summary created! Sign up to save it to your library.')
       setTimeout(() => setSuccessMessage(null), 5000)
       
-      // If we got a real task_id from backend, switch to using it
+      // If we got a real task_id from backend, switch to using it for progress tracking
       if (data.task_id && data.task_id !== currentTaskId) {
         console.log('🔄 Switching to real task_id:', data.task_id)
         setCurrentTaskId(data.task_id)
@@ -151,25 +179,57 @@ export default function HomePage() {
       // Mark that free summary has been used
       markFreeSummaryUsed()
       
-      // Wait a moment for user to see completion, then show summary
-      setTimeout(() => {
-        setCurrentSummary(data)
-        setAnonymousSummaryId(data.id)
-        setCurrentTaskId(null) // Stop progress tracking
-        
-        // Auto-scroll to summary section
-        setTimeout(() => {
-          const summaryElement = document.getElementById('summary-section')
-          if (summaryElement) {
-            summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Wait for progress to complete (100%) or a maximum timeout before showing summary
+      const waitForProgressCompletion = () => {
+        const checkProgress = async () => {
+          if (progressStatus === 'completed' || progress >= 100) {
+            console.log('📊 Progress completed, showing anonymous summary immediately')
+            setCurrentSummary(data)
+            setAnonymousSummaryId(data.id)
+            setCurrentTaskId(null) // Clear task ID after showing summary
+            
+            // Auto-scroll to summary section
+            setTimeout(() => {
+              const summaryElement = document.getElementById('summary-section')
+              if (summaryElement) {
+                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }, 100)
+            
+            // Show auth prompt after a short delay
+            setTimeout(() => {
+              setShowAuthPrompt(true)
+            }, 2000)
+          } else {
+            // Check again in 500ms if progress isn't complete yet
+            setTimeout(checkProgress, 500)
           }
-        }, 100)
+        }
         
-        // Show auth prompt after a short delay
+        // Start checking immediately, but with a 3-second safety timeout
+        checkProgress()
         setTimeout(() => {
-          setShowAuthPrompt(true)
-        }, 2000)
-      }, 1000)
+          if (!currentSummary) {
+            console.log('⏰ Progress timeout, showing anonymous summary anyway')
+            setCurrentSummary(data)
+            setAnonymousSummaryId(data.id)
+            setCurrentTaskId(null)
+            
+            setTimeout(() => {
+              const summaryElement = document.getElementById('summary-section')
+              if (summaryElement) {
+                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }, 100)
+            
+            setTimeout(() => {
+              setShowAuthPrompt(true)
+            }, 2000)
+          }
+        }, 3000)
+      }
+      
+      waitForProgressCompletion()
     },
     onError: (error) => {
       console.error('❌ Anonymous summarization failed:', error)
@@ -202,6 +262,7 @@ export default function HomePage() {
     
     // Generate a temporary task ID to start progress tracking immediately
     const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    console.log('🆔 Generated temporary task ID:', tempTaskId)
     setCurrentTaskId(tempTaskId)
     
     try {
@@ -210,11 +271,8 @@ export default function HomePage() {
         const result = await createSummary.mutateAsync({ url })
         console.log('✅ Mutation result:', result)
         
-        // Switch to real task_id if we got one
-        if (result.task_id && result.task_id !== tempTaskId) {
-          console.log('🔄 Switching to real task_id from mutation:', result.task_id)
-          setCurrentTaskId(result.task_id)
-        }
+        // The task_id switching and summary display is now handled in the onSuccess callback
+        // This ensures better coordination with progress tracking
       } else {
         // Check if they've already used their free summary
         if (hasUsedFreeSummary()) {
@@ -230,11 +288,8 @@ export default function HomePage() {
         const result = await createAnonymousSummary.mutateAsync({ url, browserFingerprint })
         console.log('✅ Anonymous mutation result:', result)
         
-        // Switch to real task_id if we got one
-        if (result.task_id && result.task_id !== tempTaskId) {
-          console.log('🔄 Switching to real task_id from mutation:', result.task_id)
-          setCurrentTaskId(result.task_id)
-        }
+        // The task_id switching and summary display is now handled in the onSuccess callback
+        // This ensures better coordination with progress tracking
       }
     } catch (error) {
       console.error('❌ HandleUrlSubmit error:', error)
@@ -573,8 +628,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Enhanced Processing state */}
-          {(createSummary.isPending || createAnonymousSummary.isPending) && (
+          {/* Enhanced Processing state - show progress bar until summary is ready */}
+          {(createSummary.isPending || createAnonymousSummary.isPending || (currentTaskId && !currentSummary)) && (
             <div className="mt-16 mx-auto max-w-md">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
                 <div className="text-center mb-4">
@@ -583,7 +638,9 @@ export default function HomePage() {
                     <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-200"></div>
                     <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse animation-delay-400"></div>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Processing your video</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    {progressStatus === 'completed' && progress >= 100 ? 'Preparing your summary...' : 'Processing your video'}
+                  </h3>
                   <p className="text-sm text-gray-600 mt-1">{processingStage}</p>
                 </div>
                 
@@ -595,7 +652,9 @@ export default function HomePage() {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-primary-600 h-2 rounded-full transition-all duration-500 ease-out"
+                      className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                        progressStatus === 'completed' ? 'bg-green-600' : 'bg-primary-600'
+                      }`}
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
@@ -603,7 +662,8 @@ export default function HomePage() {
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
-                    {progress === 100 ? 'Complete! 🎉' : 
+                    {progressStatus === 'completed' && progress >= 100 ? 'Loading your summary... 🎉' : 
+                     progress === 100 ? 'Almost ready! 🎉' : 
                      currentTaskId?.startsWith('temp_') ? 'Estimated time: 45-60 seconds' : 
                      'Live progress tracking active'}
                   </p>
@@ -728,6 +788,7 @@ export default function HomePage() {
                       height={120}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
@@ -758,6 +819,7 @@ export default function HomePage() {
                       height={120}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
@@ -788,6 +850,7 @@ export default function HomePage() {
                       height={120}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
@@ -818,6 +881,7 @@ export default function HomePage() {
                       height={120}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
@@ -848,6 +912,7 @@ export default function HomePage() {
                       height={120}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
@@ -1257,7 +1322,11 @@ Don&apos;t Miss Out - Try Sightline Free
 
 
       {/* Debug Panel - only in development */}
-      {typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && <DebugPanel />}
+      {process.env.NODE_ENV === 'development' && (
+        <div suppressHydrationWarning>
+          {typeof window !== 'undefined' && <DebugPanel />}
+        </div>
+      )}
       
       {/* Exit Intent Popup placeholder - implement with proper exit intent detection */}
       {/* "Still scrolling? Paste a link—see the magic." */}
