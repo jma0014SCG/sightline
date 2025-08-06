@@ -397,9 +397,14 @@ export default function HomePage() {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200"
             >
-              <div className="flex items-center justify-center w-8 h-8 bg-primary-600 rounded-lg">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
+              <Image
+                src="/images/logo/logo1.png"
+                alt="Sightline Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
               <span className="font-bold text-xl text-gray-900">Sightline</span>
             </button>
 
