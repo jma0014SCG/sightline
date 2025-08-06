@@ -13,8 +13,8 @@ const config = {
   // Setup files after env
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
-  // Module paths
-  moduleNameMapping: {
+  // Module path mapping
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   

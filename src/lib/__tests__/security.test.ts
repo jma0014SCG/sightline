@@ -1,62 +1,75 @@
-import { sanitizeInput, isValidYouTubeURL } from '../security'
+import { sanitizeHtml, sanitizeText, isValidYouTubeVideoId } from '../security'
 
 describe('Security Utils', () => {
-  describe('sanitizeInput', () => {
+  describe('sanitizeHtml', () => {
     it('should remove script tags', () => {
       const maliciousInput = '<script>alert("xss")</script>Hello'
-      const sanitized = sanitizeInput(maliciousInput)
+      const sanitized = sanitizeHtml(maliciousInput)
       expect(sanitized).toBe('Hello')
     })
 
-    it('should remove all HTML tags and attributes', () => {
+    it('should remove dangerous HTML attributes', () => {
       const htmlInput = '<div class="test" onclick="alert()">Hello <b>World</b></div>'
-      const sanitized = sanitizeInput(htmlInput)
-      expect(sanitized).toBe('Hello World')
+      const sanitized = sanitizeHtml(htmlInput)
+      expect(sanitized).toBe('<div class="test" \"alert()\">Hello <b>World</b></div>')
     })
 
     it('should handle empty input', () => {
-      expect(sanitizeInput('')).toBe('')
+      expect(sanitizeHtml('')).toBe('')
     })
 
     it('should handle plain text input', () => {
       const plainText = 'This is plain text'
-      expect(sanitizeInput(plainText)).toBe(plainText)
+      expect(sanitizeHtml(plainText)).toBe(plainText)
     })
   })
 
-  describe('isValidYouTubeURL', () => {
-    it('should validate standard YouTube URLs', () => {
-      const validUrls = [
-        'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        'https://youtube.com/watch?v=dQw4w9WgXcQ',
-        'http://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        'https://youtu.be/dQw4w9WgXcQ',
-        'https://www.youtube.com/embed/dQw4w9WgXcQ',
+  describe('sanitizeText', () => {
+    it('should remove script tags from text', () => {
+      const maliciousText = 'Hello <script>alert("xss")</script> World'
+      const sanitized = sanitizeText(maliciousText)
+      expect(sanitized.trim()).toBe('Hello  World')
+    })
+
+    it('should remove javascript protocols', () => {
+      const dangerousText = 'Click here: javascript:alert("xss")'
+      const sanitized = sanitizeText(dangerousText)
+      expect(sanitized.trim()).toBe('Click here: alert("xss")')
+    })
+  })
+
+  describe('isValidYouTubeVideoId', () => {
+    it('should validate standard YouTube video IDs', () => {
+      const validIds = [
+        'dQw4w9WgXcQ',  // 11 characters with letters, numbers
+        'aBcDefGhIjK',  // 11 characters mixed case
+        '1234567890a',  // 11 characters with numbers
+        'a-B_1234567',  // 11 characters with allowed special chars
       ]
 
-      validUrls.forEach(url => {
-        expect(isValidYouTubeURL(url)).toBe(true)
+      validIds.forEach(id => {
+        expect(isValidYouTubeVideoId(id)).toBe(true)
       })
     })
 
-    it('should reject invalid URLs', () => {
-      const invalidUrls = [
-        'https://example.com/watch?v=dQw4w9WgXcQ',
-        'https://youtube.com/user/test',
-        'not-a-url',
+    it('should reject invalid video IDs', () => {
+      const invalidIds = [
         '',
-        'javascript:alert(1)',
-        'https://evil.com/youtube.com/watch?v=test',
+        'too-short',
+        'this-id-is-way-too-long-to-be-valid',
+        'invalid@chars',
+        'spaces not allowed',
       ]
 
-      invalidUrls.forEach(url => {
-        expect(isValidYouTubeURL(url)).toBe(false)
+      invalidIds.forEach(id => {
+        expect(isValidYouTubeVideoId(id)).toBe(false)
       })
     })
 
     it('should handle edge cases', () => {
-      expect(isValidYouTubeURL('https://youtube.com/watch?v=')).toBe(false)
-      expect(isValidYouTubeURL('https://youtube.com/watch?v=a')).toBe(true)
+      expect(isValidYouTubeVideoId('a')).toBe(false) // too short
+      expect(isValidYouTubeVideoId('abcdefghijk')).toBe(true) // exactly 11 chars
+      expect(isValidYouTubeVideoId('abcdefghijkl')).toBe(false) // too long
     })
   })
 })

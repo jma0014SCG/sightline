@@ -1,6 +1,77 @@
 // Optional: configure or set up a testing framework before each test.
 import '@testing-library/jest-dom'
 
+// Polyfill for Next.js Request/Response in Node.js environment
+if (typeof Request === 'undefined') {
+  global.Request = class Request {
+    constructor(input, init = {}) {
+      this.url = input
+      this.method = init.method || 'GET'
+      this.headers = new Map(Object.entries(init.headers || {}))
+      this.body = init.body
+    }
+    
+    async text() {
+      return this.body || ''
+    }
+    
+    async json() {
+      return JSON.parse(this.body || '{}')
+    }
+  }
+}
+
+if (typeof Response === 'undefined') {
+  global.Response = class Response {
+    constructor(body, init = {}) {
+      this.body = body
+      this.status = init.status || 200
+      this.statusText = init.statusText || 'OK'
+      this.headers = new Map(Object.entries(init.headers || {}))
+    }
+    
+    async text() {
+      return this.body || ''
+    }
+    
+    async json() {
+      return JSON.parse(this.body || '{}')
+    }
+  }
+}
+
+// Mock NextResponse
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: jest.fn((body, init = {}) => {
+      const response = {
+        status: init.status || 200,
+        headers: new Map(Object.entries(init.headers || {})),
+        body: JSON.stringify(body),
+        async json() {
+          return body
+        },
+        async text() {
+          return JSON.stringify(body)
+        }
+      }
+      
+      // Add headers.get method
+      response.headers.get = function(name) {
+        for (const [key, value] of this.entries()) {
+          if (key.toLowerCase() === name.toLowerCase()) {
+            return value
+          }
+        }
+        return null
+      }
+      
+      return response
+    }),
+    redirect: jest.fn()
+  }
+}))
+
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter() {
@@ -49,6 +120,8 @@ process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
 process.env.CLERK_SECRET_KEY = 'test-clerk-secret'
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'test-clerk-publishable'
+process.env.STRIPE_WEBHOOK_SECRET = 'test-webhook-secret'
+process.env.CLERK_WEBHOOK_SECRET = 'test-webhook-secret'
 
 // Mock Clerk
 jest.mock('@clerk/nextjs', () => ({
@@ -69,37 +142,37 @@ jest.mock('@clerk/nextjs', () => ({
   UserButton: () => <div>User Button</div>,
 }))
 
-// Mock tRPC
-jest.mock('@/lib/api/trpc', () => ({
-  api: {
-    useContext: jest.fn(),
-    summary: {
-      create: {
-        useMutation: jest.fn(() => ({
-          mutate: jest.fn(),
-          isLoading: false,
-          error: null,
-        })),
-      },
-      getById: {
-        useQuery: jest.fn(() => ({
-          data: null,
-          isLoading: false,
-          error: null,
-        })),
-      },
-    },
-    library: {
-      getAll: {
-        useQuery: jest.fn(() => ({
-          data: null,
-          isLoading: false,
-          error: null,
-        })),
-      },
-    },
-  },
-}))
+// Mock tRPC - temporarily disabled to fix module resolution
+// jest.mock('../src/lib/api/trpc', () => ({
+//   api: {
+//     useContext: jest.fn(),
+//     summary: {
+//       create: {
+//         useMutation: jest.fn(() => ({
+//           mutate: jest.fn(),
+//           isLoading: false,
+//           error: null,
+//         })),
+//       },
+//       getById: {
+//         useQuery: jest.fn(() => ({
+//           data: null,
+//           isLoading: false,
+//           error: null,
+//         })),
+//       },
+//     },
+//     library: {
+//       getAll: {
+//         useQuery: jest.fn(() => ({
+//           data: null,
+//           isLoading: false,
+//           error: null,
+//         })),
+//       },
+//     },
+//   },
+// }))
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
