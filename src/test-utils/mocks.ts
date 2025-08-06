@@ -1,4 +1,4 @@
-import { type User, type Summary, type Subscription, type Category, type Tag } from '@prisma/client'
+import { type User, type Summary, type Subscription, type Category, type Tag, type ShareLink } from '@prisma/client'
 
 // Mock user data
 export const createMockUser = (overrides?: Partial<User>): User => ({
@@ -154,6 +154,20 @@ export const MOCK_BROWSER_FINGERPRINT = 'test-fingerprint-123'
 
 // Mock IP address
 export const MOCK_CLIENT_IP = '127.0.0.1'
+
+// Mock share link data
+export const createMockShareLink = (overrides?: Partial<ShareLink>): ShareLink => ({
+  id: 'share_123',
+  slug: 'abc123defg',
+  summaryId: 'summary_123',
+  userId: 'user_123',
+  isPublic: true,
+  views: 0,
+  expiresAt: null,
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
+  ...overrides,
+})
 
 // Anonymous user ID constant
 export const ANONYMOUS_USER_ID = 'ANONYMOUS_USER'
