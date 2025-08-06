@@ -115,6 +115,18 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
+// Mock fetch globally for Node.js tests
+if (typeof fetch === 'undefined') {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(''),
+    })
+  )
+}
+
 // Mock environment variables
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
