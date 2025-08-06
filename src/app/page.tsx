@@ -400,9 +400,9 @@ export default function HomePage() {
               <Image
                 src="/images/logo/logo1.png"
                 alt="Sightline Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto"
+                width={48}
+                height={48}
+                className="h-12 w-auto"
                 priority
               />
               <span className="font-bold text-xl text-gray-900">Sightline</span>
