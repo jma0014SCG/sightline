@@ -8,6 +8,7 @@ import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
+import { useAnalytics } from '@/hooks/useAnalytics'
 import { api } from '@/components/providers/TRPCProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
 import { SignInModal } from '@/components/modals/SignInModal'
@@ -38,6 +39,7 @@ import {
 export default function HomePage() {
   const router = useRouter()
   const { isAuthenticated, authModal, openAuthModal, closeAuthModal } = useAuth()
+  const analytics = useAnalytics()
   const [currentSummary, setCurrentSummary] = useState<any>(null)
   const [animatedText, setAnimatedText] = useState('')
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -109,6 +111,17 @@ export default function HomePage() {
       setSuccessMessage('✅ Summary created and saved to your library!')
       setTimeout(() => setSuccessMessage(null), 5000)
       
+      // Track successful summary creation
+      analytics.trackSummaryCreated({
+        video_id: data.videoId || '',
+        video_title: data.videoTitle || '',
+        channel_name: data.channelName || '',
+        duration: data.duration || 0,
+        user_plan: 'FREE', // Will be updated when we have user plan info
+        is_anonymous: false,
+        success: true
+      })
+      
       // If we got a real task_id from backend, switch to using it for progress tracking
       if (data.task_id && data.task_id !== currentTaskId) {
         console.log('🔄 Switching to real task_id:', data.task_id)
@@ -160,6 +173,14 @@ export default function HomePage() {
       console.error('❌ Summarization failed:', error)
       alert(`Summarization failed: ${error.message}`)
       setCurrentTaskId(null) // Stop progress tracking
+      
+      // Track error
+      analytics.trackErrorOccurred({
+        error_type: 'summary_creation_failed',
+        error_message: error.message,
+        context: 'authenticated_summary_creation',
+        user_plan: 'FREE' // Will be updated when we have user plan info
+      })
     }
   })
 
@@ -169,6 +190,17 @@ export default function HomePage() {
       console.log('✅ Anonymous summary created successfully:', data)
       setSuccessMessage('✅ Free summary created! Sign up to save it to your library.')
       setTimeout(() => setSuccessMessage(null), 5000)
+      
+      // Track successful anonymous summary creation
+      analytics.trackSummaryCreated({
+        video_id: data.videoId || '',
+        video_title: data.videoTitle || '',
+        channel_name: data.channelName || '',
+        duration: data.duration || 0,
+        user_plan: 'ANONYMOUS',
+        is_anonymous: true,
+        success: true
+      })
       
       // If we got a real task_id from backend, switch to using it for progress tracking
       if (data.task_id && data.task_id !== currentTaskId) {
@@ -234,8 +266,22 @@ export default function HomePage() {
     onError: (error) => {
       console.error('❌ Anonymous summarization failed:', error)
       
+      // Track error
+      analytics.trackErrorOccurred({
+        error_type: error.message.includes('already used') ? 'anonymous_limit_reached' : 'summary_creation_failed',
+        error_message: error.message,
+        context: 'anonymous_summary_creation',
+        user_plan: 'ANONYMOUS'
+      })
+      
       // Check if they've already used their free summary
       if (error.message.includes('already used')) {
+        analytics.trackLimitReached({
+          user_plan: 'ANONYMOUS',
+          limit_type: 'anonymous',
+          current_usage: 1,
+          limit_value: 1
+        })
         setShowAuthPrompt(true)
       } else {
         alert(`Summarization failed: ${error.message}`)

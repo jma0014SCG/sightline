@@ -9,6 +9,7 @@ import { sanitizeUrl, sanitizeText, containsSuspiciousContent, isValidYouTubeVid
 import { classifySummaryContent } from '@/lib/classificationService'
 import { monitoring } from '@/lib/monitoring'
 import { checkBusinessMetric } from '@/lib/performance-budgets'
+import { emailService } from '@/lib/emailService'
 
 // Create an event emitter for streaming
 const ee = new EventEmitter()
@@ -687,6 +688,33 @@ export const summaryRouter = createTRPCRouter({
               },
             },
           })
+
+          // Update email service with summary creation (fire and forget)
+          if (user && userId !== 'ANONYMOUS_USER') {
+            const userWithEmail = await ctx.prisma.user.findUnique({
+              where: { id: userId },
+              select: { email: true, summariesUsed: true }
+            })
+            
+            if (userWithEmail?.email) {
+              emailService.onSummaryCreated(
+                userWithEmail.email,
+                userWithEmail.summariesUsed,
+                user.plan as 'FREE' | 'PRO',
+                {
+                  title: summary.videoTitle,
+                  channel: summary.channelName,
+                  category: data.category || 'General'
+                }
+              ).catch(error => {
+                logger.error('Failed to update email service for summary creation', { 
+                  userId, 
+                  summaryId: summary.id,
+                  error: error instanceof Error ? error.message : 'Unknown error'
+                })
+              })
+            }
+          }
         }
 
         // Classify summary content asynchronously (fire and forget)

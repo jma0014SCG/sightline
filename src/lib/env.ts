@@ -30,6 +30,13 @@ const envSchema = z.object({
   LANGCHAIN_API_KEY: z.string().optional(),
   LANGCHAIN_PROJECT: z.string().optional(),
   
+  // Analytics - PostHog (optional)
+  NEXT_PUBLIC_POSTHOG_KEY: z.string().startsWith('phc_').optional(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+  
+  // Email Marketing - MailerLite (optional)
+  MAILERLITE_API_KEY: z.string().optional(),
+  
   // Node environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 })

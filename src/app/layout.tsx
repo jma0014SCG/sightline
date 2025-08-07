@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
 import { MonitoringProvider } from '@/components/providers/MonitoringProvider'
+import { PostHogProvider } from '@/components/providers/PostHogProvider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -70,13 +71,15 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
-          <TRPCProvider>
-            <MonitoringProvider>
-              <ToastProvider>
-                {children}
-              </ToastProvider>
-            </MonitoringProvider>
-          </TRPCProvider>
+          <PostHogProvider>
+            <TRPCProvider>
+              <MonitoringProvider>
+                <ToastProvider>
+                  {children}
+                </ToastProvider>
+              </MonitoringProvider>
+            </TRPCProvider>
+          </PostHogProvider>
         </body>
       </html>
     </ClerkProvider>
