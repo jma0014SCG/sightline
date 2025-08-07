@@ -7,6 +7,8 @@ import jwt from 'jsonwebtoken'
 import { logger } from '@/lib/logger'
 import { sanitizeUrl, sanitizeText, containsSuspiciousContent, isValidYouTubeVideoId } from '@/lib/security'
 import { classifySummaryContent } from '@/lib/classificationService'
+import { monitoring } from '@/lib/monitoring'
+import { checkBusinessMetric } from '@/lib/performance-budgets'
 
 // Create an event emitter for streaming
 const ee = new EventEmitter()
@@ -138,6 +140,16 @@ export const summaryRouter = createTRPCRouter({
       }
 
       try {
+        // Track summary creation start
+        const summaryStartTime = Date.now()
+        
+        // Track metrics for anonymous summary creation
+        monitoring.logBusinessMetric('summary_creation_attempt', 1, {
+          userType: 'anonymous',
+          clientIP,
+          browserFingerprint: input.browserFingerprint,
+        })
+
         // Sanitize and validate URL
         const sanitizedUrl = sanitizeUrl(input.url)
         
@@ -295,6 +307,24 @@ export const summaryRouter = createTRPCRouter({
             })
           })
 
+        // Track successful summary creation metrics
+        const summaryEndTime = Date.now()
+        const totalDuration = summaryEndTime - summaryStartTime
+        
+        monitoring.logBusinessMetric('summary_creation_time', totalDuration, {
+          userType: 'anonymous',
+          videoLength: data.duration || 0,
+          source: 'api',
+        })
+        
+        monitoring.logBusinessMetric('summary_creation_success', 1, {
+          userType: 'anonymous',
+          clientIP,
+        })
+        
+        // Check against performance budget
+        checkBusinessMetric('SUMMARY_CREATION', totalDuration)
+
         // Return summary with anonymous flag and task_id
         return {
           ...summary,
@@ -303,6 +333,12 @@ export const summaryRouter = createTRPCRouter({
           task_id: data.task_id, // Include task_id for progress tracking
         }
       } catch (error) {
+        // Track failed summary creation
+        monitoring.logBusinessMetric('summary_creation_failure', 1, {
+          userType: 'anonymous',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+        
         if (error instanceof TRPCError) {
           throw error
         }
@@ -422,6 +458,16 @@ export const summaryRouter = createTRPCRouter({
         }
       }
       try {
+        // Track authenticated summary creation start
+        const summaryStartTime = Date.now()
+        
+        // Track metrics for authenticated summary creation
+        monitoring.logBusinessMetric('summary_creation_attempt', 1, {
+          userType: 'authenticated',
+          plan: user.plan,
+          userId: userId,
+        })
+
         // Sanitize and validate URL
         const sanitizedUrl = sanitizeUrl(input.url)
         
@@ -620,12 +666,41 @@ export const summaryRouter = createTRPCRouter({
             })
           })
 
+        // Track successful summary creation metrics
+        const summaryEndTime = Date.now()
+        const totalDuration = summaryEndTime - summaryStartTime
+        
+        monitoring.logBusinessMetric('summary_creation_time', totalDuration, {
+          userType: 'authenticated',
+          plan: user.plan,
+          userId: userId,
+          videoLength: data.duration || 0,
+          source: 'api',
+        })
+        
+        monitoring.logBusinessMetric('summary_creation_success', 1, {
+          userType: 'authenticated',
+          plan: user.plan,
+          userId: userId,
+        })
+        
+        // Check against performance budget
+        checkBusinessMetric('SUMMARY_CREATION', totalDuration)
+
         // Return summary with task_id for progress tracking
         return {
           ...summary,
           task_id: data.task_id, // Include task_id from backend
         }
       } catch (error) {
+        // Track failed summary creation
+        monitoring.logBusinessMetric('summary_creation_failure', 1, {
+          userType: 'authenticated',
+          plan: user.plan,
+          userId: userId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+        
         if (error instanceof TRPCError) {
           throw error
         }

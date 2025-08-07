@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -120,4 +122,43 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Wrap with Sentry config
+module.exports = withSentryConfig(
+  nextConfig,
+  {
+    // For all available options, see:
+    // https://github.com/getsentry/sentry-webpack-plugin#options
+
+    // Upload source maps to Sentry
+    silent: true, // Suppresses all logs
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    
+    // Configure source maps
+    widenClientFileUpload: true, // Upload all client files
+    transpileClientSDK: true, // Transpile SDK for compatibility
+    
+    // Hide source maps from public
+    hideSourceMaps: true,
+    
+    // Ignore specific files
+    ignore: ['node_modules', 'next.config.js'],
+    
+    // Release configuration
+    release: {
+      // Use Git commit SHA for release version
+      name: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
+    },
+  },
+  {
+    // Additional config options
+    
+    // Disable Sentry webpack plugin in development
+    disableServerWebpackPlugin: process.env.NODE_ENV === 'development',
+    disableClientWebpackPlugin: process.env.NODE_ENV === 'development',
+    
+    // Automatically tree-shake Sentry logger statements
+    automaticVercelMonitors: true,
+  }
+)

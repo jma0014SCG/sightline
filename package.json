@@ -21,8 +21,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "env:setup": "chmod +x scripts/setup-env.sh && scripts/setup-env.sh",
-    "env:check": "node -e \"require('./lib/env.ts')\" && echo '✅ Environment variables are valid'",
-    "env:validate": "tsx -e \"try { require('./lib/env.ts').default; console.log('✅ All environment variables are valid'); } catch(e) { console.error('❌ Environment validation failed:', e.message); process.exit(1); }\"",
+    "env:check": "node -e \"require('./src/lib/env.ts')\" && echo '✅ Environment variables are valid'",
+    "env:validate": "tsx -e \"try { require('./src/lib/env.ts').default; console.log('✅ All environment variables are valid'); } catch(e) { console.error('❌ Environment validation failed:', e.message); process.exit(1); }\"",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "vercel:link": "vercel link",
@@ -52,6 +52,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.28.0",
     "@prisma/client": "^6.12.0",
+    "@sentry/nextjs": "^10.2.0",
     "@stripe/stripe-js": "^7.5.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.83.0",

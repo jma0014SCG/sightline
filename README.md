@@ -1,22 +1,24 @@
 # Sightline.ai
 
-**AI-Powered YouTube Video Summarization Platform**
+## AI-Powered YouTube Video Summarization Platform
 
 Transform long-form YouTube videos into actionable insights with AI-powered summarization, Smart Collections tagging, and intelligent content organization.
 
 ## 🎯 Core Features
 
-- **⚡ Instant Summarization**: AI-powered summaries in 15-30 seconds
-- **🧠 Smart Collections**: Automatic AI tagging and categorization  
-- **👤 Anonymous Trial**: Try without signup (1 free summary)
-- **📊 Real-time Progress**: Live processing updates
-- **🏷️ Intelligent Organization**: Filter by people, companies, technologies
-- **📱 Responsive Design**: Optimized for all devices
-- **🔒 Secure Authentication**: Clerk-powered user management
+- **⚡ Instant Summarization**: AI-powered summaries with structured content (TL;DR, key moments, frameworks, playbooks)
+- **🧠 Smart Collections**: Automatic AI tagging with 7 entity types (PERSON, COMPANY, TECHNOLOGY, PRODUCT, CONCEPT, FRAMEWORK, TOOL) and 14 categories
+- **👤 Anonymous Trial**: Try without signup (1 free summary with browser fingerprinting)
+- **📊 Real-time Progress**: Live processing updates with UUID-based task tracking
+- **🏷️ Intelligent Organization**: Filter by color-coded tags and categories with visual counts
+- **📱 Responsive Design**: Multi-column layout optimized for all devices
+- **🔒 Secure Authentication**: Modal-based Clerk authentication with seamless user experience
+- **💳 Flexible Plans**: Free (3 lifetime), Pro (25/month), Complete (unlimited) tiers
+- **🔗 Public Sharing**: Shareable summary links with SEO optimization
 
 ## 📁 Project Structure
 
-```
+```text
 sightline/
 ├── src/                          # Application source code
 │   ├── app/                      # Next.js 14 App Router
@@ -36,6 +38,7 @@ sightline/
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **Next.js 14** (App Router) - React framework with file-based routing
 - **TypeScript** - Full type safety across the application
 - **Tailwind CSS** + **shadcn/ui** - Modern styling with component library
@@ -43,17 +46,20 @@ sightline/
 - **Clerk** - Modern authentication and user management
 
 ### Backend
+
 - **FastAPI** (Python) - High-performance API framework
 - **LangChain** + **OpenAI** - AI processing and language models
 - **tRPC** - End-to-end type-safe API layer
 - **Vercel Functions** - Serverless deployment and scaling
 
 ### Database & Payments
+
 - **Vercel Postgres** (Neon) - Serverless PostgreSQL database
 - **Prisma** - Type-safe ORM with migrations
 - **Stripe** - Secure payment processing and subscription management
 
 ### Infrastructure
+
 - **Vercel** - Deployment and hosting platform
 - **Upstash Redis** - Caching and session storage (optional)
 - **Sentry** - Error tracking and monitoring (optional)
@@ -61,6 +67,7 @@ sightline/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Python 3.12+
 - pnpm
@@ -68,62 +75,75 @@ sightline/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd sightline
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    pip install -r requirements.txt.disabled
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
 
 4. **Set up database**
+
    ```bash
    npx prisma generate
    npx prisma db push
    ```
 
 5. **Start development server**
+
    ```bash
    pnpm dev
    ```
 
 ## 📚 Documentation
 
-**📖 [Complete Platform Documentation](SIGHTLINE_PLATFORM_DOCUMENTATION.md)** - Comprehensive technical documentation
+**🗂️ [Documentation Index](DOCUMENTATION_INDEX.md)** - Complete guide to all documentation with navigation and quick-start paths
 
-### Additional Resources
-- [Development Setup](CLAUDE.md) - Claude Code development instructions
-- [Project Structure](Docs/project_structure.md) - Detailed codebase organization  
-- [UI/UX Guidelines](Docs/UI_UX_doc.md) - Design system and patterns
-- [Production Deployment](Docs/PRODUCTION_DEPLOYMENT.md) - Deployment procedures
-- [Troubleshooting](Docs/TROUBLESHOOTING.md) - Common issues and solutions
+**📖 [Platform Documentation](Docs/architecture/platform-overview.md)** - Comprehensive technical reference (architecture, API, deployment)
+
+### Key Resources
+
+- **[Development Setup](CLAUDE.md)** - Claude Code development instructions  
+- **[API Documentation](API_DOCUMENTATION.md)** - Complete tRPC and FastAPI reference
+- **[Project Structure](Docs/architecture/project-structure.md)** - Codebase organization
+- **[UI/UX Guidelines](Docs/architecture/ui-ux-guidelines.md)** - Design system and accessibility
+- **[Testing Strategy](Docs/development/testing-strategy.md)** - Unit, E2E, performance, and security tests
+- **[Security Policy](SECURITY.md)** - Security headers and best practices
+- **[Production Operations Guide](PRODUCTION_OPERATIONS_GUIDE.md)** - Complete operations manual
 
 ## ✨ Latest Features
 
 ### Smart Collections (August 2025)
+
 - **🤖 AI-Powered Tagging**: Automatic extraction of people, companies, technologies
 - **🎨 Color-Coded Organization**: 7 distinct tag types with visual coding
 - **🔍 Intelligent Filtering**: Filter library by tags and categories
 - **📊 Usage Analytics**: Tag/category counts and insights
 
-### Anonymous User Experience (August 2025)  
+### Anonymous User Experience (August 2025)
+
 - **🆓 Try Before Signup**: 1 free summary without registration
 - **🔗 Modal Authentication**: Seamless in-app login flow
 - **📱 Browser Fingerprinting**: Secure anonymous user tracking
 - **🎯 Progressive Registration**: Experience value before commitment
 
 ### Core Platform
+
 - **⚡ Real-time Progress**: Live processing updates with accurate stages
-- **🔐 Clerk Authentication**: Modern, secure user management  
+- **🔐 Clerk Authentication**: Modern, secure user management
 - **💳 Stripe Integration**: Seamless Pro plan subscriptions ($9.99/month)
 - **📊 Personal Library**: Searchable, organized summary collection
 
@@ -159,4 +179,4 @@ See [Deployment Guide](Docs/PRODUCTION_DEPLOYMENT.md) for detailed instructions.
 
 - [Production App](https://sightline.ai)
 - [Documentation](https://docs.sightline.ai)
-- [API Documentation](https://api.sightline.ai/docs) 
+- [API Documentation](https://api.sightline.ai/docs)

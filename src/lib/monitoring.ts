@@ -1,5 +1,8 @@
 // Performance API is available globally in modern browsers and Node.js
 
+// Dynamic imports for alert system to avoid circular dependencies
+const getAlertSystem = () => import('./alert-system')
+
 interface ErrorEvent {
   error: Error
   context?: Record<string, any>
@@ -87,7 +90,7 @@ class MonitoringService {
   }
 
   /**
-   * Log API response times
+   * Log API response times with performance budget checking
    */
   logApiPerformance(endpoint: string, duration: number, status: number) {
     this.logMetric({
@@ -99,12 +102,46 @@ class MonitoringService {
       },
     })
 
-    // Alert on slow responses
-    if (duration > 5000) {
-      this.logError({
-        error: new Error(`Slow API response: ${endpoint} took ${duration}ms`),
-        context: { endpoint, duration, status },
+    // Check against performance budget and trigger alerts
+    try {
+      // Check performance budgets
+      import('./performance-budgets').then(({ checkApiResponse }) => {
+        const budgetCheck = checkApiResponse(endpoint, duration)
+        
+        // Log additional metrics for budget tracking
+        this.logMetric({
+          name: 'api_budget_status',
+          value: budgetCheck.status === 'good' ? 1 : 0,
+          tags: {
+            endpoint,
+            status: budgetCheck.status,
+            threshold: budgetCheck.threshold.toString(),
+          },
+        })
+      }).catch(() => {
+        // Performance budgets not available, use simple threshold
+        if (duration > 5000) {
+          this.logError({
+            error: new Error(`Slow API response: ${endpoint} took ${duration}ms`),
+            context: { endpoint, duration, status },
+          })
+        }
       })
+      
+      // Check for alerts
+      getAlertSystem().then(({ checkApiResponseAlert }) => {
+        checkApiResponseAlert(endpoint, duration)
+      }).catch(() => {
+        // Alert system not available
+      })
+    } catch {
+      // Fallback to simple threshold check
+      if (duration > 5000) {
+        this.logError({
+          error: new Error(`Slow API response: ${endpoint} took ${duration}ms`),
+          context: { endpoint, duration, status },
+        })
+      }
     }
   }
 
@@ -131,6 +168,15 @@ class MonitoringService {
       value,
       tags: context,
     })
+    
+    // Check for business metric alerts
+    if (metric.includes('time') && value > 1000) {
+      getAlertSystem().then(({ checkBusinessMetricAlert }) => {
+        checkBusinessMetricAlert(metric, value)
+      }).catch(() => {
+        // Alert system not available
+      })
+    }
   }
 
   private async logServerError(errorEvent: ErrorEvent) {
@@ -247,25 +293,47 @@ export const useErrorTracking = () => {
 export const startPerformanceMonitoring = () => {
   if (typeof window === 'undefined') return
 
-  // Monitor Core Web Vitals (only if web-vitals is available)
-  // Dynamic import to avoid webpack issues
-  setTimeout(() => {
-    try {
-      // @ts-ignore - Optional dependency, dynamic import
-      const webVitalsPromise = Function('return import("web-vitals")')()
-      webVitalsPromise.then(({ getCLS, getFID, getFCP, getLCP, getTTFB }: any) => {
-        getCLS((metric: any) => monitoring.logMetric({ name: 'cls', value: metric.value }))
-        getFID((metric: any) => monitoring.logMetric({ name: 'fid', value: metric.value }))
-        getFCP((metric: any) => monitoring.logMetric({ name: 'fcp', value: metric.value }))
-        getLCP((metric: any) => monitoring.logMetric({ name: 'lcp', value: metric.value }))
-        getTTFB((metric: any) => monitoring.logMetric({ name: 'ttfb', value: metric.value }))
-      }).catch(() => {
-        // web-vitals not available, continue without it
+  // Monitor Core Web Vitals with performance budget checking
+  import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {
+    const handleWebVital = (metric: any) => {
+      monitoring.logMetric({ 
+        name: `web_vitals_${metric.name.toLowerCase()}`, 
+        value: metric.value,
+        tags: { 
+          name: metric.name,
+          rating: metric.rating,
+          id: metric.id,
+        }
       })
-    } catch {
-      // web-vitals not available, continue without it
+      
+      // Check against performance budget
+      import('./performance-budgets').then(({ checkWebVital }) => {
+        const budgetCheck = checkWebVital(metric.name, metric.value)
+        
+        // Log budget status
+        monitoring.logMetric({
+          name: 'web_vitals_budget_status',
+          value: budgetCheck.status === 'good' ? 1 : 0,
+          tags: {
+            metric: metric.name,
+            status: budgetCheck.status,
+            rating: metric.rating,
+          },
+        })
+      }).catch(() => {
+        // Performance budgets not available
+      })
     }
-  }, 1000)
+    
+    onCLS(handleWebVital)
+    onFID(handleWebVital)
+    onFCP(handleWebVital)
+    onLCP(handleWebVital)
+    onTTFB(handleWebVital)
+    onINP(handleWebVital)
+  }).catch(() => {
+    console.warn('Web Vitals not available')
+  })
 
   // Monitor unhandled errors
   window.addEventListener('error', (event) => {
