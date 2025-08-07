@@ -53,7 +53,7 @@ describe('summaryRouter', () => {
 
   describe('createAnonymous', () => {
     const validInput = {
-      url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       browserFingerprint: MOCK_BROWSER_FINGERPRINT,
     }
 
@@ -161,7 +161,7 @@ describe('summaryRouter', () => {
         'https://example.com',
         'https://vimeo.com/123456',
         'not-a-url',
-        'https://youtube.com/invalid',
+        'https://www.youtube.com/watch?v=invalid',
       ]
       
       for (const url of invalidUrls) {
@@ -179,7 +179,7 @@ describe('summaryRouter', () => {
       
       const caller = summaryRouter.createCaller(mockContext)
       
-      const suspiciousUrl = 'https://youtube.com/watch?v=test<script>alert("xss")</script>'
+      const suspiciousUrl = 'https://www.youtube.com/watch?v=test<script>alert("xss")</script>'
       
       await expect(
         caller.createAnonymous({ 
@@ -284,7 +284,7 @@ describe('summaryRouter', () => {
 
   describe('create (authenticated)', () => {
     const validInput = {
-      url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     }
 
     it('should create summary for FREE plan user within limits', async () => {
@@ -660,7 +660,7 @@ describe('summaryRouter', () => {
         ...anonymousSummary,
         userId: userId,
         metadata: {
-          ...anonymousSummary.metadata,
+          ...(anonymousSummary.metadata as Record<string, any>),
           claimedAt: expect.any(String),
           isAnonymous: false,
         },

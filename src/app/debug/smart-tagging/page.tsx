@@ -63,7 +63,7 @@ export default function SmartTaggingDebugPage() {
     try {
       // Test database connection and get smart tagging data
       const dbResult = await getSmartTaggingStatus()
-      if (dbResult.success) {
+      if (dbResult.success && dbResult.data) {
         setData(dbResult.data)
       } else {
         setError(dbResult.error || 'Failed to load database data')
@@ -71,7 +71,7 @@ export default function SmartTaggingDebugPage() {
 
       // Test OpenAI connection
       const openaiResult = await testOpenAIConnection()
-      if (openaiResult.success) {
+      if (openaiResult.success && openaiResult.data) {
         setOpenaiData(openaiResult.data)
       } else {
         setOpenaiError(openaiResult.error || 'Failed to test OpenAI connection')

@@ -423,18 +423,18 @@ describe('libraryRouter', () => {
       const mockContext = createAuthenticatedContext(userId, { prisma: mockPrisma })
       
       const recentSummaries = [
-        { 
+        createMockSummary({ 
           id: 'recent_1', 
           videoTitle: 'Recent Video 1', 
           channelName: 'Channel 1',
           createdAt: new Date('2024-01-01'),
-        },
-        { 
+        }),
+        createMockSummary({ 
           id: 'recent_2', 
           videoTitle: 'Recent Video 2', 
           channelName: 'Channel 2',
           createdAt: new Date('2024-01-02'),
-        },
+        }),
       ]
       
       // Mock for middleware
@@ -443,7 +443,13 @@ describe('libraryRouter', () => {
       
       // Mock the Promise.all call
       mockPrisma.summary.count.mockResolvedValueOnce(10)
-      mockPrisma.summary.aggregate.mockResolvedValueOnce({ _sum: { duration: 3600 } })
+      mockPrisma.summary.aggregate.mockResolvedValueOnce({ 
+        _count: { _all: 0, id: 0, createdAt: 0, updatedAt: 0, userId: 0, videoId: 0, videoUrl: 0, videoTitle: 0, channelName: 0, channelId: 0, duration: 0, content: 0, thumbnailUrl: 0, keyPoints: 0, metadata: 0 },
+        _avg: { duration: null },
+        _sum: { duration: 3600 },
+        _min: { id: null, createdAt: null, updatedAt: null, userId: null, videoId: null, videoUrl: null, videoTitle: null, channelName: null, channelId: null, duration: null, content: null, thumbnailUrl: null, keyPoints: null, metadata: null },
+        _max: { id: null, createdAt: null, updatedAt: null, userId: null, videoId: null, videoUrl: null, videoTitle: null, channelName: null, channelId: null, duration: null, content: null, thumbnailUrl: null, keyPoints: null, metadata: null }
+      } as any)
       mockPrisma.summary.findMany.mockResolvedValueOnce(recentSummaries)
       
       const caller = libraryRouter.createCaller(mockContext)
@@ -483,7 +489,13 @@ describe('libraryRouter', () => {
       
       // Mock the Promise.all call with null duration
       mockPrisma.summary.count.mockResolvedValueOnce(0)
-      mockPrisma.summary.aggregate.mockResolvedValueOnce({ _sum: { duration: null } })
+      mockPrisma.summary.aggregate.mockResolvedValueOnce({ 
+        _count: { _all: 0, id: 0, createdAt: 0, updatedAt: 0, userId: 0, videoId: 0, videoUrl: 0, videoTitle: 0, channelName: 0, channelId: 0, duration: 0, content: 0, thumbnailUrl: 0, keyPoints: 0, metadata: 0 },
+        _avg: { duration: null },
+        _sum: { duration: null },
+        _min: { id: null, createdAt: null, updatedAt: null, userId: null, videoId: null, videoUrl: null, videoTitle: null, channelName: null, channelId: null, duration: null, content: null, thumbnailUrl: null, keyPoints: null, metadata: null },
+        _max: { id: null, createdAt: null, updatedAt: null, userId: null, videoId: null, videoUrl: null, videoTitle: null, channelName: null, channelId: null, duration: null, content: null, thumbnailUrl: null, keyPoints: null, metadata: null }
+      } as any)
       mockPrisma.summary.findMany.mockResolvedValueOnce([])
       
       const caller = libraryRouter.createCaller(mockContext)
@@ -499,9 +511,9 @@ describe('libraryRouter', () => {
       const mockContext = createAuthenticatedContext(userId, { prisma: mockPrisma })
       
       const mockTags = [
-        { id: 'tag_1', name: 'React', type: 'TECHNOLOGY', count: 5 },
-        { id: 'tag_2', name: 'JavaScript', type: 'TECHNOLOGY', count: 3 },
-        { id: 'tag_3', name: 'John Doe', type: 'PERSON', count: 2 },
+        { id: 'tag_1', name: 'React', type: 'TECHNOLOGY', count: 5, _count: { summaries: 5 }, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'tag_2', name: 'JavaScript', type: 'TECHNOLOGY', count: 3, _count: { summaries: 3 }, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'tag_3', name: 'John Doe', type: 'PERSON', count: 2, _count: { summaries: 2 }, createdAt: new Date(), updatedAt: new Date() },
       ]
       
       // Mock for middleware
@@ -543,9 +555,9 @@ describe('libraryRouter', () => {
       const mockContext = createAuthenticatedContext(userId, { prisma: mockPrisma })
       
       const mockCategories = [
-        { id: 'cat_1', name: 'Technology', count: 8 },
-        { id: 'cat_2', name: 'Programming', count: 5 },
-        { id: 'cat_3', name: 'Business', count: 2 },
+        { id: 'cat_1', name: 'Technology', count: 8, _count: { summaries: 8 }, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'cat_2', name: 'Programming', count: 5, _count: { summaries: 5 }, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'cat_3', name: 'Business', count: 2, _count: { summaries: 2 }, createdAt: new Date(), updatedAt: new Date() },
       ]
       
       // Mock for middleware

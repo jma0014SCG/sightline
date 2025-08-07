@@ -110,13 +110,13 @@ describe('authRouter', () => {
       
       const updatedUser = createMockUser({
         id: userId,
-        image: 'https://example.com/new-avatar.jpg',
+        image: 'https://avatars.githubusercontent.com/u/1234?v=4',
       })
       mockPrisma.user.update.mockResolvedValueOnce(updatedUser)
       
       const caller = authRouter.createCaller(mockContext)
       const result = await caller.updateProfile({ 
-        image: 'https://example.com/new-avatar.jpg' 
+        image: 'https://avatars.githubusercontent.com/u/1234?v=4' 
       })
       
       expect(result).toEqual(updatedUser)
@@ -124,7 +124,7 @@ describe('authRouter', () => {
         where: { id: userId },
         data: {
           name: undefined,
-          image: 'https://example.com/new-avatar.jpg',
+          image: 'https://avatars.githubusercontent.com/u/1234?v=4',
         },
       })
     })
@@ -136,14 +136,14 @@ describe('authRouter', () => {
       const updatedUser = createMockUser({
         id: userId,
         name: 'New Name',
-        image: 'https://example.com/new-avatar.jpg',
+        image: 'https://avatars.githubusercontent.com/u/1234?v=4',
       })
       mockPrisma.user.update.mockResolvedValueOnce(updatedUser)
       
       const caller = authRouter.createCaller(mockContext)
       const result = await caller.updateProfile({ 
         name: 'New Name',
-        image: 'https://example.com/new-avatar.jpg' 
+        image: 'https://avatars.githubusercontent.com/u/1234?v=4' 
       })
       
       expect(result).toEqual(updatedUser)
@@ -151,7 +151,7 @@ describe('authRouter', () => {
         where: { id: userId },
         data: {
           name: 'New Name',
-          image: 'https://example.com/new-avatar.jpg',
+          image: 'https://avatars.githubusercontent.com/u/1234?v=4',
         },
       })
     })

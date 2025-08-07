@@ -183,7 +183,7 @@ export function SummaryCard({
                 </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <Play className="h-6 w-6 text-gray-400" />
+                  <Play className="h-6 w-6 text-gray-400" data-testid="play-icon" />
                 </div>
               )}
               
@@ -441,7 +441,7 @@ export function SummaryCard({
                 </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <Play className="h-6 w-6 text-gray-400" />
+                  <Play className="h-6 w-6 text-gray-400" data-testid="play-icon" />
                 </div>
               )}
               

@@ -29,13 +29,18 @@ class CacheService {
     try {
       // Dynamic import to avoid bundling Redis in client
       if (typeof window === 'undefined') {
-        const { Redis } = await import('@upstash/redis')
-        this.redis = new Redis({
-          url: process.env.UPSTASH_REDIS_URL!,
-          token: process.env.UPSTASH_REDIS_TOKEN!,
-        })
-        this.isRedisEnabled = true
-        console.log('✅ Redis cache initialized')
+        try {
+          const upstashRedis = await import('@upstash/redis')
+          this.redis = new upstashRedis.Redis({
+            url: process.env.UPSTASH_REDIS_URL!,
+            token: process.env.UPSTASH_REDIS_TOKEN!,
+          })
+          this.isRedisEnabled = true
+          console.log('✅ Redis cache initialized')
+        } catch (importError) {
+          console.log('📦 @upstash/redis not installed, falling back to memory cache')
+          // Module not available, continue with memory cache
+        }
       }
     } catch (error) {
       console.warn('❌ Failed to initialize Redis cache, falling back to memory:', error)
@@ -159,7 +164,8 @@ class CacheService {
       // Memory cache - clear matching keys
       let count = 0
       const prefix = `sightline:${pattern.replace('*', '')}`
-      for (const key of this.memoryCache.keys()) {
+      const keys = Array.from(this.memoryCache.keys())
+      for (const key of keys) {
         if (key.startsWith(prefix)) {
           this.memoryCache.delete(key)
           count++
@@ -193,7 +199,8 @@ class CacheService {
     // Clean up expired entries (run occasionally)
     if (Math.random() < 0.01) { // 1% chance
       const now = Date.now()
-      for (const [key, entry] of this.memoryCache.entries()) {
+      const entries = Array.from(this.memoryCache.entries())
+      for (const [key, entry] of entries) {
         if (now >= entry.expiry) {
           this.memoryCache.delete(key)
         }

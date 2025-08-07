@@ -62,13 +62,9 @@ export const createCaller = async (router: AppRouter, ctx: MockContext) => {
 
 // Type helpers for input inference
 export type RouterInput<
-  TRouter extends any,
-  TPath extends keyof TRouter['_def']['record']
-> = TRouter['_def']['record'][TPath] extends infer TProc
-  ? TProc extends { _def: { $types: { input: infer TInput } } }
-    ? TInput
-    : never
-  : never
+  TRouter extends Record<string, any>,
+  TPath extends string
+> = any // Simplified for test utilities
 
 // Helper to create mock response for fetch
 export const createMockFetchResponse = (data: any, status = 200) => {

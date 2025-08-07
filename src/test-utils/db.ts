@@ -17,7 +17,7 @@ export const setupCommonMocks = (mockPrisma: DeepMockProxy<PrismaClient>) => {
   mockPrisma.$queryRaw.mockResolvedValue([{ 1: 1 }])
   
   // Transaction mock
-  mockPrisma.$transaction.mockImplementation(async (fn) => {
+  mockPrisma.$transaction.mockImplementation(async (fn: any) => {
     if (typeof fn === 'function') {
       return fn(mockPrisma)
     }

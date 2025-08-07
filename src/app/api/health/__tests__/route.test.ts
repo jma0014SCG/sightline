@@ -62,6 +62,7 @@ describe('/api/health', () => {
     })
 
     it('should include system metrics in development or when enabled', async () => {
+      const originalNodeEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'development'
       mockPrisma.$queryRaw.mockResolvedValue([{}])
       
@@ -73,9 +74,17 @@ describe('/api/health', () => {
       expect(data.metrics.memory.used).toBeGreaterThan(0)
       expect(data.metrics.memory.total).toBeGreaterThan(0)
       expect(data.metrics.memory.percentage).toBeGreaterThan(0)
+      
+      // Restore original NODE_ENV
+      if (originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = originalNodeEnv
+      } else {
+        delete process.env.NODE_ENV
+      }
     })
 
     it('should include metrics when ENABLE_HEALTH_METRICS is true', async () => {
+      const originalNodeEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'production'
       process.env.ENABLE_HEALTH_METRICS = 'true'
       mockPrisma.$queryRaw.mockResolvedValue([{}])
@@ -84,6 +93,13 @@ describe('/api/health', () => {
       const data = await response.json()
       
       expect(data.metrics).toBeDefined()
+      
+      // Restore original NODE_ENV
+      if (originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = originalNodeEnv
+      } else {
+        delete process.env.NODE_ENV
+      }
     })
   })
 
@@ -207,14 +223,16 @@ describe('/api/health', () => {
       expect(responseTime).toBeTruthy()
       expect(responseTime).toMatch(/^\d+ms$/)
       
-      const timeValue = parseInt(responseTime.replace('ms', ''))
-      expect(timeValue).toBeGreaterThanOrEqual(0)
-      expect(timeValue).toBeLessThan(5000) // Should be fast
+      if (responseTime) {
+        const timeValue = parseInt(responseTime.replace('ms', ''))
+        expect(timeValue).toBeGreaterThanOrEqual(0)
+        expect(timeValue).toBeLessThan(5000) // Should be fast
+      }
     })
 
     it('should track database latency', async () => {
       mockPrisma.$queryRaw.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve([{}]), 50))
+        new Promise(resolve => setTimeout(() => resolve([{}] as any), 50))
       )
       
       const response = await GET()

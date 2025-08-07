@@ -229,6 +229,75 @@ global.console = {
   error: jest.fn(),
 }
 
+// Setup MSW for component testing - temporarily disabled
+// import { setupMSW } from './src/test-utils/msw-server'
+// setupMSW()
+
+// Mock YouTube IFrame API for SummaryViewer tests
+global.YT = {
+  Player: jest.fn().mockImplementation(() => ({
+    seekTo: jest.fn(),
+    playVideo: jest.fn(),
+    pauseVideo: jest.fn(),
+    getCurrentTime: jest.fn(() => 0),
+    getDuration: jest.fn(() => 1200),
+    getPlayerState: jest.fn(() => 1),
+  })),
+  PlayerState: {
+    UNSTARTED: -1,
+    ENDED: 0,
+    PLAYING: 1,
+    PAUSED: 2,
+    BUFFERING: 3,
+    CUED: 5
+  }
+}
+
+// Mock navigator.clipboard for copy functionality
+if (!navigator.clipboard) {
+  Object.defineProperty(navigator, 'clipboard', {
+    value: {
+      writeText: jest.fn().mockResolvedValue(undefined),
+      readText: jest.fn().mockResolvedValue('mock clipboard content')
+    },
+    writable: true,
+    configurable: true
+  })
+}
+
+// Mock URL constructor for component tests - fallback to native URL if it exists
+if (!global.URL) {
+  global.URL = class URL {
+    constructor(url) {
+      this.href = url
+      try {
+        const nativeURL = new globalThis.URL(url)
+        this.pathname = nativeURL.pathname
+        this.searchParams = nativeURL.searchParams
+      } catch (e) {
+        this.pathname = ''
+        this.searchParams = new URLSearchParams()
+      }
+    }
+  }
+}
+
+// Mock ResizeObserver for responsive components
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}))
+
+// Mock Image constructor for thumbnail loading
+global.Image = class {
+  constructor() {
+    setTimeout(() => {
+      this.onload && this.onload()
+    }, 100)
+  }
+}
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks()

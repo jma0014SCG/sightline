@@ -10,8 +10,14 @@ jest.mock('svix', () => ({
 import { POST } from '../route'
 import { prisma } from '@/lib/db/prisma'
 
-// Get the mocked prisma instance
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+// Get the mocked prisma instance with proper typing
+const mockPrisma = prisma as jest.Mocked<typeof prisma> & {
+  user: {
+    create: jest.MockedFunction<any>
+    update: jest.MockedFunction<any>
+    delete: jest.MockedFunction<any>
+  }
+}
 
 // Mock Next.js headers
 const mockHeaders = new Map()

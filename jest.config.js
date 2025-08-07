@@ -24,6 +24,14 @@ const config = {
     '<rootDir>/**/*.(test|spec).(js|jsx|ts|tsx)',
   ],
   
+  // Exclude E2E tests from Jest
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/dist/',
+    '<rootDir>/e2e/',
+  ],
+  
   // Coverage settings
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
@@ -55,12 +63,6 @@ const config = {
   // Module file extensions
   moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
   
-  // Ignore patterns
-  testPathIgnorePatterns: [
-    '<rootDir>/.next/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/dist/',
-  ],
   
   // Transform ignore patterns
   transformIgnorePatterns: [

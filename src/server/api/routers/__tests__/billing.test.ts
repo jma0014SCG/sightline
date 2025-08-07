@@ -55,8 +55,12 @@ import { type PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { stripe, PRICING_PLANS } from '@/lib/stripe'
 
-// Get the mocked stripe instance
-const mockStripe = stripe as jest.Mocked<typeof stripe>
+// Get the mocked stripe instance with proper typing
+const mockStripe = stripe as jest.Mocked<typeof stripe> & {
+  customers: { create: jest.MockedFunction<any> }
+  checkout: { sessions: { create: jest.MockedFunction<any> } }
+  billingPortal: { sessions: { create: jest.MockedFunction<any> } }
+}
 
 // Create mock Prisma client
 const mockPrisma = mockDeep<PrismaClient>()

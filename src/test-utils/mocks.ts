@@ -1,4 +1,4 @@
-import { type User, type Summary, type Subscription, type Category, type Tag, type ShareLink } from '@prisma/client'
+import { type User, type Summary, type Category, type Tag, type ShareLink } from '@prisma/client'
 
 // Mock user data
 export const createMockUser = (overrides?: Partial<User>): User => ({
@@ -6,6 +6,7 @@ export const createMockUser = (overrides?: Partial<User>): User => ({
   email: 'test@example.com',
   name: 'Test User',
   image: 'https://example.com/avatar.jpg',
+  role: 'USER',
   emailVerified: new Date('2024-01-01'),
   plan: 'FREE',
   stripeCustomerId: null,
@@ -165,7 +166,6 @@ export const createMockShareLink = (overrides?: Partial<ShareLink>): ShareLink =
   views: 0,
   expiresAt: null,
   createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
   ...overrides,
 })
 
