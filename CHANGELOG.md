@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2025-01-09
 
 ### Fixed
+- **CRITICAL:** Fixed tRPC context error causing landing page to display white screen with 500 errors
+  - Resolved "Unable to find tRPC Context" error by reordering React providers in layout.tsx
+  - Moved `MonitoringProvider` inside `TRPCProvider` context to enable proper tRPC hook access
+  - Landing page now loads correctly at localhost:3000 with full functionality
 - Fixed package manager inconsistency in `dev:full` script - changed from `npm` to `pnpm` for consistency with project's package manager specification
 
 ### Added

@@ -427,6 +427,21 @@ The SummaryViewer uses a responsive multi-column layout:
 - Use Vercel's Edge Network for global distribution
 
 ## Debugging Tips
+
+### Common Issues
+
+**"Unable to find tRPC Context" Error / White Screen on Frontend**
+- **Cause**: React provider order issue - components trying to use tRPC hooks outside of TRPCProvider context
+- **Symptoms**: Frontend shows white screen, 500 errors, "Unable to find tRPC Context" in console
+- **Solution**: Ensure all components using tRPC hooks (like `api.*.useQuery()`) are wrapped inside `<TRPCProvider>`
+- **Fixed in**: layout.tsx - moved `MonitoringProvider` inside `TRPCProvider`
+
+**Servers Won't Start**
+- **Port Conflicts**: Check for existing processes on ports 3000/8000 with `lsof -i :3000` and `lsof -i :8000`
+- **Kill processes**: `pkill -f "next dev"` and `pkill -f "uvicorn"`
+- **Verify both servers running**: Backend should show "Application startup complete", Frontend should show "✓ Ready"
+
+### General Debugging
 - Check browser console for tRPC errors
 - Use Prisma Studio (`pnpm db:studio`) to inspect database
 - Monitor Python API logs in development console
