@@ -70,13 +70,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
-          <MonitoringProvider>
-            <TRPCProvider>
+          <TRPCProvider>
+            <MonitoringProvider>
               <ToastProvider>
                 {children}
               </ToastProvider>
-            </TRPCProvider>
-          </MonitoringProvider>
+            </MonitoringProvider>
+          </TRPCProvider>
         </body>
       </html>
     </ClerkProvider>
