@@ -103,10 +103,11 @@ export const summaryRouter = createTRPCRouter({
                       headersList.get('x-real-ip') || 
                       'unknown'
       
-      // Check if this browser fingerprint has already created a summary
-      const existingAnonymousSummary = await ctx.prisma.summary.findFirst({
+      // Check if this browser fingerprint has already created a summary (SECURITY FIX - use usage events)
+      const existingUsageByFingerprint = await ctx.prisma.usageEvent.findFirst({
         where: {
           userId: ANONYMOUS_USER_ID,
+          eventType: 'summary_created',
           metadata: {
             path: ['browserFingerprint'],
             equals: input.browserFingerprint,
@@ -114,17 +115,18 @@ export const summaryRouter = createTRPCRouter({
         },
       })
 
-      if (existingAnonymousSummary) {
+      if (existingUsageByFingerprint) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Welcome back! You\'ve already used your free trial. Sign up now to get 3 summaries every month!',
         })
       }
 
-      // Also check by IP as a backup (in case they clear localStorage)
-      const existingByIP = await ctx.prisma.summary.findFirst({
+      // Also check by IP as a backup (SECURITY FIX - use usage events)
+      const existingUsageByIP = await ctx.prisma.usageEvent.findFirst({
         where: {
           userId: ANONYMOUS_USER_ID,
+          eventType: 'summary_created',
           metadata: {
             path: ['clientIP'],
             equals: clientIP,
@@ -132,7 +134,7 @@ export const summaryRouter = createTRPCRouter({
         },
       })
 
-      if (existingByIP) {
+      if (existingUsageByIP) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'A free summary has already been used from this location. Sign up now to get 3 summaries every month!',
@@ -298,6 +300,25 @@ export const summaryRouter = createTRPCRouter({
           },
         })
 
+        // Record anonymous usage event for limit enforcement (SECURITY FIX)
+        await ctx.prisma.usageEvent.create({
+          data: {
+            userId: ANONYMOUS_USER_ID,
+            eventType: 'summary_created',
+            summaryId: summary.id,
+            videoId: summary.videoId,
+            metadata: {
+              plan: 'ANONYMOUS',
+              browserFingerprint: input.browserFingerprint,
+              clientIP,
+              videoTitle: summary.videoTitle,
+              channelName: summary.channelName,
+              duration: summary.duration,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        })
+
         // Classify summary content asynchronously (fire and forget)
         classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)
           .catch((error) => {
@@ -414,35 +435,30 @@ export const summaryRouter = createTRPCRouter({
       // Check usage limits based on plan
       if (user.summariesLimit > 0) {
         if (user.plan === 'FREE') {
-          // FREE plan: Check monthly usage (3 max per month, same as PRO plan logic)
-          const startOfMonth = new Date()
-          startOfMonth.setDate(1)
-          startOfMonth.setHours(0, 0, 0, 0)
-
-          const currentMonthUsage = await ctx.prisma.summary.count({
+          // FREE plan: Check lifetime usage (3 max total, SECURITY FIX - can't bypass via deletion)
+          const totalUsage = await ctx.prisma.usageEvent.count({
             where: {
               userId: userId,
-              createdAt: {
-                gte: startOfMonth,
-              },
+              eventType: 'summary_created',
             },
           })
 
-          if (currentMonthUsage >= user.summariesLimit) {
+          if (totalUsage >= user.summariesLimit) {
             throw new TRPCError({
               code: 'FORBIDDEN',
-              message: `You've reached your monthly limit of ${user.summariesLimit} summaries. Your limit resets on the 1st of next month. Upgrade to Pro for 25 summaries per month!`,
+              message: `You've reached your lifetime limit of ${user.summariesLimit} summaries. Upgrade to Pro for 25 summaries per month!`,
             })
           }
         } else if (user.plan === 'PRO') {
-          // PRO plan: Check monthly usage (25 max per month)
+          // PRO plan: Check monthly usage (25 max per month, SECURITY FIX - can't bypass via deletion)
           const startOfMonth = new Date()
           startOfMonth.setDate(1)
           startOfMonth.setHours(0, 0, 0, 0)
 
-          const currentMonthUsage = await ctx.prisma.summary.count({
+          const currentMonthUsage = await ctx.prisma.usageEvent.count({
             where: {
               userId: userId,
+              eventType: 'summary_created',
               createdAt: {
                 gte: startOfMonth,
               },
@@ -651,6 +667,23 @@ export const summaryRouter = createTRPCRouter({
             data: {
               summariesUsed: {
                 increment: 1,
+              },
+            },
+          })
+
+          // Record usage event for limit enforcement (SECURITY FIX)
+          await ctx.prisma.usageEvent.create({
+            data: {
+              userId: userId,
+              eventType: 'summary_created',
+              summaryId: summary.id,
+              videoId: summary.videoId,
+              metadata: {
+                plan: user.plan,
+                videoTitle: summary.videoTitle,
+                channelName: summary.channelName,
+                duration: summary.duration,
+                timestamp: new Date().toISOString(),
               },
             },
           })

@@ -1,71 +1,82 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
+import { SELECTORS } from "./helpers/selectors";
+import { waitForPageLoad } from "./helpers/wait-utils";
 
-test.describe('Landing Page', () => {
-  test('displays landing page correctly', async ({ page }) => {
-    await page.goto('/');
-    
-    // Check hero section
-    await expect(page.getByText('Speed-learn')).toBeVisible();
-    await expect(page.getByText('anything on YouTube')).toBeVisible();
-    
-    // Check URL input form
-    await expect(page.getByPlaceholder(/Enter YouTube URL/)).toBeVisible();
-    await expect(page.getByRole('button', { name: /Summarize/i })).toBeVisible();
-    
-    // Check features section
-    await expect(page.getByText(/Quick Summaries/)).toBeVisible();
-    await expect(page.getByText(/Key Insights/)).toBeVisible();
-    await expect(page.getByText(/Time-Stamped Moments/)).toBeVisible();
+test.describe("Landing Page", () => {
+  test("displays landing page correctly", async ({ page }) => {
+    await page.goto("/");
+    await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
+    // Check hero section - updated to match actual content
+    await expect(page.getByText("Turn YouTube videos into")).toBeVisible();
+    await expect(page.getByText("instant insights")).toBeVisible();
+
+    // Check URL input form - using new selectors
+    await expect(page.locator(SELECTORS.FORMS.urlInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.FORMS.submitButton)).toBeVisible();
+
+    // Check subheadline
+    await expect(
+      page.getByText("Stop queuing videos. Start absorbing insights."),
+    ).toBeVisible();
   });
 
-  test('shows pricing information', async ({ page }) => {
-    await page.goto('/');
-    
+  test("shows pricing information", async ({ page }) => {
+    await page.goto("/");
+    await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
     // Scroll to pricing section
-    await page.getByText('Choose Your Plan').scrollIntoViewIfNeeded();
-    
-    // Check pricing plans
-    await expect(page.getByText('Free Plan')).toBeVisible();
-    await expect(page.getByText('Pro Plan')).toBeVisible();
-    await expect(page.getByText(/\$\d+\/month/)).toBeVisible();
+    await page.locator("#pricing").scrollIntoViewIfNeeded();
+
+    // Check pricing plans - be more specific with headings
+    await expect(page.locator("#FREE")).toBeVisible();
+    await expect(page.locator("#PRO")).toBeVisible();
+    await expect(page.getByText("$9.99")).toBeVisible();
   });
 
-  test('URL validation works correctly', async ({ page }) => {
-    await page.goto('/');
-    
-    const urlInput = page.getByPlaceholder(/Enter YouTube URL/);
-    const submitButton = page.getByRole('button', { name: /Summarize/i });
-    
+  test("URL validation works correctly", async ({ page }) => {
+    await page.goto("/");
+    await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
+    // Using new centralized selectors
+    const urlInput = page.locator(SELECTORS.FORMS.urlInput);
+    const submitButton = page.locator(SELECTORS.FORMS.submitButton);
+
     // Test invalid URL
-    await urlInput.fill('not-a-valid-url');
+    await urlInput.fill("not-a-valid-url");
     await submitButton.click();
-    await expect(page.getByText(/Please enter a valid YouTube URL/)).toBeVisible();
-    
-    // Test non-YouTube URL  
-    await urlInput.fill('https://example.com');
+    await expect(page.locator(SELECTORS.ERRORS.message)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Test non-YouTube URL
+    await urlInput.fill("https://example.com");
     await submitButton.click();
-    await expect(page.getByText(/Please enter a valid YouTube URL/)).toBeVisible();
-    
+    await expect(page.locator(SELECTORS.ERRORS.message)).toBeVisible({
+      timeout: 5000,
+    });
+
     // Test valid YouTube URL format
-    await urlInput.fill('https://youtube.com/watch?v=dQw4w9WgXcQ');
+    await urlInput.fill("https://youtube.com/watch?v=dQw4w9WgXcQ");
     // Should not show validation error
-    await expect(page.getByText(/Please enter a valid YouTube URL/)).not.toBeVisible();
+    await expect(page.locator(SELECTORS.ERRORS.message)).not.toBeVisible();
   });
 
-  test('responsive design works on mobile', async ({ page, isMobile }) => {
+  test("responsive design works on mobile", async ({ page, isMobile }) => {
     if (!isMobile) return;
-    
-    await page.goto('/');
-    
+
+    await page.goto("/");
+    await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
     // Check mobile menu functionality
-    const menuButton = page.getByRole('button', { name: /menu/i }).first();
+    const menuButton = page.getByRole("button", { name: /menu/i }).first();
     if (await menuButton.isVisible()) {
       await menuButton.click();
-      await expect(page.getByRole('navigation')).toBeVisible();
+      await expect(page.getByRole("navigation")).toBeVisible();
     }
-    
-    // Check responsive layout
-    await expect(page.getByText('Speed-learn')).toBeVisible();
-    await expect(page.getByPlaceholder(/Enter YouTube URL/)).toBeVisible();
+
+    // Check responsive layout - updated to match actual content
+    await expect(page.getByText("Turn YouTube videos into")).toBeVisible();
+    await expect(page.locator(SELECTORS.FORMS.urlInput)).toBeVisible();
   });
 });

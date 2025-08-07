@@ -1,136 +1,186 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
+import { TestApiMocks } from "./helpers/api-mocks";
+import { TestDatabaseManager } from "./helpers/database-manager";
+import { DebugUtils } from "./helpers/debug-utils";
+import { SELECTORS } from "./helpers/selectors";
+import { waitForPageLoad, waitForSummaryLoad } from "./helpers/wait-utils";
 
-test.describe('Anonymous User Flow', () => {
-  test('anonymous user can create and view summary', async ({ page }) => {
-    await page.goto('/');
-    
-    // Mock the API endpoint to simulate successful summarization
-    await page.route('**/api/trpc/summary.createSummary*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          result: {
-            data: {
-              id: 'test-summary-id',
-              title: 'Test Video Summary',
-              url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
-              status: 'COMPLETED',
-              summary: 'This is a test summary of the video content.',
-              createdAt: new Date().toISOString(),
-            }
-          }
-        })
-      });
-    });
-    
-    // Fill in YouTube URL
-    const urlInput = page.getByPlaceholder(/Enter YouTube URL/);
-    await urlInput.fill('https://youtube.com/watch?v=dQw4w9WgXcQ');
-    
-    // Submit form
-    const submitButton = page.getByRole('button', { name: /Summarize/i });
-    await submitButton.click();
-    
-    // Should navigate to summary page
-    await expect(page).toHaveURL(/\/summary\//);
-    
-    // Should show progress initially
-    await expect(page.getByText(/Processing/)).toBeVisible();
-    
-    // Wait for completion and check summary content
-    await expect(page.getByText('Test Video Summary')).toBeVisible({ timeout: 30000 });
-    await expect(page.getByText('This is a test summary')).toBeVisible();
+test.describe("Anonymous User Flow", () => {
+  test.beforeEach(async ({ page }) => {
+    // Setup debug monitoring
+    await DebugUtils.startNetworkMonitoring(page);
+    await DebugUtils.startConsoleMonitoring(page);
+
+    // Setup database for test
+    await TestDatabaseManager.setupTestDatabase();
+
+    // Setup authentication mocks for anonymous user
+    await TestApiMocks.setupAuthMocks(page, "anonymous");
   });
 
-  test('anonymous user sees sign-in prompt after summary', async ({ page }) => {
-    await page.goto('/');
-    
-    // Mock API response for summary creation
-    await page.route('**/api/trpc/summary.createSummary*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          result: {
-            data: {
-              id: 'test-summary-id',
-              title: 'Test Video Summary',
-              url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
-              status: 'COMPLETED',
-              summary: 'This is a test summary.',
-              createdAt: new Date().toISOString(),
-            }
-          }
-        })
+  test.afterEach(async ({ page }) => {
+    // Cleanup test data
+    await TestDatabaseManager.cleanup();
+  });
+
+  test("anonymous user can create and view summary", async ({
+    page,
+  }, testInfo) => {
+    try {
+      // Setup API mocks for successful summary creation
+      await TestApiMocks.setupSummaryCreationMocks(page, {
+        shouldSucceed: true,
+        processingTime: 2000,
+        userType: "anonymous",
       });
-    });
-    
-    // Create summary as anonymous user
-    await page.getByPlaceholder(/Enter YouTube URL/).fill('https://youtube.com/watch?v=dQw4w9WgXcQ');
-    await page.getByRole('button', { name: /Summarize/i }).click();
-    
-    // Wait for summary to load
-    await expect(page.getByText('Test Video Summary')).toBeVisible({ timeout: 30000 });
-    
-    // Look for sign-in prompts or calls-to-action
-    const signInPrompts = [
-      page.getByText(/Sign up/i),
-      page.getByText(/Create account/i),
-      page.getByText(/Save this summary/i),
-      page.getByRole('button', { name: /Sign in/i })
-    ];
-    
-    // At least one sign-in prompt should be visible
-    let promptVisible = false;
-    for (const prompt of signInPrompts) {
-      if (await prompt.isVisible()) {
-        promptVisible = true;
-        break;
-      }
+
+      // Navigate to homepage
+      await page.goto("/");
+      await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
+      // Fill in YouTube URL using enhanced debugging
+      await DebugUtils.fillWithDebug(
+        page,
+        SELECTORS.FORMS.urlInput,
+        "https://youtube.com/watch?v=dQw4w9WgXcQ",
+      );
+
+      // Submit form with debugging
+      await DebugUtils.clickWithDebug(page, SELECTORS.FORMS.submitButton);
+
+      // Should navigate to summary page
+      await expect(page).toHaveURL(/\/summary\//, { timeout: 15000 });
+
+      // Wait for summary to load completely
+      await waitForSummaryLoad(page);
+
+      // Verify summary content is displayed
+      await expect(page.locator(SELECTORS.CONTENT.summaryTitle)).toContainText(
+        "Test Video",
+        { timeout: 10000 },
+      );
+      await expect(
+        page.locator(SELECTORS.CONTENT.summaryContent),
+      ).toContainText("test summary", { timeout: 10000 });
+    } catch (error) {
+      // Capture debug artifacts on failure
+      await DebugUtils.captureFailureArtifacts(page, testInfo, error as Error);
+      throw error;
     }
-    expect(promptVisible).toBe(true);
   });
 
-  test('anonymous user hits rate limit', async ({ page }) => {
-    // This test simulates the rate limit for anonymous users
-    await page.goto('/');
-    
-    // Mock rate limit response
-    await page.route('**/api/trpc/summary.createSummary*', async (route) => {
-      await route.fulfill({
-        status: 429,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          error: {
-            message: 'Rate limit exceeded. Anonymous users can create 1 summary. Please sign in for more.',
-            code: 'TOO_MANY_REQUESTS'
-          }
-        })
+  test("anonymous user sees sign-in prompt after summary", async ({
+    page,
+  }, testInfo) => {
+    try {
+      // Setup API mocks for successful summary creation
+      await TestApiMocks.setupSummaryCreationMocks(page, {
+        shouldSucceed: true,
+        processingTime: 1500,
+        userType: "anonymous",
       });
-    });
-    
-    await page.getByPlaceholder(/Enter YouTube URL/).fill('https://youtube.com/watch?v=dQw4w9WgXcQ');
-    await page.getByRole('button', { name: /Summarize/i }).click();
-    
-    // Should show rate limit error
-    await expect(page.getByText(/Rate limit exceeded/)).toBeVisible();
-    await expect(page.getByText(/Please sign in/)).toBeVisible();
+
+      await page.goto("/");
+      await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
+      // Create summary as anonymous user using enhanced debugging
+      await DebugUtils.fillWithDebug(
+        page,
+        SELECTORS.FORMS.urlInput,
+        "https://youtube.com/watch?v=dQw4w9WgXcQ",
+      );
+      await DebugUtils.clickWithDebug(page, SELECTORS.FORMS.submitButton);
+
+      // Should navigate to summary page
+      await expect(page).toHaveURL(/\/summary\//, { timeout: 15000 });
+
+      // Wait for summary to load
+      await waitForSummaryLoad(page);
+
+      // Look for sign-in prompts - anonymous users should see auth prompts
+      const authPrompts = [
+        page.locator(SELECTORS.AUTH.signInButton),
+        page.locator(SELECTORS.AUTH.signUpButton),
+        page.locator(SELECTORS.AUTH.authPromptModal),
+      ];
+
+      // At least one auth prompt should be visible
+      let promptVisible = false;
+      for (const prompt of authPrompts) {
+        if (await prompt.isVisible().catch(() => false)) {
+          promptVisible = true;
+          break;
+        }
+      }
+      expect(promptVisible).toBe(true);
+    } catch (error) {
+      // Capture debug artifacts on failure
+      await DebugUtils.captureFailureArtifacts(page, testInfo, error as Error);
+      throw error;
+    }
   });
 
-  test('anonymous user cannot access protected routes', async ({ page }) => {
-    // Try to access library page
-    await page.goto('/library');
-    
-    // Should redirect to landing or show auth prompt
-    await expect(page).toHaveURL(/\/|sign-in/);
-    
-    // Try to access settings
-    await page.goto('/settings');
-    await expect(page).toHaveURL(/\/|sign-in/);
-    
-    // Try to access billing  
-    await page.goto('/billing');
-    await expect(page).toHaveURL(/\/|sign-in/);
+  test("anonymous user hits rate limit", async ({ page }, testInfo) => {
+    try {
+      // Setup API mocks for rate limit scenario
+      await TestApiMocks.setupSummaryCreationMocks(page, {
+        shouldSucceed: false,
+        userType: "anonymous",
+        errorType: "RATE_LIMIT",
+      });
+
+      await page.goto("/");
+      await waitForPageLoad(page, SELECTORS.FORMS.summaryCreation);
+
+      // Try to create summary with enhanced debugging
+      await DebugUtils.fillWithDebug(
+        page,
+        SELECTORS.FORMS.urlInput,
+        "https://youtube.com/watch?v=dQw4w9WgXcQ",
+      );
+      await DebugUtils.clickWithDebug(page, SELECTORS.FORMS.submitButton);
+
+      // Should show rate limit error
+      await expect(page.locator(SELECTORS.ERRORS.message)).toContainText(
+        /Rate limit exceeded/,
+        { timeout: 10000 },
+      );
+      await expect(page.locator(SELECTORS.ERRORS.message)).toContainText(
+        /sign in/,
+        { timeout: 10000 },
+      );
+    } catch (error) {
+      await DebugUtils.captureFailureArtifacts(page, testInfo, error as Error);
+      throw error;
+    }
+  });
+
+  test("anonymous user cannot access protected routes", async ({
+    page,
+  }, testInfo) => {
+    try {
+      // Setup authentication mocks for anonymous user
+      await TestApiMocks.setupAuthMocks(page, "anonymous");
+
+      // Try to access library page
+      await page.goto("/library");
+      await page.waitForLoadState("networkidle");
+
+      // Should redirect to landing or show auth prompt
+      await expect(page).toHaveURL(/\/|sign-in/, { timeout: 10000 });
+
+      // Try to access settings
+      await page.goto("/settings");
+      await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(/\/|sign-in/, { timeout: 10000 });
+
+      // Try to access billing
+      await page.goto("/billing");
+      await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(/\/|sign-in/, { timeout: 10000 });
+    } catch (error) {
+      await DebugUtils.captureFailureArtifacts(page, testInfo, error as Error);
+      throw error;
+    }
   });
 });

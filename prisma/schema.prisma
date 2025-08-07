@@ -33,8 +33,9 @@ model User {
   summariesLimit         Int       @default(3) // Free tier limit - 3 summaries ever
 
   // Relations (removed NextAuth tables)
-  summaries   Summary[]
-  sharedLinks ShareLink[]
+  summaries    Summary[]
+  sharedLinks  ShareLink[]
+  usageEvents  UsageEvent[]
 }
 
 // NextAuth models removed - Clerk handles authentication
@@ -116,4 +117,24 @@ enum Plan {
   FREE
   PRO
   ENTERPRISE
+}
+
+// Usage tracking for preventing limit bypass via deletion
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  eventType String   // "summary_created", "summary_deleted", "plan_upgraded", etc.
+  summaryId String?  // Reference to summary if applicable
+  videoId   String?  // YouTube video ID if applicable
+  metadata  Json?    // Additional context data
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([userId, eventType])
+  @@index([createdAt])
+  @@index([userId, eventType, createdAt])
 }
