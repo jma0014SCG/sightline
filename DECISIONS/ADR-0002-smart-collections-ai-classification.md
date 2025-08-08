@@ -90,6 +90,7 @@ UI Display with Color Coding
 ## References
 
 - [OpenAI Classification API](https://platform.openai.com/docs/guides/structured-outputs)
+- [Smart Collections Architecture](../ARCHITECTURE.md#smart-collections-processing)
 - [Smart Collections Implementation](../src/lib/classificationService.ts)
 - [UI Design System](../Docs/architecture/ui-ux-guidelines.md)
 

@@ -95,7 +95,7 @@
     "smart_collections": {
       "term": "Smart Collections", 
       "category": "ai",
-      "definition": "AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering.",
+      "definition": "AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering. See Architecture Documentation for technical details.",
       "aliases": ["ai_tagging", "auto_categorization"],
       "related_terms": ["ai_classification", "tags", "categories"],
       "usage_context": "ai_processing",

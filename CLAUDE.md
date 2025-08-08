@@ -96,82 +96,9 @@ python tests/test_oxylabs.py
 python tests/test_ytdlp.py
 ```
 
-## Smart Collections (AI-Powered Tagging and Categorization)
+## Smart Collections
 
-### Overview
-Smart Collections automatically analyze and categorize video summaries using AI, enabling users to filter and organize their content library intelligently. The system uses OpenAI's API to extract entities, topics, and themes from video content.
-
-### Core Features
-- **Automatic Classification**: New summaries are automatically analyzed and tagged
-- **7 Tag Types**: PERSON, COMPANY, TECHNOLOGY, PRODUCT, CONCEPT, FRAMEWORK, TOOL
-- **Predefined Categories**: Productivity, Technology, Business, Marketing, Finance, Health, etc.
-- **Smart Filtering**: Filter library by tags and categories with visual counts
-- **Color-Coded Tags**: Each tag type has a distinct color for easy recognition
-- **Graceful Fallbacks**: Works even if OpenAI API is unavailable
-
-### Architecture Components
-
-#### 1. Classification Service (`/src/lib/classificationService.ts`)
-- **OpenAI Integration**: Uses GPT-4 for content analysis with structured JSON output
-- **Lazy Loading**: OpenAI client initialized only when needed to prevent module failures  
-- **Entity Extraction**: Identifies people, companies, technologies, concepts, etc.
-- **Category Assignment**: Maps content to predefined categories
-- **Database Integration**: Automatically creates and associates tags/categories
-- **Error Resilience**: Classification failures don't break summary creation
-
-#### 2. Database Schema (Prisma)
-```prisma
-model Category {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  summaries Summary[] @relation("SummaryCategories")
-}
-
-model Tag {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  type      String    // PERSON, COMPANY, TECHNOLOGY, etc.
-  summaries Summary[] @relation("SummaryTags")
-}
-```
-
-#### 3. Enhanced UI Components
-- **LibraryControls**: Smart filtering sidebar with tag/category counts
-- **SummaryCard**: Color-coded tag badges with overflow handling
-- **Smart Filtering**: Real-time filter updates with preserved state
-
-#### 4. API Integration
-- **Summary Router**: Automatic classification during summary creation
-- **Library Router**: Tag and category queries for filtering
-- **Fire-and-Forget**: Classification runs asynchronously to not block UX
-
-### Configuration Requirements
-```bash
-# Required environment variable
-OPENAI_API_KEY="sk-proj-your-openai-api-key-here"
-```
-
-### Usage Workflow
-1. **User creates summary** → Video content is processed
-2. **Classification triggered** → OpenAI analyzes content and generates tags/categories  
-3. **Database updated** → Tags and categories are created and associated
-4. **UI displays results** → Colored badges appear on summary cards
-5. **Filtering enabled** → Users can filter by tags/categories in sidebar
-
-### Tag Type Color Coding
-- **PERSON**: Blue badges - Individual people, influencers, experts
-- **COMPANY**: Green badges - Organizations, businesses, brands  
-- **TECHNOLOGY**: Orange badges - Technologies, programming languages, platforms
-- **PRODUCT**: Pink badges - Specific products, apps, services
-- **CONCEPT**: Indigo badges - Abstract concepts, methodologies, principles
-- **FRAMEWORK**: Yellow badges - Frameworks, libraries, systems
-- **TOOL**: Teal badges - Tools, software, applications
-
-### Error Handling and Resilience
-- **OpenAI API Failures**: Logged but don't break summary creation
-- **Missing API Key**: Service gracefully skips classification
-- **Database Errors**: Individual classification failures are isolated
-- **UI Fallbacks**: Components handle missing classification data gracefully
+AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing) for comprehensive technical details.
 
 ## Architecture Overview
 
@@ -324,7 +251,7 @@ When adding new procedures:
 - `NEXT_PUBLIC_STRIPE_COMPLETE_PRICE_ID` - Stripe Complete plan price ID (if applicable)
 
 ### AI Services
-- `OPENAI_API_KEY` - OpenAI API key for summarization and Smart Collections classification
+- `OPENAI_API_KEY` - OpenAI API key for summarization and Smart Collections classification (see [Smart Collections](ARCHITECTURE.md#smart-collections-processing))
 - `YOUTUBE_API_KEY` - YouTube Data API key for video metadata
 
 ### Transcript Services (Fallback Chain)

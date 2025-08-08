@@ -45,7 +45,7 @@ Real-time status updates during AI processing using UUID-based task identificati
 Feature allowing users to generate public URLs for summaries, making them viewable without authentication via unique slug identifiers.
 
 **Smart Collections**  
-AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering.
+AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing) for technical details.
 
 **Summary Claiming**  
 Process where anonymous users can convert their free summary to a saved summary by creating an account, transferring ownership from anonymous to authenticated user.

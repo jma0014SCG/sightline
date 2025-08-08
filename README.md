@@ -161,7 +161,7 @@ pnpm lint && pnpm typecheck && pnpm format:check
 
 ### Smart Collections
 
-AI-powered automatic categorization system that extracts entities and assigns categories to video summaries:
+AI-powered automatic categorization system that extracts entities and assigns categories to video summaries. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing) for detailed technical specifications.
 
 - **7 Entity Types**: Person, Company, Technology, Product, Concept, Framework, Tool
 - **14 Categories**: Technology, Business, Marketing, Productivity, Education, Health, etc.
