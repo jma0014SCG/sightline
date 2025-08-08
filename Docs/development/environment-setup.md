@@ -1,13 +1,19 @@
 # Environment Setup Guide
 
-This guide helps you set up all the required environment variables for Sightline.ai.
+**Comprehensive environment configuration for Sightline.ai development and production deployment**
 
 ## Quick Setup
 
 Run the setup script to get started quickly:
 
 ```bash
-npm run env:setup
+pnpm env:setup
+```
+
+Validate your configuration:
+
+```bash
+pnpm env:validate
 ```
 
 ## Required Environment Variables
@@ -15,74 +21,93 @@ npm run env:setup
 ### 1. Database (Required)
 
 **DATABASE_URL** - PostgreSQL connection string
-- **Provider:** [Neon](https://neon.tech/) (recommended)
+- **Provider:** [Neon](https://neon.tech/) (Vercel Postgres recommended)
 - **Format:** `postgresql://user:password@host:5432/database?sslmode=require`
 - **Setup:**
-  1. Create account at [neon.tech](https://neon.tech/)
+  1. Create account at [neon.tech](https://neon.tech/) or use Vercel Postgres
   2. Create a new project
   3. Copy the connection string from the dashboard
   4. Add to `.env.local`
 
-### 2. Authentication (Required)
-
-**NEXTAUTH_URL** - Your application URL
+**NEXT_PUBLIC_APP_URL** - Application base URL
 - **Development:** `http://localhost:3000`
-- **Production:** Your deployed URL
+- **Production:** Your deployed URL (e.g., `https://sightline.ai`)
 
-**NEXTAUTH_SECRET** - Secret for signing JWT tokens
-- **Requirement:** Minimum 32 characters
-- **Generate:** `openssl rand -base64 32`
+### 2. Authentication (Required - Clerk)
 
-### 3. Google OAuth (Required)
-
-**GOOGLE_CLIENT_ID** & **GOOGLE_CLIENT_SECRET**
+**CLERK_SECRET_KEY** - Server-side Clerk API key
+- **Format:** `sk_test_...` (development) or `sk_live_...` (production)
 - **Setup:**
-  1. Go to [Google Cloud Console](https://console.developers.google.com/)
-  2. Create a new project or select existing
-  3. Enable Google+ API
-  4. Create OAuth 2.0 credentials
-  5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-  6. Copy Client ID and Secret
+  1. Create account at [clerk.com](https://clerk.com/)
+  2. Create a new application
+  3. Copy the secret key from API Keys section
 
-### 4. OpenAI (Required)
+**NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY** - Client-side Clerk key
+- **Format:** `pk_test_...` (development) or `pk_live_...` (production)
+- **Same source:** Clerk dashboard → API Keys
 
-**OPENAI_API_KEY** - For AI summarization
+**CLERK_WEBHOOK_SECRET** - Webhook verification secret
+- **Setup:** Clerk Dashboard → Webhooks → Create webhook
+- **Endpoint:** `https://yourdomain.com/api/webhooks/clerk`
+- **Events:** `user.created`, `user.updated`, `user.deleted`
+
+### 3. AI Processing (Required)
+
+**OPENAI_API_KEY** - AI summarization and classification
+- **Format:** `sk-proj-...` (new format) or `sk-...` (legacy)
 - **Setup:**
-  1. Create account at [OpenAI](https://platform.openai.com/)
-  2. Go to [API Keys](https://platform.openai.com/api-keys)
+  1. Create account at [platform.openai.com](https://platform.openai.com/)
+  2. Navigate to API Keys section
   3. Create new secret key
-  4. Copy the key (starts with `sk-`)
+  4. Copy key immediately (not shown again)
+
+**YOUTUBE_API_KEY** - Video metadata extraction (optional)
+- **Setup:**
+  1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+  2. Enable YouTube Data API v3
+  3. Create API key credential
+  4. Restrict to YouTube Data API v3
+
+### 4. Payments (Required - Stripe)
+
+**STRIPE_SECRET_KEY** - Server-side Stripe operations
+- **Format:** `sk_test_...` (development) or `sk_live_...` (production)
+- **Setup:**
+  1. Create account at [stripe.com](https://stripe.com/)
+  2. Navigate to Dashboard → Developers → API keys
+  3. Copy the secret key
+
+**NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY** - Client-side Stripe operations
+- **Format:** `pk_test_...` (development) or `pk_live_...` (production) 
+- **Same source:** Stripe Dashboard → API keys
+
+**STRIPE_WEBHOOK_SECRET** - Webhook verification
+- **Setup:** Stripe Dashboard → Webhooks → Add endpoint
+- **Endpoint:** `https://yourdomain.com/api/webhooks/stripe`
+- **Events:** `invoice.payment_succeeded`, `customer.subscription.updated`
+
+**NEXT_PUBLIC_STRIPE_PRO_PRICE_ID** - Pro plan price ID
+**NEXT_PUBLIC_STRIPE_COMPLETE_PRICE_ID** - Complete plan price ID (if applicable)
+- **Source:** Stripe Dashboard → Products → Pricing table
 
 ## Optional Environment Variables
 
-### YouTube API (Optional)
+### Transcript Services (Enhanced Processing)
 
-**YOUTUBE_API_KEY** - For enhanced video metadata
-- **Setup:**
-  1. Go to [Google Cloud Console](https://console.developers.google.com/)
-  2. Enable YouTube Data API v3
-  3. Create API key
-  4. Restrict key to YouTube Data API v3
+**GUMLOOP_API_KEY** - Enhanced transcript processing
+- **Setup:** Create account at [gumloop.com](https://gumloop.com/)
 
-### Stripe (Required for Payments)
+**OXYLABS_USERNAME** & **OXYLABS_PASSWORD** - Proxy service for restricted content
+- **Setup:** Create account at [oxylabs.io](https://oxylabs.io/)
 
-**STRIPE_SECRET_KEY**, **STRIPE_WEBHOOK_SECRET**, **NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY**
-- **Setup:**
-  1. Create account at [Stripe](https://dashboard.stripe.com/)
-  2. Get keys from [API Keys page](https://dashboard.stripe.com/apikeys)
-  3. Use test keys for development (start with `sk_test_` and `pk_test_`)
-  4. Set up webhook endpoint for subscription events
+### Monitoring & Analytics
 
-### Monitoring & Analytics (Optional)
+**SENTRY_DSN** - Error tracking and monitoring
+- **Setup:** Create project at [sentry.io](https://sentry.io/)
+- **Format:** `https://...@...ingest.sentry.io/...`
 
-**SENTRY_DSN** - Error tracking
-- **Setup:** Create project at [Sentry](https://sentry.io/)
-
-**LANGCHAIN_API_KEY** - LLM observability
-- **Setup:** Create account at [LangSmith](https://smith.langchain.com/)
-
-**UPSTASH_REDIS_REST_URL** & **UPSTASH_REDIS_REST_TOKEN** - Job queues
-- **Setup:** Create database at [Upstash](https://upstash.com/)
+**UPSTASH_REDIS_URL** - Caching layer (optional)
+- **Setup:** Create database at [upstash.com](https://upstash.com/)
 
 ## Environment Validation
 
@@ -90,10 +115,10 @@ Check if your environment is properly configured:
 
 ```bash
 # Validate all environment variables
-npm run env:validate
+pnpm env:validate
 
 # Quick check (allows missing optional vars)
-npm run env:check
+pnpm env:check
 ```
 
 ## Development vs Production
@@ -123,7 +148,7 @@ npm run env:check
 ### Common Issues
 
 **"Invalid environment variables" error:**
-- Run `npm run env:validate` to see which variables are missing
+- Run `pnpm env:validate` to see which variables are missing
 - Check the format matches the expected pattern (e.g., OpenAI keys start with `sk-`)
 
 **Database connection fails:**
@@ -131,28 +156,48 @@ npm run env:check
 - Check if the database allows connections from your IP
 - Ensure SSL mode is properly configured
 
-**OAuth redirect errors:**
-- Verify redirect URIs match in Google Console
-- Check NEXTAUTH_URL matches your current URL
+**Clerk authentication errors:**
+- Verify domain settings in Clerk dashboard
+- Check NEXT_PUBLIC_APP_URL matches your current URL
+- Ensure webhook endpoints are correctly configured
 
 ### Getting Help
 
-1. Check the [Bug Tracking document](./Docs/Bug_tracking.md)
-2. Validate environment with `npm run env:validate`
+1. Check the [Bug Tracking document](bug-tracking.md)
+2. Validate environment with `pnpm env:validate`
 3. Check API service status pages
 4. Review service documentation links above
 
 ## Example .env.local
 
 ```bash
-# Copy from .env.example and fill in your values
-NODE_ENV=development
-SKIP_ENV_VALIDATION=true
-
+# Core Application
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 DATABASE_URL="postgresql://user:pass@host:5432/db?sslmode=require"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-32-character-secret-here"
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-OPENAI_API_KEY="sk-your-openai-key"
+
+# Authentication (Clerk)
+CLERK_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_WEBHOOK_SECRET="whsec_..."
+
+# AI Services  
+OPENAI_API_KEY="sk-proj-..."
+YOUTUBE_API_KEY="AIza..." # optional
+
+# Payments (Stripe)
+STRIPE_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID="price_..."
+
+# Optional Services
+SENTRY_DSN="https://...@...ingest.sentry.io/..."
+UPSTASH_REDIS_URL="redis://..."
+GUMLOOP_API_KEY="gum_..."
+OXYLABS_USERNAME="..."
+OXYLABS_PASSWORD="..."
 ```
+
+---
+
+*Environment setup guide - Updated January 2025 for Clerk authentication and current service architecture*

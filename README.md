@@ -2,181 +2,195 @@
 
 ## AI-Powered YouTube Video Summarization Platform
 
-Transform long-form YouTube videos into actionable insights with AI-powered summarization, Smart Collections tagging, and intelligent content organization.
+Transform long-form YouTube videos into actionable insights with structured AI summaries, intelligent tagging, and seamless organization.
 
-## 🎯 Core Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white)](https://openai.com/)
 
-- **⚡ Instant Summarization**: AI-powered summaries with structured content (TL;DR, key moments, frameworks, playbooks)
-- **🧠 Smart Collections**: Automatic AI tagging with 7 entity types (PERSON, COMPANY, TECHNOLOGY, PRODUCT, CONCEPT, FRAMEWORK, TOOL) and 14 categories
-- **👤 Anonymous Trial**: Try without signup (1 free summary with browser fingerprinting)
-- **📊 Real-time Progress**: Live processing updates with UUID-based task tracking
-- **🏷️ Intelligent Organization**: Filter by color-coded tags and categories with visual counts
-- **📱 Responsive Design**: Multi-column layout optimized for all devices
-- **🔒 Secure Authentication**: Modal-based Clerk authentication with seamless user experience
-- **💳 Flexible Plans**: Free (3 lifetime), Pro (25/month), Complete (unlimited) tiers
-- **🔗 Public Sharing**: Shareable summary links with SEO optimization
+## What
 
-## 📁 Project Structure
+Sightline.ai converts YouTube videos into structured summaries featuring:
+
+- **Instant AI Summaries** - TL;DR, key moments, frameworks, and playbooks extracted from video content
+- **Smart Collections** - Automatic tagging with 7 entity types (Person, Company, Technology, Product, Concept, Framework, Tool)
+- **Anonymous Trial** - Try with 1 free summary, no signup required
+- **Real-time Progress** - Live processing updates with accurate stage tracking
+- **Personal Library** - Searchable collection with intelligent filtering
+- **Public Sharing** - Generate shareable links for any summary
+
+## Why
+
+**Problem**: YouTube videos contain valuable insights buried in hours of content, making knowledge extraction time-consuming and inconsistent.
+
+**Solution**: AI-powered analysis that converts video content into structured, searchable, and actionable formats.
+
+**Value**:
+
+- Save 90% of time typically spent watching educational content
+- Never lose track of valuable insights from videos
+- Organize knowledge with intelligent, automatic categorization
+- Share discoveries easily with teammates and communities
+
+## How
+
+### Quick Start
+
+1. **Try Without Signup** - Visit the homepage, paste any YouTube URL, get instant summary
+2. **Sign Up for More** - Create account for personal library and advanced features
+3. **Choose Your Plan** - Free (3 lifetime), Pro (25/month), or Complete (unlimited)
+
+### Tech Stack
+
+- **Frontend**: Next.js 14 + TypeScript + Tailwind CSS + tRPC
+- **Backend**: FastAPI + Python + LangChain + OpenAI
+- **Database**: PostgreSQL + Prisma ORM
+- **Auth**: Clerk (modal-based authentication)
+- **Payments**: Stripe
+- **Deployment**: Vercel
+
+### Architecture
 
 ```text
-sightline/
-├── src/                          # Application source code
-│   ├── app/                      # Next.js 14 App Router
-│   ├── components/               # React components (atomic design)
-│   ├── lib/                      # Shared utilities and libraries
-│   ├── server/                   # Server-side code (tRPC)
-│   └── types/                    # TypeScript type definitions
-├── api/                          # FastAPI backend
-├── prisma/                       # Database schema and migrations
-├── public/                       # Static assets
-├── Docs/                         # Documentation
-├── tests/                        # Test files
-├── scripts/                      # Build and deployment scripts
-└── config/                       # Configuration files
+User → Next.js Frontend → tRPC API → FastAPI → OpenAI → Structured Summary
+                       ↓
+                   PostgreSQL Database
 ```
 
-## 🛠 Tech Stack
-
-### Frontend
-
-- **Next.js 14** (App Router) - React framework with file-based routing
-- **TypeScript** - Full type safety across the application
-- **Tailwind CSS** + **shadcn/ui** - Modern styling with component library
-- **TanStack Query** + **tRPC** - Type-safe API client with caching
-- **Clerk** - Modern authentication and user management
-
-### Backend
-
-- **FastAPI** (Python) - High-performance API framework
-- **LangChain** + **OpenAI** - AI processing and language models
-- **tRPC** - End-to-end type-safe API layer
-- **Vercel Functions** - Serverless deployment and scaling
-
-### Database & Payments
-
-- **Vercel Postgres** (Neon) - Serverless PostgreSQL database
-- **Prisma** - Type-safe ORM with migrations
-- **Stripe** - Secure payment processing and subscription management
-
-### Infrastructure
-
-- **Vercel** - Deployment and hosting platform
-- **Upstash Redis** - Caching and session storage (optional)
-- **Sentry** - Error tracking and monitoring (optional)
-
-## 🚀 Quick Start
+## Run
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3.12+
-- pnpm
+- **Node.js** 18+ and **pnpm** package manager
+- **Python** 3.12+ for FastAPI backend
+- **PostgreSQL** database (Neon recommended)
+- **API Keys**: OpenAI, Clerk, Stripe (see [Environment Setup](docs/development/environment-setup.md))
 
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd sightline
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   pnpm install
-   pip install -r requirements.txt.disabled
-   ```
-
-3. **Set up environment variables**
-
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   ```
-
-4. **Set up database**
-
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-5. **Start development server**
-
-   ```bash
-   pnpm dev
-   ```
-
-## 📚 Documentation
-
-**🗂️ [Documentation Index](DOCUMENTATION_INDEX.md)** - Complete guide to all documentation with navigation and quick-start paths
-
-**📖 [Platform Documentation](Docs/architecture/platform-overview.md)** - Comprehensive technical reference (architecture, API, deployment)
-
-### Key Resources
-
-- **[Development Setup](CLAUDE.md)** - Claude Code development instructions  
-- **[API Documentation](API_DOCUMENTATION.md)** - Complete tRPC and FastAPI reference
-- **[Project Structure](Docs/architecture/project-structure.md)** - Codebase organization
-- **[UI/UX Guidelines](Docs/architecture/ui-ux-guidelines.md)** - Design system and accessibility
-- **[Testing Strategy](Docs/development/testing-strategy.md)** - Unit, E2E, performance, and security tests
-- **[Security Policy](SECURITY.md)** - Security headers and best practices
-- **[Production Operations Guide](PRODUCTION_OPERATIONS_GUIDE.md)** - Complete operations manual
-
-## ✨ Latest Features
-
-### Smart Collections (August 2025)
-
-- **🤖 AI-Powered Tagging**: Automatic extraction of people, companies, technologies
-- **🎨 Color-Coded Organization**: 7 distinct tag types with visual coding
-- **🔍 Intelligent Filtering**: Filter library by tags and categories
-- **📊 Usage Analytics**: Tag/category counts and insights
-
-### Anonymous User Experience (August 2025)
-
-- **🆓 Try Before Signup**: 1 free summary without registration
-- **🔗 Modal Authentication**: Seamless in-app login flow
-- **📱 Browser Fingerprinting**: Secure anonymous user tracking
-- **🎯 Progressive Registration**: Experience value before commitment
-
-### Core Platform
-
-- **⚡ Real-time Progress**: Live processing updates with accurate stages
-- **🔐 Clerk Authentication**: Modern, secure user management
-- **💳 Stripe Integration**: Seamless Pro plan subscriptions ($9.99/month)
-- **📊 Personal Library**: Searchable, organized summary collection
-
-## 🧪 Testing
+### Development Setup
 
 ```bash
-# Run all tests
-pnpm test
+# Clone and install dependencies
+git clone https://github.com/jma0014SCG/sightline.git
+cd sightline
+pnpm install
 
-# Run specific test suites
-pnpm test:unit
-pnpm test:integration
-pnpm test:e2e
+# Set up Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Environment setup
+cp .env.example .env.local
+# Add your API keys to .env.local (see Environment Setup guide)
+
+# Database setup
+pnpm db:generate
+pnpm db:push
+
+# Start development servers
+pnpm dev:full  # Both frontend (3000) and backend (8000)
 ```
 
-## 🚀 Deployment
+### Essential Commands
 
-See [Deployment Guide](Docs/PRODUCTION_DEPLOYMENT.md) for detailed instructions.
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Frontend development server |
+| `pnpm api:dev` | FastAPI backend server |
+| `pnpm dev:full` | Both servers concurrently |
+| `pnpm lint` | Code quality checks |
+| `pnpm typecheck` | TypeScript validation |
+| `pnpm test` | Unit tests |
+| `pnpm test:e2e` | End-to-end tests |
+| `pnpm build` | Production build |
+| `pnpm db:studio` | Database GUI |
 
-## 🤝 Contributing
+### Quality Assurance
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+Before committing:
 
-## 📄 License
+```bash
+pnpm lint && pnpm typecheck && pnpm format:check
+```
 
-[Add your license information here]
+## Links
 
-## 🔗 Links
+### 📖 Documentation
 
-- [Production App](https://sightline.ai)
-- [Documentation](https://docs.sightline.ai)
-- [API Documentation](https://api.sightline.ai/docs)
+- **[Architecture Guide](ARCHITECTURE.md)** - Technical architecture, data flow, dependencies
+- **[Contributing Guide](CONTRIBUTING.md)** - Development workflow, testing, PR process
+- **[API Documentation](API/)** - Complete tRPC and FastAPI reference
+- **[Documentation Index](docs/INDEX.md)** - Complete navigation hub
+
+### 🏗️ Development Resources
+
+- **[Environment Setup](docs/development/environment-setup.md)** - Complete configuration guide
+- **[Glossary](GLOSSARY.md)** - Canonical terminology and definitions
+- **[Architectural Decisions](DECISIONS/)** - ADRs for key technical decisions
+- **[Bug Tracking](docs/development/bug-tracking.md)** - Known issues and resolutions
+- **[Testing Strategy](docs/development/testing-strategy.md)** - Comprehensive testing approach
+
+### 🚀 Production & Operations
+
+- **[Production Operations](PRODUCTION_OPERATIONS_GUIDE.md)** - Complete deployment and operations guide
+- **[Security Policy](SECURITY.md)** - Security implementation and compliance
+- **[Monitoring](docs/operations/monitoring.md)** - Error tracking and performance monitoring
+
+### 🤝 Community
+
+- **[Issues](https://github.com/jma0014SCG/sightline/issues)** - Bug reports and feature requests
+- **[Discussions](https://github.com/jma0014SCG/sightline/discussions)** - General questions and community support
+- **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+
+## Features
+
+### Smart Collections
+
+AI-powered automatic categorization system that extracts entities and assigns categories to video summaries:
+
+- **7 Entity Types**: Person, Company, Technology, Product, Concept, Framework, Tool
+- **14 Categories**: Technology, Business, Marketing, Productivity, Education, Health, etc.
+- **Color-coded Tags**: Visual organization with distinct colors for each entity type
+- **Intelligent Filtering**: Filter library by tags and categories with visual counts
+
+### Anonymous User Support
+
+- **Browser Fingerprinting**: No cookies required for anonymous usage tracking
+- **1 Free Summary**: Try the platform without creating an account
+- **Seamless Upgrade**: Convert anonymous summaries to saved summaries after signup
+
+### Real-time Progress Tracking
+
+- **UUID-based Tasks**: Track long-running operations with unique identifiers
+- **Live Updates**: Real-time progress updates during AI processing
+- **7 Processing Stages**: From initialization to completion with descriptive messaging
+
+### Dual API Architecture
+
+- **tRPC Layer**: Type-safe user operations with automatic TypeScript validation
+- **FastAPI Layer**: High-performance AI processing with Python and LangChain
+- **Optimized Performance**: Serverless functions with edge deployment
+
+## Roadmap
+
+- [ ] **Enhanced AI Models**: Support for additional LLM providers
+- [ ] **Multi-language Support**: International video summarization
+- [ ] **Team Collaboration**: Shared workspaces and collaborative features
+- [ ] **Advanced Analytics**: Usage insights and learning progress tracking
+- [ ] **Mobile App**: Native iOS and Android applications
+- [ ] **API Access**: Public API for third-party integrations
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- **Documentation**: Start with our [Documentation Index](docs/INDEX.md)
+- **Issues**: Report bugs or request features in [GitHub Issues](https://github.com/jma0014SCG/sightline/issues)
+- **Discussions**: Join the community in [GitHub Discussions](https://github.com/jma0014SCG/sightline/discussions)
+
+---
+
+**Built with ❤️ by the Sightline.ai team** | **Version**: 1.0.0 | **Last Updated**: January 2025

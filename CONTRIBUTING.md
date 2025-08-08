@@ -1,503 +1,392 @@
-# Contributing to Sightline.ai
+# Contributing
 
-Welcome to Sightline.ai! We're excited that you're interested in contributing to our AI-powered YouTube video summarization platform. This guide will help you get started and ensure your contributions are effective and aligned with our project goals.
+**Developer workflow guide for contributing to Sightline.ai platform**
 
-## 🎯 Project Vision
-
-Sightline.ai transforms long-form YouTube videos into actionable insights, helping users speed-learn from video content. We're building a platform that's:
-
-- **Fast**: 15-30 second summaries for 20+ minute videos
-- **Intelligent**: AI-powered Smart Collections with automatic tagging
-- **Accessible**: Anonymous trials, progressive registration, responsive design
-- **Reliable**: Comprehensive testing, production-ready infrastructure
-
-## 🚀 Quick Start for Contributors
+## Development Environment Setup
 
 ### Prerequisites
 
-Before you begin, ensure you have:
+- **Node.js 18+** - JavaScript runtime
+- **Python 3.12+** - Backend API runtime
+- **pnpm** - Package manager (specified: v10.13.1)
+- **PostgreSQL** - Database (or Neon cloud instance)
 
-- **Node.js 18+** and **pnpm** (package manager)
-- **Python 3.12+** for the FastAPI backend
-- **Git** for version control
-- **PostgreSQL** (or access to Neon cloud database)
-- **Code Editor** (VS Code recommended with extensions listed below)
+### Quick Setup
 
-### First-Time Setup
+```bash
+# Clone repository
+git clone <repository-url>
+cd sightline
 
-1. **Fork and Clone**
+# Install dependencies
+pnpm install
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-   ```bash
-   # Fork the repository on GitHub
-   git clone https://github.com/YOUR_USERNAME/sightline.git
-   cd sightline
-   ```
+# Environment configuration
+cp .env.example .env.local
+# Edit .env.local with your API keys (see Environment Variables section)
 
-2. **Install Dependencies**
+# Database setup
+pnpm db:generate
+pnpm db:push
+node scripts/init-anonymous-user.js
 
-   ```bash
-   # Install frontend dependencies
-   pnpm install
+# Start development servers
+pnpm dev:full  # Both frontend (3000) and backend (8000)
+```
 
-   # Set up Python virtual environment
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+### Environment Variables
 
-3. **Environment Configuration**
+**Required for Development**:
 
-   ```bash
-   # Copy environment template
-   cp .env.example .env.local
+```bash
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/sightline"
 
-   # Edit .env.local with required API keys:
-   # - OPENAI_API_KEY (required for AI features)
-   # - DATABASE_URL (Neon PostgreSQL)
-   # - CLERK_SECRET_KEY and NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-   # - Other optional services
-   ```
+# Authentication (Clerk)
+CLERK_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
 
-4. **Database Setup**
+# AI Services
+OPENAI_API_KEY="sk-proj-..."
 
-   ```bash
-   # Generate Prisma client
-   pnpm db:generate
+# Payments (Stripe - Test Mode)
+STRIPE_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID="price_..."
 
-   # Push schema to database
-   pnpm db:push
+# Optional Services
+YOUTUBE_API_KEY="..."  # For enhanced video metadata
+GUMLOOP_API_KEY="..."  # For enhanced transcript processing
+OXYLABS_USERNAME="..."  # For proxy-based transcript acquisition
+OXYLABS_PASSWORD="..."
+```
 
-   # Initialize anonymous user account
-   node scripts/init-anonymous-user.js
-   ```
+**Validation**:
 
-5. **Verification**
+```bash
+pnpm env:check     # Quick validation
+pnpm env:validate  # Comprehensive validation
+```
 
-   ```bash
-   # Start both frontend and backend
-   pnpm dev:full
+## Development Workflow
 
-   # Frontend: http://localhost:3000
-   # Backend: http://localhost:8000
+### Code Standards
 
-   # Run tests to ensure everything works
-   pnpm test
-   pnpm lint
-   pnpm typecheck
-   ```
+**TypeScript**:
+- Use strict mode with comprehensive type checking
+- Define interfaces for all data structures
+- Prefer type inference over explicit types where clear
+- Use discriminated unions for state management
 
-## 📋 Development Workflow
+**Component Architecture**:
+- Follow atomic design pattern (atoms → molecules → organisms)
+- Use composition over inheritance
+- Implement proper error boundaries
+- Ensure responsive design with Tailwind CSS
 
-### Branch Strategy
+**API Development**:
+- tRPC procedures must use Zod for input/output validation
+- Follow RESTful principles for FastAPI endpoints
+- Implement comprehensive error handling
+- Use appropriate HTTP status codes
 
-We use **GitHub Flow** for simplicity:
+### Development Commands
 
-1. **Main Branch**: Always production-ready
-2. **Feature Branches**: `feature/description-of-change`
-3. **Bug Fix Branches**: `fix/issue-description`
-4. **Documentation**: `docs/update-description`
+```bash
+# Frontend development
+pnpm dev                    # Next.js development server (port 3000)
+pnpm build                  # Production build
+pnpm lint                   # ESLint code quality checks
+pnpm lint:fix               # Auto-fix linting issues
+pnpm typecheck              # TypeScript type checking
+pnpm format                 # Format code with Prettier
 
-### Creating a Pull Request
+# Backend development
+pnpm api:dev               # FastAPI development server (port 8000)
+pnpm api:test              # Python API tests
 
-1. **Create Feature Branch**
+# Database management
+pnpm db:generate           # Generate Prisma client
+pnpm db:push               # Push schema changes (development)
+pnpm db:migrate            # Run migrations (production)
+pnpm db:studio             # Open Prisma Studio GUI
+pnpm db:seed               # Seed database with test data
 
-   ```bash
-   git checkout -b feature/smart-collections-enhancement
-   git push -u origin feature/smart-collections-enhancement
-   ```
+# Full development
+pnpm dev:full              # Both frontend and backend servers
+```
 
-2. **Make Changes**
-   - Follow our [coding standards](#-coding-standards)
-   - Write tests for new features
-   - Update documentation as needed
+### Git Workflow
 
-3. **Quality Checks**
+**Branch Naming**:
+- `feature/feature-name` - New features
+- `fix/bug-description` - Bug fixes
+- `refactor/component-name` - Code refactoring
+- `docs/documentation-update` - Documentation changes
 
-   ```bash
-   # Run all quality checks
-   pnpm lint
-   pnpm typecheck
-   pnpm test
-   pnpm test:e2e  # If applicable
-   ```
+**Commit Standards**:
+- Use conventional commit format: `type(scope): description`
+- Examples: `feat(auth): add anonymous user support`, `fix(api): resolve cors issues`
+- Keep commits focused and atomic
+- Include tests with feature commits
 
-4. **Commit with Conventional Commits**
+**Pre-commit Checks**:
 
-   ```bash
-   git add .
-   git commit -m "feat(smart-collections): add category filtering with visual counts"
-   
-   # Or for bug fixes:
-   git commit -m "fix(auth): resolve session timeout issue in modal flow"
-   ```
+```bash
+# Automatically run before each commit
+pnpm lint && pnpm typecheck && pnpm test
+```
 
-5. **Create Pull Request**
-   - Use the PR template (automatically loaded)
-   - Reference related issues
-   - Add screenshots for UI changes
-   - Request review from maintainers
-
-### Pull Request Guidelines
-
-**Before Submitting:**
-
-- [ ] Code follows our style guidelines (ESLint passes)
-- [ ] TypeScript compilation succeeds
-- [ ] All tests pass (unit and integration)
-- [ ] Documentation updated for new features
-- [ ] No console errors or warnings
-- [ ] Performance impact considered and documented
-
-**PR Description Should Include:**
-
-- **What**: Brief description of changes
-- **Why**: Problem being solved or feature being added
-- **How**: Technical approach taken
-- **Testing**: How changes were validated
-- **Breaking Changes**: Any compatibility concerns
-
-## 🧪 Testing Standards
+## Testing Strategy
 
 ### Test Categories
 
-1. **Unit Tests**: Jest + React Testing Library
-   - Test individual components and functions
-   - Mock external dependencies
-   - Focus on behavior, not implementation
-
-2. **End-to-End Tests**: Playwright
-   - Test complete user workflows
-   - Cross-browser compatibility
-   - Critical user journeys
-
-3. **Integration Tests**: API and database testing
-   - tRPC procedure testing
-   - Database operations
-   - Third-party service integration
-
-### Writing Good Tests
-
-```typescript
-// Good: Tests behavior, not implementation
-describe('URLInput Component', () => {
-  it('should validate YouTube URLs and show appropriate feedback', async () => {
-    render(<URLInput onSubmit={mockSubmit} />)
-    
-    const input = screen.getByPlaceholderText('Paste YouTube URL here...')
-    const submitButton = screen.getByRole('button', { name: /summarize/i })
-    
-    // Test invalid URL
-    await user.type(input, 'invalid-url')
-    await user.click(submitButton)
-    expect(screen.getByText(/enter a valid youtube url/i)).toBeInTheDocument()
-    
-    // Test valid URL
-    await user.clear(input)
-    await user.type(input, 'https://youtube.com/watch?v=dQw4w9WgXcQ')
-    await user.click(submitButton)
-    expect(mockSubmit).toHaveBeenCalledWith('https://youtube.com/watch?v=dQw4w9WgXcQ')
-  })
-})
-```
-
-### Running Tests
+**Unit Tests** (Jest + React Testing Library):
 
 ```bash
-# Unit tests
-pnpm test                    # Run all Jest tests
-pnpm test:watch              # Watch mode for development
-pnpm test:coverage           # Generate coverage report
-
-# E2E tests
-pnpm test:e2e                # Run all Playwright tests
-pnpm test:e2e:ui             # Run with UI mode for debugging
-
-# Test specific files
-pnpm test SummaryViewer      # Run tests matching pattern
+pnpm test                  # Run all unit tests
+pnpm test:watch            # Watch mode for development
+pnpm test:coverage         # Generate coverage reports (70% minimum)
+pnpm test:ci               # CI-optimized test run
 ```
 
-## 💻 Coding Standards
+**End-to-End Tests** (Playwright):
 
-### TypeScript Guidelines
-
-1. **Strict Type Safety**: No `any` types
-2. **Interface over Type**: Use interfaces for object shapes
-3. **Proper Null Handling**: Use optional chaining and nullish coalescing
-
-```typescript
-// Good
-interface CreateSummaryRequest {
-  url: string
-  userId?: string
-}
-
-const summary = await api.summary.create.mutate({ 
-  url: validatedUrl 
-})
-
-// Handle potential null/undefined
-const title = summary?.videoTitle ?? 'Untitled'
+```bash
+pnpm test:e2e              # Run E2E tests
+pnpm test:e2e:headed       # Run with browser UI
+pnpm test:e2e:debug        # Debug mode with DevTools
 ```
 
-### React Component Standards
+**API Tests** (Python + pytest):
 
-1. **Functional Components**: Use hooks instead of class components
-2. **TypeScript Props**: Always type component props
-3. **Atomic Design**: Follow our component hierarchy (atoms → molecules → organisms)
-
-```typescript
-// Good component structure
-interface SummaryCardProps {
-  summary: Summary
-  onShare?: (summaryId: string) => void
-  className?: string
-}
-
-export function SummaryCard({ summary, onShare, className }: SummaryCardProps) {
-  const handleShare = useCallback(() => {
-    onShare?.(summary.id)
-  }, [onShare, summary.id])
-
-  return (
-    <Card className={cn('summary-card', className)}>
-      {/* Component JSX */}
-    </Card>
-  )
-}
+```bash
+cd api
+python -m pytest                    # Run all API tests
+python -m pytest tests/test_*.py    # Run specific test files
+python -m pytest -v                 # Verbose output
 ```
 
-### API Development Standards
+### Test Writing Guidelines
 
-1. **tRPC Procedures**: Use Zod for input/output validation
-2. **Error Handling**: Proper error types with user-friendly messages
-3. **Authentication**: Use `protectedProcedure` for authenticated routes
+**Unit Tests**:
+- Test component behavior, not implementation details
+- Use semantic queries (getByRole, getByLabelText)
+- Mock external dependencies (APIs, third-party libraries)
+- Test both success and error scenarios
 
-```typescript
-// Good tRPC procedure
-export const createSummary = protectedProcedure
-  .input(
-    z.object({
-      url: z.string().url('Must be a valid URL'),
-      isPublic: z.boolean().default(false),
-    })
-  )
-  .output(
-    z.object({
-      id: z.string(),
-      videoTitle: z.string(),
-      taskId: z.string().optional(),
-    })
-  )
-  .mutation(async ({ input, ctx }) => {
-    // Implementation with proper error handling
-    try {
-      const result = await processSummary(input, ctx.userId)
-      return result
-    } catch (error) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create summary. Please try again.',
-        cause: error,
-      })
-    }
-  })
+**E2E Tests**:
+- Focus on critical user journeys
+- Test across multiple browsers (Chrome, Firefox, Safari)
+- Use Page Object Model for maintainable tests
+- Include accessibility testing with axe
+
+**API Tests**:
+- Test all endpoints with valid/invalid inputs
+- Verify response schemas and status codes
+- Test authentication and authorization
+- Include performance benchmarks
+
+### Quality Gates
+
+**Before Pull Request**:
+
+```bash
+# Complete quality check
+pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 ```
 
-### File Organization
+**Coverage Requirements**:
+- Unit Tests: >70% code coverage
+- E2E Tests: All critical user paths
+- API Tests: All endpoints with success/error cases
+
+## Pull Request Process
+
+### PR Preparation
+
+1. **Create Feature Branch**: `git checkout -b feature/your-feature`
+2. **Implement Changes**: Follow coding standards and include tests
+3. **Run Quality Checks**: Ensure all tests pass and code is formatted
+4. **Update Documentation**: Update relevant docs for user-facing changes
+5. **Self-Review**: Review your own code for obvious issues
+
+### PR Requirements
+
+**PR Title Format**:
+- `feat: add Smart Collections AI tagging`
+- `fix: resolve CORS issues in FastAPI`
+- `docs: update API documentation`
+
+**PR Description Template**:
+
+```markdown
+## Changes
+Brief description of what this PR does
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] E2E tests added/updated  
+- [ ] Manual testing completed
+- [ ] Edge cases considered
+
+## Documentation
+- [ ] Code comments added for complex logic
+- [ ] API documentation updated (if applicable)
+- [ ] User-facing documentation updated (if applicable)
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] No console errors or warnings
+- [ ] Responsive design tested (mobile/desktop)
+```
+
+### Review Process
+
+**Reviewer Guidelines**:
+- Focus on logic, security, and maintainability
+- Check for proper error handling
+- Verify test coverage for new functionality
+- Ensure accessibility standards are met
+- Validate responsive design implementation
+
+**Author Guidelines**:
+- Respond to feedback constructively
+- Make requested changes in separate commits
+- Update tests when logic changes
+- Resolve conflicts before requesting re-review
+
+## Bug Reporting & Issue Management
+
+### Bug Report Template
+
+```markdown
+## Bug Description
+Clear description of the issue
+
+## Steps to Reproduce
+1. Go to...
+2. Click on...
+3. See error
+
+## Expected Behavior
+What should happen
+
+## Actual Behavior
+What actually happens
+
+## Environment
+- OS: [e.g., macOS 12.6]
+- Browser: [e.g., Chrome 108]
+- Device: [e.g., iPhone 13, Desktop]
+
+## Additional Context
+Screenshots, error logs, etc.
+```
+
+### Issue Labels
+
+- `bug` - Something isn't working
+- `enhancement` - New feature or request
+- `documentation` - Documentation improvements
+- `good first issue` - Good for newcomers
+- `help wanted` - Extra attention needed
+- `priority: high/medium/low` - Priority classification
+
+## Development Best Practices
+
+### Performance Optimization
+
+**Frontend**:
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize images with Next.js Image component
+- Use code splitting for large components
+- Implement proper caching strategies
+
+**Backend**:
+- Use database indexes for common queries
+- Implement connection pooling
+- Cache expensive operations
+- Use appropriate HTTP status codes
+- Monitor API response times
+
+### Security Guidelines
+
+**Input Validation**:
+- Always validate inputs with Zod schemas
+- Sanitize user-generated content
+- Use parameterized queries (Prisma ORM)
+- Implement proper rate limiting
+
+**Authentication**:
+- Never store sensitive data in localStorage
+- Use HTTPS for all communications  
+- Implement proper CORS policies
+- Validate JWT tokens on server side
+
+**Error Handling**:
+- Never expose sensitive information in error messages
+- Log errors appropriately for debugging
+- Implement proper error boundaries
+- Use structured error responses
+
+### Code Organization
+
+**File Structure**:
 
 ```text
 src/
-├── components/
-│   ├── atoms/           # Basic building blocks
-│   ├── molecules/       # Feature-specific components
-│   ├── organisms/       # Complex page sections
-│   └── modals/          # Modal components
-├── lib/                 # Utilities and services
-├── hooks/               # Custom React hooks
-├── server/api/routers/  # tRPC API routes
-└── types/               # TypeScript definitions
+├── app/                    # Next.js App Router pages
+├── components/             # React components (atomic design)
+│   ├── atoms/             # Basic building blocks
+│   ├── molecules/         # Simple combinations
+│   └── organisms/         # Complex components
+├── lib/                   # Shared utilities
+├── server/                # tRPC server code
+└── types/                 # TypeScript definitions
 ```
 
-## 🎨 UI/UX Contribution Guidelines
-
-### Design System
-
-We follow our established design system documented in [UI/UX Guidelines](Docs/UI_UX_doc.md):
-
-- **Colors**: Use CSS custom properties for consistent theming
-- **Typography**: Inter font stack with defined type scale
-- **Components**: shadcn/ui components with Tailwind CSS
-- **Spacing**: 8px grid system
-- **Accessibility**: WCAG 2.1 AA compliance required
-
-### Component Development
-
-1. **Start with Design**: Check Figma designs or create wireframes
-2. **Responsive First**: Design for mobile, enhance for desktop
-3. **Accessibility**: Include ARIA labels, keyboard navigation, color contrast
-4. **Performance**: Optimize images, minimize bundle impact
+**Import Organization**:
 
 ```typescript
-// Good accessible component
-<button
-  type="button"
-  className="btn btn-primary"
-  onClick={handleSubmit}
-  disabled={isLoading}
-  aria-label="Create summary from YouTube URL"
-  aria-describedby="url-input-help"
->
-  {isLoading ? (
-    <>
-      <Spinner className="mr-2" aria-hidden="true" />
-      Processing...
-    </>
-  ) : (
-    'Summarize Video'
-  )}
-</button>
+// External libraries
+import React from 'react'
+import { NextPage } from 'next'
+
+// Internal modules (absolute imports)
+import { Button } from '@/components/atoms/Button'
+import { api } from '@/lib/trpc'
+
+// Relative imports
+import './styles.css'
 ```
 
-## 🚀 Feature Development Process
+### Accessibility Requirements
 
-### Planning Phase
+**WCAG 2.1 AA Compliance**:
+- Use semantic HTML elements
+- Provide alt text for images
+- Ensure proper color contrast (4.5:1 minimum)
+- Support keyboard navigation
+- Use ARIA labels appropriately
 
-1. **Issue Discussion**: Discuss feature in GitHub Issues
-2. **Technical Design**: Create design document for complex features
-3. **Approval**: Get maintainer approval before starting work
-4. **Breaking Changes**: Discuss breaking changes early
-
-### Implementation Phase
-
-1. **Create Feature Branch**: Following naming conventions
-2. **Incremental Development**: Make small, focused commits
-3. **Testing**: Write tests alongside implementation
-4. **Documentation**: Update docs as you build
-
-### Review Phase
-
-1. **Self Review**: Check your own PR before requesting review
-2. **Peer Review**: Address reviewer feedback promptly
-3. **Quality Gates**: All checks must pass
-4. **Maintainer Review**: Final approval from maintainers
-
-## 🐛 Bug Reporting and Fixing
-
-### Reporting Bugs
-
-Use our [Bug Tracking](Docs/Bug_tracking.md) system:
-
-1. **Search Existing**: Check if bug already reported
-2. **Use Template**: Follow the bug report template
-3. **Reproduction Steps**: Provide clear steps to reproduce
-4. **Environment Details**: Include OS, browser, Node version
-
-### Fixing Bugs
-
-1. **Understand Root Cause**: Don't just fix symptoms
-2. **Write Test**: Add test that would have caught the bug
-3. **Document Fix**: Update Bug_tracking.md with resolution
-4. **Consider Impact**: Ensure fix doesn't break other functionality
-
-## 🔧 Development Tools
-
-### Recommended VS Code Extensions
-
-```json
-{
-  "recommendations": [
-    "ms-vscode.vscode-typescript-next",
-    "bradlc.vscode-tailwindcss",
-    "esbenp.prettier-vscode",
-    "ms-playwright.playwright",
-    "prisma.prisma",
-    "ms-python.python"
-  ]
-}
-```
-
-### Git Hooks (Husky)
-
-We use Husky for pre-commit hooks:
-
-- **pre-commit**: Runs linting and type checking
-- **commit-msg**: Validates conventional commit format
-
-### Debugging Tools
-
-1. **React Developer Tools**: Browser extension for React debugging
-2. **Prisma Studio**: Database GUI (`pnpm db:studio`)
-3. **tRPC Panel**: API explorer in development
-4. **Playwright Test UI**: E2E test debugging (`pnpm test:e2e:ui`)
-
-## 📚 Documentation Contributions
-
-### What to Document
-
-- **New Features**: Architecture, API changes, usage examples
-- **Breaking Changes**: Migration guides and compatibility notes
-- **Setup Changes**: Environment variables, dependencies
-- **Bug Fixes**: Root cause and resolution in Bug_tracking.md
-
-### Documentation Standards
-
-1. **Clear Structure**: Use headings, tables, code blocks
-2. **Code Examples**: Always test code examples before documenting
-3. **Up-to-date**: Keep docs in sync with code changes
-4. **Accessible**: Write for different skill levels
-
-## 🏆 Recognition
-
-### Types of Contributions We Value
-
-- **Code**: New features, bug fixes, performance improvements
-- **Documentation**: Guides, examples, API documentation
-- **Testing**: Test coverage, E2E scenarios, performance tests
-- **Design**: UI improvements, accessibility enhancements
-- **Community**: Helping other contributors, issue triaging
-
-### Contributor Recognition
-
-- Contributors are listed in our CHANGELOG
-- Significant contributions are highlighted in release notes
-- Top contributors may be invited to the maintainer team
-
-## 📞 Getting Help
-
-### Community Channels
-
-- **GitHub Issues**: Bug reports and feature requests
-- **GitHub Discussions**: General questions and community chat
-- **Code Review**: Learning opportunity during PR reviews
-
-### Maintainer Contact
-
-For sensitive issues or questions:
-- Email: contributors@sightline.ai
-- Tag maintainers in issues: @maintainer-username
-
-### Common Questions
-
-**Q: How do I set up the development environment?**
-A: Follow the [Quick Start](#quick-start-for-contributors) section above.
-
-**Q: What should I work on?**
-A: Check issues labeled `good first issue` or `help wanted`.
-
-**Q: How do I run only the frontend/backend?**
-A: Use `pnpm dev` (frontend only) or `pnpm api:dev` (backend only).
-
-**Q: My tests are failing in CI but pass locally. What should I do?**
-A: Check the CI logs for environment differences, ensure all dependencies are committed.
-
-## 📄 License
-
-By contributing to Sightline.ai, you agree that your contributions will be licensed under the same license as the project. See the [LICENSE](LICENSE) file for details.
+**Testing**:
+- Include accessibility tests in E2E suite
+- Use axe-core for automated testing
+- Test with screen readers
+- Validate keyboard-only navigation
 
 ---
 
-**Thank you for contributing to Sightline.ai!** 🙏
+**Need Help?**
 
-Your contributions help make video learning more accessible and efficient for everyone. Whether you're fixing a typo, adding a feature, or improving performance, every contribution matters.
-
-**Ready to start?** Check out our [good first issue](https://github.com/sightline-ai/sightline/labels/good%20first%20issue) label on GitHub to find beginner-friendly tasks.
+- Check existing [bug reports](docs/development/bug-tracking.md)
+- Review [architecture documentation](ARCHITECTURE.md)
+- Ask questions in GitHub Discussions
+- Join development community channels

@@ -6,29 +6,31 @@ If pasting YouTube links isn't working, follow these debugging steps:
 
 ### Step 1: Check Authentication
 
-1. **Sign in first**: Make sure you're signed in with Google OAuth
-   - Go to http://localhost:3000/login
-   - Click "Continue with Google"
-   - Complete the OAuth flow
+1. **Sign in first**: Make sure you're signed in with Clerk authentication
+   - Go to http://localhost:3000
+   - Click "Sign In" button to open authentication modal
+   - Choose from Google, GitHub, or email authentication options
+   - Complete the authentication flow
 
 2. **Verify authentication status**:
-   - Look for user info in the top navigation
-   - Check browser console for auth-related errors
+   - Look for user avatar/info in the top navigation
+   - Check browser console for Clerk-related errors
+   - Verify JWT token in browser developer tools → Application → Local Storage
 
 ### Step 2: Check Services Are Running
 
 Both frontend and backend must be running:
 
 ```bash
-# Quick check - run this in terminal:
-./scripts/debug-startup.sh
+# Quick check - run both servers concurrently:
+pnpm dev:full
 
-# OR manually:
+# OR manually in separate terminals:
 # Terminal 1 - Backend
-npm run api:dev
+pnpm api:dev
 
 # Terminal 2 - Frontend  
-npm run dev
+pnpm dev
 ```
 
 **Expected ports:**
@@ -41,13 +43,14 @@ Ensure `.env.local` has all required variables:
 
 ```bash
 # Validate environment
-npm run env:validate
+pnpm env:validate
 
 # Required variables:
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=sk-proj-...
 DATABASE_URL=postgresql://...
-NEXTAUTH_SECRET=...
-GOOGLE_CLIENT_ID=...
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
 GOOGLE_CLIENT_SECRET=...
 ```
 
