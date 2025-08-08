@@ -1,3 +1,22 @@
+---
+title: "ADR-0003: Anonymous User Browser Fingerprinting"
+description: "Architectural decision for implementing browser fingerprinting to enable anonymous usage limits"
+type: "adr"
+canonical_url: "/decisions/adr-0003-anonymous-user-browser-fingerprinting"
+status: "accepted"
+decision_date: "2024-08-20"
+review_date: "2025-02-20"
+version: "1.0"
+last_updated: "2025-01-09"
+authors: ["Security Lead"]
+reviewers: ["Privacy Officer", "Tech Lead"]
+stakeholders: ["Frontend Team", "Backend Team", "Legal Team", "Product Team"]
+supersedes: []
+related_adrs: ["ADR-0001"]
+tags: ["security", "privacy", "anonymity", "browser-fingerprinting", "usage-limits", "conversion"]
+impact: "high"
+---
+
 # ADR-0003: Anonymous User Browser Fingerprinting
 
 ## Status
@@ -6,19 +25,24 @@ Accepted
 
 ## Context
 
-To reduce friction and increase conversion, we want to offer a "try before you buy" experience where users can create one free summary without registration. However, we need to prevent abuse while maintaining anonymity and avoiding persistent tracking across sessions.
+To reduce friction and increase conversion, we want to offer a "try before you buy" experience
+where users can create one free summary without registration. However, we need to prevent abuse while
+maintaining anonymity and avoiding persistent tracking across sessions.
 
 ## Decision
 
-Implement browser fingerprinting combined with IP address tracking to enable anonymous usage limits without requiring authentication or persistent cookies.
+Implement browser fingerprinting combined with IP address tracking to enable anonymous usage limits
+without requiring authentication or persistent cookies.
 
 ### Implementation Strategy
+
 - Generate client-side browser fingerprint from: User Agent + Screen Resolution + Timezone + Language
 - Combine with server-side IP address for enhanced uniqueness
 - Store usage events against anonymous fingerprint + IP combination
 - Enforce 1 lifetime summary limit per unique fingerprint+IP pair
 
 ### Database Design
+
 ```sql
 UsageEvent {
   userId: "ANONYMOUS_USER" (special account)
@@ -64,6 +88,7 @@ UsageEvent {
 ## Implementation Notes
 
 ### Client-Side Fingerprinting
+
 ```typescript
 const generateFingerprint = () => {
   const canvas = document.createElement('canvas')
@@ -83,6 +108,7 @@ const generateFingerprint = () => {
 ```
 
 ### Server-Side Validation
+
 ```typescript
 const checkAnonymousLimit = async (fingerprint: string, ip: string) => {
   const hashedIP = await hash(ip + SALT)
@@ -99,12 +125,14 @@ const checkAnonymousLimit = async (fingerprint: string, ip: string) => {
 ```
 
 ### Privacy Measures
+
 - Hash IP addresses before storage
 - No cross-session data retention beyond usage counting
 - Clear documentation of fingerprinting usage
 - Easy upgrade path to remove limitations
 
 ### User Experience Flow
+
 1. User visits homepage
 2. Fingerprint generated client-side
 3. User submits YouTube URL

@@ -1,8 +1,23 @@
+---
+title: "Project Structure"
+description: "Complete directory structure and organization patterns for the Sightline.ai codebase"
+type: "reference"
+canonical_url: "/docs/architecture/project-structure"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "new-contributors", "architects"]
+complexity: "intermediate"
+tags: ["structure", "organization", "codebase", "directories", "patterns", "atomic-design"]
+status: "active"
+estimated_time: "15 minutes read"
+related_docs: ["/architecture", "/claude", "/contributing", "/docs/architecture/ui-ux-guidelines"]
+---
+
 # Project Structure
 
 ## Root Directory
 
-```
+```text
 sightline/
 ├── src/                          # Application source code
 │   ├── app/                      # Next.js 14 App Router
@@ -21,15 +36,17 @@ sightline/
 ├── tests/                        # Test files
 ├── scripts/                      # Build and deployment scripts
 └── config/                       # Configuration files
-```
+```text
 
 ## Detailed Structure
 
 ### Frontend Structure (/src)
 
 #### /src/app
+
 Next.js 14 App Router structure with file-based routing
-```
+
+```text
 app/
 ├── sign-in/[[...sign-in]]/       # Clerk sign-in pages
 │   └── page.tsx                 # Clerk SignIn component
@@ -67,11 +84,13 @@ app/
 ├── loading.tsx                  # Global loading state
 ├── error.tsx                    # Global error boundary
 └── globals.css                  # Global styles
-```
+```text
 
 #### /src/components
+
 Organized by atomic design principles
-```
+
+```text
 components/
 ├── atoms/                       # Basic building blocks
 │   ├── Skeleton/
@@ -117,11 +136,13 @@ components/
 │   # Note: AuthProvider removed - using ClerkProvider in layout.tsx
 └── debug/                      # Debug components
     └── DebugPanel.tsx
-```
+```text
 
 #### /src/lib
+
 Shared libraries and utilities
-```
+
+```text
 lib/
 ├── api/                         # API client setup
 │   └── trpc.ts                  # tRPC client
@@ -141,11 +162,13 @@ lib/
 ├── stripe.ts                    # Stripe utilities
 ├── stripe-client.ts             # Stripe client
 └── classificationService.ts     # AI-powered content classification (NEW - Smart Collections)
-```
+```text
 
 #### /src/server
+
 Server-side code and tRPC routers
-```
+
+```text
 server/
 ├── api/
 │   ├── routers/
@@ -156,19 +179,22 @@ server/
 │   │   └── share.ts             # Share router
 │   ├── trpc.ts                  # tRPC setup
 │   └── root.ts                  # Root router
-```
+```text
 
 #### /src/types
+
 TypeScript type definitions
-```
+
+```text
 types/
 └── next-auth.d.ts              # NextAuth type extensions
-```
+```text
 
 ### Backend Structure (/api)
 
 #### FastAPI Application
-```
+
+```text
 api/
 ├── __init__.py
 ├── main.py                      # FastAPI app entry
@@ -199,18 +225,18 @@ api/
 │   ├── requests.py              # Request models
 │   └── responses.py             # Response models
 └── utils/                       # Utility functions
-```
+```text
 
 ### Database Structure (/prisma)
 
-```
+```text
 prisma/
 └── schema.prisma                # Database schema
-```
+```text
 
 ### Testing Structure (/tests)
 
-```
+```text
 tests/
 ├── test_api_response.py         # API response tests
 ├── test_fallback.py             # Fallback service tests
@@ -227,21 +253,23 @@ tests/
 ├── test-oauth.html              # OAuth tests
 ├── test-markdown-parsing.md     # Markdown parsing tests
 └── test-gumloop-output.md       # Gumloop output tests
-```
+```text
 
 ### Configuration Files
 
 #### Root Level Configuration Files
-```
+
+```text
 /
 ├── tailwind.config.ts           # Tailwind CSS config 
 ├── postcss.config.js            # PostCSS config
 ├── next-env.d.ts               # Next.js types
 └── tsconfig.json                # TypeScript configuration
-```
+```text
 
 #### /config Directory
-```
+
+```text
 config/
 ├── next.config.js               # Next.js configuration
 ├── .eslintrc.json              # ESLint rules
@@ -249,13 +277,13 @@ config/
 ├── components.json              # shadcn/ui config
 ├── vercel.json                  # Vercel deployment config
 └── .vercelignore                # Vercel ignore rules
-```
+```text
 
 **Note**: Tailwind and PostCSS configs are in project root for Next.js 14 compatibility.
 
 ### Documentation (/Docs)
 
-```
+```text
 Docs/
 ├── Implementation.md            # Implementation plan
 ├── project_structure.md         # This file
@@ -270,11 +298,11 @@ Docs/
 ├── SECURITY_AUDIT.md          # Security audit
 ├── IMPLEMENTATION_STATUS.md    # Implementation status
 └── TROUBLESHOOTING.md         # Troubleshooting guide
-```
+```text
 
 ### Build & Deployment (/scripts)
 
-```
+```text
 scripts/
 ├── debug-startup.sh            # Debug startup script
 ├── deploy-production.sh        # Production deployment
@@ -283,18 +311,19 @@ scripts/
 ├── test-db.js                  # Database testing
 ├── test-pipeline.js            # Pipeline testing
 └── test-youtube-transcript.py  # YouTube transcript testing
-```
+```text
 
 ### Static Assets (/public)
 
-```
+```text
 public/
 └── [static assets]             # Static files
-```
+```text
 
 ## File Naming Conventions
 
 ### TypeScript/React Files
+
 - Components: PascalCase (e.g., `SummaryCard.tsx`)
 - Utilities: camelCase (e.g., `formatDate.ts`)
 - Types: PascalCase with `.types.ts` suffix
@@ -302,34 +331,40 @@ public/
 - Constants: UPPER_SNAKE_CASE in `.constants.ts` files
 
 ### Python Files
+
 - Modules: snake_case (e.g., `youtube_service.py`)
 - Classes: PascalCase within files
 - Constants: UPPER_SNAKE_CASE
 
 ### Styles
+
 - CSS Modules: `[Component].module.css`
 - Global styles: lowercase with hyphens
 
 ## Module Organization Patterns
 
 ### Component Structure
+
 Each component follows this pattern:
-```
+
+```text
 ComponentName/
 ├── ComponentName.tsx          # Main component
 ├── ComponentName.test.tsx     # Tests (if needed)
 ├── ComponentName.module.css   # Styles (if needed)
 ├── ComponentName.types.ts     # Type definitions (if needed)
 └── index.ts                   # Barrel export
-```
+```text
 
 ### API Route Structure
+
 - Group related endpoints in routers
 - Keep business logic in services
 - Use dependency injection for shared resources
 - Maintain separation between HTTP layer and business logic
 
 ### State Management
+
 - Server state: TanStack Query + tRPC
 - Client state: React hooks and context
 - Form state: React Hook Form
@@ -338,22 +373,26 @@ ComponentName/
 ## Recent Changes: NextAuth to Clerk Migration
 
 ### Authentication System Change (July 2025)
+
 The project has been migrated from NextAuth.js to Clerk for improved authentication and user management.
 
-#### Files Added:
+#### Files Added
+
 - `/src/middleware.ts` - Clerk middleware for route protection
 - `/src/app/sign-in/[[...sign-in]]/page.tsx` - Clerk sign-in component
 - `/src/app/sign-up/[[...sign-up]]/page.tsx` - Clerk sign-up component  
 - `/src/app/api/webhooks/clerk/route.ts` - Clerk user sync webhook
 
-#### Files Removed:
+#### Files Removed
+
 - `/src/app/api/auth/[...nextauth]/` - NextAuth API routes
 - `/src/lib/auth/auth.ts` - NextAuth configuration
 - `/src/components/providers/AuthProvider.tsx` - NextAuth session provider
 - `/src/app/(auth)/` - Old auth group layout
 - `/middleware.ts` - Old NextAuth middleware (root level)
 
-#### Files Modified:
+#### Files Modified
+
 - `/src/app/layout.tsx` - Now uses ClerkProvider instead of AuthProvider
 - `/src/lib/hooks/useAuth.ts` - Updated to use Clerk hooks
 - `/src/server/api/trpc.ts` - Updated context to use Clerk's auth()
@@ -361,12 +400,14 @@ The project has been migrated from NextAuth.js to Clerk for improved authenticat
 - `/prisma/schema.prisma` - Removed NextAuth models (Account, Session)
 - `/.env.local` - Updated environment variables for Clerk
 
-#### Database Changes:
+#### Database Changes
+
 - User model now uses Clerk user ID as primary key
 - Removed Account and Session models (handled by Clerk)
 - Added webhook endpoint for user synchronization
 
-#### Environment Variables:
+#### Environment Variables
+
 ```env
 # Old NextAuth variables (removed):
 NEXTAUTH_URL, NEXTAUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
@@ -375,37 +416,43 @@ NEXTAUTH_URL, NEXTAUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 CLERK_SECRET_KEY  
 CLERK_WEBHOOK_SECRET
-```
+```text
 
 ### Modal-Based Authentication & Anonymous Flow (August 2025)
+
 The authentication system has been enhanced with modal-based login and anonymous user support.
 
-#### New Authentication Flow:
+#### New Authentication Flow
+
 1. **Anonymous Users**: Can create 1 free summary without signing up
 2. **Modal-Based Auth**: Sign-in/sign-up happens in modals (no page redirects)
 3. **Progressive Registration**: Users see value before being asked to sign up
 4. **Summary Claiming**: Anonymous summaries can be claimed after authentication
 
-#### Files Added for Modal Flow:
+#### Files Added for Modal Flow
+
 - `/src/components/modals/SignInModal.tsx` - Clerk authentication modal wrapper
 - `/src/components/modals/AuthPromptModal.tsx` - Post-summary authentication prompt
 - `/src/lib/browser-fingerprint.ts` - Anonymous user tracking via browser fingerprinting
 - `/src/hooks/useToast.ts` - Toast notification system for success feedback
 - `/scripts/init-anonymous-user.js` - Database setup for anonymous user account
 
-#### Files Modified for Anonymous Flow:
+#### Files Modified for Anonymous Flow
+
 - `/src/components/molecules/URLInput/URLInput.tsx` - Dynamic button states and auth callbacks
 - `/src/app/page.tsx` - Integrated modal flow with success notifications
 - `/src/lib/hooks/useAuth.ts` - Added modal state management
 - `/src/server/api/routers/summary.ts` - Anonymous summary procedures and enhanced limit checking
 
-#### Enhanced Summary Limits:
+#### Enhanced Summary Limits
+
 - **Anonymous**: 1 summary ever (browser fingerprint + IP tracking)
 - **Free Plan**: 3 summaries ever (total lifetime limit)
 - **Pro Plan**: 25 summaries/month (monthly reset on 1st)
 - **Complete Plan**: Unlimited summaries
 
-#### Database Changes:
+#### Database Changes
+
 - Special "ANONYMOUS_USER" account for anonymous summaries
 - Enhanced limit checking logic (total vs monthly based on plan)
 - Browser fingerprint storage in summary metadata
@@ -414,18 +461,21 @@ The authentication system has been enhanced with modal-based login and anonymous
 ## Environment-Specific Configurations
 
 ### Development
+
 - `.env.local` for local development
 - Hot module replacement enabled
 - Source maps enabled
 - Clerk development keys
 
 ### Staging
+
 - `.env.staging` for staging environment
 - Preview deployments on Vercel
 - Testing integrations enabled
 - Clerk test environment
 
 ### Production
+
 - `.env.production` for production
 - Optimized builds
 - Error tracking enabled
@@ -434,21 +484,24 @@ The authentication system has been enhanced with modal-based login and anonymous
 
 ## Build Output Structure
 
-```
+```text
 .next/                         # Next.js build output
 .vercel/                       # Vercel build cache
-```
+```text
 
 ## Recent Enhancements: Real-time Progress Tracking
 
 ### Progress Tracking System (January 2025)
+
 A comprehensive real-time progress tracking system has been implemented to provide realistic feedback during video summarization.
 
-#### New Files Added:
+#### New Files Added
+
 - `/src/lib/hooks/useProgressTracking.ts` - Custom React hook for real-time progress polling
 - Enhanced `/api/index.py` with progress storage and tracking endpoints
 
-#### Backend Progress Tracking:
+#### Backend Progress Tracking
+
 - **Progress Storage**: In-memory dictionary storing task progress by UUID
 - **Progress Endpoint**: `GET /api/progress/{task_id}` for real-time polling
 - **Enhanced Summarization**: `/api/summarize` now includes:
@@ -461,18 +514,21 @@ A comprehensive real-time progress tracking system has been implemented to provi
     - 80%: "Generating your summary..."
     - 100%: "Summary ready!"
 
-#### Frontend Progress Integration:
+#### Frontend Progress Integration
+
 - **useProgressTracking Hook**: Polls backend every second for real progress
 - **Smart Fallbacks**: Falls back to realistic simulation if backend unavailable
 - **Immediate Feedback**: Progress starts instantly when user submits URL
 - **Temporary Task IDs**: Enables immediate progress display before backend response
 - **Auto-cleanup**: Stops polling when task completes or errors
 
-#### Pages Enhanced:
+#### Pages Enhanced
+
 - **Landing Page** (`/src/app/page.tsx`): Real progress with auto-scroll to summary
 - **Library Page** (`/src/app/(dashboard)/library/page.tsx`): Real progress with auto-navigation
 
-#### Key Features:
+#### Key Features
+
 - **Realistic Progress**: Reflects actual backend processing stages
 - **Resilient**: Works even if progress API fails (graceful fallback)
 - **Responsive**: 1-second polling for smooth progress updates
@@ -481,9 +537,11 @@ A comprehensive real-time progress tracking system has been implemented to provi
 ## Recent Updates: Payment System & Settings (August 2025)
 
 ### Stripe Payment Integration Enhancement
+
 The PRO plan payment system has been fully implemented with direct Stripe payment links.
 
-#### Changes Made:
+#### Changes Made
+
 - **Pricing Configuration** (`/src/lib/pricing.ts`):
   - Updated PRO plan with functional Stripe payment link
   - Removed "Coming soon" placeholder for PRO plan
@@ -500,22 +558,26 @@ The PRO plan payment system has been fully implemented with direct Stripe paymen
   - Updated `.env.example` with Stripe price ID requirements
 
 ### Complete Settings Page Implementation
+
 A comprehensive user settings page has been implemented with three main sections.
 
-#### New Features Added:
+#### New Features Added
 
 **1. Settings Page** (`/src/app/(dashboard)/settings/page.tsx`):
+
 - **Profile Settings**: Name editing, email display, current plan info
 - **Notification Preferences**: Email notifications, weekly digest, account alerts, usage warnings
 - **Account Management**: Data export and account deletion with confirmation
 
 **2. Enhanced Auth Router** (`/src/server/api/routers/auth.ts`):
+
 - `updateNotificationPreferences`: Store user notification settings
 - `getNotificationPreferences`: Retrieve user preferences with defaults
 - `exportUserData`: Complete user data export (summaries, shared links, stats)
 - `deleteAccount`: Secure account deletion with confirmation validation
 
 **3. User Experience Improvements**:
+
 - Tabbed interface for easy navigation
 - Real-time form updates with success notifications
 - Modal confirmations for dangerous operations
@@ -523,7 +585,8 @@ A comprehensive user settings page has been implemented with three main sections
 - Data export functionality (JSON download)
 - Secure account deletion requiring "DELETE" confirmation
 
-#### Technical Implementation:
+#### Technical Implementation
+
 - **Data Storage**: Notification preferences stored in user metadata (JSON field)
 - **Security**: Account deletion requires exact confirmation text
 - **User Safety**: Export data before deletion capability
@@ -531,6 +594,7 @@ A comprehensive user settings page has been implemented with three main sections
 - **UI/UX**: Consistent design following app's Tailwind + shadcn/ui system
 
 This structure supports:
+
 - Clear separation of concerns
 - Scalable architecture
 - Easy navigation
@@ -547,12 +611,15 @@ This structure supports:
 ## Recent Updates: Smart Collections (AI-Powered Tagging) - August 2025
 
 ### Overview
+
 Smart Collections is an AI-powered feature that automatically analyzes and categorizes video summaries, enabling intelligent content organization and filtering.
 
 ### New Architecture Components
 
 #### 1. Classification Service (`/src/lib/classificationService.ts`)
+
 **Purpose**: AI-powered content analysis and tagging service
+
 - **OpenAI Integration**: Uses GPT-4o-mini for cost-effective content classification
 - **Lazy Initialization**: OpenAI client loaded only when needed to prevent module failures
 - **Entity Extraction**: Identifies 7 types of entities (PERSON, COMPANY, TECHNOLOGY, PRODUCT, CONCEPT, FRAMEWORK, TOOL)
@@ -561,7 +628,9 @@ Smart Collections is an AI-powered feature that automatically analyzes and categ
 - **Error Resilience**: Classification failures are logged but don't break summary creation
 
 #### 2. Enhanced Database Schema
+
 **New Models Added to `prisma/schema.prisma`**:
+
 ```prisma
 model Category {
   id        String    @id @default(cuid())
@@ -580,20 +649,23 @@ model Tag {
   updatedAt DateTime  @updatedAt
   @@index([type])
 }
-```
+```text
 
 **Enhanced Summary Model**:
+
 - Added many-to-many relations: `categories Category[] @relation("SummaryCategories")`
 - Added many-to-many relations: `tags Tag[] @relation("SummaryTags")`
 
 #### 3. Enhanced API Routers
 
 **Summary Router (`/src/server/api/routers/summary.ts`)**:
+
 - **Automatic Classification**: Both authenticated and anonymous summaries trigger classification
 - **Fire-and-Forget**: Classification runs asynchronously to not block UX
 - **Error Handling**: Classification failures are caught and logged, don't affect summary creation
 
 **Library Router (`/src/server/api/routers/library.ts`)**:
+
 - **Enhanced getAll**: Includes tags and categories in summary queries
 - **New Procedures**: `getTags` and `getCategories` for filtering UI
 - **Smart Filtering**: Supports filtering by tag names and category names
@@ -602,6 +674,7 @@ model Tag {
 #### 4. Enhanced UI Components
 
 **LibraryControls (`/src/components/molecules/LibraryControls/LibraryControls.tsx`)**:
+
 - **Smart Collections Section**: New collapsible section for tag/category filtering
 - **Tag Filtering**: Color-coded tag buttons with usage counts
 - **Category Filtering**: Purple category badges with usage counts  
@@ -609,6 +682,7 @@ model Tag {
 - **Responsive**: Adapts to available tags and categories
 
 **SummaryCard (`/src/components/molecules/SummaryCard/SummaryCard.tsx`)**:
+
 - **Colored Tag Badges**: 7 distinct colors based on tag type
 - **Category Badges**: Purple badges with dot indicators
 - **Overflow Handling**: Shows "+N more" for space management
@@ -616,6 +690,7 @@ model Tag {
 - **Backward Compatible**: Works with summaries that don't have classifications
 
 #### 5. Enhanced Library Page (`/src/app/(dashboard)/library/page.tsx`)
+
 - **Smart Filtering Integration**: Connects LibraryControls filters to API queries
 - **Tag/Category Queries**: Fetches available tags and categories for filtering
 - **Filter State Management**: Proper debouncing and state handling
@@ -624,6 +699,7 @@ model Tag {
 ### Technical Implementation Details
 
 #### Tag Types and Color Coding
+
 - **PERSON** (Blue): Individual people, influencers, creators, experts
 - **COMPANY** (Green): Organizations, businesses, brands
 - **TECHNOLOGY** (Orange): Technologies, programming languages, platforms
@@ -633,9 +709,11 @@ model Tag {
 - **TOOL** (Teal): Tools, software, applications
 
 #### Predefined Categories
+
 Productivity, Technology, Business, Marketing, Finance, Health, Personal Development, Art & Design, Education, Entertainment, Science, Startup, Programming, AI & Machine Learning
 
 #### Classification Workflow
+
 1. **Summary Creation**: User creates summary via URL input
 2. **Content Processing**: Summary content and title extracted
 3. **AI Analysis**: OpenAI analyzes content using structured prompt
@@ -646,6 +724,7 @@ Productivity, Technology, Business, Marketing, Finance, Health, Personal Develop
 8. **Filtering Enabled**: Users can filter library using generated classifications
 
 #### Error Handling Strategy
+
 - **OpenAI API Failures**: Gracefully logged, don't break summary creation
 - **Missing API Key**: Service detects and skips classification with warning
 - **Database Errors**: Individual classification failures are isolated
@@ -653,6 +732,7 @@ Productivity, Technology, Business, Marketing, Finance, Health, Personal Develop
 - **Lazy Loading**: OpenAI client initialized only when needed to prevent startup failures
 
 #### Performance Considerations
+
 - **Asynchronous Processing**: Classification doesn't block summary creation UX
 - **Cost Optimization**: Uses GPT-4o-mini model for cost-effective classification
 - **Token Limiting**: Content truncated to 8000 characters to manage API costs
@@ -660,12 +740,15 @@ Productivity, Technology, Business, Marketing, Finance, Health, Personal Develop
 - **Efficient Queries**: Database queries include only necessary fields
 
 ### Environment Configuration
+
 **Required Environment Variable**:
+
 ```bash
 OPENAI_API_KEY="sk-proj-your-openai-api-key-here"
-```
+```text
 
 ### User Experience Enhancements
+
 - **Automatic Organization**: Users get instant content organization without manual work
 - **Visual Clarity**: Color-coded tags make content types immediately recognizable  
 - **Smart Discovery**: Filter large libraries by topic, person, company, or technology

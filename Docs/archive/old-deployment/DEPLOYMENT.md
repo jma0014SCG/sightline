@@ -21,6 +21,7 @@ pnpm run vercel:link
 ### 2. Set Environment Variables
 
 Option A - Upload from local:
+
 ```bash
 # Set up environment variables in Vercel dashboard
 vercel env add DATABASE_URL
@@ -32,6 +33,7 @@ vercel env add OPENAI_API_KEY
 ```
 
 Option B - Use Vercel dashboard:
+
 1. Go to your project dashboard
 2. Navigate to Settings → Environment Variables
 3. Add all variables from your `.env.local`
@@ -66,11 +68,13 @@ pnpm run deploy
 ## Environment-Specific Configuration
 
 ### Development
+
 - Preview deployments for feature branches
 - Test environment variables
 - Debug mode enabled
 
 ### Production
+
 - Production environment variables
 - Optimized build output
 - Error tracking enabled
@@ -81,18 +85,21 @@ pnpm run deploy
 ### Neon PostgreSQL
 
 1. **Create Production Database**:
+
    ```bash
    # Create production branch in Neon
    # Update DATABASE_URL in Vercel environment variables
    ```
 
 2. **Run Migrations**:
+
    ```bash
    # Deploy schema to production database
    pnpm run db:push
    ```
 
 3. **Seed Data** (optional):
+
    ```bash
    pnpm run db:seed
    ```
@@ -105,6 +112,7 @@ pnpm run deploy
    - Configure DNS records
 
 2. **Update Environment Variables**:
+
    ```bash
    # Update NEXTAUTH_URL to use custom domain
    vercel env add NEXTAUTH_URL production
@@ -113,17 +121,20 @@ pnpm run deploy
 ## Monitoring & Analytics
 
 ### Built-in Vercel Features
+
 - **Analytics**: User and performance metrics
 - **Speed Insights**: Core Web Vitals tracking
 - **Function Logs**: Serverless function monitoring
 
 ### External Services (Optional)
+
 - **Sentry**: Error tracking and performance monitoring
 - **LangSmith**: LLM observability and prompt tracking
 
 ## CI/CD with GitHub Actions
 
 ### Automatic Deployments
+
 - **Pull Requests**: Automatic preview deployments
 - **Main Branch**: Automatic production deployments
 - **Environment Variables**: Managed through Vercel dashboard
@@ -149,6 +160,7 @@ pnpm run vercel:env
 ### Common Issues
 
 **Build Failures**:
+
 ```bash
 # Check build logs in Vercel dashboard
 # Verify all dependencies are in package.json
@@ -156,6 +168,7 @@ pnpm run vercel:env
 ```
 
 **Environment Variable Issues**:
+
 ```bash
 # Validate locally first
 pnpm run env:validate
@@ -165,6 +178,7 @@ vercel env ls
 ```
 
 **Database Connection**:
+
 ```bash
 # Test database connection
 pnpm run db:push
@@ -174,6 +188,7 @@ pnpm run db:push
 ```
 
 **Function Timeouts**:
+
 - Python functions: 30-second limit (configured in vercel.json)
 - Upgrade to Pro plan for longer execution times if needed
 
@@ -211,6 +226,6 @@ pnpm run db:push
 
 ## Support
 
-- **Vercel Documentation**: https://vercel.com/docs
-- **Next.js Deployment**: https://nextjs.org/docs/deployment
+- **Vercel Documentation**: <https://vercel.com/docs>
+- **Next.js Deployment**: <https://nextjs.org/docs/deployment>
 - **Project Issues**: Check `Docs/Bug_tracking.md`

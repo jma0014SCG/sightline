@@ -87,6 +87,7 @@ api.summary.createAnonymous.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   url: string              // YouTube URL (validated, max 2048 chars)
@@ -95,6 +96,7 @@ api.summary.createAnonymous.mutate(input)
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -110,6 +112,7 @@ api.summary.createAnonymous.mutate(input)
 ```
 
 **Example:**
+
 ```typescript
 const { data } = await api.summary.createAnonymous.useMutation()
 
@@ -122,6 +125,7 @@ console.log(summary.task_id) // Use for progress tracking
 ```
 
 **Error Codes:**
+
 - `FORBIDDEN`: User already created anonymous summary
 - `BAD_REQUEST`: Invalid YouTube URL or suspicious content
 - `INTERNAL_SERVER_ERROR`: Backend processing failure
@@ -135,6 +139,7 @@ api.summary.create.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   url: string          // YouTube URL (validated)
@@ -144,6 +149,7 @@ api.summary.create.mutate(input)
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -160,6 +166,7 @@ api.summary.create.mutate(input)
 ```
 
 **Usage Limits:**
+
 - Free Plan: 3 summaries total (lifetime)
 - Pro Plan: 25 summaries/month
 - Complete Plan: Unlimited
@@ -173,6 +180,7 @@ api.summary.getById.useQuery({ id: string })
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -198,6 +206,7 @@ api.summary.update.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   id: string
@@ -215,6 +224,7 @@ api.summary.delete.mutate({ id: string })
 ```
 
 **Response:**
+
 ```typescript
 {
   success: true
@@ -237,6 +247,7 @@ api.library.getAll.useQuery(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   limit?: number        // 1-100, default: 20
@@ -252,6 +263,7 @@ api.library.getAll.useQuery(input)
 ```
 
 **Response:**
+
 ```typescript
 {
   items: Summary[]
@@ -261,6 +273,7 @@ api.library.getAll.useQuery(input)
 ```
 
 **Example with Smart Collections:**
+
 ```typescript
 const { data } = await api.library.getAll.useQuery({
   categories: ['Technology', 'Programming'],
@@ -285,6 +298,7 @@ api.library.getStats.useQuery()
 ```
 
 **Response:**
+
 ```typescript
 {
   totalSummaries: number
@@ -312,6 +326,7 @@ api.library.getTags.useQuery()
 ```
 
 **Response:**
+
 ```typescript
 Array<{
   id: string
@@ -331,6 +346,7 @@ api.library.getCategories.useQuery()
 ```
 
 **Response:**
+
 ```typescript
 Array<{
   id: string
@@ -354,6 +370,7 @@ api.auth.getCurrentUser.useQuery()
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -378,6 +395,7 @@ api.auth.updateProfile.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   firstName?: string
@@ -399,6 +417,7 @@ api.auth.exportUserData.mutate()
 ```
 
 **Response:**
+
 ```typescript
 {
   user: UserProfile
@@ -418,6 +437,7 @@ api.auth.deleteAccount.mutate({ confirmation: 'DELETE_MY_ACCOUNT' })
 ```
 
 **Response:**
+
 ```typescript
 {
   success: true
@@ -441,6 +461,7 @@ api.billing.getSubscription.useQuery()
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -463,6 +484,7 @@ api.billing.createCheckoutSession.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   priceId: string      // Stripe price ID
@@ -472,6 +494,7 @@ api.billing.createCheckoutSession.mutate(input)
 ```
 
 **Response:**
+
 ```typescript
 {
   sessionId: string
@@ -480,6 +503,7 @@ api.billing.createCheckoutSession.mutate(input)
 ```
 
 **Example:**
+
 ```typescript
 const { sessionId, url } = await createCheckoutSession({
   priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
@@ -500,6 +524,7 @@ api.billing.createPortalSession.mutate()
 ```
 
 **Response:**
+
 ```typescript
 {
   url: string          // Stripe portal URL
@@ -521,6 +546,7 @@ api.share.create.mutate(input)
 ```
 
 **Input Schema:**
+
 ```typescript
 {
   summaryId: string
@@ -529,6 +555,7 @@ api.share.create.mutate(input)
 ```
 
 **Response:**
+
 ```typescript
 {
   id: string
@@ -549,6 +576,7 @@ api.share.getBySlug.useQuery({ slug: string })
 ```
 
 **Response:**
+
 ```typescript
 {
   summary: {
@@ -576,6 +604,7 @@ High-performance Python backend for AI processing and video analysis.
 Main video summarization endpoint with real-time progress tracking.
 
 **Request Body:**
+
 ```json
 {
   "url": "https://youtube.com/watch?v=dQw4w9WgXcQ",
@@ -588,6 +617,7 @@ Main video summarization endpoint with real-time progress tracking.
 ```
 
 **Response:**
+
 ```json
 {
   "video_id": "dQw4w9WgXcQ",
@@ -617,6 +647,7 @@ Main video summarization endpoint with real-time progress tracking.
 ```
 
 **Processing Stages:**
+
 1. `Initializing...` (5%)
 2. `Connecting to YouTube...` (10%)
 3. `Fetching video information...` (25%)
@@ -626,6 +657,7 @@ Main video summarization endpoint with real-time progress tracking.
 7. `Summary ready!` (100%)
 
 **Error Responses:**
+
 ```json
 {
   "error": "Could not retrieve transcript for this video",
@@ -639,6 +671,7 @@ Main video summarization endpoint with real-time progress tracking.
 Testing endpoint for API validation (development only).
 
 **Request Body:**
+
 ```json
 {
   "url": "https://youtube.com/watch?v=dQw4w9WgXcQ"
@@ -646,6 +679,7 @@ Testing endpoint for API validation (development only).
 ```
 
 **Response:**
+
 ```json
 {
   "status": "test_success",
@@ -665,9 +699,11 @@ Real-time progress monitoring for long-running summarization tasks.
 Get current progress status for a task.
 
 **Parameters:**
+
 - `task_id`: UUID string from summarization request
 
 **Response:**
+
 ```json
 {
   "progress": 60,
@@ -678,11 +714,13 @@ Get current progress status for a task.
 ```
 
 **Status Values:**
+
 - `processing`: Task in progress
 - `completed`: Task finished successfully
 - `error`: Task failed with error
 
 **Example Usage:**
+
 ```javascript
 // Poll progress every 2 seconds
 const pollProgress = async (taskId) => {
@@ -707,6 +745,7 @@ const pollProgress = async (taskId) => {
 Clean up completed progress data to prevent memory leaks.
 
 **Response:**
+
 ```json
 {
   "status": "cleaned"
@@ -724,6 +763,7 @@ System health and status endpoints for monitoring and diagnostics.
 Basic health check for API availability.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -738,6 +778,7 @@ Basic health check for API availability.
 API root endpoint with version information.
 
 **Response:**
+
 ```json
 {
   "message": "Sightline API",
@@ -770,6 +811,7 @@ try {
 ```
 
 **Common Error Codes:**
+
 - `BAD_REQUEST`: Invalid input parameters
 - `UNAUTHORIZED`: Authentication required
 - `FORBIDDEN`: Access denied or limits exceeded
@@ -791,6 +833,7 @@ FastAPI returns structured error responses:
 ```
 
 **HTTP Status Codes:**
+
 - `400`: Bad Request (invalid input)
 - `404`: Not Found (resource missing)
 - `429`: Too Many Requests (rate limited)
@@ -801,6 +844,7 @@ FastAPI returns structured error responses:
 # Rate Limiting
 
 ## Anonymous Users
+
 - **Limit**: 1 summary per browser fingerprint + IP address
 - **Reset**: Never (lifetime limit)
 - **Bypass**: User registration and authentication
@@ -808,16 +852,19 @@ FastAPI returns structured error responses:
 ## Authenticated Users
 
 ### Free Plan
+
 - **Limit**: 3 summaries total (lifetime)
 - **Reset**: Never
 - **Upgrade**: Pro plan ($9.99/month)
 
 ### Pro Plan
+
 - **Limit**: 25 summaries per month
 - **Reset**: Monthly on billing cycle start
 - **Overage**: Blocked until next cycle
 
 ### Complete Plan
+
 - **Limit**: Unlimited summaries
 - **Reset**: N/A
 
@@ -973,7 +1020,7 @@ All endpoints include version information in responses. Breaking changes will in
 - **Bug Reports**: [Bug Tracking](Docs/Bug_tracking.md)
 - **Feature Requests**: GitHub Issues
 - **API Questions**: [GitHub Discussions](https://github.com/sightline-ai/sightline/discussions)
-- **Security Issues**: security@sightline.ai
+- **Security Issues**: <security@sightline.ai>
 
 ---
 

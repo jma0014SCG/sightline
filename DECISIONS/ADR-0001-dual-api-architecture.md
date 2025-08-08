@@ -17,7 +17,7 @@ tags: ["architecture", "api-design", "trpc", "fastapi", "performance"]
 impact: "high"
 ---
 
-# ADR-0001: Dual API Architecture (tRPC + FastAPI)
+## ADR-0001: Dual API Architecture (tRPC + FastAPI)
 
 ## Status
 
@@ -25,7 +25,10 @@ Accepted
 
 ## Context
 
-Sightline.ai requires both real-time user interactions (database operations, authentication, library management) and CPU-intensive AI processing (video transcription, content analysis, summarization). A single API architecture would either limit TypeScript type safety for frontend interactions or constrain AI processing performance with Python libraries.
+Sightline.ai requires both real-time user interactions (database operations, authentication,
+library management) and CPU-intensive AI processing (video transcription, content analysis,
+summarization). A single API architecture would either limit TypeScript type safety for frontend
+interactions or constrain AI processing performance with Python libraries.
 
 ## Decision
 
@@ -66,25 +69,29 @@ Frontend → tRPC Router → FastAPI → AI Processing → Database Storage
 
 ## Alternatives Considered
 
-- **Single TypeScript API**: Rejected due to limited AI/ML library ecosystem and performance constraints for CPU-intensive operations
+- **Single TypeScript API**: Rejected due to limited AI/ML library ecosystem and performance
+  constraints for CPU-intensive operations
 - **Single Python API**: Rejected due to loss of type safety and increased development complexity for frontend interactions
 - **Microservices Architecture**: Rejected as over-engineering for current scale, adds unnecessary complexity
 
 ## Implementation Notes
 
 ### tRPC Layer Responsibilities
+
 - User authentication and session management
 - Database CRUD operations for summaries, library, sharing
 - Subscription and billing management
 - Real-time progress polling
 
 ### FastAPI Layer Responsibilities  
+
 - Video transcript acquisition from multiple sources
 - OpenAI API integration for content analysis
 - Smart Collections classification and tagging
 - Task progress tracking for long-running operations
 
 ### Integration Pattern
+
 ```typescript
 // tRPC procedure calls FastAPI
 const summary = await api.summary.create.mutate({ url })

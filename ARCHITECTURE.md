@@ -12,7 +12,7 @@ audience: ["developers", "architects", "contributors"]
 complexity: "advanced"
 ---
 
-# Architecture
+## Architecture Overview
 
 **Technical architecture, data flow patterns, and system dependencies for Sightline.ai platform**
 
@@ -32,7 +32,8 @@ complexity: "advanced"
 
 ## System Overview {#system-overview}
 
-Sightline.ai implements a modern full-stack architecture following Next.js 14 App Router patterns, tRPC type-safe APIs, and FastAPI async patterns for optimal performance and developer experience.
+Sightline.ai implements a modern full-stack architecture following Next.js 14 App Router patterns,
+tRPC type-safe APIs, and FastAPI async patterns for optimal performance and developer experience.
 
 ```text
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -106,9 +107,12 @@ Plan-based Usage Limits
 
 ### 3. Smart Collections Processing
 
-Smart Collections automatically analyze and categorize video summaries using AI, enabling users to filter and organize their content library intelligently. The system uses OpenAI's API to extract entities, topics, and themes from video content.
+Smart Collections automatically analyze and categorize video summaries using AI, enabling users to filter
+and organize their content library intelligently. The system uses OpenAI's API to extract entities,
+topics, and themes from video content.
 
 **Data Flow Pipeline**:
+
 ```text
 Video Content Analysis
     ↓
@@ -140,6 +144,7 @@ Database Association & UI Display
 #### Architecture Components
 
 ##### 1. Classification Service (`/src/lib/classificationService.ts`)
+
 - **OpenAI Integration**: Uses GPT-4 for content analysis with structured JSON output
 - **Lazy Loading**: OpenAI client initialized only when needed to prevent module failures  
 - **Entity Extraction**: Identifies people, companies, technologies, concepts, etc.
@@ -148,6 +153,7 @@ Database Association & UI Display
 - **Error Resilience**: Classification failures don't break summary creation
 
 ##### 2. Database Schema Extensions
+
 ```prisma
 model Category {
   id        String    @id @default(cuid())
@@ -164,16 +170,19 @@ model Tag {
 ```
 
 ##### 3. Enhanced UI Components
+
 - **LibraryControls**: Smart filtering sidebar with tag/category counts
 - **SummaryCard**: Color-coded tag badges with overflow handling
 - **Smart Filtering**: Real-time filter updates with preserved state
 
 ##### 4. API Integration Patterns
+
 - **Summary Router**: Automatic classification during summary creation
 - **Library Router**: Tag and category queries for filtering
 - **Fire-and-Forget**: Classification runs asynchronously to not block UX
 
 #### Usage Workflow
+
 1. **User creates summary** → Video content is processed
 2. **Classification triggered** → OpenAI analyzes content and generates tags/categories  
 3. **Database updated** → Tags and categories are created and associated
@@ -181,6 +190,7 @@ model Tag {
 5. **Filtering enabled** → Users can filter by tags/categories in sidebar
 
 #### Tag Type System
+
 - **PERSON**: Blue badges - Individual people, influencers, experts
 - **COMPANY**: Green badges - Organizations, businesses, brands  
 - **TECHNOLOGY**: Orange badges - Technologies, programming languages, platforms
@@ -190,6 +200,7 @@ model Tag {
 - **TOOL**: Teal badges - Tools, software, applications
 
 #### Performance Characteristics
+
 - **Classification Time**: 2-5 seconds per summary (non-blocking)
 - **Accuracy Rate**: ~85% entity extraction accuracy
 - **API Usage**: ~500-1000 tokens per classification
@@ -197,6 +208,7 @@ model Tag {
 - **Parallel Processing**: Runs alongside summary generation when possible
 
 #### Error Handling and Resilience
+
 - **OpenAI API Failures**: Logged but don't break summary creation
 - **Missing API Key**: Service gracefully skips classification
 - **Database Errors**: Individual classification failures are isolated
@@ -209,6 +221,7 @@ model Tag {
 ### Frontend Architecture (Next.js 14 + App Router)
 
 **Technology Stack**:
+
 - **Next.js 14**: App Router with Server Components and Client Components
 - **TypeScript**: Strict type checking with comprehensive interfaces
 - **Tailwind CSS + shadcn/ui**: Utility-first CSS with accessible components
@@ -218,6 +231,7 @@ model Tag {
 #### Next.js 14 App Router Best Practices
 
 **Server vs Client Component Strategy**:
+
 ```typescript
 // Server Component (default) - runs on server, no hydration
 export default async function LibraryPage() {
@@ -237,6 +251,7 @@ export default function InteractiveComponent() {
 ```
 
 **File Structure Conventions**:
+
 ```text
 src/app/
 ├── (auth)/                    # Route Groups (organizational only)
@@ -261,6 +276,7 @@ src/app/
 ```
 
 **Error Boundaries Implementation**:
+
 ```typescript
 // app/error.tsx - Segment-level error boundary
 'use client'
@@ -307,6 +323,7 @@ export default function GlobalError({
 ```
 
 **Performance Optimization Techniques**:
+
 ```typescript
 // Dynamic imports for code splitting
 import dynamic from 'next/dynamic'
@@ -345,6 +362,7 @@ export const metadata: Metadata = {
 ```
 
 **Component Hierarchy**:
+
 ```text
 App Router Layout
 ├── Providers (tRPC, Clerk, Toast, Monitoring)
@@ -361,6 +379,7 @@ App Router Layout
 ```
 
 **State Management Strategy**:
+
 - **Server State**: TanStack Query with tRPC for API data
 - **Client State**: React Context for UI state (modals, progress)
 - **Form State**: React Hook Form with Zod validation
@@ -372,6 +391,7 @@ App Router Layout
 #### tRPC API Layer (TypeScript)
 
 **tRPC Setup with Next.js 14 App Router**:
+
 ```typescript
 // src/server/api/trpc.ts - Core tRPC configuration
 import { initTRPC, TRPCError } from '@trpc/server'
@@ -459,6 +479,7 @@ export const protectedProcedure = t.procedure
 ```
 
 **Type-Safe Router Implementation**:
+
 ```typescript
 // src/server/api/routers/summary.ts
 import { z } from 'zod'
@@ -499,6 +520,7 @@ export const summaryRouter = createTRPCRouter({
 ```
 
 **Client-Side Usage Patterns**:
+
 ```typescript
 // Client Components
 'use client'
@@ -547,6 +569,7 @@ export default async function ServerSummaryPage({ params }: { params: { id: stri
 ```
 
 **Router Organization**:
+
 ```text
 src/server/api/routers/
 ├── summary.ts - Video summarization endpoints
@@ -577,6 +600,7 @@ src/server/api/routers/
 #### FastAPI Processing Layer (Python)
 
 **Async FastAPI Setup with Best Practices**:
+
 ```python
 # api/index.py - Main application configuration
 from fastapi import FastAPI, HTTPException, BackgroundTasks
@@ -617,6 +641,7 @@ app.add_middleware(
 ```
 
 **Async Processing Patterns with LangChain**:
+
 ```python
 # services/summarization_service.py
 import asyncio
@@ -705,6 +730,7 @@ class AsyncSummarizationService:
 ```
 
 **Background Tasks and Progress Tracking**:
+
 ```python
 # routers/summarize.py
 from fastapi import APIRouter, BackgroundTasks, HTTPException
@@ -808,6 +834,7 @@ async def get_progress(task_id: str):
 ```
 
 **Error Handling and Logging**:
+
 ```python
 # middleware/error_handler.py
 from fastapi import Request, HTTPException
@@ -848,6 +875,7 @@ async def value_error_handler(request: Request, exc: ValueError):
 ```
 
 **Project Structure**:
+
 ```text
 api/
 ├── index.py - FastAPI app with CORS and middleware
@@ -878,6 +906,7 @@ api/
 ### Database Schema
 
 **Core Entities**:
+
 ```sql
 User {
   id: String (Clerk user ID)
@@ -918,6 +947,7 @@ UsageEvent {
 ```
 
 **Relationships**:
+
 - User → Summary (1:many)
 - Summary ↔ Tag (many:many)
 - Summary ↔ Category (many:many)
@@ -928,12 +958,14 @@ UsageEvent {
 ### Required Services
 
 **Authentication & User Management**:
+
 - **Clerk**: JWT-based authentication with social providers
   - Handles: User registration, login, profile management
   - Integration: Webhooks for user creation/updates
   - Security: JWT validation in API middleware
 
 **AI Processing**:
+
 - **OpenAI API**: GPT-4 model for summarization and Smart Collections classification
   - Endpoints: Chat completions, structured outputs
   - Usage: Video content analysis, entity extraction, automatic categorization
@@ -942,18 +974,21 @@ UsageEvent {
   - Performance: ~500-1000 tokens per classification, 85% accuracy rate
 
 **Payments & Billing**:
+
 - **Stripe**: Subscription management and payment processing
   - Products: Pro Plan ($9.99/month), Complete Plan (future)
   - Webhooks: Subscription status updates
   - Customer Portal: Self-service subscription management
 
 **Infrastructure & Hosting**:
+
 - **Vercel**: Frontend hosting with edge functions
   - Features: Automatic deployments, preview URLs, analytics
   - Performance: Edge caching, global CDN
   - Integration: GitHub-based deployments
 
 **Database & Storage**:
+
 - **Neon (Vercel Postgres)**: Serverless PostgreSQL
   - Features: Automatic scaling, connection pooling
   - Backup: Automated daily backups
@@ -962,11 +997,13 @@ UsageEvent {
 ### Optional Services
 
 **Monitoring & Analytics**:
+
 - **Sentry**: Error tracking and performance monitoring
 - **PostHog**: User analytics and feature flags
 - **Upstash Redis**: Caching layer for performance optimization
 
 **Video Processing**:
+
 - **YouTube Data API**: Video metadata extraction
 - **Oxylabs**: Proxy service for transcript acquisition
 - **YT-DLP**: Fallback transcript service
@@ -977,6 +1014,7 @@ UsageEvent {
 ### Authentication & Authorization Patterns
 
 #### JWT Authentication with Clerk Integration
+
 ```text
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Browser   │    │    Clerk    │    │    tRPC     │    │   FastAPI   │
@@ -987,6 +1025,7 @@ UsageEvent {
 ```
 
 **Next.js Middleware Security**:
+
 ```typescript
 // src/middleware.ts - Request-level security
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
@@ -1036,6 +1075,7 @@ export const config = {
 ```
 
 **JWT Validation Patterns**:
+
 ```typescript
 // tRPC middleware with comprehensive auth validation
 const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
@@ -1080,6 +1120,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
 ```
 
 **FastAPI Security with OAuth2 Bearer**:
+
 ```python
 # FastAPI JWT validation for cross-service calls
 from fastapi import Depends, HTTPException, status
@@ -1142,6 +1183,7 @@ async def secure_operation(
 ### CORS & Request Security
 
 **Next.js CORS Configuration**:
+
 ```typescript
 // api/cors-config.ts
 const corsOptions = {
@@ -1161,6 +1203,7 @@ const corsOptions = {
 ```
 
 **FastAPI CORS with Security Headers**:
+
 ```python
 # Enhanced CORS middleware with security
 from fastapi.middleware.cors import CORSMiddleware
@@ -1197,6 +1240,7 @@ async def add_security_headers(request: Request, call_next):
 ### Rate Limiting Architecture
 
 **Multi-Layer Rate Limiting**:
+
 ```typescript
 // src/lib/rateLimit.ts - Intelligent rate limiting
 import { Ratelimit } from "@upstash/ratelimit";
@@ -1268,6 +1312,7 @@ export const rateLimitedProcedure = publicProcedure.use(async ({ ctx, next, path
 ```
 
 **FastAPI Rate Limiting**:
+
 ```python
 # middleware/rate_limiter.py
 import asyncio
@@ -1364,6 +1409,7 @@ async def rate_limit_middleware(request: Request, call_next):
 ### Input Validation & Sanitization
 
 **Comprehensive Input Validation**:
+
 ```typescript
 // src/lib/security.ts - Enhanced input validation
 import DOMPurify from 'dompurify'
@@ -1432,6 +1478,7 @@ export function detectSuspiciousPatterns(content: string): {
 ```
 
 **Zod Schema Validation**:
+
 ```typescript
 // Enhanced Zod schemas with security validations
 import { z } from 'zod'
@@ -1471,6 +1518,7 @@ export const updateProfileSchema = z.object({
 ### Data Protection & Privacy
 
 **Encryption at Rest and Transit**:
+
 ```typescript
 // src/lib/encryption.ts - Data encryption utilities
 import crypto from 'crypto'
@@ -1535,6 +1583,7 @@ export function redactPII(data: any): any {
 ```
 
 **GDPR Compliance Patterns**:
+
 ```typescript
 // Data export and deletion utilities
 export async function exportUserData(userId: string) {
@@ -1602,12 +1651,14 @@ export async function deleteUserData(userId: string) {
 ### Scalability
 
 **Horizontal Scaling**:
+
 - **Frontend**: Automatic edge scaling via Vercel
 - **tRPC API**: Serverless functions with auto-scaling
 - **FastAPI**: Containerized deployment with load balancing
 - **Database**: Connection pooling with automatic scaling
 
 **Resource Optimization**:
+
 - **Caching Strategy**: Browser cache, CDN cache, database query cache
 - **Bundle Optimization**: Code splitting, tree shaking, lazy loading
 - **Database Optimization**: Indexed queries, connection pooling
@@ -1627,6 +1678,7 @@ Mock Data     Seed Data     Real Data
 ```
 
 **Configuration Management**:
+
 - **Environment Variables**: Secure secret management via Vercel
 - **Feature Flags**: PostHog integration for gradual rollouts
 - **Database Migrations**: Prisma-managed schema evolution
@@ -1635,12 +1687,14 @@ Mock Data     Seed Data     Real Data
 ### Quality Assurance
 
 **Testing Strategy**:
+
 - **Unit Tests**: Jest + React Testing Library (70% coverage target)
 - **E2E Tests**: Playwright cross-browser testing
 - **API Tests**: Python test suite with pytest
 - **Performance Tests**: Core Web Vitals monitoring
 
 **Code Quality**:
+
 - **TypeScript**: Strict mode with comprehensive type checking
 - **ESLint**: Custom rules for consistency and best practices
 - **Prettier**: Automated code formatting
@@ -1651,48 +1705,60 @@ Mock Data     Seed Data     Real Data
 ### Key Design Decisions and Rationales
 
 #### 1. Next.js 14 App Router vs Pages Router
+
 **Decision**: Use App Router for new development
-**Rationale**: 
+**Rationale**:
+
 - Server Components reduce client-side bundle size by 40-60%
 - Better SEO with built-in metadata API
 - Improved developer experience with co-located loading/error states
 - Future-proof architecture aligned with React 18+ features
 
 #### 2. tRPC vs REST API
+
 **Decision**: tRPC for internal APIs, REST for external integrations
 **Rationale**:
+
 - End-to-end type safety eliminates runtime errors
 - 30-50% reduction in API development time
 - Automatic client generation from server schemas
 - Better developer experience with autocompletion
 
 #### 3. Dual Backend Architecture (tRPC + FastAPI)
+
 **Decision**: Separate TypeScript and Python backends
 **Rationale**:
+
 - tRPC handles CRUD operations with type safety
 - FastAPI optimized for AI/ML workloads with async processing
 - Language-specific optimizations (TypeScript for web, Python for AI)
 - Clear separation of concerns
 
 #### 4. Prisma ORM vs Raw SQL
+
 **Decision**: Prisma for database operations
 **Rationale**:
+
 - Type-safe database queries prevent runtime errors
 - Excellent migration system with versioning
 - Built-in connection pooling and query optimization
 - Great developer experience with auto-completion
 
 #### 5. Clerk vs NextAuth.js
+
 **Decision**: Clerk for authentication
 **Rationale**:
+
 - Production-ready with minimal configuration
 - Built-in security features (rate limiting, attack protection)
 - Excellent Next.js integration with middleware support
 - Social providers and enterprise features included
 
 #### 6. Server Components vs Client Components Strategy
+
 **Decision**: Server Components by default, Client Components for interactivity
 **Rationale**:
+
 - Reduced bundle size and improved initial page load
 - Better SEO and Core Web Vitals scores
 - Simplified data fetching without loading states
@@ -1701,6 +1767,7 @@ Mock Data     Seed Data     Real Data
 ### Performance Optimization Strategies
 
 #### Bundle Optimization
+
 ```typescript
 // next.config.js - Production optimizations
 const nextConfig = {
@@ -1728,6 +1795,7 @@ const nextConfig = {
 ```
 
 #### Database Query Optimization
+
 ```typescript
 // Optimized queries with selective includes
 const optimizedSummaryQuery = {
@@ -1772,6 +1840,7 @@ const prisma = new PrismaClient({
 ```
 
 #### Caching Strategy
+
 ```typescript
 // Multi-layer caching approach
 export async function getCachedSummary(id: string) {
@@ -1800,6 +1869,7 @@ export async function getCachedSummary(id: string) {
 ### Monitoring and Observability
 
 #### Performance Monitoring
+
 ```typescript
 // Built-in performance monitoring
 export const performanceMonitor = {
@@ -1828,6 +1898,7 @@ export const performanceMonitor = {
 ```
 
 #### Error Tracking Patterns
+
 ```typescript
 // Comprehensive error boundary
 export class ErrorBoundaryWithReporting extends Component {
@@ -1867,6 +1938,7 @@ export class ErrorBoundaryWithReporting extends Component {
 ### Deployment & DevOps Patterns
 
 #### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy to Production
@@ -1908,6 +1980,7 @@ jobs:
 ```
 
 #### Environment Configuration
+
 ```typescript
 // src/lib/env.ts - Environment validation
 import { z } from 'zod'
@@ -1946,4 +2019,6 @@ This architecture implements modern full-stack best practices with:
 - **Reliability**: Comprehensive error boundaries and graceful degradation
 - **Developer Experience**: tRPC for type-safe APIs, comprehensive tooling
 
-The architecture supports current requirements while providing flexibility for future enhancements including advanced AI features, enterprise functionality, and global scaling. All patterns follow industry best practices from 2024 and are optimized for production deployment.
+The architecture supports current requirements while providing flexibility for future enhancements
+including advanced AI features, enterprise functionality, and global scaling. All patterns follow
+industry best practices from 2024 and are optimized for production deployment.

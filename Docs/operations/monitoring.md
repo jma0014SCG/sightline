@@ -1,3 +1,18 @@
+---
+title: "Monitoring and Error Tracking"
+description: "Comprehensive monitoring, error tracking, and performance measurement setup for Sightline.ai"
+type: "reference"
+canonical_url: "/docs/operations/monitoring"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["system-administrators", "devops-engineers", "developers"]
+complexity: "advanced"
+tags: ["monitoring", "error-tracking", "performance", "observability", "sentry", "metrics"]
+status: "active"
+estimated_time: "25 minutes read"
+related_docs: ["/docs/operations/troubleshooting", "/production-operations-guide"]
+---
+
 # Monitoring and Error Tracking
 
 This document describes the monitoring, error tracking, and performance measurement setup for Sightline.ai.
@@ -5,6 +20,7 @@ This document describes the monitoring, error tracking, and performance measurem
 ## Overview
 
 The platform uses a comprehensive monitoring service that:
+
 - Tracks errors with full context
 - Measures performance metrics
 - Logs user actions for analytics
@@ -32,6 +48,7 @@ ENABLE_HEALTH_METRICS=true
 ### Sentry Setup
 
 When `SENTRY_DSN` is configured, the monitoring service automatically:
+
 - Captures exceptions with full context
 - Sets user context for better debugging
 - Groups errors by type and location
@@ -155,6 +172,7 @@ class ErrorBoundary extends React.Component {
 ## Core Web Vitals
 
 The monitoring service automatically tracks:
+
 - **CLS** (Cumulative Layout Shift)
 - **FID** (First Input Delay)
 - **FCP** (First Contentful Paint)
@@ -162,6 +180,7 @@ The monitoring service automatically tracks:
 - **TTFB** (Time to First Byte)
 
 Initialize in your app:
+
 ```typescript
 import { startPerformanceMonitoring } from '@/lib/monitoring'
 
@@ -174,6 +193,7 @@ useEffect(() => {
 ## Health Check Integration
 
 The `/api/health` endpoint provides:
+
 - Database connectivity status
 - External service availability
 - System metrics (memory, uptime)
@@ -182,12 +202,14 @@ The `/api/health` endpoint provides:
 ## Alert Thresholds
 
 ### Error Alerts
+
 - **Critical**: Database connection failures
 - **High**: Payment processing errors, API failures
 - **Medium**: Slow API responses (>5s)
 - **Low**: Client-side JavaScript errors
 
 ### Performance Alerts
+
 - API response time > 5000ms
 - Memory usage > 80%
 - Error rate > 1% of requests
@@ -195,12 +217,14 @@ The `/api/health` endpoint provides:
 ## Development vs Production
 
 ### Development Mode
+
 - Detailed console logging with emojis
 - Stack traces visible
 - No external service calls
 - Performance metrics logged to console
 
 ### Production Mode
+
 - Sentry integration active
 - External logging endpoints used
 - Minimal console output
@@ -225,12 +249,14 @@ The `/api/health` endpoint provides:
 ## Dashboards and Reporting
 
 ### Sentry Dashboard
+
 - Real-time error tracking
 - Error grouping and trends
 - Performance monitoring
 - Release tracking
 
 ### Custom Metrics
+
 - Business KPIs dashboard
 - API performance graphs
 - User action analytics
@@ -241,16 +267,19 @@ The `/api/health` endpoint provides:
 ### Common Issues
 
 **Sentry not capturing errors**
+
 - Verify SENTRY_DSN is set correctly
 - Check network connectivity
 - Ensure Sentry SDK is loaded
 
 **Missing performance metrics**
+
 - web-vitals package may not be installed
 - Browser may not support Performance API
 - Check Content Security Policy
 
 **High memory usage alerts**
+
 - Review recent deployments
 - Check for memory leaks
 - Monitor garbage collection

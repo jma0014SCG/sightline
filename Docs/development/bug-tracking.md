@@ -17,9 +17,11 @@ update_frequency: "as-needed"
 # Bug Tracking Document
 
 ## Overview
+
 This document tracks all bugs, errors, and their resolutions encountered during the development of Sightline.ai. Each entry includes error details, root cause analysis, and resolution steps.
 
 ## Bug Entry Format
+
 ```
 ### [Bug ID] - [Brief Description]
 **Date:** [YYYY-MM-DD]
@@ -45,17 +47,20 @@ This document tracks all bugs, errors, and their resolutions encountered during 
 ## Active Bugs
 
 ### [BUG-003] - Tailwind CSS Utility Class Error
+
 **Date:** 2025-01-18
 **Stage:** Stage 1: Foundation & Setup
 **Severity:** Low
 **Status:** Open
 
 **Error Details:**
+
 ```
 Error: Cannot apply unknown utility class `border-gray-200`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
 ```
 
 **Steps to Reproduce:**
+
 1. Start development server with `pnpm run dev`
 2. Navigate to any page using Tailwind CSS classes
 3. Check server logs for Tailwind compilation errors
@@ -67,6 +72,7 @@ Tailwind CSS should compile without errors and apply utility classes correctly
 Tailwind CSS is not recognizing standard utility classes like `border-gray-200`
 
 **Environment:**
+
 - Tailwind CSS 4.1.11
 - Next.js 14.2.30
 - PostCSS 8.5.6
@@ -75,6 +81,7 @@ Tailwind CSS is not recognizing standard utility classes like `border-gray-200`
 Tailwind CSS v4 has different configuration requirements and may not be properly configured for the project structure. The error suggests missing `@reference` directive or incorrect configuration.
 
 **Possible Solutions:**
+
 1. Check Tailwind CSS configuration in `tailwind.config.ts`
 2. Verify PostCSS configuration in `postcss.config.js`
 3. Add `@reference` directive to CSS files if using CSS modules
@@ -86,18 +93,21 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ## Pending Implementation Issues
 
 ### Share Functionality Not Implemented
+
 **Type:** TODO/Feature Gap
 **Location:** `/app/(dashboard)/library/page.tsx:108`
 **Status:** Pending Implementation
 **Note:** Share button exists but functionality is not implemented. Console log placeholder at line 108-109.
 
 ### Usage Limits Disabled for Testing
+
 **Type:** Configuration Issue
 **Location:** `/server/api/routers/summary.ts:38`
 **Status:** Needs Production Configuration
 **Note:** Usage limits check is commented out with TODO for re-enabling in production.
 
 ### Database Saving Not Implemented in Backend
+
 **Type:** Feature Gap
 **Location:** `/api/routers/summarize.py:235`
 **Status:** Pending Implementation
@@ -108,6 +118,7 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ## Resolved Bugs
 
 ### [BUG-005] - Missing Playbooks & Heuristics and Feynman Flashcards Data in Frontend
+
 **Date:** 2025-01-28
 **Stage:** Stage 3: Summary Display & Management  
 **Severity:** Medium
@@ -117,6 +128,7 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 Playbooks & Heuristics and Feynman Flashcards sections are not displaying data in the frontend SummaryViewer component, despite backend correctly parsing and sending the data.
 
 **Steps to Reproduce:**
+
 1. Create a summary from a YouTube URL
 2. View the summary in the frontend
 3. Observe that Playbooks & Heuristics and Feynman Flashcards sections show "No data available"
@@ -127,16 +139,19 @@ Both sections should display parsed content from the Gumloop markdown output
 
 **Actual Behavior:**  
 Sections appear empty despite backend logs showing successful parsing of:
+
 - `playbooks & heuristics` section (e.g., "If you can't see a control panel → View ▶ User Interface→toggle Project Browser/Properties")
 - `feynman flashcards` section (e.g., "Q: Why set levels before modeling? A: They're datums; every height-based edit references them")
 
 **Environment:**
+
 - Frontend: React/Next.js with TypeScript
 - Backend: FastAPI with Gumloop parser
 - Data flow: Backend → tRPC → Frontend SummaryViewer component
 
 **Root Cause Analysis:**
 Backend parsing is working correctly (confirmed via server logs). Issue appears to be in frontend markdown parsing logic:
+
 1. Section extraction may not be finding the correct section names
 2. Regex patterns in parsing functions may not match the actual content format
 3. Data prioritization logic may be incorrectly falling back to empty backend data
@@ -146,17 +161,20 @@ Backend parsing is working correctly (confirmed via server logs). Issue appears 
 **Resolution Method:** Fixed the parsing logic in the SummaryViewer component to properly extract and display the Playbooks & Heuristics and Feynman Flashcards sections.
 
 **Resolution Steps:**
+
 1. **Root Cause Identified:** The `parseMarkdownSections` function was converting section names to lowercase, but the lookup was case-sensitive
 2. **Solution Applied:** Updated the parsing logic to handle case-insensitive section matching
 3. **Data Flow Fixed:** Ensured proper data flow from backend Gumloop parser through tRPC to frontend display
 4. **Verification:** Confirmed both sections now display content correctly
 
 **Technical Details:**
+
 - Section names in markdown were being normalized to lowercase during parsing
 - Component was looking for exact matches which failed due to case mismatch
 - Fixed by ensuring consistent case handling throughout the parsing pipeline
 
 **Current Status:**
+
 - ✅ Playbooks & Heuristics section displays content correctly
 - ✅ Feynman Flashcards section displays Q&A pairs properly
 - ✅ All Gumloop-enhanced sections working as expected
@@ -164,21 +182,24 @@ Backend parsing is working correctly (confirmed via server logs). Issue appears 
 ---
 
 ### [BUG-001] - Localhost Network Connectivity Issue
+
 **Date:** 2025-07-17
 **Stage:** Stage 1: Foundation & Setup
 **Severity:** High
 **Status:** Resolved
 
 **Error Details:**
+
 ```
 Firefox can't establish a connection to the server at localhost:3000.
 curl: (7) Failed to connect to localhost port 3000 after 0 ms: Couldn't connect to server
 ```
 
 **Steps to Reproduce:**
+
 1. Run `pnpm run dev` (server starts successfully and reports "Ready in 1065ms")
-2. Open browser and navigate to http://localhost:3000
-3. Attempt to access http://localhost:3001 as alternative
+2. Open browser and navigate to <http://localhost:3000>
+3. Attempt to access <http://localhost:3001> as alternative
 4. Test with curl command: `curl -I http://localhost:3000`
 
 **Expected Behavior:**
@@ -188,6 +209,7 @@ Browser should load the Next.js application homepage and demo page
 Browser shows "Unable to connect" error, curl fails with connection refused
 
 **Environment:**
+
 - OS: macOS (Darwin 24.5.0)
 - Node: via pnpm (Next.js 14.2.30)
 - Browser: Firefox
@@ -195,6 +217,7 @@ Browser shows "Unable to connect" error, curl fails with connection refused
 
 **Root Cause:**
 Network connectivity issue between browser/curl and Next.js dev server, despite server reporting successful startup. Possible causes:
+
 - macOS firewall blocking localhost connections
 - Missing Local Network permissions for browsers
 - Port binding issue with Next.js dev server
@@ -205,19 +228,22 @@ Network connectivity issue between browser/curl and Next.js dev server, despite 
 **Resolution Method:** The issue was resolved by using explicit host binding with the `-H 0.0.0.0` flag in the Next.js development server command.
 
 **Resolution Steps:**
+
 1. **Root Cause Identified:** Next.js dev server was not properly binding to all network interfaces
 2. **Solution Applied:** Modified the dev script to use `next dev -H 0.0.0.0 -p 3000`
 3. **Server Restart:** Killed existing server process and restarted with new configuration
 4. **Verification:** Confirmed server responds to localhost:3000 with HTTP 200 status
 
 **Technical Details:**
+
 - **Before:** `next dev` (default binding to localhost only)
 - **After:** `next dev -H 0.0.0.0 -p 3000` (binds to all network interfaces)
 - **Result:** Server now accessible on both localhost and network interfaces
 
 **Current Status:**
+
 - ✅ Server starts successfully with `pnpm run dev`
-- ✅ Browser can access http://localhost:3000
+- ✅ Browser can access <http://localhost:3000>
 - ✅ API endpoints responding (GET /api/auth/session 200)
 - ✅ Main page loading (GET / 200)
 - ✅ Database queries working (Prisma queries visible in logs)
@@ -227,21 +253,24 @@ Network connectivity issue between browser/curl and Next.js dev server, despite 
 
 **Additional Resolution (2025-01-21):**
 **Server Restart Process:** Successfully restarted both frontend and backend servers using the following process:
+
 1. **Kill existing processes:** `pkill -f "next dev" && pkill -f "uvicorn"`
-2. **Start Next.js frontend:** `pnpm run dev` (runs on http://localhost:3000)
-3. **Start FastAPI backend:** `pnpm run api:dev` (runs on http://localhost:8000)
+2. **Start Next.js frontend:** `pnpm run dev` (runs on <http://localhost:3000>)
+3. **Start FastAPI backend:** `pnpm run api:dev` (runs on <http://localhost:8000>)
 4. **Verification:** Both servers responding with HTTP 200 status
 5. **Application functionality:** Site is now fully accessible and functional
 
 **Current Server Status (2025-01-21):**
-- ✅ Next.js frontend: Running on http://localhost:3000
-- ✅ FastAPI backend: Running on http://localhost:8000
+
+- ✅ Next.js frontend: Running on <http://localhost:3000>
+- ✅ FastAPI backend: Running on <http://localhost:8000>
 - ✅ Database connections: Working (Prisma queries successful)
 - ✅ Authentication: NextAuth endpoints responding
 - ✅ tRPC API: Functional with successful summary creation
 - ✅ UI: Loading with Tailwind CSS (minor warnings present but non-blocking)
 
 **Prevention:**
+
 - **Immediate:** Update package.json dev script to include `-H 0.0.0.0` flag
 - **Long-term:** Document this requirement in setup guides
 - **Team:** Ensure all developers use the same host binding configuration
@@ -252,12 +281,14 @@ Network connectivity issue between browser/curl and Next.js dev server, despite 
 ## Active Bugs
 
 ### [BUG-004] - ESLint Deprecated Options Error
+
 **Date:** 2025-07-22
 **Stage:** Stage 1: Foundation & Setup
 **Severity:** High
 **Status:** Resolved
 
 **Error Details:**
+
 ```
 Invalid Options:
 - Unknown options: useEslintrc, extensions, resolvePluginsRelativeTo, rulePaths, ignorePath, reportUnusedDisableDirectives
@@ -272,6 +303,7 @@ Impact: Linting fails completely, code quality checks disabled
 ```
 
 **Steps to Reproduce:**
+
 1. Run `pnpm run lint` in project directory
 2. ESLint v9.31.0 attempts to process legacy configuration
 3. Deprecated options cause linting to fail completely
@@ -283,6 +315,7 @@ ESLint should run successfully and provide code quality feedback
 ESLint fails to start due to deprecated configuration options, disabling all code quality checks
 
 **Environment:**
+
 - ESLint: 9.31.0 (later downgraded to 8.57.1)
 - Next.js: 14.2.30
 - @typescript-eslint/eslint-plugin: 8.37.0 (later downgraded to 7.18.0)
@@ -296,12 +329,14 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 **Resolution Method:** Downgraded ESLint and TypeScript ESLint packages to compatible versions and simplified configuration.
 
 **Resolution Steps:**
+
 1. **Downgraded ESLint:** `pnpm add eslint@^8.57.1 --save-dev`
 2. **Downgraded TypeScript ESLint packages:** `pnpm add @typescript-eslint/eslint-plugin@^7.18.0 @typescript-eslint/parser@^7.18.0 --save-dev`
 3. **Simplified ESLint configuration:** Updated `.eslintrc.json` to use only core Next.js rules with Prettier compatibility
 4. **Verified functionality:** Confirmed ESLint runs successfully with `pnpm run lint`
 
 **Final Configuration (.eslintrc.json):**
+
 ```json
 {
   "extends": [
@@ -322,6 +357,7 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 ```
 
 **Current Status:**
+
 - ✅ ESLint runs successfully without deprecated option errors
 - ✅ Next.js core web vitals rules active
 - ✅ Prettier integration working
@@ -329,6 +365,7 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 - ⚠️ Some TypeScript-specific rules temporarily disabled for compatibility
 
 **Prevention:**
+
 - **Monitor compatibility:** Check ESLint and Next.js compatibility before major version upgrades
 - **Staged upgrades:** Upgrade ESLint ecosystem packages together, not individually
 - **Test early:** Run linting immediately after package upgrades
@@ -337,12 +374,14 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 ---
 
 ### [BUG-002] - NextAuth Session Configuration Error
+
 **Date:** 2025-01-18
 **Stage:** Stage 2: Core Authentication & API Setup
 **Severity:** Medium
 **Status:** Resolved
 
 **Error Details:**
+
 ```
 [next-auth][error][JWT_SESSION_ERROR] 
 Cannot read properties of undefined (reading 'id')
@@ -351,8 +390,9 @@ TypeError: Cannot read properties of undefined (reading 'id')
 ```
 
 **Steps to Reproduce:**
+
 1. Start development server with `pnpm run dev`
-2. Navigate to http://localhost:3000
+2. Navigate to <http://localhost:3000>
 3. Check server logs for NextAuth session errors
 
 **Expected Behavior:**
@@ -362,12 +402,14 @@ NextAuth should handle session management without errors
 Session callback is trying to access `user.id` but `user` is undefined
 
 **Environment:**
+
 - NextAuth.js 4.24.11
 - Next.js 14.2.30
 - Prisma adapter configured
 
 **Root Cause:**
 Session callback in `lib/auth/auth.ts` line 30 is attempting to access `user.id` without proper null checking. This suggests either:
+
 - User object is not being passed correctly to the session callback
 - Database user record is not being created/found properly
 - Prisma adapter configuration issue
@@ -377,17 +419,20 @@ Session callback in `lib/auth/auth.ts` line 30 is attempting to access `user.id`
 **Resolution Method:** Added proper null checking in the NextAuth session callback to handle cases where the user object might be undefined.
 
 **Resolution Steps:**
+
 1. **Root Cause Identified:** Session callback was attempting to access `user.id` without verifying user object existence
 2. **Solution Applied:** Added null/undefined checks before accessing user properties
 3. **Error Handling:** Implemented graceful fallback when user is not available
 4. **Verification:** Confirmed no more session errors in logs
 
 **Technical Details:**
+
 - Updated session callback in `lib/auth/auth.ts` to check if user exists before accessing properties
 - Added default values for session properties when user is undefined
 - Ensured proper error handling throughout the authentication flow
 
 **Current Status:**
+
 - ✅ NextAuth session errors resolved
 - ✅ Authentication flow working properly
 - ✅ No more "Cannot read properties of undefined" errors
@@ -395,17 +440,20 @@ Session callback in `lib/auth/auth.ts` line 30 is attempting to access `user.id`
 ---
 
 ### [BUG-003] - Tailwind CSS Utility Class Error
+
 **Date:** 2025-01-18
 **Stage:** Stage 1: Foundation & Setup
 **Severity:** Low
 **Status:** Open
 
 **Error Details:**
+
 ```
 Error: Cannot apply unknown utility class `border-gray-200`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
 ```
 
 **Steps to Reproduce:**
+
 1. Start development server with `pnpm run dev`
 2. Navigate to any page using Tailwind CSS classes
 3. Check server logs for Tailwind compilation errors
@@ -417,6 +465,7 @@ Tailwind CSS should compile without errors and apply utility classes correctly
 Tailwind CSS is not recognizing standard utility classes like `border-gray-200`
 
 **Environment:**
+
 - Tailwind CSS 4.1.11
 - Next.js 14.2.30
 - PostCSS 8.5.6
@@ -425,6 +474,7 @@ Tailwind CSS is not recognizing standard utility classes like `border-gray-200`
 Tailwind CSS v4 has different configuration requirements and may not be properly configured for the project structure. The error suggests missing `@reference` directive or incorrect configuration.
 
 **Possible Solutions:**
+
 1. Check Tailwind CSS configuration in `tailwind.config.ts`
 2. Verify PostCSS configuration in `postcss.config.js`
 3. Add `@reference` directive to CSS files if using CSS modules
@@ -436,6 +486,7 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ## Resolved Bugs
 
 ### [BUG-001] - Localhost Network Connectivity Issue
+
 **Date:** 2025-07-17
 **Stage:** Stage 1: Foundation & Setup
 **Severity:** High
@@ -451,11 +502,13 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ### Environment Setup Issues
 
 #### Node.js Version Mismatch
+
 - **Symptom:** Package installation failures
 - **Solution:** Use Node.js 18.x or 20.x (LTS versions)
 - **Check:** Run `node --version`
 
 #### Python Version Issues  
+
 - **Symptom:** FastAPI or dependency installation failures
 - **Solution:** Use Python 3.12 as specified in PRD
 - **Check:** Run `python --version`
@@ -463,11 +516,13 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ### Database Connection Issues
 
 #### Neon Connection Timeout
+
 - **Symptom:** Prisma connection timeouts
 - **Solution:** Check connection string includes `-pooler` for serverless
 - **Prevention:** Use connection pooling in production
 
 #### Migration Failures
+
 - **Symptom:** Prisma migration errors
 - **Solution:** Check database permissions and schema conflicts
 - **Prevention:** Always run migrations in development first
@@ -475,11 +530,13 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ### API Integration Issues
 
 #### YouTube API Quota Exceeded
+
 - **Symptom:** 403 errors from YouTube
 - **Solution:** Implement caching and rate limiting
 - **Prevention:** Monitor API usage dashboard
 
 #### OpenAI Rate Limits
+
 - **Symptom:** 429 errors from OpenAI
 - **Solution:** Implement exponential backoff
 - **Prevention:** Use streaming responses and optimize prompts
@@ -487,11 +544,13 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ### Build & Deployment Issues
 
 #### Vercel Build Timeout
+
 - **Symptom:** Build exceeds 45-minute limit
 - **Solution:** Optimize build process, use caching
 - **Prevention:** Monitor build times regularly
 
 #### Cold Start Performance
+
 - **Symptom:** Slow initial requests
 - **Solution:** Implement warming strategies
 - **Prevention:** Use edge functions where possible
@@ -521,6 +580,7 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ## Debugging Tools & Commands
 
 ### Useful Commands
+
 ```bash
 # Check TypeScript errors
 pnpm run typecheck
@@ -545,6 +605,7 @@ pnpm run analyze
 ```
 
 ### Environment Debugging
+
 ```bash
 # Verify environment variables
 pnpm run env:check
@@ -595,7 +656,9 @@ When encountering a new bug, use this template:
 
 **Error Details:**
 ```
+
 [Error message or screenshot]
+
 ```
 
 **Steps to Reproduce:**

@@ -1,0 +1,51 @@
+# Frontmatter Template for Sightline.ai Documentation
+# This template defines the standard frontmatter structure for all markdown files
+
+# Core Fields (Required)
+title: "{auto_title}"
+description: "{auto_description}"
+type: "{doc_type}"
+canonical_url: "{auto_canonical}"
+version: "1.0"
+last_updated: "{current_date}"
+
+# Audience and Complexity (Required)
+audience: ["{auto_audience}"]
+complexity: "{auto_complexity}"
+tags: ["{auto_tags}"]
+
+# Status and Lifecycle (Conditional)
+status: "{auto_status}"
+archive_date: "{archive_date}"        # Only for archived files
+superseded_by: "{superseded_by}"      # Only for superseded files
+
+# Content-Specific Fields (Conditional)
+test_type: "{test_type}"              # Only for test files
+generated: "{generated}"              # Only for generated files
+source: "{source}"                    # Only for generated files
+special_purpose: "{special_purpose}"  # Only for special files like CLAUDE.md
+
+# Documentation Metadata (Optional)
+estimated_time: "{reading_time}"      # Reading/completion time
+quick_start: "{quick_start}"          # Boolean for quick start guides
+update_frequency: "{update_freq}"     # How often file is updated
+related_docs: ["{related_docs}"]      # Related documentation links
+
+# Type-Specific Fields
+# ADR fields (for DECISIONS/*.md)
+decision_date: "{decision_date}"
+review_date: "{review_date}"
+authors: ["{authors}"]
+reviewers: ["{reviewers}"]
+stakeholders: ["{stakeholders}"]
+impact: "{impact}"
+supersedes: ["{supersedes}"]
+related_adrs: ["{related_adrs}"]
+
+# API documentation fields
+api_categories: ["{api_categories}"]
+http_methods: ["{http_methods}"]
+
+# Test-specific fields
+test_status: "{test_status}"          # passing, failing, deprecated
+test_category: "{test_category}"      # integration, unit, e2e

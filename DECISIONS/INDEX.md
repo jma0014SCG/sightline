@@ -1,10 +1,28 @@
+---
+title: "Architectural Decision Records (ADRs)"
+description: "Index and governance framework for architectural decision records in Sightline.ai platform"
+type: "reference"
+canonical_url: "/decisions"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["architects", "senior-developers", "tech-leads"]
+complexity: "intermediate"
+tags: ["adrs", "architecture", "decisions", "governance", "process"]
+status: "active"
+total_adrs: 3
+active_adrs: 3
+related_docs: ["/contributing", "/architecture"]
+---
+
 # Architectural Decision Records (ADRs)
 
-This directory contains Architectural Decision Records (ADRs) for durable technical decisions made in the Sightline.ai platform development.
+This directory contains Architectural Decision Records (ADRs) for durable technical decisions made
+in the Sightline.ai platform development.
 
 ## What are ADRs?
 
-ADRs document important architectural decisions, their context, and consequences. They provide historical insight into why certain technical choices were made and help inform future decisions.
+ADRs document important architectural decisions, their context, and consequences. They provide
+historical insight into why certain technical choices were made and help inform future decisions.
 
 ## ADR Index
 
@@ -19,12 +37,15 @@ ADRs document important architectural decisions, their context, and consequences
 ### By Category
 
 **Core Architecture**:
+
 - [ADR-0001: Dual API Architecture](ADR-0001-dual-api-architecture.md)
 
 **AI & Machine Learning**:
+
 - [ADR-0002: Smart Collections AI Classification](ADR-0002-smart-collections-ai-classification.md)
 
 **User Experience & Privacy**:
+
 - [ADR-0003: Anonymous User Browser Fingerprinting](ADR-0003-anonymous-user-browser-fingerprinting.md)
 
 ## Creating New ADRs
@@ -32,6 +53,7 @@ ADRs document important architectural decisions, their context, and consequences
 ### When to Create an ADR
 
 Create an ADR for decisions that are:
+
 - **Significant**: Affect system architecture, major components, or user experience
 - **Durable**: Expected to have long-lasting impact
 - **Controversial**: Where multiple valid approaches exist
@@ -84,6 +106,7 @@ Supporting documentation and resources.
 ## Review Schedule
 
 ADRs should be reviewed periodically to ensure they remain relevant:
+
 - **Critical Decisions**: Every 6 months
 - **Standard Decisions**: Annually
 - **Legacy Decisions**: When technology or requirements change

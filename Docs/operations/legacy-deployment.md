@@ -1,3 +1,19 @@
+---
+title: "Production Deployment Guide"
+description: "Legacy deployment guide for deploying Sightline.ai to production on Vercel platform"
+type: "guide"
+canonical_url: "/docs/operations/legacy-deployment"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["devops-engineers", "system-administrators"]
+complexity: "advanced"
+tags: ["deployment", "production", "vercel", "legacy", "operations"]
+status: "legacy"
+archive_reason: "superseded_by_modern_deployment"
+superseded_by: ["/production-operations-guide"]
+related_docs: ["/docs/operations/monitoring", "/production-operations-guide"]
+---
+
 # Production Deployment Guide
 
 This guide walks you through deploying Sightline.ai to production on Vercel.
@@ -13,12 +29,14 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
 ## Step 1: Database Setup
 
 1. **Create Production Database**
+
    ```bash
    # Create a new Neon project for production
    # Get the connection string from Neon dashboard
    ```
 
 2. **Run Database Migrations**
+
    ```bash
    # Set DATABASE_URL temporarily
    export DATABASE_URL="your-production-database-url"
@@ -28,16 +46,19 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
 ## Step 2: Vercel Deployment
 
 1. **Install Vercel CLI**
+
    ```bash
    pnpm i -g vercel
    ```
 
 2. **Link Project to Vercel**
+
    ```bash
    vercel link
    ```
 
 3. **Set Environment Variables**
+
    ```bash
    # Required variables
    vercel env add NEXTAUTH_URL production
@@ -57,6 +78,7 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
    ```
 
 4. **Deploy to Production**
+
    ```bash
    vercel --prod
    ```
@@ -111,6 +133,7 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
 ## Step 6: Domain & DNS
 
 1. **Custom Domain (Optional)**
+
    ```bash
    # Add custom domain in Vercel dashboard
    # Update DNS records as shown
@@ -123,6 +146,7 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
 ## Step 7: Performance Optimization
 
 1. **Enable Vercel Analytics**
+
    ```bash
    vercel analytics
    ```
@@ -144,6 +168,7 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
 ## Step 9: Monitoring & Alerts
 
 1. **Error Tracking (Sentry)**
+
    ```bash
    # If using Sentry
    vercel env add SENTRY_DSN production

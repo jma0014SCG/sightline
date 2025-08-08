@@ -1,3 +1,18 @@
+---
+title: "Production Operations Guide"
+description: "Comprehensive operational guide for running Sightline.ai in production environments"
+type: "guide"
+canonical_url: "/operations/production-guide"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["system-administrators", "devops-engineers", "operators"]
+complexity: "advanced"
+tags: ["operations", "production", "deployment", "monitoring", "troubleshooting", "scaling"]
+status: "active"
+estimated_time: "45 minutes read"
+related_docs: ["/docs/operations/monitoring", "/docs/operations/troubleshooting", "/security"]
+---
+
 # Production Operations Guide
 
 Comprehensive operational guide for running Sightline.ai in production, covering deployment, monitoring, maintenance, troubleshooting, and scaling strategies.
@@ -48,6 +63,7 @@ Sightline.ai operates on a serverless architecture using Vercel for hosting, Neo
 ## Modern Deployment Stack (2025)
 
 ### Current Production Stack
+
 - **Platform**: Vercel (Next.js 14 with App Router)
 - **Database**: Neon PostgreSQL (Serverless)
 - **Authentication**: Clerk (replaces NextAuth)
@@ -59,6 +75,7 @@ Sightline.ai operates on a serverless architecture using Vercel for hosting, Neo
 ### Environment Variables (Updated for Clerk)
 
 #### Required Production Variables
+
 ```bash
 # Application
 DATABASE_URL=postgresql://user:pass@ep-example.us-east-1.aws.neon.tech/neondb
@@ -89,6 +106,7 @@ SENTRY_DSN=https://...@sentry.io/...
 ### Deployment Checklist (Updated)
 
 **Pre-Deployment:**
+
 - [ ] Update Clerk production settings (domains, redirects)
 - [ ] Configure Stripe live webhooks
 - [ ] Set up Neon production database with proper connection pooling
@@ -97,6 +115,7 @@ SENTRY_DSN=https://...@sentry.io/...
 - [ ] Validate API rate limits and usage quotas
 
 **Deployment Process:**
+
 ```bash
 # 1. Final quality checks
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
@@ -112,6 +131,7 @@ vercel --prod
 ```
 
 **Post-Deployment:**
+
 - [ ] Test authentication flow (Clerk sign-in/up)
 - [ ] Verify payment processing (test transaction)
 - [ ] Test video summarization end-to-end
@@ -122,6 +142,7 @@ vercel --prod
 ### Rollback Procedures
 
 **Automated Rollback (Vercel):**
+
 ```bash
 # Get deployment ID to rollback to
 vercel rollback <deployment-url>
@@ -132,6 +153,7 @@ vercel rollback <deployment-url>
 ```
 
 **Manual Rollback Steps:**
+
 1. **Identify Last Known Good Deployment**: Check Vercel dashboard for stable version
 2. **Database Considerations**: Ensure no breaking schema changes
 3. **Environment Variables**: Verify configuration compatibility
@@ -145,18 +167,21 @@ vercel rollback <deployment-url>
 ## Key Metrics Dashboard
 
 ### Application Performance
+
 - **Page Load Time**: Target <2s (P95), Critical >5s
 - **API Response Time**: Target <200ms (P95), Critical >1s  
 - **Summarization Time**: Target <30s (P95), Critical >60s
 - **Error Rate**: Target <0.1%, Critical >1%
 
 ### Business Metrics
+
 - **Summary Creation Rate**: Summaries/hour, success rate
 - **User Conversion**: Anonymous → Registered → Paid
 - **Plan Usage**: Free/Pro/Complete utilization
 - **Revenue Tracking**: MRR, churn rate, upgrade rate
 
 ### Infrastructure Metrics
+
 - **Database**: Connection count, query performance, storage usage
 - **Function Execution**: Invocation count, duration, memory usage
 - **Third-party APIs**: OpenAI usage, rate limits, error rates
@@ -165,6 +190,7 @@ vercel rollback <deployment-url>
 ## Monitoring Setup
 
 ### Vercel Analytics (Built-in)
+
 ```bash
 # Enable Vercel Analytics
 vercel analytics enable
@@ -174,12 +200,14 @@ vercel analytics --json | jq '.performance'
 ```
 
 **Key Vercel Metrics:**
+
 - Real User Metrics (RUM)
 - Core Web Vitals (LCP, FID, CLS)
 - Function invocation performance
 - Edge cache performance
 
 ### Sentry Integration (Error Tracking)
+
 ```typescript
 // sentry.client.config.ts (recommended setup)
 import * as Sentry from "@sentry/nextjs"
@@ -198,12 +226,14 @@ Sentry.init({
 ```
 
 ### Database Monitoring (Neon)
+
 - **Connection Pooling**: Monitor active connections, queue depth
 - **Query Performance**: Slow query log, execution plans
 - **Storage Usage**: Database size growth, backup status
 - **Connection Limits**: Track connection pool usage
 
 ### Custom Health Checks
+
 ```bash
 # API health check endpoint
 curl https://sightline.ai/api/health
@@ -224,18 +254,21 @@ curl https://sightline.ai/api/health
 ## Security Monitoring
 
 ### Authentication Security (Clerk)
+
 - **Failed Login Attempts**: Monitor for brute force attacks
 - **Session Management**: Track session duration, concurrent sessions
 - **Webhook Validation**: Ensure all Clerk webhooks are properly verified
 - **User Management**: Monitor suspicious account creation patterns
 
 ### API Security
+
 - **Rate Limiting**: Track anonymous vs. authenticated usage
 - **Input Validation**: Monitor for malicious URLs or content
 - **SQL Injection Attempts**: Database query monitoring
 - **XSS Prevention**: CSP violation reports
 
 ### Infrastructure Security
+
 ```bash
 # Security header validation
 curl -I https://sightline.ai | grep -E "(Strict-Transport-Security|X-Frame-Options|Content-Security-Policy)"
@@ -247,6 +280,7 @@ curl -I https://sightline.ai | grep -E "(Strict-Transport-Security|X-Frame-Optio
 ```
 
 ### Vulnerability Management
+
 - **Dependency Scanning**: Weekly `pnpm audit` and security updates
 - **Code Analysis**: Static analysis with ESLint security rules
 - **Secret Management**: Environment variable access auditing
@@ -259,12 +293,14 @@ curl -I https://sightline.ai | grep -E "(Strict-Transport-Security|X-Frame-Optio
 ## Performance Budgets
 
 ### Frontend Performance
+
 - **Bundle Size**: <500KB initial, <2MB total
 - **Core Web Vitals**: LCP <2.5s, FID <100ms, CLS <0.1
 - **Time to Interactive**: <3s on 3G connection
 - **First Contentful Paint**: <1.5s
 
 ### API Performance
+
 - **tRPC Procedures**: <200ms (P95)
 - **FastAPI Endpoints**: <500ms for summarization start
 - **Database Queries**: <50ms (P95) for simple queries
@@ -273,6 +309,7 @@ curl -I https://sightline.ai | grep -E "(Strict-Transport-Security|X-Frame-Optio
 ### Optimization Strategies
 
 #### Frontend Optimization
+
 ```typescript
 // Implement proper code splitting
 import dynamic from 'next/dynamic'
@@ -284,6 +321,7 @@ const SummaryViewer = dynamic(() => import('@/components/SummaryViewer'), {
 ```
 
 #### Database Optimization
+
 ```sql
 -- Monitor slow queries
 SELECT query, mean_exec_time, calls 
@@ -297,6 +335,7 @@ ON summaries(user_id, created_at DESC);
 ```
 
 #### Caching Strategy
+
 - **Static Assets**: Vercel Edge CDN (1 year cache)
 - **API Responses**: Implement Redis for expensive operations
 - **Database**: Connection pooling with PgBouncer
@@ -309,6 +348,7 @@ ON summaries(user_id, created_at DESC);
 ## Critical Incident Response
 
 ### Severity Levels
+
 - **P0 (Critical)**: Complete service outage, security breach
 - **P1 (High)**: Major feature broken, significant user impact  
 - **P2 (Medium)**: Minor feature issues, performance degradation
@@ -317,21 +357,22 @@ ON summaries(user_id, created_at DESC);
 ### Incident Response Process
 
 #### P0/P1 Incident Runbook
+
 1. **Immediate Response (0-5 minutes)**
    - Assess impact and scope
    - Check Vercel status page and deployment history
    - Verify external service status (Clerk, Stripe, OpenAI, Neon)
-   
+
 2. **Investigation (5-15 minutes)**
    - Check error logs in Sentry
    - Review recent deployments
    - Test core user flows manually
-   
+
 3. **Resolution (15-30 minutes)**
    - Rollback if deployment-related
    - Scale resources if capacity issue
    - Contact vendor support if third-party issue
-   
+
 4. **Communication (Ongoing)**
    - Update status page
    - Notify users if widespread impact
@@ -340,6 +381,7 @@ ON summaries(user_id, created_at DESC);
 ### Common Issues & Solutions
 
 #### "Service Unavailable" / 500 Errors
+
 ```bash
 # Check deployment status
 vercel deployments
@@ -355,6 +397,7 @@ vercel rollback <previous-deployment-url>
 ```
 
 #### Authentication Issues (Clerk)
+
 ```bash
 # Verify Clerk configuration
 curl -H "Authorization: Bearer $CLERK_SECRET_KEY" \
@@ -370,6 +413,7 @@ curl -X GET https://sightline.ai/api/webhooks/clerk
 ```
 
 #### Database Connection Issues
+
 ```sql
 -- Check connection count
 SELECT count(*) FROM pg_stat_activity;
@@ -384,6 +428,7 @@ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE ...;
 ```
 
 #### Payment Processing Issues (Stripe)
+
 ```bash
 # Check webhook delivery in Stripe Dashboard
 # Verify STRIPE_WEBHOOK_SECRET matches
@@ -399,6 +444,7 @@ curl -X POST https://sightline.ai/api/webhooks/stripe \
 ```
 
 #### Summarization Failures
+
 ```bash
 # Check OpenAI API status
 curl -H "Authorization: Bearer $OPENAI_API_KEY" \
@@ -421,12 +467,14 @@ curl https://sightline.ai/api/health
 ## Regular Maintenance Tasks
 
 ### Daily Tasks (Automated)
+
 - Health check monitoring
 - Error rate monitoring
 - Performance metrics review
 - Security alert monitoring
 
 ### Weekly Tasks
+
 ```bash
 # 1. Dependency security audit
 pnpm audit --audit-level=high
@@ -442,6 +490,7 @@ pnpm audit --audit-level=high
 ```
 
 ### Monthly Tasks
+
 - Complete security audit
 - Performance optimization review
 - Cost optimization analysis
@@ -449,6 +498,7 @@ pnpm audit --audit-level=high
 - Disaster recovery testing
 
 ### Quarterly Tasks
+
 - Full dependency updates
 - Security penetration testing
 - Capacity planning review
@@ -457,6 +507,7 @@ pnpm audit --audit-level=high
 ## Database Maintenance
 
 ### Schema Migrations
+
 ```bash
 # Production migration process
 1. Backup database before migration
@@ -470,6 +521,7 @@ npx prisma migrate deploy
 ```
 
 ### Index Management
+
 ```sql
 -- Monitor index usage
 SELECT schemaname, tablename, attname, n_distinct, correlation 
@@ -482,6 +534,7 @@ ON summaries USING GIN (tags);
 ```
 
 ### Data Archival
+
 ```sql
 -- Archive old anonymous summaries (>90 days)
 DELETE FROM summaries 
@@ -500,12 +553,14 @@ WHERE created_at < NOW() - INTERVAL '7 days';
 ## Traffic Growth Planning
 
 ### Current Capacity Baselines
+
 - **Vercel Functions**: 100GB-hr/month (Pro plan)
 - **Database**: 1GB storage, 10M queries/month (Neon)
 - **OpenAI**: Rate limits vary by usage tier
 - **Concurrent Users**: ~1000 based on current architecture
 
 ### Scaling Triggers
+
 - **Database**: >80% storage usage or >8M queries/month
 - **Function Execution**: >80GB-hr monthly usage
 - **API Rate Limits**: Approaching 80% of OpenAI limits
@@ -514,6 +569,7 @@ WHERE created_at < NOW() - INTERVAL '7 days';
 ### Vertical Scaling (Immediate)
 
 #### Database Scaling (Neon)
+
 ```bash
 # Upgrade to higher compute tier
 # Enable read-replicas for read-heavy workloads
@@ -524,6 +580,7 @@ SELECT * FROM pg_stat_database WHERE datname = 'neondb';
 ```
 
 #### Function Optimization
+
 ```typescript
 // Optimize memory usage for better performance
 export const config = {
@@ -536,6 +593,7 @@ export const config = {
 ### Horizontal Scaling (Growth Phase)
 
 #### Multi-Region Deployment
+
 ```bash
 # Deploy to multiple Vercel regions
 vercel --regions sfo1,iad1,fra1
@@ -545,6 +603,7 @@ vercel --regions sfo1,iad1,fra1
 ```
 
 #### Microservices Architecture
+
 ```text
 Current:     [Next.js + FastAPI] → [Neon DB]
 Future:      [Next.js] → [API Gateway] → [Summarization Service]
@@ -553,6 +612,7 @@ Future:      [Next.js] → [API Gateway] → [Summarization Service]
 ```
 
 #### Background Job Processing
+
 ```typescript
 // Implement queue for heavy operations
 import { Queue } from 'bullmq'
@@ -568,6 +628,7 @@ await summarizationQueue.add('summarize', { videoUrl, userId })
 ### Cost Optimization
 
 #### Resource Monitoring
+
 ```bash
 # Monitor Vercel usage
 vercel billing
@@ -581,6 +642,7 @@ vercel functions --optimize
 ```
 
 #### Caching Strategy
+
 ```typescript
 // Implement intelligent caching
 const cache = {
@@ -597,12 +659,14 @@ const cache = {
 ## Backup Strategy
 
 ### Database Backups (Neon)
+
 - **Automatic Backups**: Point-in-time recovery for 7 days (free tier)
 - **Extended Backups**: 30-day retention (paid tier)
 - **Manual Snapshots**: Before major updates or migrations
 - **Cross-region Backup**: For critical data protection
 
 ### Application Backups
+
 ```bash
 # Export user data regularly
 pnpm run export-user-data > backup-$(date +%Y%m%d).json
@@ -615,6 +679,7 @@ git push origin production-$(date +%Y%m%d)
 ### Recovery Procedures
 
 #### Database Recovery
+
 ```bash
 # Point-in-time recovery (Neon)
 # 1. Go to Neon Console > Branches
@@ -627,6 +692,7 @@ psql $NEW_DATABASE_URL < backup.sql
 ```
 
 #### Application Recovery
+
 ```bash
 # Deploy from known-good state
 git checkout production-backup-tag
@@ -640,17 +706,20 @@ vercel env pull .env.backup
 ## Business Continuity
 
 ### Service Dependencies
+
 - **Critical**: Vercel, Neon, Clerk (blocks core functionality)
 - **Important**: Stripe (blocks paid features), OpenAI (blocks summarization)
 - **Optional**: YouTube API, Sentry (degrades experience)
 
 ### Fallback Strategies
+
 - **OpenAI Outage**: Queue requests, show status message
 - **Database Outage**: Show cached data, defer writes
 - **Authentication Outage**: Allow anonymous usage only
 - **Payment Outage**: Allow existing users, defer new subscriptions
 
 ### Communication Plan
+
 - **Internal**: Slack alerts, email notifications for incidents
 - **External**: Status page updates, email to affected users
 - **Documentation**: Incident post-mortems, runbook updates
@@ -662,18 +731,21 @@ vercel env pull .env.backup
 ## Key Performance Indicators (KPIs)
 
 ### Technical KPIs
+
 - **Availability**: 99.9% uptime SLO
 - **Performance**: P95 response time <2s
 - **Quality**: Error rate <0.1%
 - **Scalability**: Handle 10x current traffic
 
 ### Business KPIs
+
 - **User Growth**: Monthly active users, conversion rate
 - **Revenue**: Monthly recurring revenue, churn rate
 - **Usage**: Summaries created per day, plan utilization
 - **Quality**: User satisfaction (NPS), support ticket volume
 
 ### Operational Efficiency
+
 - **Deploy Frequency**: Target daily deploys
 - **Lead Time**: Feature to production <1 week
 - **Recovery Time**: Mean time to recovery <5 minutes
@@ -682,6 +754,7 @@ vercel env pull .env.backup
 ## Monitoring Automation
 
 ### Alert Configurations
+
 ```yaml
 alerts:
   critical:
@@ -695,6 +768,7 @@ alerts:
 ```
 
 ### Automated Responses
+
 ```bash
 # Auto-scaling trigger
 if [ $error_rate -gt 1 ]; then
@@ -714,20 +788,23 @@ fi
 ## Support & Resources
 
 ### Internal Documentation
+
 - [API Documentation](API_DOCUMENTATION.md) - Complete API reference
 - [Security Policy](SECURITY.md) - Security measures and procedures
 - [Monitoring Guide](MONITORING.md) - Detailed monitoring setup
 - [Bug Tracking](Docs/Bug_tracking.md) - Known issues and resolutions
 
 ### External Resources
+
 - [Vercel Production Checklist](https://vercel.com/guides/production-checklist)
 - [Neon Production Guide](https://neon.tech/docs/guides/production-checklist)
 - [Clerk Production Setup](https://clerk.com/docs/deployments/production)
 - [Stripe Production Integration](https://stripe.com/docs/production-checklist)
 
 ### Emergency Contacts
+
 - **Platform Issues**: Vercel Support, Neon Support
-- **Security Issues**: security@sightline.ai
+- **Security Issues**: <security@sightline.ai>
 - **Payment Issues**: Stripe Support
 - **AI Issues**: OpenAI Support
 

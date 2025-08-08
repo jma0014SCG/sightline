@@ -1,3 +1,17 @@
+---
+title: "API Rate Limits"
+description: "Rate limiting policies and configurations for Sightline.ai platform API endpoints"
+type: "reference"
+canonical_url: "/docs/operations/rate-limits"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "system-administrators", "api-users"]
+complexity: "intermediate"
+tags: ["rate-limits", "api", "configuration", "performance", "security"]
+status: "active"
+related_docs: ["/rate-limits", "/docs/operations/monitoring", "/api"]
+---
+
 # API Rate Limits
 
 This document defines the rate limiting policies for the Sightline.ai platform API endpoints.
@@ -5,6 +19,7 @@ This document defines the rate limiting policies for the Sightline.ai platform A
 ## Overview
 
 Rate limiting is implemented to:
+
 - Prevent abuse and ensure fair usage
 - Protect against DDoS attacks
 - Manage external API quotas efficiently
@@ -67,16 +82,19 @@ Rate limiting is implemented to:
 ## External API Quotas
 
 ### OpenAI API
+
 - **Tokens per minute**: 90,000 (GPT-4o-mini)
 - **Requests per minute**: 200
 - **Monthly budget**: $500 (adjustable)
 
 ### YouTube Data API
+
 - **Daily quota**: 10,000 units
 - **Search cost**: 100 units per request
 - **Video details**: 1 unit per video
 
 ### Stripe API
+
 - **Requests per second**: 100
 - **Webhook events**: Unlimited (with verification)
 
@@ -113,11 +131,13 @@ HTTP Status Code: `429 Too Many Requests`
 ## Implementation Details
 
 ### Rate Limit Storage
+
 - **Development**: In-memory storage
 - **Production**: Redis/Upstash (when configured)
 - **Fallback**: Database-backed rate limiting
 
 ### Rate Limit Keys
+
 ```typescript
 // Anonymous users
 `rate_limit:anon:${fingerprint}:${ip}:${endpoint}`
@@ -130,6 +150,7 @@ HTTP Status Code: `429 Too Many Requests`
 ```
 
 ### Bypass Mechanisms
+
 - Internal health checks
 - Webhook endpoints (with signature verification)
 - Admin override tokens (Enterprise only)
@@ -145,12 +166,15 @@ HTTP Status Code: `429 Too Many Requests`
 ## Rate Limit Adjustments
 
 ### Requesting Higher Limits
+
 1. Pro users: Automatic increase with subscription
-2. High-volume users: Contact support@sightline.ai
-3. Enterprise: Custom limits via sales@sightline.ai
+2. High-volume users: Contact <support@sightline.ai>
+3. Enterprise: Custom limits via <sales@sightline.ai>
 
 ### Temporary Increases
+
 Available for:
+
 - Product launches
 - Migration periods
 - Special events
@@ -160,11 +184,13 @@ Contact support with justification and expected duration.
 ## Monitoring and Alerts
 
 ### For Developers
+
 - Dashboard at `/admin/rate-limits` (admin only)
 - Alerts when users hit 80% of limits
 - Daily reports of rate limit violations
 
 ### For Users
+
 - Usage dashboard in account settings
 - Email alerts at 80% and 100% of quota
 - Monthly usage reports for Pro users

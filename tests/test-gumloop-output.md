@@ -1,3 +1,19 @@
+---
+title: "Test Gumloop Output"
+description: "Sample output from Gumloop API processing showing video summarization results"
+type: "test"
+canonical_url: "/tests/gumloop-output"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "qa-engineers"]
+complexity: "intermediate"
+tags: ["test", "gumloop", "api", "output", "sample"]
+test_type: "output"
+test_status: "reference"
+test_category: "integration"
+related_docs: ["/api", "/docs/development/testing-strategy"]
+---
+
 ```markdown
 ## Video Context
 

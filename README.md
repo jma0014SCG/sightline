@@ -12,11 +12,12 @@ quick_start: true
 estimated_time: "5 minutes read"
 ---
 
-# Sightline.ai
+## Sightline.ai
 
 ## AI-Powered YouTube Video Summarization Platform
 
-Transform long-form YouTube videos into actionable insights with structured AI summaries, intelligent tagging, and seamless organization.
+Transform long-form YouTube videos into actionable insights with structured AI summaries,
+intelligent tagging, and seamless organization.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -28,7 +29,8 @@ Transform long-form YouTube videos into actionable insights with structured AI s
 Sightline.ai converts YouTube videos into structured summaries featuring:
 
 - **Instant AI Summaries** - TL;DR, key moments, frameworks, and playbooks extracted from video content
-- **Smart Collections** - Automatic tagging with 7 entity types (Person, Company, Technology, Product, Concept, Framework, Tool)
+- **Smart Collections** - Automatic tagging with 7 entity types
+  (Person, Company, Technology, Product, Concept, Framework, Tool)
 - **Anonymous Trial** - Try with 1 free summary, no signup required
 - **Real-time Progress** - Live processing updates with accurate stage tracking
 - **Personal Library** - Searchable collection with intelligent filtering
@@ -36,7 +38,8 @@ Sightline.ai converts YouTube videos into structured summaries featuring:
 
 ## Why
 
-**Problem**: YouTube videos contain valuable insights buried in hours of content, making knowledge extraction time-consuming and inconsistent.
+**Problem**: YouTube videos contain valuable insights buried in hours of content,
+making knowledge extraction time-consuming and inconsistent.
 
 **Solution**: AI-powered analysis that converts video content into structured, searchable, and actionable formats.
 
@@ -161,7 +164,9 @@ pnpm lint && pnpm typecheck && pnpm format:check
 
 ### Smart Collections
 
-AI-powered automatic categorization system that extracts entities and assigns categories to video summaries. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing) for detailed technical specifications.
+AI-powered automatic categorization system that extracts entities and assigns categories to video
+summaries. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing) for detailed
+technical specifications.
 
 - **7 Entity Types**: Person, Company, Technology, Product, Concept, Framework, Tool
 - **14 Categories**: Technology, Business, Marketing, Productivity, Education, Health, etc.

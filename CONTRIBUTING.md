@@ -13,7 +13,7 @@ tags: ["development", "workflow", "setup", "testing", "pull-requests"]
 related_docs: ["/architecture", "/claude"]
 ---
 
-# Contributing
+## Contributing Guide
 
 **Developer workflow guide for contributing to Sightline.ai platform**
 
@@ -92,18 +92,21 @@ pnpm env:validate  # Comprehensive validation
 ### Code Standards
 
 **TypeScript**:
+
 - Use strict mode with comprehensive type checking
 - Define interfaces for all data structures
 - Prefer type inference over explicit types where clear
 - Use discriminated unions for state management
 
 **Component Architecture**:
+
 - Follow atomic design pattern (atoms → molecules → organisms)
 - Use composition over inheritance
 - Implement proper error boundaries
 - Ensure responsive design with Tailwind CSS
 
 **API Development**:
+
 - tRPC procedures must use Zod for input/output validation
 - Follow RESTful principles for FastAPI endpoints
 - Implement comprehensive error handling
@@ -138,12 +141,14 @@ pnpm dev:full              # Both frontend and backend servers
 ### Git Workflow
 
 **Branch Naming**:
+
 - `feature/feature-name` - New features
 - `fix/bug-description` - Bug fixes
 - `refactor/component-name` - Code refactoring
 - `docs/documentation-update` - Documentation changes
 
 **Commit Standards**:
+
 - Use conventional commit format: `type(scope): description`
 - Examples: `feat(auth): add anonymous user support`, `fix(api): resolve cors issues`
 - Keep commits focused and atomic
@@ -189,18 +194,21 @@ python -m pytest -v                 # Verbose output
 ### Test Writing Guidelines
 
 **Unit Tests**:
+
 - Test component behavior, not implementation details
 - Use semantic queries (getByRole, getByLabelText)
 - Mock external dependencies (APIs, third-party libraries)
 - Test both success and error scenarios
 
 **E2E Tests**:
+
 - Focus on critical user journeys
 - Test across multiple browsers (Chrome, Firefox, Safari)
 - Use Page Object Model for maintainable tests
 - Include accessibility testing with axe
 
 **API Tests**:
+
 - Test all endpoints with valid/invalid inputs
 - Verify response schemas and status codes
 - Test authentication and authorization
@@ -216,6 +224,7 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 ```
 
 **Coverage Requirements**:
+
 - Unit Tests: >70% code coverage
 - E2E Tests: All critical user paths
 - API Tests: All endpoints with success/error cases
@@ -233,6 +242,7 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 ### PR Requirements
 
 **PR Title Format**:
+
 - `feat: add Smart Collections AI tagging`
 - `fix: resolve CORS issues in FastAPI`
 - `docs: update API documentation`
@@ -264,6 +274,7 @@ Brief description of what this PR does
 ### Review Process
 
 **Reviewer Guidelines**:
+
 - Focus on logic, security, and maintainability
 - Check for proper error handling
 - Verify test coverage for new functionality
@@ -271,6 +282,7 @@ Brief description of what this PR does
 - Validate responsive design implementation
 
 **Author Guidelines**:
+
 - Respond to feedback constructively
 - Make requested changes in separate commits
 - Update tests when logic changes
@@ -318,6 +330,7 @@ Screenshots, error logs, etc.
 ### Performance Optimization
 
 **Frontend**:
+
 - Use React.memo for expensive components
 - Implement proper loading states
 - Optimize images with Next.js Image component
@@ -325,6 +338,7 @@ Screenshots, error logs, etc.
 - Implement proper caching strategies
 
 **Backend**:
+
 - Use database indexes for common queries
 - Implement connection pooling
 - Cache expensive operations
@@ -334,18 +348,21 @@ Screenshots, error logs, etc.
 ### Security Guidelines
 
 **Input Validation**:
+
 - Always validate inputs with Zod schemas
 - Sanitize user-generated content
 - Use parameterized queries (Prisma ORM)
 - Implement proper rate limiting
 
 **Authentication**:
+
 - Never store sensitive data in localStorage
 - Use HTTPS for all communications  
 - Implement proper CORS policies
 - Validate JWT tokens on server side
 
 **Error Handling**:
+
 - Never expose sensitive information in error messages
 - Log errors appropriately for debugging
 - Implement proper error boundaries
@@ -385,6 +402,7 @@ import './styles.css'
 ### Accessibility Requirements
 
 **WCAG 2.1 AA Compliance**:
+
 - Use semantic HTML elements
 - Provide alt text for images
 - Ensure proper color contrast (4.5:1 minimum)
@@ -392,6 +410,7 @@ import './styles.css'
 - Use ARIA labels appropriately
 
 **Testing**:
+
 - Include accessibility tests in E2E suite
 - Use axe-core for automated testing
 - Test with screen readers

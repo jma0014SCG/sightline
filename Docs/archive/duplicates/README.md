@@ -1,3 +1,20 @@
+---
+title: "Archived Duplicate Documentation"
+description: "Directory containing documentation files archived during deduplication cleanup process"
+type: "archive"
+canonical_url: "/docs/archive/duplicates"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "maintainers"]
+complexity: "beginner"
+tags: ["archive", "duplicates", "cleanup", "historical"]
+status: "archived"
+archive_date: "2025-01-09"
+archive_reason: "deduplication_cleanup"
+superseded_by: ["/docs/index"]
+related_docs: ["/docs/index", "/contributing"]
+---
+
 # Archived Duplicate Documentation
 
 **⚠️ ARCHIVE PURPOSE**: This directory contains documentation files that were archived on 2025-01-09 during the documentation deduplication cleanup process.  
@@ -12,14 +29,16 @@ These files were identified as duplicates of content maintained authoritatively 
 ## Archived Files
 
 ### 1. platform-overview.md
+
 - **Original Location**: `docs/architecture/platform-overview.md`
 - **Size**: 1,667 lines of comprehensive platform documentation
 - **Canonical Source**: [/ARCHITECTURE.md](../../../ARCHITECTURE.md)
 - **Reason**: Complete duplicate of root-level architecture documentation
 
 ### 2. legacy-implementation.md
+
 - **Consolidated Content**: Multiple legacy implementation documents
-- **Original Locations**: 
+- **Original Locations**:
   - `docs/archive/old-implementation/Implementation.md`
   - `docs/archive/old-implementation/IMPLEMENTATION_STATUS.md`
 - **Canonical Source**: [/docs/reports/implementation-report.md](../../reports/implementation-report.md)

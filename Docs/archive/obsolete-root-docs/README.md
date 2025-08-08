@@ -5,16 +5,19 @@ This directory contains root-level documentation files that have been superseded
 ## Archived Files
 
 ### DOCUMENTATION_INDEX.md
+
 **Archived**: January 9, 2025  
 **Reason**: Superseded by [docs/INDEX.md](../../INDEX.md) with improved organization and LLM-friendly structure  
 **Content**: Original documentation navigation hub  
 
 ### DOCUMENTATION_STANDARDS.md  
+
 **Archived**: January 9, 2025  
 **Reason**: Excessive process overhead for LLM-optimized structure; core standards integrated into [CONTRIBUTING.md](../../../CONTRIBUTING.md)  
 **Content**: Comprehensive documentation maintenance standards and workflows  
 
 ### API_DOCUMENTATION.md
+
 **Archived**: January 9, 2025  
 **Reason**: Replaced by schema-first [API/](../../../API/) directory structure with separate tRPC and FastAPI documentation  
 **Content**: Complete API reference for both tRPC and FastAPI layers  
@@ -32,18 +35,21 @@ The LLM-optimized documentation structure prioritizes:
 ## Migration Notes
 
 ### DOCUMENTATION_INDEX.md → docs/INDEX.md
+
 - Condensed from comprehensive navigation to essential paths
 - Removed redundant sections and duplicate links
 - Added status indicators and review schedules
 - Focused on LLM consumption patterns
 
 ### DOCUMENTATION_STANDARDS.md → Integrated Standards
+
 - Core standards moved to CONTRIBUTING.md workflow section
 - Process overhead removed for simplified maintenance
 - Quality gates integrated into development workflow
 - Automated validation preferred over manual processes
 
 ### API_DOCUMENTATION.md → API/ Directory
+
 - Split into tRPC and FastAPI specific documentation  
 - Added schema-first approach with auto-generation potential
 - Created implementation examples directory
@@ -52,6 +58,7 @@ The LLM-optimized documentation structure prioritizes:
 ## Access to Historical Content
 
 These files remain accessible in this archive for:
+
 - Historical reference and context
 - Migration verification and comparison  
 - Recovery of specific content if needed

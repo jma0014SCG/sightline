@@ -5,6 +5,7 @@ Currently, usage limits are disabled for testing. Here's how to re-enable them f
 ## 1. Update User Model Default Limits
 
 In `prisma/schema.prisma`, the current limits are:
+
 - Free tier: 5 summaries
 - Pro tier: Unlimited (set high limit)
 - Enterprise: Unlimited
@@ -61,6 +62,7 @@ await prisma.user.updateMany({
 ## 5. Display Limits in UI
 
 The library page already shows usage. Make sure it's visible:
+
 - Current: X/Y summaries used
 - Warning when approaching limit
 - Clear upgrade CTA when at limit

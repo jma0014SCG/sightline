@@ -33,8 +33,9 @@ User's private collection of saved video summaries with search, filtering, and o
 
 **Plan Limits**  
 Usage restrictions based on subscription tier:
+
 - Anonymous: 1 summary (lifetime)
-- Free: 3 summaries (lifetime) 
+- Free: 3 summaries (lifetime)
 - Pro: 25 summaries/month
 - Complete: Unlimited summaries
 

@@ -1,3 +1,18 @@
+---
+title: "ADR Template"
+description: "Standard template for creating new Architectural Decision Records"
+type: "template"
+canonical_url: "/decisions/adr-template"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["architects", "senior-developers", "tech-leads"]
+complexity: "beginner"
+tags: ["template", "adr", "process", "documentation"]
+status: "active"
+special_purpose: "adr_template"
+related_docs: ["/decisions", "/contributing"]
+---
+
 # ADR-[NUMBER]: [TITLE]
 
 ## Status

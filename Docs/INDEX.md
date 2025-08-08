@@ -38,18 +38,21 @@ quick_start: true
 ## Quick Start Paths {#quick-start}
 
 ### For New Developers
+
 1. **[README.md](../README.md)** - Project overview and quick start
 2. **[ARCHITECTURE.md](../ARCHITECTURE.md)** - System architecture and data flow
 3. **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Development setup and workflow
 4. **[GLOSSARY.md](../GLOSSARY.md)** - Platform terminology
 
 ### For Contributors  
+
 1. **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Complete development guide
 2. **[Bug Tracking](development/bug-tracking.md)** - Known issues and resolutions
 3. **[Testing Strategy](development/testing-strategy.md)** - Testing framework
 4. **[DECISIONS/](../DECISIONS/)** - Architectural decision records
 
 ### For Operators
+
 1. **[Production Operations](../PRODUCTION_OPERATIONS_GUIDE.md)** - Complete operational manual
 2. **[Security Policy](../SECURITY.md)** - Security implementation
 3. **[Monitoring Guide](operations/monitoring.md)** - Error tracking setup
@@ -82,6 +85,7 @@ quick_start: true
 | **Examples** | [API/examples/](../API/examples/) | Implementation patterns |
 
 **Quick API Reference**:
+
 - [Summary Procedures](../API/trpc/summary.md) - Video summarization API
 - [Summarization Endpoint](../API/fastapi/summarization.md) - AI processing API
 - [Progress Tracking](../API/examples/progress-tracking.md) - Real-time progress
@@ -91,6 +95,7 @@ quick_start: true
 ### By Category
 
 #### Architecture & Design {#architecture-design}
+
 - **[Project Structure](architecture/project-structure.md)** - Codebase organization
 - **[UI/UX Guidelines](architecture/ui-ux-guidelines.md)** - Design system and accessibility
 
@@ -99,6 +104,7 @@ quick_start: true
 **See Also**: [Security Implementation](../ARCHITECTURE.md#security) • [Performance Patterns](../ARCHITECTURE.md#performance) • [ADR References](../ARCHITECTURE.md#adrs-reference)
 
 #### Development Resources {#development}
+
 - **[Environment Setup](development/environment-setup.md)** - Detailed development configuration
 - **[Bug Tracking](development/bug-tracking.md)** - Known issues and resolution process
 - **[Testing Strategy](development/testing-strategy.md)** - Unit tests, E2E tests (Playwright), performance benchmarks
@@ -107,6 +113,7 @@ quick_start: true
 **See Also**: [CONTRIBUTING.md](../CONTRIBUTING.md) • [Environment Variables](../ARCHITECTURE.md#external-dependencies) • [Testing Framework](development/testing-strategy.md)
 
 #### Operations & Deployment {#operations}
+
 - **[Monitoring Guide](operations/monitoring.md)** - Error tracking and performance monitoring
 - **[Rate Limits](../RATE_LIMITS.md)** - API rate limiting configuration and enforcement
 - **[Troubleshooting](operations/troubleshooting.md)** - Common issues and solutions
@@ -115,6 +122,7 @@ quick_start: true
 **See Also**: [Production Operations Guide](../PRODUCTION_OPERATIONS_GUIDE.md) • [Security Policy](../SECURITY.md) • [Performance Monitoring](../ARCHITECTURE.md#performance)
 
 #### Project Reports {#reports}
+
 - **[Implementation Report](reports/implementation-report.md)** - Project implementation summary
 
 *Historical test reports have been archived. For current testing information, see [Testing Strategy](development/testing-strategy.md)*
@@ -122,13 +130,16 @@ quick_start: true
 ## Legacy Documentation (Archive) {#archive}
 
 ### Archived Files
+
 Files moved to `archive/` directory are no longer maintained but kept for historical reference:
 
 #### Recently Archived (2025-01-09 Deduplication)
+
 - **[Duplicated Documentation](archive/duplicates/)** - Files consolidated to canonical sources
 - **[Test Reports](archive/test-reports/)** - Historical testing reports and roadmaps
 
 #### Previously Archived
+
 - **Legacy Implementation Docs** - Superseded by current architecture  
 - **Old Deployment Guides** - Replaced by Production Operations Guide
 - **Historical Feature Specs** - Implemented and integrated into main docs
@@ -137,6 +148,7 @@ Files moved to `archive/` directory are no longer maintained but kept for histor
 ## Documentation Status {#status}
 
 ### Active Documentation (7 Core Files)
+
 ✅ **README.md** - Entry point with what/why/how/run/links  
 ✅ **ARCHITECTURE.md** - Technical foundation with system diagrams  
 ✅ **CONTRIBUTING.md** - Complete developer workflow guide  
@@ -146,12 +158,14 @@ Files moved to `archive/` directory are no longer maintained but kept for histor
 ✅ **Docs/INDEX.md** - This navigation hub  
 
 ### Maintained Documentation (Supporting)
+
 - Production operations and security guides
 - Detailed architecture and development resources
 - Testing strategies and bug tracking
 - Project reports and analysis
 
 ### Quality Metrics
+
 - **Coverage**: 100% of core features documented
 - **Freshness**: Core docs updated with each major release
 - **Accuracy**: All code examples tested and validated
@@ -162,12 +176,14 @@ Files moved to `archive/` directory are no longer maintained but kept for histor
 ### When to Update Documentation
 
 **Immediate Updates Required**:
+
 - New features or API changes
 - Breaking changes or deprecations  
 - Security updates or configuration changes
 - Bug fixes affecting user workflow
 
 **Regular Updates**:
+
 - Performance improvements
 - UI/UX enhancements
 - Development process changes
@@ -182,6 +198,7 @@ Files moved to `archive/` directory are no longer maintained but kept for histor
 **Glossary**: Maintain canonical definitions for consistent terminology  
 
 ### Review Schedule
+
 - **Monthly**: Review all core documentation for accuracy
 - **Quarterly**: Update examples and verify all links
 - **Release**: Update relevant docs with each version release
@@ -190,17 +207,20 @@ Files moved to `archive/` directory are no longer maintained but kept for histor
 ## Getting Help {#help}
 
 ### Documentation Questions
+
 - **Quick Reference**: Use search across documentation files
 - **Development Issues**: Check [Bug Tracking](development/bug-tracking.md)
 - **Architecture Questions**: Review [System Overview](../ARCHITECTURE.md#system-overview), [Data Flow](../ARCHITECTURE.md#data-flow), [Security](../ARCHITECTURE.md#security), and [ADRs](../DECISIONS/)
 - **API Usage**: See [API Documentation](../API/) with examples
 
 ### Community Resources
+
 - **GitHub Issues**: Bug reports and feature requests
 - **GitHub Discussions**: General questions and community support
 - **Development Chat**: Real-time development discussions
 
 ### Contribution Process
+
 1. Check existing documentation for gaps or outdated content
 2. Follow [Documentation Standards](archive/obsolete-root-docs/DOCUMENTATION_STANDARDS.md)
 3. Submit updates via pull request with proper review

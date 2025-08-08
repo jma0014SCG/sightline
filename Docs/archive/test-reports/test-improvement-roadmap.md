@@ -5,10 +5,12 @@
 **Estimated Effort**: 40-60 hours
 
 ## Phase 1: Critical Foundation (Week 1-2) 🚨
+
 **Goal**: Address highest risk areas and establish testing patterns  
 **Target Coverage**: 15-20%
 
 ### 1.1 Fix Configuration Issues
+
 ```bash
 # Fix Jest configuration warning
 # File: jest.config.js - Change moduleNameMapping to moduleNameMapping
@@ -16,12 +18,15 @@ moduleNameMapping → moduleNameMapping
 ```
 
 ### 1.2 API Route Testing (Priority 1)
+
 **Files to Create**:
+
 - `src/app/api/health/__tests__/route.test.ts`
-- `src/app/api/webhooks/clerk/__tests__/route.test.ts` 
+- `src/app/api/webhooks/clerk/__tests__/route.test.ts`
 - `src/app/api/webhooks/stripe/__tests__/route.test.ts`
 
 **Implementation Pattern**:
+
 ```typescript
 import { GET } from '../route'
 import { NextRequest } from 'next/server'
@@ -40,18 +45,23 @@ describe('/api/health', () => {
 ```
 
 ### 1.3 Core tRPC Procedures (Priority 1)
+
 **Files to Create**:
+
 - `src/server/api/routers/__tests__/summary.test.ts`
 - `src/server/api/routers/__tests__/auth.test.ts`
 - `src/server/api/routers/__tests__/billing.test.ts`
 
 **Setup Requirements**:
+
 - Mock Prisma database calls
 - Mock external API services (OpenAI, Clerk, Stripe)
 - Test both success and error scenarios
 
 ### 1.4 Payment Processing (Critical)
+
 **Test Scenarios**:
+
 - Subscription creation and updates
 - Payment method handling
 - Webhook processing
@@ -61,13 +71,16 @@ describe('/api/health', () => {
 **Estimated Effort**: 12-15 hours
 
 ## Phase 2: Core Business Logic (Week 3-4) ⚡
+
 **Goal**: Test video summarization and user management  
 **Target Coverage**: 35-45%
 
 ### 2.1 Video Summarization Pipeline
+
 **File**: `src/server/api/routers/__tests__/summary.test.ts`
 
 **Key Test Scenarios**:
+
 - Anonymous user summary creation
 - Authenticated user summary creation  
 - Summary limit enforcement by plan
@@ -76,9 +89,11 @@ describe('/api/health', () => {
 - Database persistence
 
 ### 2.2 Smart Collections Testing
+
 **File**: `src/lib/__tests__/classificationService.test.ts`
 
 **Test Coverage**:
+
 - AI classification service mocking
 - Tag and category extraction
 - Error handling when OpenAI unavailable
@@ -86,9 +101,11 @@ describe('/api/health', () => {
 - Fallback behavior
 
 ### 2.3 Authentication & Authorization
+
 **File**: `src/server/api/routers/__tests__/auth.test.ts`
 
 **Test Scenarios**:
+
 - User profile updates
 - Notification preferences
 - Data export functionality
@@ -98,13 +115,16 @@ describe('/api/health', () => {
 **Estimated Effort**: 15-18 hours
 
 ## Phase 3: Service Layer & Caching (Week 5-6) 🔧
+
 **Goal**: Test performance-critical systems  
 **Target Coverage**: 55-65%
 
 ### 3.1 Caching System
+
 **File**: `src/lib/__tests__/cache.test.ts`
 
 **Test Coverage**:
+
 - Redis connection and fallback to memory
 - Cache hit/miss scenarios
 - TTL expiration
@@ -112,18 +132,22 @@ describe('/api/health', () => {
 - Performance wrapper functions
 
 ### 3.2 Performance Monitoring
+
 **File**: `src/lib/__tests__/monitoring.test.ts`
 
 **Test Coverage**:
+
 - Error tracking integration
 - Performance metrics collection
 - Alerting thresholds
 - Custom error handling
 
 ### 3.3 Library Management
+
 **File**: `src/server/api/routers/__tests__/library.test.ts`
 
 **Test Coverage**:
+
 - Summary filtering and pagination
 - Category and tag-based filtering
 - Search functionality
@@ -132,29 +156,36 @@ describe('/api/health', () => {
 **Estimated Effort**: 12-15 hours
 
 ## Phase 4: Component & Hook Testing (Week 7-8) 🎨
+
 **Goal**: Test React components and custom hooks  
 **Target Coverage**: 70-80%
 
 ### 4.1 Critical React Components
+
 **Priority Components to Test**:
+
 - `URLInput` - Core user interaction
 - `SummaryCard` - Data display and actions
 - `LibraryControls` - Filtering and search
 - `SummaryViewer` - Complex content display
 
 **Setup Requirements**:
+
 ```bash
 # Additional testing dependencies
 pnpm add -D @testing-library/user-event msw
 ```
 
 ### 4.2 Custom Hooks Testing
+
 **Files to Create**:
+
 - `src/lib/hooks/__tests__/useProgressTracking.test.ts`
 - `src/lib/hooks/__tests__/useAuth.test.ts`
 - `src/hooks/__tests__/useToast.test.ts`
 
 **Testing Pattern**:
+
 ```typescript
 import { renderHook, act } from '@testing-library/react'
 import { useProgressTracking } from '../useProgressTracking'
@@ -170,7 +201,9 @@ describe('useProgressTracking', () => {
 ```
 
 ### 4.3 Provider Components
+
 **Files to Test**:
+
 - `TRPCProvider` - API client configuration
 - `ToastProvider` - Notification system
 - `MonitoringProvider` - Error tracking
@@ -178,20 +211,25 @@ describe('useProgressTracking', () => {
 **Estimated Effort**: 15-20 hours
 
 ## Phase 5: Integration & E2E Testing (Week 9-12) 🌐
+
 **Goal**: End-to-end user journey testing  
 **Target Coverage**: 80%+
 
 ### 5.1 Python Test Integration
+
 **Tasks**:
+
 - Install pytest in Python environment
 - Convert existing test files to pytest format
 - Integrate with main test pipeline
 - Add coverage reporting for Python code
 
 ### 5.2 End-to-End Testing Setup
+
 **Tool**: Playwright for browser automation
 
 **Critical User Journeys**:
+
 - Anonymous user creates summary
 - User signs up and claims anonymous summary
 - Paid user creates and manages summaries
@@ -199,9 +237,11 @@ describe('useProgressTracking', () => {
 - Sharing functionality
 
 ### 5.3 Database Integration Testing
+
 **Setup**: Test database with realistic data
 
 **Test Scenarios**:
+
 - Database migration testing
 - Data integrity constraints
 - Performance under load
@@ -214,6 +254,7 @@ describe('useProgressTracking', () => {
 ### Testing Patterns to Follow
 
 #### 1. API Route Testing Pattern
+
 ```typescript
 // Mock external dependencies
 jest.mock('@/lib/db/prisma')
@@ -237,6 +278,7 @@ describe('API Route', () => {
 ```
 
 #### 2. tRPC Procedure Testing Pattern
+
 ```typescript
 import { appRouter } from '@/server/api/root'
 import { createTRPCMsw } from 'msw-trpc'
@@ -261,6 +303,7 @@ describe('tRPC Procedures', () => {
 ```
 
 #### 3. Component Testing Pattern
+
 ```typescript
 import { render, screen, userEvent } from '@testing-library/react'
 import { URLInput } from '../URLInput'
@@ -283,6 +326,7 @@ describe('URLInput', () => {
 ### Mock Strategy
 
 #### External Services
+
 ```typescript
 // Clerk Authentication
 jest.mock('@clerk/nextjs/server', () => ({
@@ -311,6 +355,7 @@ jest.mock('stripe', () => ({
 ```
 
 #### Database Mocking
+
 ```typescript
 // Prisma Client Mock
 const mockPrisma = {
@@ -334,6 +379,7 @@ jest.mock('@/lib/db/prisma', () => ({
 ## Quality Gates & CI Integration
 
 ### Coverage Thresholds
+
 ```javascript
 // jest.config.js
 coverageThreshold: {
@@ -354,6 +400,7 @@ coverageThreshold: {
 ```
 
 ### GitHub Actions Integration
+
 ```yaml
 name: Test Suite
 on: [push, pull_request]
@@ -382,6 +429,7 @@ jobs:
 ## Success Metrics & Monitoring
 
 ### Weekly Targets
+
 - **Week 1-2**: 20% coverage, API routes tested
 - **Week 3-4**: 45% coverage, business logic tested  
 - **Week 5-6**: 65% coverage, services tested
@@ -389,6 +437,7 @@ jobs:
 - **Week 9-12**: 80%+ coverage, E2E testing complete
 
 ### Quality Indicators
+
 - Test execution time < 30 seconds
 - No flaky tests (95%+ reliability)
 - All critical user journeys covered

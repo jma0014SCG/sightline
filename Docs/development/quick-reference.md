@@ -1,3 +1,19 @@
+---
+title: "Sightline.ai Quick Reference"
+description: "Essential commands and configurations for rapid development and troubleshooting"
+type: "reference"
+canonical_url: "/docs/development/quick-reference"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "new-contributors"]
+complexity: "beginner"
+tags: ["quick-reference", "commands", "development", "cheatsheet", "productivity"]
+status: "active"
+quick_start: true
+estimated_time: "5 minutes read"
+related_docs: ["/claude", "/contributing", "/docs/development/environment-setup"]
+---
+
 # Sightline.ai Quick Reference
 
 *Essential commands and configurations for rapid development*
@@ -5,6 +21,7 @@
 ## 🚀 Development Commands
 
 ### Frontend Development
+
 ```bash
 pnpm dev                      # Start Next.js dev server (port 3000)
 pnpm build                    # Production build
@@ -13,12 +30,14 @@ pnpm format                   # Format code with Prettier
 ```
 
 ### Backend Development
+
 ```bash
 pnpm api:dev                  # Start FastAPI server (port 8000)
 pnpm dev:full                 # Start both frontend and backend
 ```
 
 ### Database Operations
+
 ```bash
 pnpm db:generate              # Generate Prisma client
 pnpm db:push                  # Push schema changes (dev)
@@ -26,6 +45,7 @@ pnpm db:studio                # Open Prisma Studio
 ```
 
 ### Environment Management
+
 ```bash
 pnpm env:check                # Validate environment variables
 pnpm env:validate             # Comprehensive env validation
@@ -53,6 +73,7 @@ NEXT_PUBLIC_STRIPE_PRO_PRICE_ID="price_..."
 ## 📁 Key File Locations
 
 ### Frontend Components
+
 ```
 src/components/
 ├── organisms/SummaryViewer/    # Main summary display
@@ -62,6 +83,7 @@ src/components/
 ```
 
 ### API Routers
+
 ```
 src/server/api/routers/
 ├── summary.ts                  # Video summarization
@@ -71,6 +93,7 @@ src/server/api/routers/
 ```
 
 ### Core Services
+
 ```
 src/lib/
 ├── classificationService.ts   # Smart Collections AI tagging
@@ -94,6 +117,7 @@ python tests/test_full_integration.py      # Full integration test
 ## 🎯 Smart Collections Integration
 
 ### AI Classification Tags
+
 - **PERSON** (Blue): Individuals, influencers, experts
 - **COMPANY** (Green): Organizations, businesses, brands  
 - **TECHNOLOGY** (Orange): Programming languages, platforms
@@ -103,6 +127,7 @@ python tests/test_full_integration.py      # Full integration test
 - **TOOL** (Teal): Software tools, applications
 
 ### Usage in Components
+
 ```typescript
 // Filter by Smart Collections
 const { data } = api.library.getAll.useQuery({
@@ -118,11 +143,13 @@ const categories = api.library.getCategories.useQuery()
 ## 🔐 Authentication Flow
 
 ### Anonymous Users
+
 1. Browser fingerprinting → 1 free summary
 2. Success → Auth prompt modal
 3. Registration → Claim anonymous summary
 
 ### Authenticated Users
+
 - **FREE**: 3 summaries total (lifetime)
 - **PRO**: 25 summaries/month ($9.99)
 - **ENTERPRISE**: Unlimited (planned)
@@ -149,6 +176,7 @@ const categories = api.library.getCategories.useQuery()
 The debug panel appears in the bottom-right corner during development:
 
 ### Features
+
 - **Auth Status**: Shows current authentication state
 - **Progress Tracking**: Real-time display of task progress
 - **Test Buttons**:
@@ -160,12 +188,14 @@ The debug panel appears in the bottom-right corner during development:
   - **Test OAuth**: Test Google OAuth flow (expanded view)
 
 ### Usage
+
 1. Click **Expand** to see all testing options
 2. Monitor logs in the gray area for real-time feedback
 3. Use **Clear** to reset the log display
 4. Task IDs and progress status shown when active
 
 ### Troubleshooting Progress Issues
+
 - Check if backend is running: **Test Backend** button
 - Verify task ID transitions in the logs
 - Monitor progress percentage and status updates
@@ -180,10 +210,10 @@ The debug panel appears in the bottom-right corner during development:
 
 ## 🔗 Important URLs
 
-- **Production**: https://sightline.ai
-- **Local Frontend**: http://localhost:3000
-- **Local Backend**: http://localhost:8000
-- **Prisma Studio**: http://localhost:5555
+- **Production**: <https://sightline.ai>
+- **Local Frontend**: <http://localhost:3000>
+- **Local Backend**: <http://localhost:8000>
+- **Prisma Studio**: <http://localhost:5555>
 
 ---
 

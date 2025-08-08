@@ -59,6 +59,7 @@ Sightline.ai implements comprehensive rate limiting to ensure fair usage, preven
 | **Health Check** | 60 | 1 minute | System status monitoring |
 
 **Key Characteristics**:
+
 - No account creation required
 - Single summary creation allowed ever
 - Seamless upgrade to authenticated plans
@@ -109,6 +110,7 @@ Sightline.ai implements comprehensive rate limiting to ensure fair usage, preven
 | **Billing Operations** | 20 | 1 hour | Enterprise billing management |
 
 **Special Features**:
+
 - Dedicated support channel
 - Custom rate limit adjustments available
 - Priority processing queue
@@ -121,6 +123,7 @@ Sightline.ai implements comprehensive rate limiting to ensure fair usage, preven
 ### Core API Operations
 
 #### Summary Management
+
 ```typescript
 // Create Summary Endpoint
 POST /api/trpc/summary.create
@@ -134,6 +137,7 @@ Caching: 24-hour cache for public summaries
 ```
 
 #### Library Operations
+
 ```typescript
 // Get User Library
 GET /api/trpc/library.getUserSummaries
@@ -147,6 +151,7 @@ Search Optimization: Cached results for common queries
 ```
 
 #### Authentication Flow
+
 ```typescript
 // Clerk Webhooks
 POST /api/webhooks/clerk
@@ -155,6 +160,7 @@ Signature Verification: Required for all requests
 ```
 
 #### Progress Tracking
+
 ```typescript
 // Real-time Progress Updates
 GET /api/progress/{taskId}
@@ -187,6 +193,7 @@ Optimization: High-frequency polling support
 | **Concurrent Requests** | 20 | Parallel processing limit |
 
 **Usage Optimization**:
+
 - Content-based caching to reduce duplicate processing
 - Token-efficient prompt engineering
 - Automatic retry with exponential backoff
@@ -202,6 +209,7 @@ Optimization: High-frequency polling support
 | **Channel Information** | 1 unit | As needed |
 
 **Quota Management**:
+
 - Efficient API usage to maximize daily quota
 - Metadata caching for 7 days
 - Fallback to alternative video sources
@@ -234,6 +242,7 @@ Content-Type: application/json
 ```
 
 **Header Definitions**:
+
 - `X-RateLimit-Limit`: Maximum requests allowed in window
 - `X-RateLimit-Remaining`: Requests remaining in current window
 - `X-RateLimit-Reset`: Unix timestamp when window resets
@@ -261,18 +270,21 @@ When rate limits are exceeded, the API returns a structured error:
 ### Rate Limit Key Generation
 
 #### Anonymous Users
+
 ```typescript
 const key = `rate_limit:anon:${fingerprint}:${ip}:${endpoint}`
 // Example: rate_limit:anon:abc123def456:192.168.1.1:create_summary
 ```
 
 #### Authenticated Users
+
 ```typescript
 const key = `rate_limit:user:${userId}:${endpoint}`
 // Example: rate_limit:user:user_2N1K8Q7Xe9fzY5mR:create_summary
 ```
 
 #### Global Operations
+
 ```typescript
 const key = `rate_limit:global:${endpoint}`
 // Example: rate_limit:global:webhooks_clerk
@@ -301,12 +313,14 @@ const rateLimitStore = new Redis({
 ### Rate Limit Violation Alerts
 
 **Critical Alerts** (Immediate Response Required):
+
 - Anonymous users exceeding baseline traffic patterns
 - Enterprise users hitting system limits
 - External API quota approaching 90% usage
 - Suspicious coordinated rate limit violations
 
 **Warning Alerts** (Monitor and Review):
+
 - Pro users consistently hitting monthly limits
 - Unusual geographic traffic patterns
 - External API usage trending above normal
@@ -326,12 +340,14 @@ const rateLimitStore = new Redis({
 #### Operational Dashboards
 
 **Real-time Monitoring**:
+
 - Current rate limit utilization by plan
 - External API quota consumption
 - Rate limit violation frequency and patterns
 - User plan distribution and usage trends
 
 **Historical Analysis**:
+
 - Monthly usage patterns and growth trends
 - Rate limit effectiveness and user impact
 - External API cost optimization opportunities
@@ -342,11 +358,13 @@ const rateLimitStore = new Redis({
 #### Scaling Triggers
 
 **Automatic Scaling**:
+
 - OpenAI quota increases when approaching 80% usage
 - Additional Redis instances for rate limit storage
 - CDN cache expansion for high-traffic content
 
 **Manual Review Required**:
+
 - Enterprise plan limit customization
 - Seasonal traffic pattern adjustments
 - External API provider plan upgrades
@@ -355,6 +373,7 @@ const rateLimitStore = new Redis({
 #### Emergency Procedures
 
 **Rate Limit Bypass** (Critical Issues Only):
+
 - Temporary rate limit increases via feature flags
 - Emergency contact procedures for external APIs
 - Incident response for rate limiting system failures
@@ -367,6 +386,7 @@ const rateLimitStore = new Redis({
 ### DDoS Protection
 
 **Multi-Layer Defense**:
+
 1. **CDN Level**: Vercel Edge Network with automatic DDoS protection
 2. **Application Level**: Rate limiting with progressive penalties
 3. **Database Level**: Connection pooling and query optimization
@@ -375,12 +395,14 @@ const rateLimitStore = new Redis({
 ### Anonymous User Fingerprinting
 
 **Privacy-Compliant Approach**:
+
 - Browser characteristics without personal identification
 - IP address hashing with salt rotation
 - No persistent storage of user behavior
 - GDPR compliance for EU users
 
 **Fingerprinting Components**:
+
 ```typescript
 const fingerprint = {
   screen: `${screen.width}x${screen.height}`,
@@ -394,12 +416,14 @@ const fingerprint = {
 ### Plan Enforcement
 
 **Usage Validation**:
+
 - Server-side verification of all rate limit checks
 - Subscription status validation via Stripe webhooks
 - Plan downgrade handling with grace periods
 - Usage audit logs for compliance and debugging
 
 **Bypass Prevention**:
+
 - Rate limit keys include user authentication context
 - Client-side manipulation protection
 - Multiple request signature validation
@@ -408,6 +432,7 @@ const fingerprint = {
 ### Rate Limit Security
 
 **Protection Against Abuse**:
+
 - Progressive penalties for repeat violators
 - Automatic temporary bans for severe violations
 - IP-based blocking for malicious traffic patterns
@@ -434,14 +459,17 @@ A: We implement automatic retries and fallback mechanisms. Users receive clear s
 ### Common Issues
 
 #### Rate Limit Headers Missing
+
 **Cause**: Caching layer stripping headers  
 **Solution**: Verify API endpoint configuration and cache bypass for dynamic content
 
 #### Anonymous Users Can't Create Summaries
+
 **Cause**: Browser fingerprinting failure or IP blocking  
 **Solution**: Check fingerprinting script and whitelist IP ranges
 
 #### External API Quota Exceeded
+
 **Cause**: High usage or service changes  
 **Solution**: Monitor quotas proactively and implement usage forecasting
 

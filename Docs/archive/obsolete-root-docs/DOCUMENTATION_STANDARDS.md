@@ -41,12 +41,14 @@ Documentation is a critical product asset that requires active maintenance to re
 ## Content Quality Requirements
 
 ### Technical Accuracy
+
 - **Code Examples**: All code snippets must be tested and functional
 - **API Documentation**: Request/response examples must be current and accurate
 - **Configuration**: Environment variables and settings must be up-to-date
 - **Version Compatibility**: Specify supported versions for dependencies
 
 ### Completeness Standards
+
 ```markdown
 # Required sections for feature documentation:
 - Overview (what it does)
@@ -58,12 +60,14 @@ Documentation is a critical product asset that requires active maintenance to re
 ```
 
 ### Writing Standards
+
 - **Clarity**: Use simple, direct language appropriate for audience
 - **Structure**: Logical flow with proper heading hierarchy
 - **Formatting**: Consistent use of markdown elements
 - **Grammar**: Professional writing with proper grammar and spelling
 
 ### Visual Standards
+
 - **Screenshots**: High-quality, consistent UI screenshots
 - **Diagrams**: Clear architectural diagrams with proper labeling
 - **Code Formatting**: Proper syntax highlighting and indentation
@@ -72,12 +76,14 @@ Documentation is a critical product asset that requires active maintenance to re
 ## Accessibility Standards
 
 ### Content Accessibility
+
 - **Headings**: Proper heading hierarchy (H1 → H2 → H3)
 - **Links**: Descriptive link text (not "click here")
 - **Images**: Alt text for all images and diagrams
 - **Tables**: Clear headers and accessible structure
 
 ### Navigation Accessibility
+
 - **Table of Contents**: Clear navigation for long documents
 - **Cross-References**: Proper linking between related sections
 - **Search**: Searchable content with clear keywords
@@ -90,6 +96,7 @@ Documentation is a critical product asset that requires active maintenance to re
 ## Update Triggers
 
 ### Automatic Update Triggers
+
 1. **Code Changes**: Documentation updates required for:
    - New features or API endpoints
    - Breaking changes or deprecations
@@ -108,6 +115,7 @@ Documentation is a critical product asset that requires active maintenance to re
    - Patch releases (bug fix documentation)
 
 ### Scheduled Maintenance
+
 ```yaml
 Daily: 
   - Check for broken links
@@ -133,6 +141,7 @@ Quarterly:
 ## Update Process Workflow
 
 ### 1. Change Detection
+
 ```bash
 # Automated detection via git hooks
 #!/bin/bash
@@ -144,6 +153,7 @@ fi
 ```
 
 ### 2. Impact Assessment
+
 ```markdown
 # Documentation Impact Checklist
 - [ ] New features require user-facing documentation
@@ -154,6 +164,7 @@ fi
 ```
 
 ### 3. Content Updates
+
 ```markdown
 # Update Priority Matrix
 High Priority (Same Day):
@@ -173,6 +184,7 @@ Low Priority (Within Month):
 ```
 
 ### 4. Quality Validation
+
 ```bash
 # Automated validation pipeline
 pnpm run docs:lint        # Markdown linting
@@ -189,6 +201,7 @@ pnpm run docs:deploy     # Deploy to staging for review
 ## Documentation Architecture
 
 ### Information Architecture
+
 ```text
 Sightline Documentation Hierarchy:
 
@@ -219,12 +232,14 @@ Specialized Documentation
 ### Content Categorization
 
 #### By Audience
+
 - **End Users**: Feature documentation, user guides
 - **Developers**: API docs, setup guides, architecture
 - **Contributors**: Contributing guidelines, development workflow
 - **Operators**: Deployment, monitoring, troubleshooting
 
 #### By Content Type
+
 - **Reference**: API documentation, configuration options
 - **Tutorials**: Step-by-step guides, walkthroughs
 - **Explanations**: Architecture, design decisions
@@ -233,6 +248,7 @@ Specialized Documentation
 ### Version Management
 
 #### Documentation Versioning Strategy
+
 ```markdown
 # Version Alignment
 - Major versions: Complete documentation review
@@ -246,6 +262,7 @@ Specialized Documentation
 ```
 
 #### Change Documentation
+
 ```markdown
 # Required for each change:
 1. Update CHANGELOG.md with user-facing changes
@@ -264,6 +281,7 @@ Specialized Documentation
 ### Review Types
 
 #### Peer Review (Developer Changes)
+
 ```markdown
 # Documentation Review Checklist
 Technical Accuracy:
@@ -286,12 +304,14 @@ Structure:
 ```
 
 #### Editorial Review (Content Changes)
+
 - **Grammar and Style**: Professional writing standards
 - **Consistency**: Terminology and formatting consistency
 - **User Experience**: Content flow and accessibility
 - **Brand Alignment**: Voice, tone, and messaging
 
 #### Technical Review (Accuracy Validation)
+
 - **Code Testing**: All examples must execute successfully
 - **API Validation**: Request/response examples tested
 - **Procedure Testing**: Step-by-step guides validated
@@ -300,6 +320,7 @@ Structure:
 ### Automated Validation
 
 #### Continuous Integration Checks
+
 ```yaml
 # .github/workflows/docs-validation.yml
 name: Documentation Validation
@@ -332,6 +353,7 @@ jobs:
 ```
 
 #### Quality Gates
+
 ```markdown
 # Documentation must pass all gates before merge:
 ✅ Markdown linting (no formatting errors)
@@ -349,6 +371,7 @@ jobs:
 ## Code-to-Documentation Automation
 
 ### API Documentation Generation
+
 ```typescript
 // Generate API documentation from tRPC schemas
 // scripts/generate-api-docs.ts
@@ -367,6 +390,7 @@ fs.writeFileSync('docs/api-reference-generated.md',
 ```
 
 ### Component Documentation
+
 ```typescript
 // Auto-generate component documentation
 // scripts/generate-component-docs.ts
@@ -383,6 +407,7 @@ components.forEach(component => {
 ```
 
 ### Configuration Documentation
+
 ```bash
 # Auto-generate environment variable documentation
 # scripts/generate-env-docs.sh
@@ -398,6 +423,7 @@ grep -r "process.env." src/ | \
 ## Documentation Deployment
 
 ### Staging Environment
+
 ```bash
 # Deploy documentation to staging for review
 pnpm run docs:build
@@ -412,6 +438,7 @@ run: |
 ```
 
 ### Production Documentation
+
 ```bash
 # Production deployment process
 1. Validate all documentation
@@ -428,12 +455,14 @@ run: |
 ## Writing Style Guide
 
 ### Voice and Tone
+
 - **Professional but Approachable**: Technical accuracy with friendly guidance
 - **Clear and Direct**: Concise instructions without unnecessary complexity
 - **Inclusive Language**: Welcoming to developers of all experience levels
 - **Action-Oriented**: Focus on what users can accomplish
 
 ### Terminology Standards
+
 ```markdown
 # Consistent Terminology
 Use: "summarization" (not "summarisation")
@@ -445,6 +474,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Code Style Standards
+
 ```markdown
 # Code Block Standards
 - Always specify language for syntax highlighting
@@ -455,6 +485,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Markdown Formatting
+
 ```markdown
 # Heading Standards
 - Use sentence case for headings
@@ -478,12 +509,14 @@ Use: "JavaScript" (not "Javascript")
 ## Visual Style Guide
 
 ### Screenshot Standards
+
 - **Resolution**: 1920x1080 for desktop, 375x667 for mobile
 - **Format**: PNG for UI screenshots, JPG for photos
 - **Quality**: High quality, sharp text, proper contrast
 - **Consistency**: Same browser, same zoom level, clean environment
 
 ### Diagram Standards
+
 - **Tool**: Mermaid for simple diagrams, Figma for complex designs
 - **Colors**: Use brand colors and high contrast
 - **Typography**: Clear, readable fonts at appropriate sizes
@@ -496,6 +529,7 @@ Use: "JavaScript" (not "Javascript")
 ## Content Lifecycle Management
 
 ### Creation Phase
+
 ```markdown
 1. **Planning**: Define audience, scope, and success criteria
 2. **Research**: Gather technical requirements and user needs
@@ -506,6 +540,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Maintenance Phase
+
 ```markdown
 1. **Monitoring**: Track metrics and user feedback
 2. **Updates**: Regular content updates and improvements
@@ -514,6 +549,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Deprecation Phase
+
 ```markdown
 1. **Assessment**: Determine if content is still needed
 2. **Migration**: Move important content to current docs
@@ -525,6 +561,7 @@ Use: "JavaScript" (not "Javascript")
 ## Quality Metrics Tracking
 
 ### Content Metrics
+
 ```markdown
 - **Accuracy Rate**: Percentage of working code examples
 - **Freshness**: Days since last update
@@ -533,6 +570,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Usage Metrics
+
 ```markdown
 - **Page Views**: Most and least visited documentation
 - **User Journey**: Common navigation paths
@@ -541,6 +579,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Maintenance Metrics
+
 ```markdown
 - **Update Velocity**: Time from code change to doc update
 - **Review Time**: Time from draft to published
@@ -555,6 +594,7 @@ Use: "JavaScript" (not "Javascript")
 ## Documentation Stack
 
 ### Core Tools
+
 ```json
 {
   "markdown": {
@@ -575,6 +615,7 @@ Use: "JavaScript" (not "Javascript")
 ```
 
 ### Validation Pipeline
+
 ```bash
 # Documentation validation commands
 pnpm run docs:lint          # Markdown linting
@@ -586,6 +627,7 @@ pnpm run docs:deploy        # Deploy to staging/production
 ```
 
 ### Automated Quality Checks
+
 ```yaml
 # package.json scripts
 "scripts": {
@@ -599,6 +641,7 @@ pnpm run docs:deploy        # Deploy to staging/production
 ```
 
 ### Configuration Files
+
 ```json
 // .cspell.json (Spell checking)
 {
@@ -628,6 +671,7 @@ rules:
 ## Monitoring and Analytics
 
 ### Documentation Health Dashboard
+
 ```markdown
 # Key Health Metrics
 🟢 Accuracy Rate: 98% (target: >95%)
@@ -637,6 +681,7 @@ rules:
 ```
 
 ### User Behavior Analytics
+
 ```javascript
 // Track documentation usage
 analytics.track('Documentation Page View', {
@@ -655,6 +700,7 @@ analytics.track('Documentation Feedback', {
 ```
 
 ### Automated Reporting
+
 ```bash
 # Weekly documentation health report
 #!/bin/bash
@@ -672,6 +718,7 @@ echo "⭐ Average Rating: $(average_user_rating)"
 ## Implementation Checklist
 
 ### Immediate Setup (Week 1)
+
 - [ ] Install and configure markdown linting tools
 - [ ] Set up automated link checking
 - [ ] Create documentation validation CI pipeline
@@ -679,6 +726,7 @@ echo "⭐ Average Rating: $(average_user_rating)"
 - [ ] Set up basic analytics and monitoring
 
 ### Short Term (Month 1)  
+
 - [ ] Audit all existing documentation for accuracy
 - [ ] Implement automated code example testing
 - [ ] Create documentation contribution templates
@@ -686,6 +734,7 @@ echo "⭐ Average Rating: $(average_user_rating)"
 - [ ] Establish regular maintenance schedule
 
 ### Long Term (Quarter 1)
+
 - [ ] Implement full automated documentation generation
 - [ ] Create comprehensive style guide and templates
 - [ ] Set up advanced analytics and user behavior tracking
@@ -697,18 +746,21 @@ echo "⭐ Average Rating: $(average_user_rating)"
 ## Support Resources
 
 ### Team Responsibilities
+
 - **Developers**: Update docs with code changes, technical accuracy
 - **Product Team**: User experience, feature documentation
 - **DevOps**: Operations documentation, deployment guides  
 - **QA**: Testing procedures, troubleshooting guides
 
 ### External Resources
+
 - [Markdown Style Guide](https://www.markdownguide.org/basic-syntax/)
 - [Technical Writing Guide](https://developers.google.com/tech-writing)
 - [Documentation Best Practices](https://documentation.divio.com/)
 - [Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 
 ### Internal Support
+
 - **Documentation Issues**: Create GitHub issues with `documentation` label
 - **Style Questions**: Refer to this standards guide
 - **Tool Problems**: DevOps team support

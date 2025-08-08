@@ -20,32 +20,37 @@ related_docs: ["/claude", "/architecture", "/contributing", "/environment-setup"
 ## Table of Contents
 
 ### [Part I: Architecture & Overview](#part-i-architecture--overview)
+
 - [API Architecture Overview](#api-architecture-overview)
-- [Quick Start](#quick-start) 
+- [Quick Start](#quick-start)
 - [Core Data Types](#core-data-types)
 - [Authentication](#authentication)
 - [Error Handling](#error-handling)
 - [Rate Limiting](#rate-limiting)
 
 ### [Part II: tRPC API Reference](#part-ii-trpc-api-reference)
+
 - [Summary Router](#summary-router)
 - [Smart Collections Integration](#smart-collections-integration)
 - [Progress Tracking Integration](#progress-tracking-integration)
 - [tRPC Error Handling Patterns](#trpc-error-handling-patterns)
 
 ### [Part III: FastAPI Reference](#part-iii-fastapi-reference)
+
 - [Summarization Endpoints](#summarization-endpoints)
 - [Progress Tracking API](#progress-tracking-api)
 - [Health Check Endpoints](#health-check-endpoints)
 - [Processing Pipeline](#processing-pipeline)
 
 ### [Part IV: Implementation Examples](#part-iv-implementation-examples)
+
 - [Frontend Progress Tracking](#frontend-progress-tracking)
 - [Backend Processing Examples](#backend-processing-examples)
 - [Error Handling Patterns](#error-handling-patterns)
 - [Testing Strategies](#testing-strategies)
 
 ### [Part V: Operations & Monitoring](#part-v-operations--monitoring)
+
 - [Load Balancer Configuration](#load-balancer-configuration)
 - [Kubernetes Integration](#kubernetes-integration)
 - [Performance Optimization](#performance-optimization)
@@ -68,22 +73,26 @@ Frontend ──→ tRPC API ──→ Database (User Operations)
 ### API Layers
 
 #### tRPC API (TypeScript)
+
 **Purpose**: Type-safe frontend-backend communication  
 **Base URL**: `/api/trpc` (development: `http://localhost:3000/api/trpc`)  
 **Authentication**: Clerk JWT tokens  
 
 **Key Features**:
+
 - End-to-end type safety with automatic TypeScript inference
 - Real-time optimistic updates
 - Built-in error handling with structured error codes
 - Automatic request/response validation with Zod schemas
 
 #### FastAPI (Python)  
+
 **Purpose**: High-performance AI processing  
 **Base URL**: `/api` (development: `http://localhost:8000`)  
 **Authentication**: JWT validation for protected routes  
 
 **Key Features**:
+
 - Async processing for CPU-intensive operations
 - OpenAPI/Swagger automatic documentation
 - Real-time progress tracking for long-running tasks
@@ -273,11 +282,13 @@ X-RateLimit-Window: month
 Create video summary for anonymous users without authentication.
 
 **Usage**:
+
 ```typescript
 api.summary.createAnonymous.mutate(input)
 ```
 
 **Input Schema**:
+
 ```typescript
 {
   url: string              // YouTube URL (validated, max 2048 chars)
@@ -286,6 +297,7 @@ api.summary.createAnonymous.mutate(input)
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: string
@@ -301,6 +313,7 @@ api.summary.createAnonymous.mutate(input)
 ```
 
 **Example**:
+
 ```typescript
 const createAnonymousSubmit = async (url: string) => {
   const fingerprint = generateBrowserFingerprint()
@@ -323,6 +336,7 @@ const createAnonymousSubmit = async (url: string) => {
 ```
 
 **Error Codes**:
+
 - `FORBIDDEN`: User already created anonymous summary
 - `BAD_REQUEST`: Invalid YouTube URL or suspicious content
 - `INTERNAL_SERVER_ERROR`: Backend processing failure
@@ -332,11 +346,13 @@ const createAnonymousSubmit = async (url: string) => {
 Create video summary for authenticated users.
 
 **Usage**:
+
 ```typescript
 api.summary.create.mutate(input)
 ```
 
 **Input Schema**:
+
 ```typescript
 {
   url: string          // YouTube URL (validated)
@@ -346,6 +362,7 @@ api.summary.create.mutate(input)
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: string
@@ -362,6 +379,7 @@ api.summary.create.mutate(input)
 ```
 
 **Example**:
+
 ```typescript
 const createSummary = async (url: string) => {
   const user = useUser()
@@ -380,6 +398,7 @@ const createSummary = async (url: string) => {
 ```
 
 **Usage Limits**:
+
 - Free Plan: 3 summaries total (lifetime)
 - Pro Plan: 25 summaries/month
 - Complete Plan: Unlimited
@@ -389,11 +408,13 @@ const createSummary = async (url: string) => {
 Retrieve specific summary by ID with access control.
 
 **Usage**:
+
 ```typescript
 api.summary.getById.useQuery({ id })
 ```
 
 **Input Schema**:
+
 ```typescript
 {
   id: string // Summary ID
@@ -401,6 +422,7 @@ api.summary.getById.useQuery({ id })
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: string
@@ -418,6 +440,7 @@ api.summary.getById.useQuery({ id })
 ```
 
 **Example**:
+
 ```typescript
 const SummaryPage = ({ summaryId }: { summaryId: string }) => {
   const { data: summary, isLoading } = api.summary.getById.useQuery({ 
@@ -436,11 +459,13 @@ const SummaryPage = ({ summaryId }: { summaryId: string }) => {
 Update summary metadata (title, public status).
 
 **Usage**:
+
 ```typescript
 api.summary.update.mutate(input)
 ```
 
 **Input Schema**:
+
 ```typescript
 {
   id: string
@@ -450,6 +475,7 @@ api.summary.update.mutate(input)
 ```
 
 **Example**:
+
 ```typescript
 const updateSummary = async (id: string, updates: Partial<Summary>) => {
   const updated = await api.summary.update.mutate({
@@ -467,11 +493,13 @@ const updateSummary = async (id: string, updates: Partial<Summary>) => {
 Delete user's summary with cascading cleanup.
 
 **Usage**:
+
 ```typescript
 api.summary.delete.mutate({ id })
 ```
 
 **Input Schema**:
+
 ```typescript
 {
   id: string // Summary ID to delete
@@ -479,6 +507,7 @@ api.summary.delete.mutate({ id })
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   success: true
@@ -487,6 +516,7 @@ api.summary.delete.mutate({ id })
 ```
 
 **Example**:
+
 ```typescript
 const deleteSummary = async (id: string) => {
   if (!confirm('Delete this summary permanently?')) return
@@ -608,6 +638,7 @@ Main video summarization endpoint with real-time progress tracking.
 **Authentication**: Required (JWT Bearer token)
 
 **Request Body**:
+
 ```json
 {
   "url": "https://youtube.com/watch?v=dQw4w9WgXcQ",
@@ -620,6 +651,7 @@ Main video summarization endpoint with real-time progress tracking.
 ```
 
 **Request Schema**:
+
 ```python
 class SummarizeRequest(BaseModel):
     url: str = Field(..., description="YouTube video URL")
@@ -632,6 +664,7 @@ class SummarizeOptions(BaseModel):
 ```
 
 **Response**:
+
 ```json
 {
   "video_id": "dQw4w9WgXcQ",
@@ -665,6 +698,7 @@ class SummarizeOptions(BaseModel):
 ```
 
 **Processing Stages**:
+
 1. `Initializing...` (5%)
 2. `Connecting to YouTube...` (10%)
 3. `Fetching video information...` (25%)
@@ -674,6 +708,7 @@ class SummarizeOptions(BaseModel):
 7. `Summary ready!` (100%)
 
 **Example Implementation**:
+
 ```python
 @app.post("/api/summarize")
 async def create_summary(
@@ -705,6 +740,7 @@ async def create_summary(
 ```
 
 **Error Responses**:
+
 ```json
 {
   "error": "Could not retrieve transcript for this video",
@@ -716,6 +752,7 @@ async def create_summary(
 ```
 
 **Common Error Codes**:
+
 - `INVALID_URL`: URL is not a valid YouTube video link
 - `VIDEO_UNAVAILABLE`: Video is private, deleted, or geo-restricted
 - `TRANSCRIPT_UNAVAILABLE`: No transcript available for the video
@@ -731,6 +768,7 @@ Testing endpoint for API validation (development only).
 **Authentication**: None (development only)
 
 **Request Body**:
+
 ```json
 {
   "url": "https://youtube.com/watch?v=dQw4w9WgXcQ"
@@ -738,6 +776,7 @@ Testing endpoint for API validation (development only).
 ```
 
 **Response**:
+
 ```json
 {
   "status": "test_success",
@@ -812,6 +851,7 @@ Retrieve current progress status for a specific task.
 **Response Examples**:
 
 **Active Processing**:
+
 ```json
 {
   "progress": 45,
@@ -822,6 +862,7 @@ Retrieve current progress status for a specific task.
 ```
 
 **Completion**:
+
 ```json
 {
   "progress": 100,
@@ -832,6 +873,7 @@ Retrieve current progress status for a specific task.
 ```
 
 **Error State**:
+
 ```json
 {
   "progress": 0,
@@ -860,6 +902,7 @@ Clean up completed or failed progress data to prevent memory leaks.
 ```
 
 **Response Values**:
+
 - `"cleaned"`: Task data successfully removed
 - `"not_found"`: Task ID was not found (already cleaned or never existed)
 
@@ -917,6 +960,7 @@ curl -X GET https://api.sightline.ai/api/health
 **Response Examples**:
 
 **Healthy Service**:
+
 ```json
 {
   "status": "healthy",
@@ -925,6 +969,7 @@ curl -X GET https://api.sightline.ai/api/health
 ```
 
 **Service Degraded** (Future Enhancement):
+
 ```json
 {
   "status": "degraded",
@@ -937,6 +982,7 @@ curl -X GET https://api.sightline.ai/api/health
 ```
 
 **Service Unhealthy** (Future Enhancement):
+
 ```json
 {
   "status": "unhealthy",
@@ -951,6 +997,7 @@ curl -X GET https://api.sightline.ai/api/health
 ## Processing Pipeline
 
 ### Transcript Acquisition
+
 ```python
 async def get_video_transcript(video_url: str) -> str:
     """Multi-service transcript acquisition with fallback chain"""
@@ -976,6 +1023,7 @@ async def get_video_transcript(video_url: str) -> str:
 ```
 
 ### AI Processing
+
 ```python
 async def process_with_openai(transcript: str, video_metadata: dict) -> dict:
     """Process transcript with OpenAI for structured summary"""
@@ -1000,6 +1048,7 @@ async def process_with_openai(transcript: str, video_metadata: dict) -> dict:
 ```
 
 ### Smart Collections Integration
+
 ```python
 async def classify_content(summary: dict) -> dict:
     """Extract entities and categories using OpenAI classification"""
@@ -1594,6 +1643,7 @@ spec:
 ## Performance Optimization
 
 ### Caching Strategy
+
 ```python
 from functools import lru_cache
 import redis
@@ -1613,6 +1663,7 @@ def get_video_metadata(video_id: str) -> dict:
 ```
 
 ### Async Processing
+
 ```python
 import asyncio
 from concurrent.futures import ThreadPoolExecutor

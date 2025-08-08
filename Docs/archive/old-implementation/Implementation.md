@@ -2,7 +2,7 @@
 
 ## Feature Analysis
 
-### Identified Features:
+### Identified Features
 
 1. **URL Input & Video Processing**
    - YouTube URL paste-box interface
@@ -45,7 +45,7 @@
    - Analytics dashboard
    - Team workspaces
 
-### Feature Categorization:
+### Feature Categorization
 
 - **Must-Have Features:**
   - YouTube URL processing
@@ -71,59 +71,65 @@
 
 ## Recommended Tech Stack
 
-### Frontend:
+### Frontend
+
 - **Framework:** Next.js 14 (App Router) - Server-side rendering, edge streaming, excellent DX
-- **Documentation:** https://nextjs.org/docs/app
+- **Documentation:** <https://nextjs.org/docs/app>
 
 - **Language:** TypeScript - Type safety and better developer experience
-- **Documentation:** https://www.typescriptlang.org/docs/
+- **Documentation:** <https://www.typescriptlang.org/docs/>
 
 - **Styling:** Tailwind CSS + shadcn/ui - Rapid UI development with consistent design
-- **Documentation:** https://tailwindcss.com/docs, https://ui.shadcn.com/
+- **Documentation:** <https://tailwindcss.com/docs>, <https://ui.shadcn.com/>
 
 - **State Management:** TanStack Query + tRPC - Type-safe API calls with caching
-- **Documentation:** https://trpc.io/docs/client/tanstack-react-query/setup
+- **Documentation:** <https://trpc.io/docs/client/tanstack-react-query/setup>
 
-### Backend:
+### Backend
+
 - **API Framework:** FastAPI (Python 3.12) - Async support, automatic OpenAPI docs
-- **Documentation:** https://fastapi.tiangolo.com/
+- **Documentation:** <https://fastapi.tiangolo.com/>
 
 - **Serverless:** Vercel Functions - Zero-ops deployment, automatic scaling
-- **Documentation:** https://vercel.com/docs/functions
+- **Documentation:** <https://vercel.com/docs/functions>
 
 - **LLM Integration:** LangChain 0.3 + OpenAI SDK - Flexible prompt management
-- **Documentation:** https://python.langchain.com/docs/, https://platform.openai.com/docs
+- **Documentation:** <https://python.langchain.com/docs/>, <https://platform.openai.com/docs>
 
-### Database:
+### Database
+
 - **Database:** Vercel Postgres (Neon) - Serverless PostgreSQL with branching
-- **Documentation:** https://neon.tech/docs
+- **Documentation:** <https://neon.tech/docs>
 
 - **ORM:** Prisma - Type-safe database access, migrations
-- **Documentation:** https://www.prisma.io/docs
+- **Documentation:** <https://www.prisma.io/docs>
 
-### Additional Tools:
+### Additional Tools
+
 - **Authentication:** NextAuth.js (Auth.js) - Battle-tested OAuth integration
-- **Documentation:** https://authjs.dev/
+- **Documentation:** <https://authjs.dev/>
 
 - **Video Processing:** youtube-transcript-api + Whisper API - Transcript extraction
-- **Documentation:** https://pypi.org/project/youtube-transcript-api/
+- **Documentation:** <https://pypi.org/project/youtube-transcript-api/>
 
 - **Payment Processing:** Stripe Checkout - PCI-compliant payments
-- **Documentation:** https://docs.stripe.com/payments/checkout
+- **Documentation:** <https://docs.stripe.com/payments/checkout>
 
 - **Background Jobs:** Vercel Cron + Upstash Queue - Reliable job processing
-- **Documentation:** https://vercel.com/docs/cron-jobs, https://upstash.com/docs/qstash
+- **Documentation:** <https://vercel.com/docs/cron-jobs>, <https://upstash.com/docs/qstash>
 
 - **Monitoring:** Sentry + LangSmith - Error tracking and LLM observability
-- **Documentation:** https://docs.sentry.io/, https://docs.smith.langchain.com/
+- **Documentation:** <https://docs.sentry.io/>, <https://docs.smith.langchain.com/>
 
 ## Implementation Stages
 
 ### Stage 1: Foundation & Setup
+
 **Duration:** 2 days
 **Dependencies:** None
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Initialize Next.js 14 project with TypeScript and App Router
 - [ ] Set up Tailwind CSS and shadcn/ui component library
 - [ ] Configure ESLint, Prettier, and development environment
@@ -134,10 +140,12 @@
 - [ ] Configure CI/CD pipeline with GitHub Actions
 
 ### Stage 2: Core Authentication & API Setup
+
 **Duration:** 2 days
 **Dependencies:** Stage 1 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Implement NextAuth.js with Google OAuth provider
 - [ ] Create user model in Prisma schema
 - [ ] Set up protected routes and middleware
@@ -148,10 +156,12 @@
 - [ ] Test OAuth flow end-to-end
 
 ### Stage 3: Video Processing & Summarization
+
 **Duration:** 3 days
 **Dependencies:** Stage 2 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Integrate youtube-transcript-api for transcript extraction
 - [ ] Implement LangChain summarization pipeline
 - [ ] Create streaming response for real-time summary display
@@ -162,10 +172,12 @@
 - [ ] Add loading states and progress indicators
 
 ### Stage 4: Data Persistence & Library
+
 **Duration:** 3 days
 **Dependencies:** Stage 3 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Design database schema for summaries and metadata
 - [ ] Implement CRUD operations for summary management
 - [ ] Create library UI with search and filtering
@@ -176,10 +188,12 @@
 - [ ] Implement user preferences storage
 
 ### Stage 5: Sharing & Export Features
+
 **Duration:** 2 days
 **Dependencies:** Stage 4 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Implement copy-to-clipboard functionality
 - [ ] Create shareable link generation with slugs
 - [ ] Add public/private access controls
@@ -190,10 +204,12 @@
 - [ ] Set up CDN caching for public shares
 
 ### Stage 6: Payment Integration
+
 **Duration:** 2 days
 **Dependencies:** Stage 5 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Set up Stripe account and webhook endpoints
 - [ ] Implement Stripe Checkout flow
 - [ ] Create subscription management UI
@@ -204,10 +220,12 @@
 - [ ] Test subscription lifecycle scenarios
 
 ### Stage 7: Background Jobs & Long Processing
+
 **Duration:** 2 days
 **Dependencies:** Stage 6 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Set up Upstash Queue for job processing
 - [ ] Implement Vercel Cron for scheduled tasks
 - [ ] Create job status tracking system
@@ -218,10 +236,12 @@
 - [ ] Test concurrent job handling
 
 ### Stage 8: Polish & Optimization
+
 **Duration:** 2 days
 **Dependencies:** Stage 7 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Implement comprehensive error handling
 - [ ] Add Sentry error tracking integration
 - [ ] Set up LangSmith for prompt monitoring
@@ -232,10 +252,12 @@
 - [ ] Conduct accessibility audit and fixes
 
 ### Stage 9: Testing & Documentation
+
 **Duration:** 2 days
 **Dependencies:** Stage 8 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Write unit tests for critical functions
 - [ ] Create integration tests for API endpoints
 - [ ] Implement E2E tests with Cypress
@@ -246,10 +268,12 @@
 - [ ] Conduct security review
 
 ### Stage 10: Production Launch
+
 **Duration:** 1 day
 **Dependencies:** Stage 9 completion
 
-#### Sub-steps:
+#### Sub-steps
+
 - [ ] Configure production environment variables
 - [ ] Set up monitoring and alerting
 - [ ] Deploy to production environment
@@ -262,37 +286,44 @@
 ## Resource Links
 
 ### Core Technologies
+
 - [Next.js 14 Documentation](https://nextjs.org/docs)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
 ### Database & ORM
+
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [Neon PostgreSQL Documentation](https://neon.tech/docs)
 - [Vercel Postgres Guide](https://vercel.com/docs/storage/vercel-postgres)
 
 ### AI & Processing
+
 - [LangChain Documentation](https://python.langchain.com/docs/)
 - [OpenAI API Documentation](https://platform.openai.com/docs)
 - [Whisper API Documentation](https://platform.openai.com/docs/guides/speech-to-text)
 
 ### Authentication & Payments
+
 - [NextAuth.js Documentation](https://authjs.dev/)
 - [Stripe Checkout Documentation](https://docs.stripe.com/payments/checkout)
 - [Google OAuth Documentation](https://developers.google.com/identity/protocols/oauth2)
 
 ### Infrastructure
+
 - [Vercel Documentation](https://vercel.com/docs)
 - [Upstash Documentation](https://upstash.com/docs)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 
 ### Monitoring & Analytics
+
 - [Sentry Documentation](https://docs.sentry.io/)
 - [LangSmith Documentation](https://docs.smith.langchain.com/)
 - [Vercel Analytics](https://vercel.com/docs/analytics)
 
 ### Tutorials & Guides
+
 - [Next.js + Prisma + PostgreSQL Guide](https://vercel.com/guides/nextjs-prisma-postgres)
 - [Deploying FastAPI to Vercel](https://vercel.com/templates/python/fastapi)
 - [tRPC with Next.js Setup](https://trpc.io/docs/client/nextjs/setup)

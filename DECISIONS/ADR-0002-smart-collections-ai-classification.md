@@ -1,3 +1,22 @@
+---
+title: "ADR-0002: Smart Collections AI Classification System"
+description: "Architectural decision for implementing AI-powered automatic entity extraction and categorization"
+type: "adr"
+canonical_url: "/decisions/adr-0002-smart-collections-ai-classification"
+status: "accepted"
+decision_date: "2024-09-01"
+review_date: "2025-03-01"
+version: "1.0"
+last_updated: "2025-01-09"
+authors: ["AI Team Lead"]
+reviewers: ["Tech Lead", "UX Team"]
+stakeholders: ["Backend Team", "Frontend Team", "Product Team"]
+supersedes: []
+related_adrs: ["ADR-0001"]
+tags: ["ai", "classification", "smart-collections", "openai", "automation", "ux"]
+impact: "high"
+---
+
 # ADR-0002: Smart Collections AI Classification System
 
 ## Status
@@ -6,13 +25,16 @@ Accepted
 
 ## Context
 
-Users need to organize and filter their video summaries effectively. Manual tagging is time-consuming and inconsistent. The platform generates rich content that contains identifiable entities (people, companies, technologies) and topics that could enable intelligent organization and discovery.
+Users need to organize and filter their video summaries effectively. Manual tagging is time-consuming
+and inconsistent. The platform generates rich content that contains identifiable entities (people,
+companies, technologies) and topics that could enable intelligent organization and discovery.
 
 ## Decision
 
 Implement an AI-powered Smart Collections system that automatically extracts and categorizes entities from video content:
 
 ### Entity Classification (7 Types)
+
 - **PERSON**: Individuals, experts, influencers mentioned in content
 - **COMPANY**: Organizations, businesses, brands referenced
 - **TECHNOLOGY**: Programming languages, platforms, technical tools
@@ -22,6 +44,7 @@ Implement an AI-powered Smart Collections system that automatically extracts and
 - **TOOL**: Software tools, applications, utilities
 
 ### Content Categorization (Predefined)
+
 - 14 broad categories: Technology, Business, Marketing, Finance, Health, Productivity, etc.
 
 ## Consequences
@@ -58,6 +81,7 @@ Implement an AI-powered Smart Collections system that automatically extracts and
 ## Implementation Notes
 
 ### Processing Pipeline
+
 ```text
 Video Summary Generated
     ↓
@@ -71,17 +95,20 @@ UI Display with Color Coding
 ```
 
 ### Error Handling Strategy
+
 - Classification failure does not block summary creation
 - Graceful degradation when OpenAI API unavailable
 - Retry logic for transient API failures
 - Logging for analysis and improvement
 
 ### Performance Optimization
+
 - Parallel processing with summary generation when possible
 - Caching of common entities to reduce API calls
 - Batch processing for bulk classification scenarios
 
 ### UI Design Principles
+
 - Color-coded tags for immediate visual recognition
 - Expandable tag sections to prevent UI clutter
 - Filter sidebar with tag counts for discovery
