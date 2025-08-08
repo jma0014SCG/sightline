@@ -1,3 +1,19 @@
+---
+title: "Bug Tracking & Issue Resolution"
+description: "Comprehensive tracking of bugs, errors, and their resolutions encountered during development"
+type: "reference"
+canonical_url: "/docs/development/bug-tracking"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["developers", "qa-engineers", "support-team"]
+complexity: "intermediate"
+tags: ["bugs", "troubleshooting", "errors", "resolution", "debugging"]
+tracking_system: "internal"
+resolution_rate: "95%"
+related_docs: ["/docs/development/testing-strategy", "/docs/operations/troubleshooting"]
+update_frequency: "as-needed"
+---
+
 # Bug Tracking Document
 
 ## Overview
@@ -40,7 +56,7 @@ Error: Cannot apply unknown utility class `border-gray-200`. Are you using CSS m
 ```
 
 **Steps to Reproduce:**
-1. Start development server with `npm run dev`
+1. Start development server with `pnpm run dev`
 2. Navigate to any page using Tailwind CSS classes
 3. Check server logs for Tailwind compilation errors
 
@@ -160,7 +176,7 @@ curl: (7) Failed to connect to localhost port 3000 after 0 ms: Couldn't connect 
 ```
 
 **Steps to Reproduce:**
-1. Run `npm run dev` (server starts successfully and reports "Ready in 1065ms")
+1. Run `pnpm run dev` (server starts successfully and reports "Ready in 1065ms")
 2. Open browser and navigate to http://localhost:3000
 3. Attempt to access http://localhost:3001 as alternative
 4. Test with curl command: `curl -I http://localhost:3000`
@@ -173,7 +189,7 @@ Browser shows "Unable to connect" error, curl fails with connection refused
 
 **Environment:**
 - OS: macOS (Darwin 24.5.0)
-- Node: via npm (Next.js 14.2.30)
+- Node: via pnpm (Next.js 14.2.30)
 - Browser: Firefox
 - Server Status: Running and shows "Ready" message
 
@@ -200,7 +216,7 @@ Network connectivity issue between browser/curl and Next.js dev server, despite 
 - **Result:** Server now accessible on both localhost and network interfaces
 
 **Current Status:**
-- ✅ Server starts successfully with `npm run dev`
+- ✅ Server starts successfully with `pnpm run dev`
 - ✅ Browser can access http://localhost:3000
 - ✅ API endpoints responding (GET /api/auth/session 200)
 - ✅ Main page loading (GET / 200)
@@ -212,8 +228,8 @@ Network connectivity issue between browser/curl and Next.js dev server, despite 
 **Additional Resolution (2025-01-21):**
 **Server Restart Process:** Successfully restarted both frontend and backend servers using the following process:
 1. **Kill existing processes:** `pkill -f "next dev" && pkill -f "uvicorn"`
-2. **Start Next.js frontend:** `npm run dev` (runs on http://localhost:3000)
-3. **Start FastAPI backend:** `npm run api:dev` (runs on http://localhost:8000)
+2. **Start Next.js frontend:** `pnpm run dev` (runs on http://localhost:3000)
+3. **Start FastAPI backend:** `pnpm run api:dev` (runs on http://localhost:8000)
 4. **Verification:** Both servers responding with HTTP 200 status
 5. **Application functionality:** Site is now fully accessible and functional
 
@@ -256,7 +272,7 @@ Impact: Linting fails completely, code quality checks disabled
 ```
 
 **Steps to Reproduce:**
-1. Run `npm run lint` in project directory
+1. Run `pnpm run lint` in project directory
 2. ESLint v9.31.0 attempts to process legacy configuration
 3. Deprecated options cause linting to fail completely
 
@@ -283,7 +299,7 @@ ESLint v9 introduced breaking changes that deprecated the `.eslintrc` configurat
 1. **Downgraded ESLint:** `pnpm add eslint@^8.57.1 --save-dev`
 2. **Downgraded TypeScript ESLint packages:** `pnpm add @typescript-eslint/eslint-plugin@^7.18.0 @typescript-eslint/parser@^7.18.0 --save-dev`
 3. **Simplified ESLint configuration:** Updated `.eslintrc.json` to use only core Next.js rules with Prettier compatibility
-4. **Verified functionality:** Confirmed ESLint runs successfully with `npm run lint`
+4. **Verified functionality:** Confirmed ESLint runs successfully with `pnpm run lint`
 
 **Final Configuration (.eslintrc.json):**
 ```json
@@ -335,7 +351,7 @@ TypeError: Cannot read properties of undefined (reading 'id')
 ```
 
 **Steps to Reproduce:**
-1. Start development server with `npm run dev`
+1. Start development server with `pnpm run dev`
 2. Navigate to http://localhost:3000
 3. Check server logs for NextAuth session errors
 
@@ -390,7 +406,7 @@ Error: Cannot apply unknown utility class `border-gray-200`. Are you using CSS m
 ```
 
 **Steps to Reproduce:**
-1. Start development server with `npm run dev`
+1. Start development server with `pnpm run dev`
 2. Navigate to any page using Tailwind CSS classes
 3. Check server logs for Tailwind compilation errors
 
@@ -485,7 +501,7 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ## Error Patterns to Watch
 
 1. **TypeScript Type Errors**
-   - Always check `npm run typecheck` before committing
+   - Always check `pnpm run typecheck` before committing
    - Use strict mode to catch issues early
 
 2. **Prisma Schema Sync**
@@ -507,13 +523,13 @@ Tailwind CSS v4 has different configuration requirements and may not be properly
 ### Useful Commands
 ```bash
 # Check TypeScript errors
-npm run typecheck
+pnpm run typecheck
 
 # Lint code
-npm run lint
+pnpm run lint
 
 # Run tests
-npm test
+pnpm test
 
 # Check Prisma schema
 npx prisma validate
@@ -522,16 +538,16 @@ npx prisma validate
 npx prisma studio
 
 # Check API routes
-npm run api:routes
+pnpm run api:routes
 
 # Analyze bundle size
-npm run analyze
+pnpm run analyze
 ```
 
 ### Environment Debugging
 ```bash
 # Verify environment variables
-npm run env:check
+pnpm run env:check
 
 # Test database connection
 npx prisma db pull --force

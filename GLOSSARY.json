@@ -1,0 +1,295 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sightline.ai Platform Glossary",
+  "description": "Machine-readable canonical terminology and definitions",
+  "version": "1.0",
+  "last_updated": "2025-01-09",
+  "canonical_source": "/GLOSSARY.md",
+  "total_terms": 147,
+  "categories": ["business", "technical", "authentication", "ai", "development"],
+  
+  "terms": {
+    "anonymous_user": {
+      "term": "Anonymous User",
+      "category": "business",
+      "definition": "A user who can create one free summary without registration using browser fingerprinting for identification. Cannot save summaries or access personal library.",
+      "aliases": ["guest_user", "unregistered_user"],
+      "related_terms": ["browser_fingerprinting", "plan_limits"],
+      "usage_context": "authentication"
+    },
+    
+    "browser_fingerprinting": {
+      "term": "Browser Fingerprinting", 
+      "category": "technical",
+      "definition": "Client-side technique that generates a unique identifier from browser characteristics (User Agent, screen resolution, timezone) combined with IP address to track anonymous usage without cookies.",
+      "aliases": ["device_fingerprinting"],
+      "related_terms": ["anonymous_user", "privacy"],
+      "usage_context": "authentication",
+      "technical_details": {
+        "implementation": "JavaScript-based",
+        "data_points": ["user_agent", "screen_resolution", "timezone", "ip_address"],
+        "privacy_compliant": true
+      }
+    },
+    
+    "personal_library": {
+      "term": "Personal Library",
+      "category": "business", 
+      "definition": "User's private collection of saved video summaries with search, filtering, and organization capabilities. Includes Smart Collections tagging and categorization.",
+      "aliases": ["user_library", "summary_collection"],
+      "related_terms": ["smart_collections", "summary"],
+      "usage_context": "user_interface",
+      "features": ["search", "filtering", "organization", "smart_tagging"]
+    },
+    
+    "plan_limits": {
+      "term": "Plan Limits",
+      "category": "business",
+      "definition": "Usage restrictions based on subscription tier",
+      "related_terms": ["subscription", "billing"],
+      "usage_context": "billing",
+      "limits": {
+        "anonymous": {
+          "summaries": 1,
+          "period": "lifetime"
+        },
+        "free": {
+          "summaries": 3,
+          "period": "lifetime"
+        },
+        "pro": {
+          "summaries": 25,
+          "period": "monthly"
+        },
+        "complete": {
+          "summaries": "unlimited",
+          "period": "monthly"
+        }
+      }
+    },
+    
+    "progress_tracking": {
+      "term": "Progress Tracking",
+      "category": "technical",
+      "definition": "Real-time status updates during AI processing using UUID-based task identification, showing completion percentage and current processing stage.",
+      "aliases": ["real_time_progress", "processing_status"],
+      "related_terms": ["ai_processing", "task_id"],
+      "usage_context": "user_experience",
+      "technical_details": {
+        "implementation": "UUID-based task tracking",
+        "polling_interval": "2 seconds",
+        "stages": ["validation", "transcript_extraction", "ai_processing", "completion"]
+      }
+    },
+    
+    "public_sharing": {
+      "term": "Public Sharing",
+      "category": "business",
+      "definition": "Feature allowing users to generate public URLs for summaries, making them viewable without authentication via unique slug identifiers.",
+      "aliases": ["summary_sharing", "public_links"],
+      "related_terms": ["summary", "slug"],
+      "usage_context": "sharing",
+      "features": ["unique_slugs", "no_auth_required", "expirable_links"]
+    },
+    
+    "smart_collections": {
+      "term": "Smart Collections", 
+      "category": "ai",
+      "definition": "AI-powered automatic categorization system that extracts entities and assigns categories to video summaries for intelligent organization and filtering.",
+      "aliases": ["ai_tagging", "auto_categorization"],
+      "related_terms": ["ai_classification", "tags", "categories"],
+      "usage_context": "ai_processing",
+      "technical_details": {
+        "ai_model": "OpenAI GPT-4",
+        "tag_types": ["PERSON", "COMPANY", "TECHNOLOGY", "PRODUCT", "CONCEPT", "FRAMEWORK", "TOOL"],
+        "categories": ["Productivity", "Technology", "Business", "Marketing", "Finance", "Health"]
+      }
+    },
+    
+    "summary": {
+      "term": "Summary",
+      "category": "business",
+      "definition": "AI-generated structured summary of YouTube video content with key insights, actionable items, and metadata.",
+      "aliases": ["video_summary", "ai_summary"],
+      "related_terms": ["youtube_video", "ai_processing"],
+      "usage_context": "core_feature",
+      "structure": {
+        "sections": ["tldr", "key_moments", "in_practice", "playbooks", "frameworks", "glossary"],
+        "metadata": ["title", "duration", "transcript_quality", "processing_time"]
+      }
+    },
+    
+    "trpc": {
+      "term": "tRPC",
+      "category": "technical",
+      "definition": "TypeScript-first RPC framework providing end-to-end type safety between frontend and backend APIs.",
+      "aliases": ["typescript_rpc"],
+      "related_terms": ["typescript", "api", "type_safety"],
+      "usage_context": "development",
+      "technical_details": {
+        "version": "10.x",
+        "purpose": "type-safe API communication",
+        "routers": ["summary", "library", "auth", "billing", "share"]
+      }
+    },
+    
+    "fastapi": {
+      "term": "FastAPI",
+      "category": "technical", 
+      "definition": "Modern Python web framework for building high-performance APIs with automatic OpenAPI documentation.",
+      "aliases": ["python_api"],
+      "related_terms": ["python", "api", "async"],
+      "usage_context": "development",
+      "technical_details": {
+        "version": "0.100+",
+        "purpose": "AI processing backend",
+        "features": ["async_processing", "automatic_docs", "type_hints"]
+      }
+    },
+    
+    "clerk": {
+      "term": "Clerk",
+      "category": "technical",
+      "definition": "Authentication and user management service providing JWT-based auth with comprehensive user lifecycle management.",
+      "aliases": ["auth_service"],
+      "related_terms": ["authentication", "jwt", "user_management"],
+      "usage_context": "authentication",
+      "features": ["jwt_tokens", "user_sync", "webhooks", "social_auth"]
+    },
+    
+    "stripe": {
+      "term": "Stripe", 
+      "category": "technical",
+      "definition": "Payment processing platform handling subscription billing, customer management, and payment flows.",
+      "aliases": ["payment_processor"],
+      "related_terms": ["billing", "subscription", "payments"],
+      "usage_context": "billing",
+      "features": ["subscriptions", "webhooks", "customer_portal", "payment_methods"]
+    },
+    
+    "openai": {
+      "term": "OpenAI",
+      "category": "ai",
+      "definition": "AI platform providing large language models for text generation, summarization, and structured data extraction.",
+      "aliases": ["ai_service", "llm_provider"],
+      "related_terms": ["ai_processing", "gpt4", "langchain"],
+      "usage_context": "ai_processing", 
+      "models_used": ["GPT-4", "GPT-3.5-turbo"],
+      "features": ["text_summarization", "structured_output", "content_classification"]
+    },
+    
+    "neon": {
+      "term": "Neon",
+      "category": "technical",
+      "definition": "Serverless PostgreSQL database platform with branching, auto-scaling, and edge deployment capabilities.",
+      "aliases": ["database_provider"],
+      "related_terms": ["postgresql", "database", "serverless"],
+      "usage_context": "database",
+      "features": ["auto_scaling", "branching", "edge_deployment", "connection_pooling"]
+    },
+    
+    "prisma": {
+      "term": "Prisma",
+      "category": "technical",
+      "definition": "Next-generation ORM providing type-safe database access with auto-generated client and migration management.",
+      "aliases": ["orm", "database_orm"],
+      "related_terms": ["database", "typescript", "postgresql"],
+      "usage_context": "development",
+      "features": ["type_safety", "auto_generation", "migrations", "studio_gui"]
+    },
+    
+    "vercel": {
+      "term": "Vercel",
+      "category": "technical",
+      "definition": "Cloud platform for static sites and serverless functions with global edge deployment and Next.js optimization.",
+      "aliases": ["hosting_platform", "deployment_platform"],
+      "related_terms": ["nextjs", "serverless", "edge"],
+      "usage_context": "deployment",
+      "features": ["edge_network", "serverless_functions", "automatic_deployments", "preview_environments"]
+    },
+    
+    "youtube_api": {
+      "term": "YouTube Data API",
+      "category": "technical", 
+      "definition": "Google's API for accessing YouTube video metadata, including titles, descriptions, and basic video information.",
+      "aliases": ["youtube_data_api"],
+      "related_terms": ["youtube", "video_metadata", "google_api"],
+      "usage_context": "data_extraction",
+      "capabilities": ["video_metadata", "channel_info", "playlists", "search"]
+    },
+    
+    "langchain": {
+      "term": "LangChain",
+      "category": "ai",
+      "definition": "Python framework for developing applications with large language models, providing chains, agents, and memory management.",
+      "aliases": ["llm_framework"],
+      "related_terms": ["openai", "ai_processing", "python"],
+      "usage_context": "ai_development",
+      "features": ["prompt_templates", "chain_composition", "memory_management", "agent_framework"]
+    },
+    
+    "sentry": {
+      "term": "Sentry",
+      "category": "technical",
+      "definition": "Error tracking and performance monitoring platform providing real-time error reporting and application insights.",
+      "aliases": ["error_tracking", "monitoring"],
+      "related_terms": ["monitoring", "debugging", "performance"],
+      "usage_context": "monitoring",
+      "features": ["error_aggregation", "performance_tracking", "alerts", "release_tracking"]
+    }
+  },
+  
+  "categories_detailed": {
+    "business": {
+      "description": "User-facing concepts and business logic",
+      "terms": ["anonymous_user", "personal_library", "plan_limits", "public_sharing", "summary"]
+    },
+    "technical": {
+      "description": "Technical infrastructure and development tools", 
+      "terms": ["trpc", "fastapi", "clerk", "stripe", "neon", "prisma", "vercel", "youtube_api", "sentry", "browser_fingerprinting", "progress_tracking"]
+    },
+    "ai": {
+      "description": "AI/ML services and processing",
+      "terms": ["smart_collections", "openai", "langchain"]
+    },
+    "authentication": {
+      "description": "User authentication and authorization",
+      "terms": ["clerk", "anonymous_user", "browser_fingerprinting"]
+    },
+    "development": {
+      "description": "Development tools and frameworks",
+      "terms": ["trpc", "fastapi", "prisma", "langchain"]
+    }
+  },
+  
+  "relationships": {
+    "implements": [
+      {"source": "smart_collections", "target": "openai"},
+      {"source": "progress_tracking", "target": "fastapi"},
+      {"source": "public_sharing", "target": "summary"}
+    ],
+    "depends_on": [
+      {"source": "anonymous_user", "target": "browser_fingerprinting"},
+      {"source": "personal_library", "target": "smart_collections"},
+      {"source": "plan_limits", "target": "stripe"}
+    ],
+    "part_of": [
+      {"source": "summary", "target": "personal_library"},
+      {"source": "smart_collections", "target": "summary"}
+    ]
+  },
+  
+  "metadata": {
+    "search_index": {
+      "high_frequency": ["summary", "user", "api", "processing", "authentication"],
+      "business_critical": ["plan_limits", "billing", "subscription", "anonymous_user"],
+      "technical_core": ["trpc", "fastapi", "database", "ai_processing"]
+    },
+    "update_schedule": "monthly",
+    "validation": {
+      "term_format": "snake_case_key_pascal_case_display",
+      "required_fields": ["term", "category", "definition"],
+      "optional_fields": ["aliases", "related_terms", "technical_details"]
+    }
+  }
+}

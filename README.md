@@ -1,3 +1,17 @@
+---
+title: "Sightline.ai"
+description: "AI-Powered YouTube Video Summarization Platform - Transform long-form videos into actionable insights"
+type: "guide"
+canonical_url: "/readme"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["all-users", "new-users", "developers"]
+complexity: "beginner"
+tags: ["overview", "getting-started", "features", "setup"]
+quick_start: true
+estimated_time: "5 minutes read"
+---
+
 # Sightline.ai
 
 ## AI-Powered YouTube Video Summarization Platform
@@ -65,7 +79,7 @@ User → Next.js Frontend → tRPC API → FastAPI → OpenAI → Structured Sum
 - **Node.js** 18+ and **pnpm** package manager
 - **Python** 3.12+ for FastAPI backend
 - **PostgreSQL** database (Neon recommended)
-- **API Keys**: OpenAI, Clerk, Stripe (see [Environment Setup](docs/development/environment-setup.md))
+- **API Keys**: OpenAI, Clerk, Stripe (see [Environment Setup](Docs/development/environment-setup.md))
 
 ### Development Setup
 
@@ -121,21 +135,21 @@ pnpm lint && pnpm typecheck && pnpm format:check
 - **[Architecture Guide](ARCHITECTURE.md)** - Technical architecture, data flow, dependencies
 - **[Contributing Guide](CONTRIBUTING.md)** - Development workflow, testing, PR process
 - **[API Documentation](API/)** - Complete tRPC and FastAPI reference
-- **[Documentation Index](docs/INDEX.md)** - Complete navigation hub
+- **[Documentation Index](Docs/INDEX.md)** - Complete navigation hub
 
 ### 🏗️ Development Resources
 
-- **[Environment Setup](docs/development/environment-setup.md)** - Complete configuration guide
+- **[Environment Setup](Docs/development/environment-setup.md)** - Complete configuration guide
 - **[Glossary](GLOSSARY.md)** - Canonical terminology and definitions
 - **[Architectural Decisions](DECISIONS/)** - ADRs for key technical decisions
-- **[Bug Tracking](docs/development/bug-tracking.md)** - Known issues and resolutions
-- **[Testing Strategy](docs/development/testing-strategy.md)** - Comprehensive testing approach
+- **[Bug Tracking](Docs/development/bug-tracking.md)** - Known issues and resolutions
+- **[Testing Strategy](Docs/development/testing-strategy.md)** - Comprehensive testing approach
 
 ### 🚀 Production & Operations
 
 - **[Production Operations](PRODUCTION_OPERATIONS_GUIDE.md)** - Complete deployment and operations guide
 - **[Security Policy](SECURITY.md)** - Security implementation and compliance
-- **[Monitoring](docs/operations/monitoring.md)** - Error tracking and performance monitoring
+- **[Monitoring](Docs/operations/monitoring.md)** - Error tracking and performance monitoring
 
 ### 🤝 Community
 
@@ -187,7 +201,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Documentation**: Start with our [Documentation Index](docs/INDEX.md)
+- **Documentation**: Start with our [Documentation Index](Docs/INDEX.md)
 - **Issues**: Report bugs or request features in [GitHub Issues](https://github.com/jma0014SCG/sightline/issues)
 - **Discussions**: Join the community in [GitHub Discussions](https://github.com/jma0014SCG/sightline/discussions)
 

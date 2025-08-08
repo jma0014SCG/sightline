@@ -90,14 +90,14 @@ GOOGLE_CLIENT_SECRET=...
 
 ### Issue: Backend connection errors
 **Solutions:**
-1. Ensure backend is running: `npm run api:dev`
+1. Ensure backend is running: `pnpm run api:dev`
 2. Check backend health: `curl http://localhost:8000/api/health`
 3. Verify CORS settings allow localhost:3000
 
 ### Issue: Database errors
 **Solutions:**
 1. Check DATABASE_URL format
-2. Run database migrations: `npm run db:push`
+2. Run database migrations: `pnpm run db:push`
 3. Verify Neon database is accessible
 
 ## Quick Debug Commands
@@ -115,7 +115,7 @@ curl http://localhost:3000/api/trpc/auth.getSession \
   -d '{"json":null,"meta":{"values":{}}}'
 
 # Validate environment
-npm run env:validate
+pnpm run env:validate
 
 # Check running processes
 lsof -i :3000  # Frontend
@@ -146,16 +146,16 @@ The Debug Panel (visible in development) provides:
 cd api && ../venv/bin/python -m uvicorn index:app --reload --log-level debug
 
 # Frontend logs  
-NEXT_PUBLIC_DEBUG=true npm run dev
+NEXT_PUBLIC_DEBUG=true pnpm run dev
 ```
 
 ### Database debugging:
 ```bash
 # Open Prisma Studio
-npm run db:studio
+pnpm run db:studio
 
 # Check database schema
-npm run db:generate
+pnpm run db:generate
 ```
 
 ### Network debugging:
@@ -169,7 +169,7 @@ npm run db:generate
 If nothing works, try this reset sequence:
 
 1. **Stop all services**: `pkill -f uvicorn && pkill -f next`
-2. **Clean install**: `rm -rf node_modules && npm install`
-3. **Reset database**: `npm run db:push --force-reset`
+2. **Clean install**: `rm -rf node_modules && pnpm install`
+3. **Reset database**: `pnpm run db:push --force-reset`
 4. **Restart services**: `./scripts/debug-startup.sh`
 5. **Test with Debug Panel**

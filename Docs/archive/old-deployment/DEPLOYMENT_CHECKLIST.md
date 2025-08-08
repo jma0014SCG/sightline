@@ -70,7 +70,7 @@ GUMLOOP_API_KEY=your-gumloop-key
 
 ### Step 1: Install Vercel CLI
 ```bash
-npm i -g vercel
+pnpm i -g vercel
 ```
 - [ ] Vercel CLI installed
 - [ ] Logged in: `vercel login`

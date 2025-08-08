@@ -247,7 +247,7 @@ curl -I https://sightline.ai | grep -E "(Strict-Transport-Security|X-Frame-Optio
 ```
 
 ### Vulnerability Management
-- **Dependency Scanning**: Weekly `npm audit` and security updates
+- **Dependency Scanning**: Weekly `pnpm audit` and security updates
 - **Code Analysis**: Static analysis with ESLint security rules
 - **Secret Management**: Environment variable access auditing
 - **Third-party Integration**: Monitor OAuth scope changes, API key rotation
@@ -429,7 +429,7 @@ curl https://sightline.ai/api/health
 ### Weekly Tasks
 ```bash
 # 1. Dependency security audit
-npm audit --audit-level=high
+pnpm audit --audit-level=high
 
 # 2. Database maintenance
 # (Neon handles this automatically, but monitor)
@@ -605,7 +605,7 @@ const cache = {
 ### Application Backups
 ```bash
 # Export user data regularly
-npm run export-user-data > backup-$(date +%Y%m%d).json
+pnpm run export-user-data > backup-$(date +%Y%m%d).json
 
 # Configuration backup
 git tag production-$(date +%Y%m%d)

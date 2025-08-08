@@ -4,8 +4,8 @@ This guide covers deploying Sightline.ai to Vercel with all required configurati
 
 ## Prerequisites
 
-1. **Vercel CLI installed**: `npm install -g vercel`
-2. **Environment variables configured**: Run `npm run env:setup`
+1. **Vercel CLI installed**: `pnpm install -g vercel`
+2. **Environment variables configured**: Run `pnpm run env:setup`
 3. **Database setup**: Neon PostgreSQL database ready
 4. **API keys obtained**: Google OAuth, OpenAI, Stripe (see ENVIRONMENT.md)
 
@@ -15,7 +15,7 @@ This guide covers deploying Sightline.ai to Vercel with all required configurati
 
 ```bash
 # Link your local project to Vercel
-npm run vercel:link
+pnpm run vercel:link
 ```
 
 ### 2. Set Environment Variables
@@ -40,10 +40,10 @@ Option B - Use Vercel dashboard:
 
 ```bash
 # Deploy to preview environment
-npm run deploy:preview
+pnpm run deploy:preview
 
 # Deploy to production
-npm run deploy
+pnpm run deploy
 ```
 
 ## Vercel Configuration
@@ -58,8 +58,8 @@ npm run deploy
 
 ### Build Process
 
-1. **Install**: `npm install` (dependencies)
-2. **Build**: `npm run build` (Next.js production build)
+1. **Install**: `pnpm install` (dependencies)
+2. **Build**: `pnpm run build` (Next.js production build)
 3. **Functions**: Python API functions deployed automatically
 4. **Static**: Assets served from global CDN
 
@@ -89,12 +89,12 @@ npm run deploy
 2. **Run Migrations**:
    ```bash
    # Deploy schema to production database
-   npm run db:push
+   pnpm run db:push
    ```
 
 3. **Seed Data** (optional):
    ```bash
-   npm run db:seed
+   pnpm run db:seed
    ```
 
 ## Custom Domain (Optional)
@@ -132,16 +132,16 @@ npm run deploy
 
 ```bash
 # Preview deployment
-npm run deploy:preview
+pnpm run deploy:preview
 
 # Production deployment  
-npm run deploy
+pnpm run deploy
 
 # Link local project
-npm run vercel:link
+pnpm run vercel:link
 
 # Pull environment variables
-npm run vercel:env
+pnpm run vercel:env
 ```
 
 ## Troubleshooting
@@ -152,13 +152,13 @@ npm run vercel:env
 ```bash
 # Check build logs in Vercel dashboard
 # Verify all dependencies are in package.json
-# Test build locally: npm run build
+# Test build locally: pnpm run build
 ```
 
 **Environment Variable Issues**:
 ```bash
 # Validate locally first
-npm run env:validate
+pnpm run env:validate
 
 # Check Vercel environment variables
 vercel env ls
@@ -167,7 +167,7 @@ vercel env ls
 **Database Connection**:
 ```bash
 # Test database connection
-npm run db:push
+pnpm run db:push
 
 # Check connection string format
 # Verify Neon database allows connections
@@ -182,7 +182,7 @@ npm run db:push
 1. **Static Generation**: Use ISR for frequently accessed content
 2. **Edge Functions**: Deploy critical functions to edge locations
 3. **Image Optimization**: Use Next.js Image component
-4. **Bundle Analysis**: Run `npm run analyze` to check bundle size
+4. **Bundle Analysis**: Run `pnpm run analyze` to check bundle size
 
 ## Security Checklist
 

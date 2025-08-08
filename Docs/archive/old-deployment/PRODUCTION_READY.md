@@ -89,7 +89,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<stripe-public-key>
 ### 2. Vercel Deployment
 ```bash
 # Install Vercel CLI
-npm i -g vercel
+pnpm i -g vercel
 
 # Link project
 vercel link

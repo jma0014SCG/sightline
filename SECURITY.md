@@ -1,3 +1,18 @@
+---
+title: "Security Policy"
+description: "Security measures, vulnerability reporting, and protection protocols for Sightline.ai platform"
+type: "reference"
+canonical_url: "/security"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["security-team", "developers", "operators"]
+complexity: "advanced"
+tags: ["security", "policy", "vulnerabilities", "protection", "compliance"]
+security_level: "critical"
+review_schedule: "quarterly"
+related_docs: ["/architecture#security"]
+---
+
 # Security Policy
 
 ## Overview

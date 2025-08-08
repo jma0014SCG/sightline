@@ -1,3 +1,19 @@
+---
+title: "Platform Glossary"
+description: "Canonical terminology and definitions for Sightline.ai platform"
+type: "glossary"
+canonical_url: "/glossary"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["all-users", "developers", "operators"]
+complexity: "reference"
+tags: ["terminology", "definitions", "reference", "business-terms", "technical-terms"]
+term_count: 147
+categories: ["business", "technical", "authentication", "ai", "development"]
+machine_readable: true
+sidecar_file: "GLOSSARY.json"
+---
+
 # Glossary
 
 **Canonical terminology and definitions for Sightline.ai platform**

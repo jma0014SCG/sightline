@@ -224,7 +224,7 @@ authRateLimit: { windowMs: 15 * 60 * 1000, maxRequests: 5 }
 - [ ] Verify SSL certificate status
 
 ### Monthly Tasks
-- [ ] Security dependency audit (`npm audit`)
+- [ ] Security dependency audit (`pnpm audit`)
 - [ ] Review and rotate API keys
 - [ ] Analyze security metrics
 - [ ] Update security documentation

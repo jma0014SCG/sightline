@@ -1,0 +1,357 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sightline.ai System Architecture Schema",
+  "description": "Machine-readable architectural specification for the Sightline.ai platform",
+  "version": "1.2",
+  "last_updated": "2025-01-09",
+  "canonical_source": "/ARCHITECTURE.md",
+  
+  "system": {
+    "name": "Sightline.ai",
+    "type": "full-stack-web-application",
+    "architecture_pattern": "dual-api-serverless",
+    "deployment_model": "serverless-edge"
+  },
+  
+  "components": {
+    "frontend": {
+      "framework": "Next.js",
+      "version": "14",
+      "router": "App Router",
+      "runtime": "Edge Runtime",
+      "port": 3000,
+      "features": [
+        "Server Components",
+        "Streaming SSR",
+        "Static Generation",
+        "Client Components"
+      ],
+      "core_pages": [
+        {
+          "route": "/",
+          "name": "Landing Page",
+          "type": "public",
+          "features": ["anonymous_summary", "url_input"]
+        },
+        {
+          "route": "/library",
+          "name": "User Library",
+          "type": "protected",
+          "features": ["summary_management", "smart_filtering"]
+        },
+        {
+          "route": "/library/[id]",
+          "name": "Summary Viewer",
+          "type": "protected",
+          "features": ["rich_display", "timestamp_navigation", "sharing"]
+        },
+        {
+          "route": "/settings",
+          "name": "User Settings",
+          "type": "protected",
+          "features": ["profile_management", "notifications"]
+        }
+      ],
+      "key_components": [
+        {
+          "name": "SummaryViewer",
+          "type": "organism",
+          "purpose": "multi-column rich summary display"
+        },
+        {
+          "name": "LibraryControls",
+          "type": "molecule",
+          "purpose": "smart filtering with AI tags"
+        },
+        {
+          "name": "URLInput",
+          "type": "molecule",
+          "purpose": "YouTube URL validation and processing"
+        },
+        {
+          "name": "AuthPromptModal",
+          "type": "organism",
+          "purpose": "authentication modal system"
+        }
+      ]
+    },
+    
+    "backend_apis": {
+      "trpc": {
+        "framework": "tRPC",
+        "version": "10.x",
+        "purpose": "type-safe frontend-backend communication",
+        "deployment": "Vercel Functions",
+        "routers": [
+          {
+            "name": "summary",
+            "procedures": ["create", "createAnonymous", "getById", "getUserSummaries"],
+            "purpose": "video summarization operations"
+          },
+          {
+            "name": "library",
+            "procedures": ["getSummaries", "updateSummary", "deleteSummary"],
+            "purpose": "user library management"
+          },
+          {
+            "name": "auth",
+            "procedures": ["getProfile", "updateProfile", "exportData"],
+            "purpose": "user authentication and profile"
+          },
+          {
+            "name": "billing",
+            "procedures": ["getSubscription", "createCheckout", "cancelSubscription"],
+            "purpose": "Stripe payment integration"
+          },
+          {
+            "name": "share",
+            "procedures": ["createShare", "getSharedSummary"],
+            "purpose": "public sharing functionality"
+          }
+        ]
+      },
+      
+      "fastapi": {
+        "framework": "FastAPI",
+        "version": "0.100+",
+        "purpose": "high-performance AI processing",
+        "deployment": "Vercel Python Functions",
+        "port": 8000,
+        "key_endpoints": [
+          {
+            "path": "/api/summarize",
+            "method": "POST",
+            "purpose": "main video summarization with progress tracking"
+          },
+          {
+            "path": "/api/progress/{task_id}",
+            "method": "GET",
+            "purpose": "real-time progress polling"
+          },
+          {
+            "path": "/api/health",
+            "method": "GET",
+            "purpose": "health check and system status"
+          }
+        ],
+        "features": [
+          "async processing",
+          "progress tracking",
+          "multi-service transcript acquisition",
+          "AI classification"
+        ]
+      }
+    },
+    
+    "database": {
+      "provider": "Neon",
+      "engine": "PostgreSQL",
+      "version": "15+",
+      "port": 5432,
+      "orm": "Prisma",
+      "key_models": [
+        {
+          "name": "User",
+          "purpose": "user profiles synced from Clerk",
+          "key_fields": ["clerkId", "email", "subscriptionStatus"]
+        },
+        {
+          "name": "Summary",
+          "purpose": "video summaries with AI-generated content",
+          "key_fields": ["videoUrl", "title", "content", "tags", "categories"]
+        },
+        {
+          "name": "Category",
+          "purpose": "AI-generated content categories",
+          "relationships": ["many-to-many with Summary"]
+        },
+        {
+          "name": "Tag",
+          "purpose": "AI-extracted entities and topics",
+          "key_fields": ["name", "type", "summaries"],
+          "types": ["PERSON", "COMPANY", "TECHNOLOGY", "PRODUCT", "CONCEPT"]
+        },
+        {
+          "name": "Share",
+          "purpose": "public sharing links",
+          "key_fields": ["slug", "summaryId", "expiresAt"]
+        }
+      ]
+    }
+  },
+  
+  "external_dependencies": {
+    "authentication": {
+      "service": "Clerk",
+      "purpose": "user authentication and management",
+      "features": ["JWT validation", "user sync", "webhooks"]
+    },
+    "payments": {
+      "service": "Stripe",
+      "purpose": "subscription billing and payment processing",
+      "features": ["subscriptions", "webhooks", "customer portal"]
+    },
+    "ai_processing": {
+      "service": "OpenAI",
+      "models": ["GPT-4", "GPT-3.5-turbo"],
+      "purpose": "video summarization and content classification",
+      "features": ["LangChain integration", "structured output"]
+    },
+    "video_services": {
+      "youtube_api": {
+        "service": "YouTube Data API",
+        "purpose": "video metadata extraction"
+      },
+      "transcript_services": [
+        {
+          "name": "Gumloop",
+          "priority": 1,
+          "purpose": "enhanced transcript processing"
+        },
+        {
+          "name": "YT-DLP",
+          "priority": 2,
+          "purpose": "direct YouTube transcript extraction"
+        },
+        {
+          "name": "Oxylabs",
+          "priority": 3,
+          "purpose": "proxy-based fallback"
+        }
+      ]
+    },
+    "monitoring": {
+      "service": "Sentry",
+      "purpose": "error tracking and performance monitoring",
+      "features": ["error aggregation", "performance tracking", "alerts"]
+    }
+  },
+  
+  "data_flow": [
+    {
+      "name": "anonymous_summary_creation",
+      "steps": [
+        {
+          "source": "frontend",
+          "target": "tRPC summary.createAnonymous",
+          "data": "YouTube URL + browser fingerprint"
+        },
+        {
+          "source": "tRPC",
+          "target": "FastAPI /api/summarize",
+          "data": "video metadata + processing request"
+        },
+        {
+          "source": "FastAPI",
+          "target": "transcript services",
+          "data": "video URL with fallback chain"
+        },
+        {
+          "source": "transcript services",
+          "target": "OpenAI GPT-4",
+          "data": "raw transcript for summarization"
+        },
+        {
+          "source": "OpenAI",
+          "target": "database",
+          "data": "structured summary with AI tags/categories"
+        }
+      ]
+    },
+    {
+      "name": "authenticated_summary_creation",
+      "steps": [
+        {
+          "source": "frontend",
+          "target": "tRPC summary.create",
+          "data": "YouTube URL + user session"
+        },
+        {
+          "source": "tRPC",
+          "target": "usage validation",
+          "data": "user subscription + summary count"
+        },
+        {
+          "source": "tRPC",
+          "target": "FastAPI /api/summarize",
+          "data": "validated processing request"
+        },
+        {
+          "source": "FastAPI",
+          "target": "database",
+          "data": "complete summary with user association"
+        }
+      ]
+    },
+    {
+      "name": "real_time_progress_tracking",
+      "steps": [
+        {
+          "source": "frontend",
+          "target": "FastAPI /api/progress/{task_id}",
+          "data": "periodic polling for status updates"
+        },
+        {
+          "source": "FastAPI",
+          "target": "frontend",
+          "data": "processing stage with realistic progress %"
+        }
+      ]
+    }
+  ],
+  
+  "security_architecture": {
+    "authentication": {
+      "method": "JWT with Clerk",
+      "token_validation": "server-side",
+      "anonymous_tracking": "browser fingerprinting + IP"
+    },
+    "api_protection": {
+      "cors_policy": "strict origin validation",
+      "rate_limiting": "custom middleware",
+      "input_validation": "Zod schemas"
+    },
+    "data_protection": {
+      "encryption": "TLS 1.3 in transit",
+      "database": "PostgreSQL row-level security",
+      "secrets": "environment variables"
+    }
+  },
+  
+  "performance_characteristics": {
+    "frontend": {
+      "initial_load": "<3s on 3G",
+      "bundle_size": "<500KB initial",
+      "core_web_vitals": {
+        "lcp": "<2.5s",
+        "fid": "<100ms",
+        "cls": "<0.1"
+      }
+    },
+    "backend": {
+      "api_response": "<200ms for tRPC",
+      "summarization": "2-5 minutes per video",
+      "database_queries": "<50ms average"
+    },
+    "scalability": {
+      "deployment": "serverless auto-scaling",
+      "database": "Neon auto-scaling",
+      "cdn": "Vercel Edge Network"
+    }
+  },
+  
+  "development_tools": {
+    "type_safety": "end-to-end TypeScript with tRPC",
+    "validation": "Zod schemas for all API boundaries",
+    "testing": {
+      "unit": "Jest + React Testing Library",
+      "e2e": "Playwright multi-browser",
+      "api": "tRPC testing utilities"
+    },
+    "development": {
+      "hot_reloading": "Next.js Fast Refresh",
+      "database": "Prisma Studio",
+      "api_docs": "auto-generated from tRPC"
+    }
+  }
+}

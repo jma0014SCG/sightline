@@ -1,3 +1,22 @@
+---
+title: "Comprehensive Testing Strategy"
+description: "Complete testing strategy including unit tests, E2E tests, performance benchmarks, and security validation"
+type: "guide"
+canonical_url: "/docs/development/testing-strategy"
+version: "1.2"
+last_updated: "2025-01-09"
+audience: ["developers", "qa-engineers", "contributors"]
+complexity: "intermediate"
+prerequisites: ["Node.js 18+", "Python 3.12+", "Docker"]
+tags: ["testing", "jest", "playwright", "e2e", "unit-tests", "performance", "security"]
+test_frameworks: ["Jest", "Playwright", "React Testing Library"]
+test_suites: 16
+test_count: 449
+coverage_target: 80
+estimated_time: "45 minutes read"
+related_docs: ["/contributing", "/docs/development/bug-tracking"]
+---
+
 # Comprehensive Testing Documentation
 
 This document outlines the complete testing strategy implemented for the Sightline platform, including unit tests, end-to-end tests, performance benchmarks, and security validation.

@@ -22,14 +22,14 @@ This guide walks you through deploying Sightline.ai to production on Vercel.
    ```bash
    # Set DATABASE_URL temporarily
    export DATABASE_URL="your-production-database-url"
-   npm run db:push
+   pnpm run db:push
    ```
 
 ## Step 2: Vercel Deployment
 
 1. **Install Vercel CLI**
    ```bash
-   npm i -g vercel
+   pnpm i -g vercel
    ```
 
 2. **Link Project to Vercel**
@@ -176,8 +176,8 @@ Use our built-in validation:
 vercel env pull .env.production.local
 
 # Validate (after installing tsx)
-npm install tsx
-npm run env:validate
+pnpm install tsx
+pnpm run env:validate
 ```
 
 ## Troubleshooting
@@ -185,8 +185,8 @@ npm run env:validate
 ### Common Issues
 
 1. **Build Failures**
-   - Check TypeScript errors: `npm run typecheck`
-   - Check linting: `npm run lint`
+   - Check TypeScript errors: `pnpm run typecheck`
+   - Check linting: `pnpm run lint`
 
 2. **OAuth Redirect Errors**
    - Verify redirect URIs in Google Console
@@ -195,7 +195,7 @@ npm run env:validate
 3. **Database Connection Issues**
    - Verify DATABASE_URL format
    - Check Neon IP allowlist settings
-   - Test connection: `npm run db:studio`
+   - Test connection: `pnpm run db:studio`
 
 4. **Stripe Webhook Failures**
    - Check webhook endpoint URL
@@ -266,8 +266,8 @@ npm run env:validate
 echo "🚀 Deploying Sightline to production..."
 
 # Build and test locally first
-npm run build
-npm run typecheck
+pnpm run build
+pnpm run typecheck
 
 # Deploy to Vercel
 vercel --prod

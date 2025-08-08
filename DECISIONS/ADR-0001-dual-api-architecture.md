@@ -1,3 +1,22 @@
+---
+title: "ADR-0001: Dual API Architecture (tRPC + FastAPI)"
+description: "Architectural decision for implementing both tRPC and FastAPI to handle different types of operations"
+type: "adr"
+canonical_url: "/decisions/adr-0001-dual-api-architecture"
+status: "accepted"
+decision_date: "2024-08-15"
+review_date: "2025-02-15"
+version: "1.0"
+last_updated: "2025-01-09"
+authors: ["Lead Architect"]
+reviewers: ["Tech Lead", "Backend Team"]
+stakeholders: ["Frontend Team", "Backend Team", "DevOps"]
+supersedes: []
+related_adrs: ["ADR-0002", "ADR-0003"]
+tags: ["architecture", "api-design", "trpc", "fastapi", "performance"]
+impact: "high"
+---
+
 # ADR-0001: Dual API Architecture (tRPC + FastAPI)
 
 ## Status

@@ -1,3 +1,18 @@
+---
+title: "Contributing Guide"
+description: "Developer workflow guide for contributing to Sightline.ai platform"
+type: "guide"
+canonical_url: "/contributing"
+version: "1.1"
+last_updated: "2025-01-09"
+audience: ["contributors", "developers"]
+complexity: "intermediate"
+prerequisites: ["Node.js 18+", "Python 3.12+", "Git", "pnpm"]
+estimated_time: "30 minutes setup"
+tags: ["development", "workflow", "setup", "testing", "pull-requests"]
+related_docs: ["/architecture", "/claude"]
+---
+
 # Contributing
 
 **Developer workflow guide for contributing to Sightline.ai platform**
@@ -26,7 +41,7 @@ pip install -r requirements.txt
 
 # Environment configuration
 cp .env.example .env.local
-# Edit .env.local with your API keys (see Environment Variables section)
+# Edit .env.local with your API keys (see [Environment Setup Guide](Docs/development/environment-setup.md))
 
 # Database setup
 pnpm db:generate
@@ -386,7 +401,7 @@ import './styles.css'
 
 **Need Help?**
 
-- Check existing [bug reports](docs/development/bug-tracking.md)
+- Check existing [bug reports](Docs/development/bug-tracking.md)
 - Review [architecture documentation](ARCHITECTURE.md)
 - Ask questions in GitHub Discussions
 - Join development community channels

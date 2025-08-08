@@ -1,3 +1,17 @@
+---
+title: "AI Assistant Guide (Claude Code)"
+description: "Guidance for Claude Code (claude.ai/code) when working with this repository"
+type: "guide"
+canonical_url: "/claude"
+version: "1.0"
+last_updated: "2025-01-09"
+audience: ["ai-assistants", "claude-code"]
+complexity: "reference"
+tags: ["ai-guidance", "development", "commands", "architecture", "workflows"]
+special_purpose: "ai_assistant_instructions"
+related_docs: ["/contributing", "/architecture"]
+---
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -451,4 +465,4 @@ The SummaryViewer uses a responsive multi-column layout:
 ## Package Manager
 This project uses pnpm (v10.13.1) as specified in package.json. Always use pnpm for dependency management to ensure lockfile compatibility.
 
-**Note**: There's currently an inconsistency in `package.json` where the `dev:full` script uses `npm run dev` instead of `pnpm dev`. This should be updated for consistency.
+**Note**: There's currently an inconsistency in `package.json` where the `dev:full` script uses `pnpm run dev` instead of `pnpm dev`. This should be updated for consistency.

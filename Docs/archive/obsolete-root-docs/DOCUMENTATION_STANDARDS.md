@@ -139,7 +139,7 @@ Quarterly:
 # .git/hooks/pre-commit
 if git diff --cached --name-only | grep -E "src/|api/"; then
   echo "Code changes detected. Remember to update documentation!"
-  echo "Run: npm run docs:check"
+  echo "Run: pnpm run docs:check"
 fi
 ```
 
@@ -175,11 +175,11 @@ Low Priority (Within Month):
 ### 4. Quality Validation
 ```bash
 # Automated validation pipeline
-npm run docs:lint        # Markdown linting
-npm run docs:spell      # Spell checking
-npm run docs:links      # Link validation
-npm run docs:code       # Code example testing
-npm run docs:deploy     # Deploy to staging for review
+pnpm run docs:lint        # Markdown linting
+pnpm run docs:spell      # Spell checking
+pnpm run docs:links      # Link validation
+pnpm run docs:code       # Code example testing
+pnpm run docs:deploy     # Deploy to staging for review
 ```
 
 ---
@@ -323,12 +323,12 @@ jobs:
       - name: Test Code Examples
         run: |
           # Extract and test code blocks
-          npm run test:docs-examples
+          pnpm run test:docs-examples
           
       - name: Validate API Examples  
         run: |
           # Test API documentation examples
-          npm run test:api-examples
+          pnpm run test:api-examples
 ```
 
 #### Quality Gates
@@ -400,14 +400,14 @@ grep -r "process.env." src/ | \
 ### Staging Environment
 ```bash
 # Deploy documentation to staging for review
-npm run docs:build
+pnpm run docs:build
 vercel --scope docs-staging
 
 # Automated deployment on documentation changes
 # .github/workflows/docs-deploy.yml
 if: contains(github.event.head_commit.modified, '*.md')
 run: |
-  npm run docs:deploy-staging
+  pnpm run docs:deploy-staging
   echo "📖 Docs deployed to staging: $STAGING_URL"
 ```
 
@@ -577,12 +577,12 @@ Use: "JavaScript" (not "Javascript")
 ### Validation Pipeline
 ```bash
 # Documentation validation commands
-npm run docs:lint          # Markdown linting
-npm run docs:spell         # Spell checking  
-npm run docs:links         # Link validation
-npm run docs:test          # Test code examples
-npm run docs:build         # Build documentation site
-npm run docs:deploy        # Deploy to staging/production
+pnpm run docs:lint          # Markdown linting
+pnpm run docs:spell         # Spell checking  
+pnpm run docs:links         # Link validation
+pnpm run docs:test          # Test code examples
+pnpm run docs:build         # Build documentation site
+pnpm run docs:deploy        # Deploy to staging/production
 ```
 
 ### Automated Quality Checks
@@ -593,7 +593,7 @@ npm run docs:deploy        # Deploy to staging/production
   "docs:spell": "cspell '**/*.md'",
   "docs:links": "markdown-link-check **/*.md --config .mlc.json",
   "docs:test": "node scripts/test-doc-examples.js",
-  "docs:validate": "npm run docs:lint && npm run docs:spell && npm run docs:links",
+  "docs:validate": "pnpm run docs:lint && pnpm run docs:spell && pnpm run docs:links",
   "docs:fix": "markdownlint-cli2-fix '**/*.md' && prettier --write '**/*.md'"
 }
 ```
@@ -718,4 +718,4 @@ echo "⭐ Average Rating: $(average_user_rating)"
 
 *Last Updated: January 9, 2025 | Version: 1.0*
 
-**🎯 Quick Start**: Run `npm run docs:validate` to check documentation quality. See [Maintenance Workflows](#maintenance-workflows) for ongoing procedures.
+**🎯 Quick Start**: Run `pnpm run docs:validate` to check documentation quality. See [Maintenance Workflows](#maintenance-workflows) for ongoing procedures.

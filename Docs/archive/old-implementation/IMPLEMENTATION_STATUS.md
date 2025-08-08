@@ -144,21 +144,21 @@ The core video summarization pipeline is **fully functional with enhanced featur
 
 ```bash
 # Start development servers
-npm run dev:full          # Both frontend and backend
-npm run dev               # Frontend only
-npm run api:dev           # Backend only
+pnpm run dev:full          # Both frontend and backend
+pnpm run dev               # Frontend only
+pnpm run api:dev           # Backend only
 
 # Test the pipeline
 node scripts/test-pipeline.js
 
 # Database operations
-npm run db:generate       # Generate Prisma client
-npm run db:migrate        # Run migrations
-npm run db:push           # Push schema changes
+pnpm run db:generate       # Generate Prisma client
+pnpm run db:migrate        # Run migrations
+pnpm run db:push           # Push schema changes
 
 # Environment setup
-npm run env:setup         # Interactive environment setup
-npm run env:validate      # Validate all environment variables
+pnpm run env:setup         # Interactive environment setup
+pnpm run env:validate      # Validate all environment variables
 ```
 
 ## 🎯 Current Capability

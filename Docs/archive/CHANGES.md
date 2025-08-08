@@ -80,9 +80,9 @@ Started: 2025-08-02
 **Changes Made**:
 - [x] Updated `tests/test_gumloop.py` to test new 3-tuple return format (lines 51-64)
 - [x] Created `tests/test_video_categorization.py` - Comprehensive integration test for full pipeline
-- [x] Verified TypeScript compilation with `npm run typecheck` - No new errors introduced
-- [x] Verified ESLint compliance with `npm run lint` - No new errors introduced
-- [x] Verified Prisma client generation with `npm run db:generate` - Schema changes work correctly
+- [x] Verified TypeScript compilation with `pnpm run typecheck` - No new errors introduced
+- [x] Verified ESLint compliance with `pnpm run lint` - No new errors introduced
+- [x] Verified Prisma client generation with `pnpm run db:generate` - Schema changes work correctly
 - [x] Tested end-to-end categorization pipeline - Successfully detects video categories via Gumloop
 
 ## Implementation Summary
@@ -133,15 +133,15 @@ git checkout HEAD -- api/services/youtube_service.py
 ### To revert Phase 3:
 ```bash
 git checkout HEAD -- prisma/schema.prisma
-npm run db:generate
-npm run db:push
+pnpm run db:generate
+pnpm run db:push
 ```
 
 ### To revert all changes:
 ```bash
 git reset --hard HEAD
-npm run db:generate
-npm run db:push
+pnpm run db:generate
+pnpm run db:push
 ```
 
 ## Notes

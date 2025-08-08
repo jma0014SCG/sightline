@@ -113,7 +113,7 @@ Due to past migration issues, we're implementing this WITHOUT schema changes by 
 - Made `userId` nullable in Summary model: `userId String?`
 - Updated user relation to be optional: `user User?`
 - Added index on `createdAt` for cleanup queries
-- Generated Prisma client with `npm run db:generate`
+- Generated Prisma client with `pnpm run db:generate`
 
 #### 3. Added Anonymous Summary API (✅)
 **File modified:** `/src/server/api/routers/summary.ts`

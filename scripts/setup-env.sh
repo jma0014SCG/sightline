@@ -11,25 +11,25 @@ if [ ! -f .env.local ]; then
     echo ""
     echo "⚠️  IMPORTANT: Please update the following variables in .env.local:"
     echo "   - DATABASE_URL (get from Neon)"
-    echo "   - NEXTAUTH_SECRET (generate with: openssl rand -base64 32)"
-    echo "   - GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET (from Google Console)"
+    echo "   - CLERK_SECRET_KEY & NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY (from Clerk)"
+    echo "   - CLERK_WEBHOOK_SECRET (from Clerk Webhooks)"
     echo "   - OPENAI_API_KEY (from OpenAI Platform)"
+    echo "   - STRIPE_SECRET_KEY & NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (from Stripe)"
     echo ""
 else
     echo "✅ .env.local already exists"
 fi
 
-# Generate NextAuth secret if needed
-if ! grep -q "NEXTAUTH_SECRET=" .env.local || grep -q "your-secret-key-here" .env.local; then
-    echo "🔐 Generating NextAuth secret..."
-    if command -v openssl &> /dev/null; then
-        SECRET=$(openssl rand -base64 32)
-        sed -i.bak "s/NEXTAUTH_SECRET=.*/NEXTAUTH_SECRET=\"$SECRET\"/" .env.local
-        rm .env.local.bak 2>/dev/null || true
-        echo "✅ Generated new NextAuth secret"
-    else
-        echo "⚠️  OpenSSL not found. Please manually generate a 32+ character secret for NEXTAUTH_SECRET"
-    fi
+# Check Clerk configuration
+if grep -q "your-clerk-secret-key" .env.local; then
+    echo "🔐 Clerk configuration needed..."
+    echo "⚠️  Please configure Clerk authentication:"
+    echo "   1. Create account at https://clerk.com/"
+    echo "   2. Create new application"
+    echo "   3. Copy API keys from Dashboard → API Keys"
+    echo "   4. Update CLERK_SECRET_KEY and NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in .env.local"
+else
+    echo "✅ Clerk configuration detected"
 fi
 
 # Check Node.js version
@@ -66,6 +66,7 @@ echo ""
 echo "Next steps:"
 echo "1. Update .env.local with your actual API keys"
 echo "2. Set up a Neon database and update DATABASE_URL"
-echo "3. Run 'npm run db:push' to sync the database schema"
-echo "4. Run 'npm run dev' to start the development server"
+echo "3. Run 'pnpm db:push' to sync the database schema"
+echo "4. Run 'pnpm dev' to start the development server"
+echo "5. Run 'pnpm env:validate' to verify all environment variables"
 echo ""

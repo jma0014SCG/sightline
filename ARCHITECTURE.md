@@ -1,8 +1,36 @@
+---
+title: "System Architecture"
+description: "Technical architecture, data flow patterns, and system dependencies for Sightline.ai platform"
+type: "reference"
+canonical_url: "/architecture"
+version: "1.2"
+last_updated: "2025-01-09"
+authors: ["Architecture Team"]
+reviewers: ["Lead Developer"]
+tags: ["architecture", "system-design", "technical-reference", "data-flow", "dependencies"]
+audience: ["developers", "architects", "contributors"]
+complexity: "advanced"
+---
+
 # Architecture
 
 **Technical architecture, data flow patterns, and system dependencies for Sightline.ai platform**
 
-## System Overview
+## Table of Contents
+
+- [System Overview](#system-overview) - High-level architecture diagram
+- [Data Flow](#data-flow) - User interaction and processing flows
+- [Core Components](#core-components) - Frontend, backend, and database layers
+- [External Dependencies](#external-dependencies) - Third-party services and APIs
+- [Security Architecture](#security) - Authentication, authorization, and protection
+- [Performance Characteristics](#performance) - Scaling and optimization patterns
+- [Development Architecture](#development-architecture) - Developer tools and workflows
+- [ADR Reference](#adrs-reference) - Links to architectural decisions
+- [Summary](#architecture-summary) - Key takeaways
+
+---
+
+## System Overview {#system-overview}
 
 Sightline.ai implements a modern full-stack architecture following Next.js 14 App Router patterns, tRPC type-safe APIs, and FastAPI async patterns for optimal performance and developer experience.
 
@@ -30,7 +58,7 @@ Sightline.ai implements a modern full-stack architecture following Next.js 14 Ap
 - **Security**: JWT validation with Clerk, CORS policies, rate limiting, and input sanitization
 - **Developer Experience**: Type inference, hot reloading, and comprehensive tooling integration
 
-## Data Flow
+## Data Flow {#data-flow}
 
 ### 1. User Summary Creation
 
@@ -97,7 +125,7 @@ Category Assignment (14 predefined categories)
 Database Association & UI Display
 ```
 
-## Core Components
+## Core Components {#core-components}
 
 ### Frontend Architecture (Next.js 14 + App Router)
 
@@ -816,7 +844,7 @@ UsageEvent {
 - Summary ↔ Category (many:many)
 - User → UsageEvent (1:many)
 
-## External Dependencies
+## External Dependencies {#external-dependencies}
 
 ### Required Services
 
@@ -863,7 +891,7 @@ UsageEvent {
 - **YT-DLP**: Fallback transcript service
 - **Gumloop**: Enhanced transcript processing
 
-## Security Architecture
+## Security Architecture {#security}
 
 ### Authentication & Authorization Patterns
 
@@ -1481,7 +1509,7 @@ export async function deleteUserData(userId: string) {
 }
 ```
 
-## Performance Characteristics
+## Performance Characteristics {#performance}
 
 ### Response Times
 
@@ -1504,7 +1532,7 @@ export async function deleteUserData(userId: string) {
 - **Database Optimization**: Indexed queries, connection pooling
 - **AI Optimization**: Prompt optimization, streaming responses
 
-## Development Architecture
+## Development Architecture {#development-architecture}
 
 ### Environment Separation
 
@@ -1537,7 +1565,7 @@ Mock Data     Seed Data     Real Data
 - **Prettier**: Automated code formatting
 - **Husky**: Pre-commit hooks for quality gates
 
-## Architectural Decision Records (ADRs)
+## Architectural Decision Records (ADRs) {#adrs-reference}
 
 ### Key Design Decisions and Rationales
 
@@ -1826,7 +1854,7 @@ if (typeof window === 'undefined') {
 
 ---
 
-## Summary
+## Summary {#architecture-summary}
 
 This architecture implements modern full-stack best practices with:
 
