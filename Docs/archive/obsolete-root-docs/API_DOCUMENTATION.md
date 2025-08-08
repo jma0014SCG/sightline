@@ -1017,7 +1017,7 @@ All endpoints include version information in responses. Breaking changes will in
 
 ## Support
 
-- **Bug Reports**: [Bug Tracking](Docs/Bug_tracking.md)
+- **Bug Reports**: [Bug Tracking](../../../Docs/development/bug-tracking.md)
 - **Feature Requests**: GitHub Issues
 - **API Questions**: [GitHub Discussions](https://github.com/sightline-ai/sightline/discussions)
 - **Security Issues**: <security@sightline.ai>

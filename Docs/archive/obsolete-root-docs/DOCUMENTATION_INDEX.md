@@ -11,15 +11,15 @@ Welcome to the Sightline.ai documentation! This comprehensive index will help yo
 1. **[README.md](README.md)** - Project overview, quick start, and core features
 2. **[CLAUDE.md](CLAUDE.md)** - Claude Code development setup and commands
 3. **[Development Setup](#-development--local-setup)** - Detailed environment setup
-4. **[Project Structure](Docs/architecture/project-structure.md)** - Codebase organization and architecture
+4. **[Project Structure](../../../Docs/architecture/project-structure.md)** - Codebase organization and architecture
 
 ### For Contributors
 
 **Ready to contribute?** Follow this path:
 
 1. **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and process
-2. **[Bug Tracking](Docs/development/bug-tracking.md)** - Known issues and resolution process
-3. **[Testing Strategy](Docs/development/testing-strategy.md)** - Testing framework and quality standards
+2. **[Bug Tracking](../../../Docs/development/bug-tracking.md)** - Known issues and resolution process
+3. **[Testing Strategy](../../../Docs/development/testing-strategy.md)** - Testing framework and quality standards
 
 ### For Operators
 
@@ -27,7 +27,7 @@ Welcome to the Sightline.ai documentation! This comprehensive index will help yo
 
 1. **[Production Operations Guide](PRODUCTION_OPERATIONS_GUIDE.md)** - Complete operational manual (deployment, monitoring, scaling)
 2. **[Security Policy](SECURITY.md)** - Security implementation and best practices
-3. **[Monitoring Guide](Docs/operations/monitoring.md)** - Error tracking and performance monitoring
+3. **[Monitoring Guide](../../../Docs/operations/monitoring.md)** - Error tracking and performance monitoring
 
 ## 📚 Core Documentation
 
@@ -38,7 +38,7 @@ Welcome to the Sightline.ai documentation! This comprehensive index will help yo
 ```text
 Docs/
 ├── architecture/          # Technical architecture & design
-│   ├── platform-overview.md
+│   ├── ui-ux-guidelines.md
 │   ├── project-structure.md
 │   └── ui-ux-guidelines.md
 ├── development/          # Development resources
@@ -66,33 +66,33 @@ Docs/
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| **[Platform Documentation](Docs/architecture/platform-overview.md)** | 📖 **Master Technical Reference** - Complete technical documentation covering architecture, features, API, deployment | All developers |
-| **[Project Structure](Docs/architecture/project-structure.md)** | Detailed codebase organization with atomic design patterns | Frontend developers |
-| **[Implementation Reports](Docs/reports/)** | Project implementation reports and roadmaps | Project managers, architects |
+| **[Platform Documentation](../../../ARCHITECTURE.md)** | 📖 **Master Technical Reference** - Complete technical documentation covering architecture, features, API, deployment | All developers |
+| **[Project Structure](../../../Docs/architecture/project-structure.md)** | Detailed codebase organization with atomic design patterns | Frontend developers |
+| **[Implementation Reports](../../../Docs/reports/)** | Project implementation reports and roadmaps | Project managers, architects |
 
 ### Features & User Experience
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| **[UI/UX Guidelines](Docs/architecture/ui-ux-guidelines.md)** | Design system, accessibility standards, responsive design | UI/UX developers, designers |
+| **[UI/UX Guidelines](../../../Docs/architecture/ui-ux-guidelines.md)** | Design system, accessibility standards, responsive design | UI/UX developers, designers |
 | **[API Documentation](API_DOCUMENTATION.md)** | **Complete API Reference** - tRPC procedures and FastAPI endpoints with examples | Backend developers |
 
 ### Quality Assurance & Testing
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| **[Testing Documentation](Docs/development/testing-strategy.md)** | Comprehensive testing strategy: unit, E2E, performance, security | QA engineers, developers |
-| **[Bug Tracking](Docs/development/bug-tracking.md)** | Known issues, resolution process, common problems | All developers |
+| **[Testing Documentation](../../../Docs/development/testing-strategy.md)** | Comprehensive testing strategy: unit, E2E, performance, security | QA engineers, developers |
+| **[Bug Tracking](../../../Docs/development/bug-tracking.md)** | Known issues, resolution process, common problems | All developers |
 
 ### Operations & Deployment
 
 | Document | Description | Audience |
 |----------|-------------|----------|
 | **[Production Operations Guide](PRODUCTION_OPERATIONS_GUIDE.md)** | **Complete Operations Manual** - Deployment, monitoring, troubleshooting, scaling | DevOps engineers, SREs |
-| **[Legacy Deployment](Docs/operations/legacy-deployment.md)** | Legacy deployment procedures (see Operations Guide for updated) | DevOps engineers |
+| **[Legacy Deployment](../../../Docs/operations/legacy-deployment.md)** | Legacy deployment procedures (see Operations Guide for updated) | DevOps engineers |
 | **[Security Policy](SECURITY.md)** | Security headers, input validation, authentication | Security engineers |
-| **[Monitoring Guide](Docs/operations/monitoring.md)** | Error tracking, performance monitoring, alerting | Site reliability engineers |
-| **[Rate Limits](Docs/operations/rate-limits.md)** | API rate limiting configuration and management | Backend developers |
+| **[Monitoring Guide](../../../Docs/operations/monitoring.md)** | Error tracking, performance monitoring, alerting | Site reliability engineers |
+| **[Rate Limits](../../../Docs/operations/rate-limits.md)** | API rate limiting configuration and management | Backend developers |
 
 ### Project Management
 
@@ -218,24 +218,24 @@ pnpm test:coverage     # Coverage reports (70% threshold)
 
 | Issue | Solution | Documentation |
 |-------|----------|---------------|
-| **Server won't start** | Check port conflicts, use `pkill -f "next dev"` | [Bug #001](Docs/Bug_tracking.md#bug-001) |
+| **Server won't start** | Check port conflicts, use `pkill -f "next dev"` | [Bug #001](../../../Docs/development/bug-tracking.md#bug-001) |
 | **Database connection fails** | Verify `DATABASE_URL`, run `pnpm db:generate` | [Development Setup](#-development--local-setup) |
 | **TypeScript errors** | Run `pnpm typecheck`, fix type issues | [Code Quality](TESTING.md#code-quality-standards) |
-| **Build fails** | Check ESLint config, run `pnpm lint:fix` | [Bug #004](Docs/Bug_tracking.md#bug-004) |
+| **Build fails** | Check ESLint config, run `pnpm lint:fix` | [Bug #004](../../../Docs/development/bug-tracking.md#bug-004) |
 
 ### Getting Help
 
-1. **Check Bug Tracking**: Review [known issues](Docs/development/bug-tracking.md)
+1. **Check Bug Tracking**: Review [known issues](../../../Docs/development/bug-tracking.md)
 2. **Documentation Search**: Use browser search across documentation files
 3. **Development Commands**: Run diagnostic commands from [CLAUDE.md](CLAUDE.md)
-4. **Quick Reference**: See [development quick reference](Docs/development/quick-reference.md)
+4. **Quick Reference**: See [development quick reference](../../../Docs/development/quick-reference.md)
 
 ## 📝 Documentation Standards
 
 ### When to Update Documentation
 
 - **New Features**: Update architecture docs and API documentation
-- **Bug Fixes**: Document in [Bug_tracking.md](Docs/development/bug-tracking.md)
+- **Bug Fixes**: Document in [Bug_tracking.md](../../../Docs/development/bug-tracking.md)
 - **Breaking Changes**: Update [CHANGELOG.md](CHANGELOG.md)
 - **Setup Changes**: Update installation and environment guides
 
@@ -250,8 +250,8 @@ pnpm test:coverage     # Coverage reports (70% threshold)
 
 ---
 
-**💡 Need help?** Start with the [README.md](README.md) for basics, or jump to the [Platform Documentation](Docs/architecture/platform-overview.md) for comprehensive technical details.
+**💡 Need help?** Start with the [README.md](README.md) for basics, or jump to the [Platform Documentation](../../../ARCHITECTURE.md) for comprehensive technical details.
 
-**🐛 Found an issue?** Report it in [Bug_tracking.md](Docs/development/bug-tracking.md) following the provided template.
+**🐛 Found an issue?** Report it in [Bug_tracking.md](../../../Docs/development/bug-tracking.md) following the provided template.
 
 **🚀 Ready to deploy?** Follow the [Production Operations Guide](PRODUCTION_OPERATIONS_GUIDE.md) for complete operational procedures.

@@ -94,7 +94,7 @@
 - **Documentation:** <https://vercel.com/docs/functions>
 
 - **LLM Integration:** LangChain 0.3 + OpenAI SDK - Flexible prompt management
-- **Documentation:** <https://python.langchain.com/docs/>, <https://platform.openai.com/docs>
+- **Documentation:** <https://python.langchain.com/docs/>, <https://platform.openai.com/docs/api-reference>
 
 ### Database
 
@@ -113,7 +113,7 @@
 - **Documentation:** <https://pypi.org/project/youtube-transcript-api/>
 
 - **Payment Processing:** Stripe Checkout - PCI-compliant payments
-- **Documentation:** <https://docs.stripe.com/payments/checkout>
+- **Documentation:** <https://docs.stripe.com/checkout>
 
 - **Background Jobs:** Vercel Cron + Upstash Queue - Reliable job processing
 - **Documentation:** <https://vercel.com/docs/cron-jobs>, <https://upstash.com/docs/qstash>
@@ -301,13 +301,13 @@
 ### AI & Processing
 
 - [LangChain Documentation](https://python.langchain.com/docs/)
-- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [OpenAI API Documentation](https://openai.com/api/)
 - [Whisper API Documentation](https://platform.openai.com/docs/guides/speech-to-text)
 
 ### Authentication & Payments
 
 - [NextAuth.js Documentation](https://authjs.dev/)
-- [Stripe Checkout Documentation](https://docs.stripe.com/payments/checkout)
+- [Stripe Checkout Documentation](https://stripe.com/docs/payments)
 - [Google OAuth Documentation](https://developers.google.com/identity/protocols/oauth2)
 
 ### Infrastructure

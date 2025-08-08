@@ -1,0 +1,13 @@
+{
+  "name": "sightline-docs-scripts",
+  "version": "1.0.0",
+  "description": "Documentation maintenance scripts for Sightline.ai",
+  "main": "link-validator.js",
+  "scripts": {
+    "validate-links": "node link-validator.js",
+    "fix-archive-links": "node fix-archive-links.js",
+    "docs-health": "node link-validator.js && echo 'Documentation health check complete'"
+  },
+  "keywords": ["documentation", "links", "validation", "maintenance"],
+  "license": "MIT"
+}

@@ -792,7 +792,7 @@ fi
 - [API Documentation](API_DOCUMENTATION.md) - Complete API reference
 - [Security Policy](SECURITY.md) - Security measures and procedures
 - [Monitoring Guide](MONITORING.md) - Detailed monitoring setup
-- [Bug Tracking](Docs/Bug_tracking.md) - Known issues and resolutions
+- [Bug Tracking](Docs/development/bug-tracking.md) - Known issues and resolutions
 
 ### External Resources
 

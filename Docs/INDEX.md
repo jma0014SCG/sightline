@@ -80,15 +80,15 @@ quick_start: true
 
 | API Layer | Documentation | Purpose |
 |-----------|---------------|---------|
-| **tRPC** | [API/trpc/](../API/trpc/) | Type-safe frontend-backend communication |
-| **FastAPI** | [API/fastapi/](../API/fastapi/) | High-performance AI processing |
-| **Examples** | [API/examples/](../API/examples/) | Implementation patterns |
+| **Complete API** | [API Documentation](../API/README.md) | Comprehensive dual-layer API reference |
+| **tRPC Routers** | [src/server/api/routers/](../src/server/api/routers/) | Type-safe frontend-backend communication |
+| **FastAPI Services** | [API/services/](../API/services/) | High-performance AI processing services |
 
 **Quick API Reference**:
 
-- [Summary Procedures](../API/trpc/summary.md) - Video summarization API
-- [Summarization Endpoint](../API/fastapi/summarization.md) - AI processing API
-- [Progress Tracking](../API/examples/progress-tracking.md) - Real-time progress
+- [Complete API Guide](../API/README.md) - Full tRPC and FastAPI documentation
+- [Summary Router](../API/README.md#summary-router) - Video summarization API
+- [Progress Tracking](../API/README.md#progress-tracking-api) - Real-time progress implementation
 
 ## Detailed Documentation (Docs/ Directory) {#detailed-docs}
 

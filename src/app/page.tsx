@@ -1007,9 +1007,12 @@ export default function HomePage() {
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-prussian-blue-200/50 ring-1 ring-prussian-blue-200">
               <div style={{ position: 'relative', paddingBottom: '41.25%', height: 0 }}>
                 <iframe 
-                  src="https://www.loom.com/embed/60df8f98f6c34a57b7bc71049b445f91?sid=a3115793-e470-4812-bb41-1d2e6d99854b" 
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  src="https://www.loom.com/embed/60df8f98f6c34a57b7bc71049b445f91?sid=4e7669a8-bfb7-4926-bfdc-d1032a24acdc" 
+                  frameBorder="0"
+                  webkitallowfullscreen="true"
+                  mozallowfullscreen="true"
                   allowFullScreen
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                   className="rounded-lg"
                 ></iframe>
               </div>
