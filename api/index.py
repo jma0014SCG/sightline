@@ -181,9 +181,37 @@ except ImportError as e:
                 "comment_count": video_info.comment_count,
                 "upload_date": video_info.upload_date.isoformat() if video_info.upload_date else None,
                 "is_gumloop": is_gumloop,
+                # Processing source metadata
+                "processing_source": "gumloop" if is_gumloop else "standard",
+                "processing_version": "v1.0",
+                "language": "en",
+                # === GUMLOOP RICH CONTENT ===
+                # Extract speakers from metadata or content
+                "speakers": getattr(summary.metadata, 'speakers', []) if summary.metadata else [],
+                "synopsis": getattr(summary.metadata, 'synopsis', None) if summary.metadata else None,
+                # Rich structured sections
+                "key_moments": [{"timestamp": km.timestamp, "insight": km.insight} for km in summary.key_moments],
+                "frameworks": [{"name": f.name, "description": f.description} for f in getattr(summary, 'frameworks', [])],
+                "debunked_assumptions": getattr(summary, 'debunked_assumptions', []),
+                "in_practice": getattr(summary, 'in_practice', []),
+                "playbooks": [{"trigger": p.trigger, "action": p.action} for p in getattr(summary, 'playbooks', [])],
+                # Learning pack
+                "learning_pack": {
+                    "flashcards": [{"q": card.question, "a": card.answer} for card in summary.flashcards],
+                    "quiz": [{"q": quiz.question, "a": quiz.answer} for quiz in summary.quiz_questions],
+                    "glossary": [{"term": card.q, "definition": card.a} for card in summary.knowledge_cards],
+                    "novel_ideas": []  # Will be populated from AI analysis
+                } if (summary.flashcards or summary.quiz_questions or summary.knowledge_cards) else None,
+                # Enrichment data
+                "enrichment": {
+                    "tools": getattr(summary, 'tools', []),
+                    "sentiment": getattr(summary.insight_enrichment, 'sentiment', 'neutral') if hasattr(summary, 'insight_enrichment') and summary.insight_enrichment else 'neutral',
+                    "risks": getattr(summary.insight_enrichment, 'risks_blockers_questions', []) if hasattr(summary, 'insight_enrichment') and summary.insight_enrichment else []
+                },
                 "metadata": {
                     "task_id": task_id,
-                    "source": "gumloop" if is_gumloop else "standard"
+                    "source": "gumloop" if is_gumloop else "standard",
+                    "ai_version": "v1.0"
                 }
             }
             

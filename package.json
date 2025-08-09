@@ -22,6 +22,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "create-test-user": "node scripts/create-test-user.js",
     "env:setup": "chmod +x scripts/setup-env.sh && scripts/setup-env.sh",
     "env:check": "node -e \"require('./src/lib/env.ts')\" && echo '✅ Environment variables are valid'",
     "env:validate": "tsx -e \"try { require('./src/lib/env.ts').default; console.log('✅ All environment variables are valid'); } catch(e) { console.error('❌ Environment validation failed:', e.message); process.exit(1); }\"",

@@ -37,6 +37,36 @@ export const createMockSummary = (overrides?: Partial<Summary>): Summary => ({
   }),
   keyPoints: ['Point 1', 'Point 2'],
   metadata: {},
+  // Enhanced YouTube metadata columns
+  viewCount: 1000000,
+  likeCount: 50000,
+  commentCount: 2500,
+  uploadDate: new Date('2024-01-01'),
+  description: 'Test video description',
+  
+  // === GUMLOOP RICH CONTENT FIELDS ===
+  speakers: [],
+  synopsis: null,
+  keyMoments: null,
+  frameworks: null,
+  debunkedAssumptions: null,
+  inPractice: null,
+  playbooks: null,
+  learningPack: null,
+  thinkingStyle: null,
+  enrichment: null,
+  
+  // Processing metadata
+  language: 'en',
+  processingSource: null,
+  processingVersion: null,
+  
+  // User interaction fields
+  userNotes: null,
+  rating: null,
+  isFavorite: false,
+  lastViewedAt: null,
+  
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   ...overrides,

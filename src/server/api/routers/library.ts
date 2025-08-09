@@ -14,7 +14,7 @@ export const libraryRouter = createTRPCRouter({
    * @param {number} [input.limit=20] - Number of results to return (1-100)
    * @param {string} [input.cursor] - Cursor for pagination (from previous response)
    * @param {string} [input.search] - Search term for title, channel, or content
-   * @param {'date'|'title'|'duration'|'channel'} [input.sortBy='date'] - Sort field
+   * @param {'date'|'title'|'duration'|'channel'|'views'|'uploadDate'} [input.sortBy='date'] - Sort field
    * @param {'asc'|'desc'} [input.sortOrder='desc'] - Sort direction
    * @param {'day'|'week'|'month'|'year'} [input.dateRange] - Filter by creation date
    * @param {'short'|'medium'|'long'} [input.durationRange] - Filter by video duration
@@ -46,7 +46,7 @@ export const libraryRouter = createTRPCRouter({
       limit: z.number().min(1).max(100).default(20),
       cursor: z.string().optional(),
       search: z.string().optional(),
-      sortBy: z.enum(['date', 'title', 'duration', 'channel']).default('date'),
+      sortBy: z.enum(['date', 'title', 'duration', 'channel', 'views', 'uploadDate']).default('date'),
       sortOrder: z.enum(['asc', 'desc']).default('desc'),
       dateRange: z.enum(['day', 'week', 'month', 'year']).optional(),
       durationRange: z.enum(['short', 'medium', 'long']).optional(),
@@ -144,6 +144,12 @@ export const libraryRouter = createTRPCRouter({
           break
         case 'channel':
           orderBy = { channelName: sortOrder }
+          break
+        case 'views':
+          orderBy = { viewCount: sortOrder }
+          break
+        case 'uploadDate':
+          orderBy = { uploadDate: sortOrder }
           break
         case 'date':
         default:

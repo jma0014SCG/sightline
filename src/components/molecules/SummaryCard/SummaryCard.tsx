@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square } from 'lucide-react'
+import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, ThumbsUp, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import type { Summary, Category, Tag } from '@prisma/client'
@@ -52,6 +52,18 @@ export function SummaryCard({
       day: 'numeric',
       year: 'numeric'
     })
+  }
+
+  // Format large numbers (e.g., 1.2M views, 45K likes)
+  const formatCount = (count: number | null | undefined) => {
+    if (!count || count === 0) return null
+    
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`
+    }
+    return count.toString()
   }
 
   // Extract key insights from content for preview
@@ -225,10 +237,32 @@ export function SummaryCard({
               {/* Footer */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    View
-                  </span>
+                  {/* YouTube metadata */}
+                  {formatCount(summary.viewCount) && (
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      {formatCount(summary.viewCount)}
+                    </span>
+                  )}
+                  {formatCount(summary.likeCount) && (
+                    <span className="flex items-center gap-1">
+                      <ThumbsUp className="h-3 w-3" />
+                      {formatCount(summary.likeCount)}
+                    </span>
+                  )}
+                  {formatCount(summary.commentCount) && (
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3" />
+                      {formatCount(summary.commentCount)}
+                    </span>
+                  )}
+                  {/* Fallback if no metadata */}
+                  {!summary.viewCount && !summary.likeCount && (
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      View
+                    </span>
+                  )}
                   {keyInsights.length > 1 && (
                     <span className="text-blue-600">+{keyInsights.length - 1} more</span>
                   )}
@@ -409,10 +443,32 @@ export function SummaryCard({
 
             {/* Footer - simplified */}
             <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                Summary
-              </span>
+              {/* YouTube metadata */}
+              {formatCount(summary.viewCount) && (
+                <span className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  {formatCount(summary.viewCount)}
+                </span>
+              )}
+              {formatCount(summary.likeCount) && (
+                <span className="flex items-center gap-1">
+                  <ThumbsUp className="h-3 w-3" />
+                  {formatCount(summary.likeCount)}
+                </span>
+              )}
+              {formatCount(summary.commentCount) && (
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" />
+                  {formatCount(summary.commentCount)}
+                </span>
+              )}
+              {/* Fallback if no metadata */}
+              {!summary.viewCount && !summary.likeCount && (
+                <span className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  Summary
+                </span>
+              )}
               {keyInsights.length > 1 && (
                 <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
               )}

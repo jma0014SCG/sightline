@@ -298,6 +298,29 @@ export const summaryRouter = createTRPCRouter({
             content: sanitizedContent,
             keyPoints: data.key_points || [],
             metadata: metadata,
+            // Enhanced YouTube metadata columns
+            viewCount: data.view_count || null,
+            likeCount: data.like_count || null,
+            commentCount: data.comment_count || null,
+            uploadDate: data.upload_date ? new Date(data.upload_date) : null,
+            description: data.description ? sanitizeText(data.description) : null,
+            
+            // === GUMLOOP RICH CONTENT STORAGE ===
+            speakers: data.speakers || [],
+            synopsis: data.synopsis ? sanitizeText(data.synopsis) : null,
+            keyMoments: data.key_moments || null,
+            frameworks: data.frameworks || null,
+            debunkedAssumptions: data.debunked_assumptions || null,
+            inPractice: data.in_practice || null,
+            playbooks: data.playbooks || null,
+            learningPack: data.learning_pack || null,
+            thinkingStyle: data.thinking_style || null,
+            enrichment: data.enrichment || null,
+            
+            // Processing metadata
+            language: data.language || 'en',
+            processingSource: data.processing_source || 'standard',
+            processingVersion: data.processing_version || 'v1.0',
           },
         })
 
@@ -644,6 +667,29 @@ export const summaryRouter = createTRPCRouter({
             content: sanitizedContent,
             keyPoints: data.key_points || [],
             metadata: metadata,
+            // Enhanced YouTube metadata columns
+            viewCount: data.view_count || null,
+            likeCount: data.like_count || null,
+            commentCount: data.comment_count || null,
+            uploadDate: data.upload_date ? new Date(data.upload_date) : null,
+            description: data.description ? sanitizeText(data.description) : null,
+            
+            // === GUMLOOP RICH CONTENT STORAGE ===
+            speakers: data.speakers || [],
+            synopsis: data.synopsis ? sanitizeText(data.synopsis) : null,
+            keyMoments: data.key_moments || null,
+            frameworks: data.frameworks || null,
+            debunkedAssumptions: data.debunked_assumptions || null,
+            inPractice: data.in_practice || null,
+            playbooks: data.playbooks || null,
+            learningPack: data.learning_pack || null,
+            thinkingStyle: data.thinking_style || null,
+            enrichment: data.enrichment || null,
+            
+            // Processing metadata
+            language: data.language || 'en',
+            processingSource: data.processing_source || 'standard',
+            processingVersion: data.processing_version || 'v1.0',
             updatedAt: new Date(),
           },
           create: {
@@ -658,6 +704,29 @@ export const summaryRouter = createTRPCRouter({
             content: sanitizedContent,
             keyPoints: data.key_points || [],
             metadata: metadata,
+            // Enhanced YouTube metadata columns
+            viewCount: data.view_count || null,
+            likeCount: data.like_count || null,
+            commentCount: data.comment_count || null,
+            uploadDate: data.upload_date ? new Date(data.upload_date) : null,
+            description: data.description ? sanitizeText(data.description) : null,
+            
+            // === GUMLOOP RICH CONTENT STORAGE ===
+            speakers: data.speakers || [],
+            synopsis: data.synopsis ? sanitizeText(data.synopsis) : null,
+            keyMoments: data.key_moments || null,
+            frameworks: data.frameworks || null,
+            debunkedAssumptions: data.debunked_assumptions || null,
+            inPractice: data.in_practice || null,
+            playbooks: data.playbooks || null,
+            learningPack: data.learning_pack || null,
+            thinkingStyle: data.thinking_style || null,
+            enrichment: data.enrichment || null,
+            
+            // Processing metadata
+            language: data.language || 'en',
+            processingSource: data.processing_source || 'standard',
+            processingVersion: data.processing_version || 'v1.0',
           },
         })
 

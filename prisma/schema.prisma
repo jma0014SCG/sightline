@@ -51,9 +51,47 @@ model Summary {
   channelId    String
   duration     Int // in seconds
   thumbnailUrl String?
-  content      String   @db.Text // Markdown content
+  content      String   @db.Text // Markdown content or TL;DR
   keyPoints    Json? // Array of key points
-  metadata     Json? // Additional metadata
+  metadata     Json? // Additional metadata (keeping for flexibility)
+  
+  // Enhanced YouTube metadata columns
+  viewCount       Int?      // Make searchable/sortable
+  likeCount       Int?      // Make searchable/sortable  
+  commentCount    Int?      // Make searchable/sortable
+  uploadDate      DateTime? // Make searchable/sortable
+  description     String?   @db.Text // Full video description
+  
+  // === GUMLOOP RICH CONTENT SECTIONS ===
+  // Video context and speakers
+  speakers        String[]  @default([]) // Multiple speakers possible
+  synopsis        String?   @db.Text     // Video synopsis from Gumloop
+  
+  // Rich structured content from Gumloop
+  keyMoments      Json?     // Array of {timestamp, insight} objects
+  frameworks      Json?     // Strategic frameworks and mental models
+  debunkedAssumptions Json? // Common misconceptions addressed
+  inPractice      Json?     // Real-world applications and use cases
+  playbooks       Json?     // Trigger-action pairs and heuristics
+  
+  // Learning and educational content
+  learningPack    Json?     // {flashcards, glossary, quiz, novelIdeas}
+  thinkingStyle   Json?     // How to think like the speaker/expert
+  
+  // Enrichment and meta-analysis
+  enrichment      Json?     // {tools, prereqs, risks, sentiment, links}
+  
+  // Processing metadata
+  language        String    @default("en")
+  processingSource String?  // "gumloop", "standard", "enhanced"
+  processingVersion String? // Version of AI processing used
+  
+  // === USER INTERACTION ===
+  userNotes       String?   @db.Text
+  rating          Int?      // 1-5 star rating
+  isFavorite      Boolean   @default(false)
+  lastViewedAt    DateTime?
+  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -66,6 +104,14 @@ model Summary {
   @@unique([userId, videoId])
   @@index([userId])
   @@index([videoId])
+  @@index([viewCount])
+  @@index([uploadDate])
+  @@index([userId, viewCount])
+  @@index([userId, uploadDate])
+  @@index([userId, isFavorite])
+  @@index([userId, rating])
+  @@index([processingSource])
+  @@index([userId, processingSource])
 }
 
 // Shareable links for summaries

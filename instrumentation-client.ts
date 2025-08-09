@@ -20,11 +20,12 @@ if (SENTRY_DSN) {
 
     // Client-side integrations
     integrations: [
-      Sentry.replayIntegration({
-        // Additional replay settings
-        maskAllText: process.env.NODE_ENV === "production",
-        blockAllMedia: process.env.NODE_ENV === "production",
-      }),
+      // Temporarily disabled replayIntegration due to compatibility issue
+      // Sentry.replayIntegration({
+      //   // Additional replay settings
+      //   maskAllText: process.env.NODE_ENV === "production",
+      //   blockAllMedia: process.env.NODE_ENV === "production",
+      // }),
     ],
 
     // Client-specific error filtering
