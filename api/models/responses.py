@@ -10,6 +10,12 @@ class VideoInfo(BaseModel):
     duration: int  # in seconds
     thumbnail_url: Optional[str] = None
     published_at: Optional[datetime] = None
+    # Enhanced metadata fields
+    description: Optional[str] = None
+    view_count: Optional[int] = None
+    like_count: Optional[int] = None
+    comment_count: Optional[int] = None
+    upload_date: Optional[datetime] = None
 
 class KeyMoment(BaseModel):
     timestamp: str

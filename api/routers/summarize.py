@@ -33,8 +33,8 @@ async def summarize_video(
         if not video_id:
             raise HTTPException(status_code=400, detail="Invalid YouTube URL")
         
-        # Get video metadata
-        video_info = await youtube_service.get_video_info(video_id)
+        # Get video metadata and transcript in parallel
+        video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
         
         # Check video duration
         if video_info.duration > 7200:  # 2 hours
@@ -43,8 +43,6 @@ async def summarize_video(
                 detail="Video is too long. Maximum duration is 2 hours."
             )
         
-        # Get transcript from YouTube service
-        transcript, is_gumloop = await youtube_service.get_transcript(video_id)
         if not transcript:
             raise HTTPException(
                 status_code=400,

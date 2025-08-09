@@ -133,14 +133,11 @@ except ImportError as e:
             # Get real video info and transcript
             print(f"🔄 Processing video ID: {video_id}")
             
-            # Update progress: Getting video info  
-            progress_storage[task_id] = {"progress": 25, "stage": "Fetching video information...", "status": "processing", "task_id": task_id}
-            video_info = await youtube_service.get_video_info(video_id)
-            print(f"📹 Video info: {video_info.title} by {video_info.channel_name}")
-            
-            # Update progress: Getting transcript
-            progress_storage[task_id] = {"progress": 40, "stage": "Downloading transcript...", "status": "processing", "task_id": task_id}
-            transcript = await youtube_service.get_transcript(video_id)
+            # Update progress: Getting video info and transcript in parallel
+            progress_storage[task_id] = {"progress": 25, "stage": "Fetching video data and transcript...", "status": "processing", "task_id": task_id}
+            video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
+            print(f"📹 Video info: {video_info.title} by {video_info.channel_name} ({video_info.view_count} views)")
+            print(f"📝 Transcript source: {'Gumloop' if is_gumloop else 'Standard'}")
             
             if not transcript:
                 progress_storage[task_id] = {"progress": 40, "stage": "Error: No transcript available", "status": "error", "task_id": task_id}
@@ -177,8 +174,16 @@ except ImportError as e:
                 "key_points": summary.key_points,
                 "user_id": "test-user",
                 "task_id": task_id,
+                # Enhanced metadata from YouTubeMetadataService
+                "description": video_info.description,
+                "view_count": video_info.view_count,
+                "like_count": video_info.like_count,
+                "comment_count": video_info.comment_count,
+                "upload_date": video_info.upload_date.isoformat() if video_info.upload_date else None,
+                "is_gumloop": is_gumloop,
                 "metadata": {
-                    "task_id": task_id
+                    "task_id": task_id,
+                    "source": "gumloop" if is_gumloop else "standard"
                 }
             }
             

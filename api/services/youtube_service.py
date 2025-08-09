@@ -22,6 +22,7 @@ from .youtube_direct_service import YouTubeDirectService
 from .transcript_fallback_service import TranscriptFallbackService
 from .reliable_transcript_service import ReliableTranscriptService
 from .gumloop_service import GumloopService
+from .youtube_metadata_service import YouTubeMetadataService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -69,6 +70,10 @@ class YouTubeService:
                 flow_id=settings.gumloop_flow_id
             )
         
+        # Initialize YouTube Metadata service
+        self.metadata_service = YouTubeMetadataService()
+        logger.info("🔧 YouTube Metadata service initialized")
+        
         # Free proxy list for testing (these may not work consistently)
         self.free_proxies = [
             "socks5://127.0.0.1:9050",  # Tor proxy if available
@@ -101,37 +106,40 @@ class YouTubeService:
             logger.info("🔧 Free proxy rotation enabled")
     
     async def get_video_info(self, video_id: str) -> VideoInfo:
-        """Get video metadata from YouTube"""
+        """Get comprehensive video metadata using YouTubeMetadataService"""
         try:
-            # Get basic info from oembed endpoint
-            url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
-            response = await self.client.get(url)
+            logger.info(f"🔄 Fetching video metadata for {video_id}")
             
-            if response.status_code != 200:
-                raise Exception(f"Video not found or unavailable (status: {response.status_code})")
+            # Get comprehensive metadata using the new service
+            metadata = await self.metadata_service.get_metadata(video_id)
             
-            data = response.json()
-            
-            # Extract channel info from author_name
-            channel_name = data.get("author_name", "Unknown")
-            
-            # Get thumbnail - try different resolutions
-            thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-            
-            # We'll estimate duration from transcript timing
-            duration = await self._estimate_duration_from_transcript(video_id)
-            
+            # Create VideoInfo object with comprehensive data
             return VideoInfo(
                 video_id=video_id,
-                title=data.get("title", "Unknown Title"),
-                channel_name=channel_name,
-                channel_id="",  # Would need YouTube Data API for channel ID
-                duration=duration,
-                thumbnail_url=thumbnail_url
+                title=metadata.get('title', 'Unknown Title'),
+                channel_name=metadata.get('channel_name', 'Unknown Channel'),
+                channel_id="",  # Not provided by current implementation
+                duration=metadata.get('duration', 0),
+                thumbnail_url=metadata.get('thumbnail_url'),
+                published_at=metadata.get('upload_date'),  # Use upload_date as published_at
+                description=metadata.get('description'),
+                view_count=metadata.get('view_count'),
+                like_count=metadata.get('like_count'),
+                comment_count=metadata.get('comment_count'),
+                upload_date=metadata.get('upload_date')
             )
             
         except Exception as e:
-            raise Exception(f"Failed to get video info: {str(e)}")
+            logger.error(f"❌ Failed to get video metadata: {str(e)}")
+            # Return minimal VideoInfo on error
+            return VideoInfo(
+                video_id=video_id,
+                title="Unknown Title",
+                channel_name="Unknown Channel", 
+                channel_id="",
+                duration=0,
+                thumbnail_url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+            )
     
     async def _estimate_duration_from_transcript(self, video_id: str) -> int:
         """Estimate video duration from transcript timestamps"""
@@ -277,6 +285,60 @@ class YouTubeService:
                     raise Exception(f"Failed to get transcript after {max_retries} attempts: {error_msg}")
         
         return None, False
+    
+    async def get_video_data_parallel(self, video_id: str, language: str = "en") -> tuple[VideoInfo, tuple[Optional[str], bool]]:
+        """
+        Get video metadata and transcript in parallel for better performance
+        
+        Returns:
+            Tuple of (VideoInfo, (transcript, is_gumloop))
+        """
+        logger.info(f"🔄 Starting parallel video data fetch for {video_id}")
+        
+        # Create tasks for parallel execution
+        metadata_task = self.get_video_info(video_id)
+        transcript_task = self.get_transcript(video_id, language)
+        
+        # Execute both tasks in parallel
+        try:
+            video_info, transcript_result = await asyncio.gather(
+                metadata_task,
+                transcript_task,
+                return_exceptions=True
+            )
+            
+            # Handle exceptions from either task
+            if isinstance(video_info, Exception):
+                logger.error(f"❌ Metadata fetch failed: {str(video_info)}")
+                # Create minimal VideoInfo
+                video_info = VideoInfo(
+                    video_id=video_id,
+                    title="Unknown Title",
+                    channel_name="Unknown Channel",
+                    channel_id="",
+                    duration=0,
+                    thumbnail_url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+                )
+            
+            if isinstance(transcript_result, Exception):
+                logger.error(f"❌ Transcript fetch failed: {str(transcript_result)}")
+                transcript_result = (None, False)
+            
+            logger.info(f"✅ Parallel video data fetch completed for {video_id}")
+            return video_info, transcript_result
+            
+        except Exception as e:
+            logger.error(f"❌ Parallel execution failed for {video_id}: {str(e)}")
+            # Return fallback data
+            video_info = VideoInfo(
+                video_id=video_id,
+                title="Unknown Title",
+                channel_name="Unknown Channel",
+                channel_id="",
+                duration=0,
+                thumbnail_url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+            )
+            return video_info, (None, False)
     
     async def _get_transcript_via_oxylabs(self, video_id: str) -> Optional[str]:
         """Get transcript using Oxylabs proxy service"""
