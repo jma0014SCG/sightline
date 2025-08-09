@@ -74,11 +74,12 @@ async def summarize_video(
                 summary_content = gumloop_data.full_content
                 key_points = extract_key_points_from_gumloop(gumloop_data)
                 
-                # Update video info with Gumloop metadata if available
-                if gumloop_data.title:
-                    video_info.title = gumloop_data.title
-                if gumloop_data.channel:
-                    video_info.channel_name = gumloop_data.channel
+                # Keep original YouTube API metadata for title and channel (accurate and clean)
+                # Don't override with Gumloop data to avoid asterisks and incorrect channel names
+                # if gumloop_data.title:
+                #     video_info.title = gumloop_data.title
+                # if gumloop_data.channel:
+                #     video_info.channel_name = gumloop_data.channel
                 if gumloop_data.duration:
                     # Parse duration from format like "HH:MM:SS" to seconds
                     try:
@@ -109,19 +110,16 @@ async def summarize_video(
                     for moment in gumloop_data.key_moments
                 ]
                 
-                # Map new structured sections
-                frameworks = [
-                    Framework(name=f.name, description=f.description)
-                    for f in gumloop_data.frameworks
-                ]
+                # Use simple markdown content for frameworks instead of complex parsing
+                # The frontend will display the raw markdown content from sections
+                frameworks = []
                 
                 debunked_assumptions = gumloop_data.debunked_assumptions
                 in_practice = gumloop_data.in_practice
                 
-                playbooks = [
-                    Playbook(trigger=p.trigger, action=p.action)
-                    for p in gumloop_data.playbooks
-                ]
+                # Use simple markdown content for playbooks instead of complex parsing
+                # The frontend will display the raw markdown content from sections
+                playbooks = []
                 
                 insight_enrichment = None
                 if gumloop_data.insight_enrichment:
@@ -244,6 +242,12 @@ async def summarize_video(
             summary=summary_content,
             key_points=key_points,
             user_id="test-user",  # Temporarily using test user ID
+            # Enhanced YouTube metadata from YouTubeMetadataService
+            description=video_info.description,
+            view_count=video_info.view_count,
+            like_count=video_info.like_count,
+            comment_count=video_info.comment_count,
+            upload_date=video_info.upload_date,
             metadata=metadata,
             key_moments=key_moments,
             frameworks=frameworks,
