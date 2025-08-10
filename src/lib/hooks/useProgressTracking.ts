@@ -158,6 +158,10 @@ export function useProgressTracking({
 
         if (data.status === 'completed') {
           console.log('✅ Progress tracking completed:', data)
+          // Ensure we show 100% progress and clear completion message
+          setProgress(100)
+          setStage('Summary ready! ✅')
+          setStatus('completed')
           onComplete?.(data)
           // Stop polling when complete
           if (intervalRef.current) {

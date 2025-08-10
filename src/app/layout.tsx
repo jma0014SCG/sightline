@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
@@ -75,7 +76,9 @@ export default function RootLayout({
             <TRPCProvider>
               <MonitoringProvider>
                 <ToastProvider>
-                  {children}
+                  <Suspense fallback={null}>
+                    {children}
+                  </Suspense>
                 </ToastProvider>
               </MonitoringProvider>
             </TRPCProvider>

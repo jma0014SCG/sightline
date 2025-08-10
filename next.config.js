@@ -13,23 +13,56 @@ const nextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ["lucide-react", "react-markdown"],
+    // Enable instrumentation hook for proper Sentry integration
     instrumentationHook: true,
   },
-  // Bundle analyzer in development
-  ...(process.env.ANALYZE === "true" && {
-    webpack: (config, { isServer }) => {
-      if (!isServer) {
-        const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: "static",
-            openAnalyzer: false,
-          }),
-        );
-      }
-      return config;
-    },
-  }),
+  // Custom webpack configuration
+  webpack: (config, { isServer, isNodeRuntime }) => {
+    // Handle OpenTelemetry modules properly for all runtime environments
+    config.resolve = config.resolve || {};
+    config.resolve.fallback = config.resolve.fallback || {};
+
+    if (!isServer) {
+      // For client-side, prevent OpenTelemetry modules from being bundled
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@opentelemetry/api': false,
+        '@opentelemetry/resources': false,
+        '@opentelemetry/semantic-conventions': false,
+      };
+    } else if (isNodeRuntime) {
+      // For Node.js server runtime, externalize OpenTelemetry modules
+      config.externals = config.externals || [];
+      config.externals.push({
+        '@opentelemetry/api': 'commonjs @opentelemetry/api',
+        '@opentelemetry/resources': 'commonjs @opentelemetry/resources',
+        '@opentelemetry/semantic-conventions': 'commonjs @opentelemetry/semantic-conventions',
+      });
+    } else {
+      // For edge runtime, completely disable OpenTelemetry modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@opentelemetry/api': false,
+        '@opentelemetry/resources': false,
+        '@opentelemetry/semantic-conventions': false,
+        '@opentelemetry/context-async-hooks': false,
+        '@opentelemetry/core': false,
+      };
+    }
+
+    // Bundle analyzer in development
+    if (process.env.ANALYZE === "true" && !isServer) {
+      const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: "static",
+          openAnalyzer: false,
+        }),
+      );
+    }
+
+    return config;
+  },
   images: {
     unoptimized: false, // Enable image optimization for better performance
     formats: ["image/webp", "image/avif"],

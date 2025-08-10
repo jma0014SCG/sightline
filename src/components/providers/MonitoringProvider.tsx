@@ -45,13 +45,18 @@ export function MonitoringProvider({
     }
   }, [user, dbUser, isLoaded]);
 
-  // Log page views for analytics
+  // Log page views for analytics (only after component mounts)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      monitoring.logUserAction("page_view", {
-        path: window.location.pathname,
-        referrer: document.referrer,
-      });
+      // Use a small delay to ensure hydration is complete
+      const timer = setTimeout(() => {
+        monitoring.logUserAction("page_view", {
+          path: window.location.pathname,
+          referrer: document.referrer,
+        });
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 

@@ -36,9 +36,11 @@ export function URLInput({
   const wasLoadingRef = useRef(false);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Handle client-side hydration
+  // Handle client-side hydration with consistent initial state
   useEffect(() => {
+    // Set hydrated first, then check localStorage to prevent mismatch
     setIsHydrated(true);
+    // Only check localStorage after hydration to ensure consistency
     setClientAnonymousUsed(hasUsedFreeSummary());
   }, []);
 
