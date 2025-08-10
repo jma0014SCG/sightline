@@ -4,7 +4,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp } from "lucide-react";
+import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SummaryViewerProps } from "@/components/organisms/SummaryViewer/SummaryViewer.types";
 
@@ -20,6 +20,20 @@ interface MainContentColumnProps {
   formatDuration: (seconds: number) => string;
   className?: string;
 }
+
+// Helper functions for YouTube metadata formatting
+const formatCount = (count?: number | null) => {
+  if (!count || count === 0) return null;
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return count.toString();
+};
+
+const formatDate = (date?: Date | string | null) => {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
 
 // Collapsible Synopsis Component
 const SynopsisSection = ({ synopsis }: { synopsis: string }) => {
@@ -193,20 +207,8 @@ export function MainContentColumn({
             {summary.videoTitle}
           </h1>
 
-          {/* Inline Metadata */}
+          {/* Inline Metadata - First Line */}
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            {summary.metadata?.speakers &&
-              summary.metadata.speakers.length > 0 && (
-                <>
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">
-                      {summary.metadata.speakers.join(", ")}
-                    </span>
-                  </div>
-                  <span className="text-gray-400">•</span>
-                </>
-              )}
             {summary.duration && (
               <>
                 <div className="flex items-center gap-1">
@@ -220,7 +222,59 @@ export function MainContentColumn({
               <Calendar className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{summary.channelName}</span>
             </div>
+            
+            {/* YouTube Metadata */}
+            {formatCount(summary.viewCount) && (
+              <>
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
+                  <Eye className="h-4 w-4 flex-shrink-0" />
+                  <span>{formatCount(summary.viewCount)} views</span>
+                </div>
+              </>
+            )}
+            {formatDate(summary.uploadDate) && (
+              <>
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
+                  <span>{formatDate(summary.uploadDate)}</span>
+                </div>
+              </>
+            )}
+            {formatCount(summary.likeCount) && (
+              <>
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
+                  <ThumbsUp className="h-4 w-4 flex-shrink-0" />
+                  <span>{formatCount(summary.likeCount)} likes</span>
+                </div>
+              </>
+            )}
+            {formatCount(summary.commentCount) && (
+              <>
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center gap-1">
+                  <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                  <span>{formatCount(summary.commentCount)} comments</span>
+                </div>
+              </>
+            )}
           </div>
+
+          {/* Speakers Line - Second Line */}
+          {(() => {
+            // Check both summary.speakers and metadata.speakers for backwards compatibility
+            const speakers = summary.speakers && summary.speakers.length > 0 
+              ? summary.speakers 
+              : summary.metadata?.speakers || [];
+            
+            return speakers.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                <User className="h-4 w-4 flex-shrink-0" />
+                <span>Speakers: {speakers.join(", ")}</span>
+              </div>
+            );
+          })()}
 
           {/* Collapsible Synopsis */}
           {summary.metadata?.synopsis && (

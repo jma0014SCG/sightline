@@ -56,6 +56,12 @@ export interface Summary {
   content: string
   keyPoints: any
   metadata: any
+  // YouTube metadata fields
+  speakers?: string[]
+  viewCount?: number | null
+  likeCount?: number | null
+  commentCount?: number | null
+  uploadDate?: Date | string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -68,6 +74,12 @@ export interface SummaryViewerProps {
     keyPoints?: any // JsonValue from Prisma - can be array or object
     duration?: number
     thumbnailUrl?: string | null
+    // YouTube metadata fields
+    speakers?: string[]
+    viewCount?: number | null
+    likeCount?: number | null
+    commentCount?: number | null
+    uploadDate?: Date | string | null
     // Extended data from backend - these could come from JsonValue in metadata field
     metadata?: any // JsonValue from Prisma that might contain BackendMetadata
     key_moments?: BackendKeyMoment[]

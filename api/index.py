@@ -88,6 +88,8 @@ except ImportError as e:
         
         # Generate task ID immediately
         task_id = str(uuid.uuid4())
+        print(f"🚀 API CALL STARTED: {task_id}")
+        print(f"🚀 Request: {request}")
         
         try:
             # Import required modules here to avoid import issues
@@ -136,6 +138,10 @@ except ImportError as e:
             # Update progress: Getting video info and transcript in parallel
             progress_storage[task_id] = {"progress": 25, "stage": "Fetching video data and transcript...", "status": "processing", "task_id": task_id}
             video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
+            
+            # Debug: Check video_info structure
+            print(f"🔍 DEBUG: video_info type: {type(video_info)}")
+            print(f"🔍 DEBUG: video_info attributes: {vars(video_info)}")
             print(f"📹 Video info: {video_info.title} by {video_info.channel_name} ({video_info.view_count} views)")
             print(f"📝 Transcript source: {'Gumloop' if is_gumloop else 'Standard'}")
             

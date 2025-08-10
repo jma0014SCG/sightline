@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-08-08T22:41:31.991Z",
+  "summary": {
+    "filesProcessed": 3,
+    "fixesApplied": 24,
+    "errors": 0
+  },
+  "fixPatterns": [
+    "Fix Bug_tracking.md path references",
+    "Fix project-structure.md path references",
+    "Fix platform-overview.md path references (note: file was deleted)",
+    "Fix ui-ux-guidelines.md path references",
+    "Fix testing-strategy.md path references",
+    "Fix development bug-tracking.md path references",
+    "Fix quick-reference.md path references (note: file may not exist)",
+    "Fix monitoring.md path references",
+    "Fix legacy-deployment.md path references",
+    "Fix rate-limits.md path references",
+    "Fix reports directory path references",
+    "Fix Bug_tracking.md anchor path references"
+  ],
+  "targetFiles": [
+    "./Docs/archive/obsolete-root-docs/API_DOCUMENTATION.md",
+    "./Docs/archive/obsolete-root-docs/DOCUMENTATION_INDEX.md",
+    "./Docs/archive/obsolete-root-docs/README.md"
+  ],
+  "errors": []
+}

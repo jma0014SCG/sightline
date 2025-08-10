@@ -1,0 +1,54 @@
+{
+  "timestamp": "2025-08-08T22:47:12.864Z",
+  "summary": {
+    "totalFiles": 64,
+    "totalLinks": 390,
+    "brokenLinks": 3,
+    "healthScore": "99.2"
+  },
+  "breakdown": {
+    "internal": {
+      "total": 115,
+      "broken": 0
+    },
+    "external": {
+      "total": 73,
+      "broken": 3
+    },
+    "anchors": {
+      "total": 89,
+      "broken": 0
+    },
+    "frontmatter": {
+      "total": 113,
+      "broken": 0
+    }
+  },
+  "issues": [
+    {
+      "text": "OpenAI API Documentation",
+      "url": "https://openai.com/api/",
+      "line": 304,
+      "file": "./Docs/archive/old-implementation/Implementation.md",
+      "type": "external",
+      "error": "HTTP 403"
+    },
+    {
+      "text": "Whisper API Documentation",
+      "url": "https://platform.openai.com/docs/guides/speech-to-text",
+      "line": 305,
+      "file": "./Docs/archive/old-implementation/Implementation.md",
+      "type": "external",
+      "error": "HTTP 403"
+    },
+    {
+      "text": "Stripe Checkout Documentation",
+      "url": "https://stripe.com/docs/payments",
+      "line": 310,
+      "file": "./Docs/archive/old-implementation/Implementation.md",
+      "type": "external",
+      "error": "HTTP 404"
+    }
+  ],
+  "warnings": []
+}

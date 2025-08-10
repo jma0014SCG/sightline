@@ -22,7 +22,7 @@ export function PricingPlans({ currentPlan, showCurrentPlan = true }: PricingPla
         return <Zap className="h-8 w-8" />
       case 'PRO':
         return <Crown className="h-8 w-8" />
-      case 'COMPLETE':
+      case 'ENTERPRISE':
         return <Users className="h-8 w-8" />
       default:
         return <Zap className="h-8 w-8" />
@@ -62,7 +62,7 @@ export function PricingPlans({ currentPlan, showCurrentPlan = true }: PricingPla
                       'flex h-12 w-12 items-center justify-center rounded-lg',
                       planKey === 'FREE' && 'bg-gray-100 text-gray-600',
                       planKey === 'PRO' && 'bg-primary-100 text-primary-600',
-                      planKey === 'COMPLETE' && 'bg-purple-100 text-purple-600'
+                      planKey === 'ENTERPRISE' && 'bg-purple-100 text-purple-600'
                     )}>
                       {getPlanIcon(planKey)}
                     </div>
