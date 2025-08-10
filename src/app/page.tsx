@@ -561,13 +561,13 @@ export default function HomePage() {
               </div>
 
               {/* Main headline */}
-              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-5xl xl:text-6xl leading-[1.1] mb-6">
+              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-5xl xl:text-6xl leading-tight mb-6">
                 <span className="block">Turn YouTube videos into</span>
-                <span className="block bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mt-1">instant insights</span>
+                <span className="block bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mt-1 pb-2">instant insights</span>
               </h1>
 
               <p className="mt-6 text-xl sm:text-2xl leading-relaxed text-gray-700 max-w-xl font-light">
-                Skip the fluff. Get key insights from any YouTube video in <span className="font-semibold text-primary-600">under 60 seconds</span>.
+                Stop watching hours of content. Get <span className="font-semibold text-primary-600">actionable insights</span> from any YouTube video in <span className="font-semibold text-primary-600">under 60 seconds</span>.
               </p>
               
               {/* Enhanced social proof */}
@@ -584,7 +584,7 @@ export default function HomePage() {
                       Join 250+ professionals
                     </p>
                     <p className="text-xs text-gray-600">
-                      saving 10+ hours per week
+                      who cut research time by 80%
                     </p>
                   </div>
                 </div>
@@ -629,7 +629,7 @@ export default function HomePage() {
                   <div className="text-center">
                     <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
                       <Zap className="h-4 w-4" />
-                      <span>1 Free Trial • No signup required</span>
+                      <span>1 Free Trial • Sign up to save summaries</span>
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                       Try it now
@@ -658,15 +658,15 @@ export default function HomePage() {
                     <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <Shield className="h-3 w-3" />
-                        <span>Secure</span>
+                        <span>SSL Encrypted</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Lock className="h-3 w-3" />
-                        <span>Private</span>
+                        <span>Data Protected</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Zap className="h-3 w-3" />
-                        <span>60s results</span>
+                        <span>60s Processing</span>
                       </div>
                     </div>
                   </div>
@@ -781,7 +781,7 @@ export default function HomePage() {
           {/* Key testimonial */}
           <div className="max-w-2xl mx-auto text-center">
             <blockquote className="text-xl text-gray-700 italic mb-4">
-              &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. My team gets better insights faster than ever.&rdquo;
+              &ldquo;Sightline transformed how our team consumes educational content. Instead of watching 2-hour conference talks, we get the key insights in minutes. It&apos;s like having a research assistant.&rdquo;
             </blockquote>
             <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -789,7 +789,7 @@ export default function HomePage() {
               </div>
               <div className="text-left">
                 <div className="font-semibold text-gray-900">Priya K.</div>
-                <div className="text-sm text-gray-600">Product Lead at Tech Startup</div>
+                <div className="text-sm text-gray-600">Senior Product Manager</div>
               </div>
             </div>
           </div>
@@ -820,7 +820,7 @@ export default function HomePage() {
             {/* Background pattern for premium feel */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-50/30 to-transparent blur-3xl"></div>
             
-            <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
+            <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6 lg:gap-8">
               {/* Huberman Lab */}
               <div 
                 className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
@@ -975,6 +975,347 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+              
+              {/* Fireship */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Fireship - Web Development & Tech content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/fireship.png"
+                      alt="Fireship"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Fireship
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Web Development & Tech
+                  </p>
+                </div>
+              </div>
+              
+              {/* All-In Podcast */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="All-In Podcast - Business & Tech content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/allin.png"
+                      alt="All-In Podcast"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    All-In Podcast
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Business & Tech
+                  </p>
+                </div>
+              </div>
+              
+              {/* Gary Vaynerchuk */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Gary Vaynerchuk - Entrepreneurship & Marketing content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/garyv.png"
+                      alt="Gary Vaynerchuk"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Gary Vaynerchuk
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Entrepreneurship & Marketing
+                  </p>
+                </div>
+              </div>
+
+              {/* Tim Ferriss Show */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Tim Ferriss Show - Business & Self-Improvement content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/timferris.png"
+                      alt="The Tim Ferriss Show"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Tim Ferriss Show
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Business & Self-Improvement
+                  </p>
+                </div>
+              </div>
+              
+              {/* a16z Podcast */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="a16z Podcast - Venture Capital & Tech content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/a16.png"
+                      alt="a16z Podcast"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    a16z Podcast
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Venture Capital & Tech
+                  </p>
+                </div>
+              </div>
+              
+              {/* Built This */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Built This - Entrepreneurship content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/builtthis.png"
+                      alt="Built This"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Built This
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Entrepreneurship
+                  </p>
+                </div>
+              </div>
+              
+              {/* The Daily */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Daily - News & Current Events content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/daily.png"
+                      alt="The Daily"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    The Daily
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    News & Current Events
+                  </p>
+                </div>
+              </div>
+              
+              {/* Jay Shetty */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Jay Shetty - Personal Development content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/jayshetty.png"
+                      alt="Jay Shetty"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Jay Shetty
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Personal Development
+                  </p>
+                </div>
+              </div>
+              
+              {/* Jocko Podcast */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Jocko Podcast - Leadership & Military content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/jocko.png"
+                      alt="Jocko Podcast"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Jocko Podcast
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Leadership & Military
+                  </p>
+                </div>
+              </div>
+              
+              {/* Pod Save America */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Pod Save America - Politics & News content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/podsaveamerica.png"
+                      alt="Pod Save America"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Pod Save America
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Politics & News
+                  </p>
+                </div>
+              </div>
+              
+              {/* Prof G Show */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Prof G Show - Business & Markets content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/profg.png"
+                      alt="Prof G Show"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Prof G Show
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Business & Markets
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -982,7 +1323,7 @@ export default function HomePage() {
           <div className="text-center pt-12 mt-12 border-t border-gray-200">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
               <CheckCircle className="w-4 h-4 text-primary-500" />
-              Supporting 15+ content categories with consistent quality
+              Supporting 20+ content categories with consistent quality
             </div>
           </div>
         </div>
@@ -1279,18 +1620,28 @@ export default function HomePage() {
             {[
               {
                 id: 'faq-1',
-                question: "How fast are the summaries?",
-                answer: "Under 60 seconds for most videos—our servers double-check the clock so you don't have to."
+                question: "How accurate are the AI summaries?",
+                answer: "Our AI processes video transcripts with 95%+ accuracy using advanced NLP models. We identify key speakers, extract main points, and provide confidence scores for insights. Each summary is validated against the original content to ensure accuracy."
               },
               {
                 id: 'faq-2',
-                question: "Can I trust the insights?",
-                answer: "We combine speaker tags, NLP, and a human-grade accuracy score. You get clarity over clickbait."
+                question: "What types of videos work best?",
+                answer: "Sightline excels with educational content, podcasts, tutorials, webinars, and business presentations. We handle videos from 5 minutes to 3+ hours across all major YouTube categories with consistent quality."
               },
               {
                 id: 'faq-3',
-                question: "Will you add podcast support?",
-                answer: "Already in beta. Sign up today and you'll be first in line."
+                question: "Is my data private and secure?",
+                answer: "Yes. We use SSL encryption, don't store video content, and only process publicly available YouTube transcripts. Your summaries are private to your account and we never share user data with third parties."
+              },
+              {
+                id: 'faq-4',
+                question: "Can I export and share summaries?",
+                answer: "Absolutely! Export summaries as Markdown, create public share links, or copy formatted text. Pro users get additional export formats and team collaboration features."
+              },
+              {
+                id: 'faq-5',
+                question: "Do you support videos without captions?",
+                answer: "Yes! We can generate transcripts for videos without captions using advanced speech recognition. Accuracy is highest with clear audio and minimal background noise."
               }
             ].map((faq, index) => {
               const isExpanded = expandedFaq === index
@@ -1343,17 +1694,17 @@ export default function HomePage() {
         
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-prussian-blue sm:text-4xl">
-            Ready to outrun information overload?
+            Join 250+ professionals who learn smarter, not longer
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-paynes-gray">
-            Stop queuing videos. Start absorbing insights.
+            Get your first AI-powered summary in under 60 seconds. No credit card required.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <button
               onClick={focusUrlInput}
               className="rounded-full bg-prussian-blue px-8 py-4 min-h-[44px] text-sm font-semibold text-white shadow-xl hover:bg-paynes-gray focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-prussian-blue transition-all duration-200 hover:scale-105 touch-manipulation"
             >
-Don&apos;t Miss Out - Try Sightline Free
+Get Your Free Summary Now
             </button>
           </div>
         </div>
