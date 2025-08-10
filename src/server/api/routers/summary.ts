@@ -119,7 +119,7 @@ export const summaryRouter = createTRPCRouter({
       if (existingUsageByFingerprint) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Welcome back! You\'ve already used your free trial. Sign up now to get 3 summaries every month!',
+          message: 'Welcome back! You\'ve already used your free trial. Sign up now to get 1 free summary every month!',
         })
       }
 
@@ -138,7 +138,7 @@ export const summaryRouter = createTRPCRouter({
       if (existingUsageByIP) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'A free summary has already been used from this location. Sign up now to get 3 summaries every month!',
+          message: 'A free summary has already been used from this location. Sign up now to get 1 free summary every month!',
         })
       }
 
@@ -458,43 +458,42 @@ export const summaryRouter = createTRPCRouter({
 
       // Check usage limits based on plan
       if (user.summariesLimit > 0) {
+        // All plans use monthly limits now
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+
+        const currentMonthUsage = await ctx.prisma.usageEvent.count({
+          where: {
+            userId: userId,
+            eventType: 'summary_created',
+            createdAt: {
+              gte: startOfMonth,
+            },
+          },
+        })
+
+        // Determine actual limit based on plan (using defaults if not set in DB)
+        let effectiveLimit = user.summariesLimit
         if (user.plan === 'FREE') {
-          // FREE plan: Check lifetime usage (3 max total, SECURITY FIX - can't bypass via deletion)
-          const totalUsage = await ctx.prisma.usageEvent.count({
-            where: {
-              userId: userId,
-              eventType: 'summary_created',
-            },
-          })
-
-          if (totalUsage >= user.summariesLimit) {
-            throw new TRPCError({
-              code: 'FORBIDDEN',
-              message: `You've reached your lifetime limit of ${user.summariesLimit} summaries. Upgrade to Pro for 25 summaries per month!`,
-            })
-          }
+          effectiveLimit = 1 // 1 per month for FREE
         } else if (user.plan === 'PRO') {
-          // PRO plan: Check monthly usage (25 max per month, SECURITY FIX - can't bypass via deletion)
-          const startOfMonth = new Date()
-          startOfMonth.setDate(1)
-          startOfMonth.setHours(0, 0, 0, 0)
+          effectiveLimit = 25 // 25 per month for PRO
+        } else if (user.plan === 'ENTERPRISE') {
+          effectiveLimit = 100 // 100 per month for ENTERPRISE
+        }
 
-          const currentMonthUsage = await ctx.prisma.usageEvent.count({
-            where: {
-              userId: userId,
-              eventType: 'summary_created',
-              createdAt: {
-                gte: startOfMonth,
-              },
-            },
+        if (currentMonthUsage >= effectiveLimit) {
+          const upgradeMessage = user.plan === 'FREE' 
+            ? 'Upgrade to Pro for 25 summaries per month!' 
+            : user.plan === 'PRO' 
+            ? 'Upgrade to Enterprise for 100 summaries per month!'
+            : 'Please contact support for additional summaries.'
+            
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `You've reached your monthly limit of ${effectiveLimit} summaries. Your limit resets on the 1st of next month. ${upgradeMessage}`,
           })
-
-          if (currentMonthUsage >= user.summariesLimit) {
-            throw new TRPCError({
-              code: 'FORBIDDEN',
-              message: `You've reached your monthly limit of ${user.summariesLimit} summaries. Your limit resets on the 1st of next month.`,
-            })
-          }
         }
       }
       try {

@@ -17,13 +17,13 @@ export const PRICING_PLANS = {
     price: 0,
     priceId: null,
     features: [
-      'Up to 5 video summaries per month',
+      '1 video summary per month',
       'Basic AI summarization',
       'Personal library',
       'Standard support',
     ],
     limitations: {
-      summariesPerMonth: 5,
+      summariesPerMonth: 1,
       videoDurationLimit: 1200, // 20 minutes
     },
   },
@@ -33,7 +33,7 @@ export const PRICING_PLANS = {
     price: 9.99,
     priceId: process.env.STRIPE_PRO_PRICE_ID,
     features: [
-      'Unlimited video summaries',
+      '25 video summaries per month',
       'Advanced AI summarization',
       'Personal library with search',
       'Export to PDF/Markdown',
@@ -41,7 +41,7 @@ export const PRICING_PLANS = {
       'Videos up to 2 hours',
     ],
     limitations: {
-      summariesPerMonth: -1, // Unlimited
+      summariesPerMonth: 25,
       videoDurationLimit: 7200, // 2 hours
     },
   },
@@ -51,7 +51,7 @@ export const PRICING_PLANS = {
     price: 29.99,
     priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID,
     features: [
-      'Everything in Pro',
+      '100 video summaries per month',
       'Team workspaces',
       'Bulk channel processing',
       'API access',
@@ -60,7 +60,7 @@ export const PRICING_PLANS = {
       'Unlimited video length',
     ],
     limitations: {
-      summariesPerMonth: -1, // Unlimited
+      summariesPerMonth: 100,
       videoDurationLimit: -1, // Unlimited
     },
   },

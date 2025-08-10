@@ -7,7 +7,7 @@ export const PRICING_PLANS = {
     price: 0,
     paymentLink: null,
     features: [
-      '3 summaries/month',
+      '1 summary/month',
       'Personal library access',
     ],
   },
@@ -22,17 +22,18 @@ export const PRICING_PLANS = {
       'Markdown exports',
     ],
   },
-  COMPLETE: {
-    name: 'Complete',
-    description: 'For power users',
-    price: 24.99,
-    paymentLink: null, // Disabled for "coming soon"
+  ENTERPRISE: {
+    name: 'Enterprise',
+    description: 'For power users and teams',
+    price: 29.99,
+    paymentLink: null, // Will be added when ready
     features: [
-      'Summarize entire channels in minutes',
-      'Comprehensive strategy breakdowns and timelines',
-      'Unlimited summaries',
+      '100 summaries/month',
+      'Summarize entire channels',
+      'Team collaboration',
       'Personal library access',
-      'Markdown export',
+      'Markdown exports',
+      'Priority support',
     ],
   },
 } as const
