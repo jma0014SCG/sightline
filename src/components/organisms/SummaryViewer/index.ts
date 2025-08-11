@@ -1,2 +1,2 @@
 export { SummaryViewer } from './SummaryViewer'
-export type { SummaryViewerProps } from './SummaryViewer.types'
+export type { SummaryViewerProps, UiSummaryBase } from './SummaryViewer.types'

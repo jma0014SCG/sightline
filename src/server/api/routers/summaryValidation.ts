@@ -74,8 +74,7 @@ export const summarySchemas = {
    */
   getById: z.object({
     id: z.string()
-      .min(1, 'Summary ID is required')
-      .max(255, 'Summary ID too long'),
+      .cuid('Invalid summary ID format - must be a valid CUID'),
   }),
 
   /**

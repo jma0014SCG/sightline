@@ -100,6 +100,12 @@ class SummarizeResponse(BaseModel):
     user_id: str
     created_at: datetime = datetime.utcnow()
     
+    # Enhanced YouTube metadata from YouTubeMetadataService
+    description: Optional[str] = None
+    view_count: Optional[int] = None
+    like_count: Optional[int] = None
+    comment_count: Optional[int] = None
+    upload_date: Optional[datetime] = None
     
     # Structured data from Gumloop parsing
     metadata: Optional[SummaryMetadata] = None

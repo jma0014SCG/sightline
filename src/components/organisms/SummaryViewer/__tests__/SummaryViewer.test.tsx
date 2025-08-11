@@ -483,4 +483,299 @@ This is a test summary.
       expect(status).toHaveAttribute('aria-live', 'polite')
     })
   })
+
+  describe('Rich Data Rendering with Database Fields', () => {
+    describe('Frameworks Rendering', () => {
+      it('renders frameworks when DB field contains data', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: [
+            { name: 'Testing Framework', description: 'A comprehensive testing approach' },
+            { name: 'SOLID Principles', description: 'Object-oriented design principles' }
+          ]
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('learning-hub-tabs')).toBeInTheDocument()
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('2')
+      })
+
+      it('shows empty state when frameworks DB field is null', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: null
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('0')
+      })
+
+      it('shows empty state when frameworks DB field is empty array', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: []
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('0')
+      })
+
+      it('handles malformed frameworks data gracefully', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: [
+            { name: 'Valid Framework', description: 'Valid description' },
+            { name: null, description: undefined }, // Malformed data
+            { name: 'Another Valid', description: 'Another valid description' }
+          ] as any
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        // Should still render component without crashing
+        expect(screen.getByTestId('learning-hub-tabs')).toBeInTheDocument()
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('3')
+      })
+    })
+
+    describe('Playbooks Rendering', () => {
+      it('renders playbooks when DB field contains data', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          playbooks: [
+            { trigger: 'When component fails', action: 'Check props first, then state' },
+            { trigger: 'When tests are flaky', action: 'Review async operations and mocking' }
+          ]
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+        // MainContentColumn should receive playbooks data
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+      })
+
+      it('shows empty playbooks section when DB field is null', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          playbooks: null
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+        // Component should render without crashing even with null playbooks
+      })
+
+      it('shows empty playbooks section when DB field is empty array', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          playbooks: []
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+      })
+
+      it('validates trigger-action structure in playbooks', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          playbooks: [
+            { trigger: 'Valid trigger', action: 'Valid action' },
+            { trigger: '', action: 'Action without trigger' }, // Edge case
+            { trigger: 'Trigger without action', action: '' } // Edge case
+          ]
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+      })
+    })
+
+    describe('Key Moments Rendering', () => {
+      it('renders key moments when DB field contains data', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          key_moments: [
+            { timestamp: '2:30', insight: 'Important concept introduction' },
+            { timestamp: '5:45', insight: 'Key example demonstration' },
+            { timestamp: '8:12', insight: 'Common mistake explanation' }
+          ]
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        expect(screen.getByTestId('timestamp-0')).toHaveTextContent('2:30: Important concept introduction')
+        expect(screen.getByTestId('timestamp-1')).toHaveTextContent('5:45: Key example demonstration')
+        expect(screen.getByTestId('timestamp-2')).toHaveTextContent('8:12: Common mistake explanation')
+      })
+
+      it('shows empty state when key_moments DB field is null', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          key_moments: null
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        // Should render sidebar but with no timestamp buttons
+        expect(screen.queryByTestId('timestamp-0')).not.toBeInTheDocument()
+      })
+
+      it('shows empty state when key_moments DB field is empty array', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          key_moments: []
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        expect(screen.queryByTestId('timestamp-0')).not.toBeInTheDocument()
+      })
+
+      it('handles various timestamp formats correctly', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          key_moments: [
+            { timestamp: '1:23', insight: 'Minutes and seconds' },
+            { timestamp: '0:45', insight: 'Under one minute' },
+            { timestamp: '12:34', insight: 'Double digit minutes' },
+            { timestamp: '1:23:45', insight: 'Hours, minutes, and seconds' }
+          ]
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('timestamp-0')).toHaveTextContent('1:23: Minutes and seconds')
+        expect(screen.getByTestId('timestamp-1')).toHaveTextContent('0:45: Under one minute')
+        expect(screen.getByTestId('timestamp-2')).toHaveTextContent('12:34: Double digit minutes')
+        expect(screen.getByTestId('timestamp-3')).toHaveTextContent('1:23:45: Hours, minutes, and seconds')
+      })
+
+      it('handles malformed key moments data gracefully', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          key_moments: [
+            { timestamp: '2:30', insight: 'Valid moment' },
+            { timestamp: null, insight: 'Invalid timestamp' }, // Malformed
+            { timestamp: '5:45', insight: null }, // Malformed
+            { timestamp: '8:12', insight: 'Another valid moment' }
+          ] as any
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        // Should render the valid moments
+        expect(screen.getByTestId('timestamp-0')).toBeInTheDocument()
+        expect(screen.getByTestId('timestamp-1')).toBeInTheDocument()
+        expect(screen.getByTestId('timestamp-2')).toBeInTheDocument()
+        expect(screen.getByTestId('timestamp-3')).toBeInTheDocument()
+      })
+    })
+
+    describe('Combined Scenarios', () => {
+      it('renders correctly with mixed data states', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: [{ name: 'Test Framework', description: 'Description' }], // Has data
+          playbooks: [], // Empty array
+          key_moments: null, // Null
+          flashcards: [{ question: 'Test Q?', answer: 'Test A' }], // Has data
+          insight_enrichment: { sentiment: 'positive' } // Has data
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        // Should render all components regardless of mixed data states
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        expect(screen.getByTestId('learning-hub-tabs')).toBeInTheDocument()
+        expect(screen.getByTestId('insight-enrichment')).toBeInTheDocument()
+        
+        // Verify specific data states
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('1')
+        expect(screen.getByTestId('flashcards-count')).toHaveTextContent('1')
+        expect(screen.getByTestId('sentiment')).toHaveTextContent('positive')
+        expect(screen.queryByTestId('timestamp-0')).not.toBeInTheDocument()
+      })
+
+      it('renders correctly when all DB fields are populated', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: [
+            { name: 'Framework 1', description: 'Description 1' },
+            { name: 'Framework 2', description: 'Description 2' }
+          ],
+          playbooks: [
+            { trigger: 'Trigger 1', action: 'Action 1' },
+            { trigger: 'Trigger 2', action: 'Action 2' }
+          ],
+          key_moments: [
+            { timestamp: '2:30', insight: 'Insight 1' },
+            { timestamp: '5:45', insight: 'Insight 2' }
+          ],
+          flashcards: [
+            { question: 'Question 1?', answer: 'Answer 1' },
+            { question: 'Question 2?', answer: 'Answer 2' }
+          ],
+          insight_enrichment: {
+            sentiment: 'positive',
+            stats_tools_links: ['Tool 1', 'Tool 2'],
+            risks_blockers_questions: ['Risk 1', 'Risk 2']
+          }
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        // All components should render with data
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('2')
+        expect(screen.getByTestId('flashcards-count')).toHaveTextContent('2')
+        expect(screen.getByTestId('timestamp-0')).toHaveTextContent('2:30: Insight 1')
+        expect(screen.getByTestId('timestamp-1')).toHaveTextContent('5:45: Insight 2')
+        expect(screen.getByTestId('sentiment')).toHaveTextContent('positive')
+      })
+
+      it('renders correctly when all DB fields are empty', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          frameworks: null,
+          playbooks: [],
+          key_moments: undefined,
+          flashcards: null,
+          quiz_questions: [],
+          insight_enrichment: {},
+          accelerated_learning_pack: null,
+          metadata: null
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        // All components should still render but show empty states
+        expect(screen.getByTestId('main-content-column')).toBeInTheDocument()
+        expect(screen.getByTestId('key-moments-sidebar')).toBeInTheDocument()
+        expect(screen.getByTestId('learning-hub-tabs')).toBeInTheDocument()
+        expect(screen.getByTestId('insight-enrichment')).toBeInTheDocument()
+        
+        // Verify empty states
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('0')
+        expect(screen.getByTestId('flashcards-count')).toHaveTextContent('0')
+        expect(screen.getByTestId('quiz-count')).toHaveTextContent('0')
+        expect(screen.getByTestId('sentiment')).toHaveTextContent('none')
+        expect(screen.queryByTestId('timestamp-0')).not.toBeInTheDocument()
+      })
+
+      it('prioritizes DB fields over parsed content sections', () => {
+        const mockSummary = createMockSummaryWithMetadata({
+          content: `
+            ## Frameworks
+            **Content Framework**: This should be overridden by DB field
+            
+            ## Key Moments
+            This should also be overridden
+          `,
+          frameworks: [{ name: 'DB Framework', description: 'From database field' }], // DB data should win
+          key_moments: [{ timestamp: '3:20', insight: 'DB key moment' }] // DB data should win
+        })
+        
+        renderSummaryViewer({ summary: mockSummary })
+        
+        // Should prioritize DB fields over parsed content
+        expect(screen.getByTestId('frameworks-count')).toHaveTextContent('1')
+        expect(screen.getByTestId('timestamp-0')).toHaveTextContent('3:20: DB key moment')
+      })
+    })
+  })
 })

@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server'
 import { summarySchemas, ANONYMOUS_USER_ID, type CreateInput, type CreateAnonymousInput, type GetByIdInput, type UpdateInput, type DeleteInput, type ClaimAnonymousInput, type GetAnonymousInput, type HealthResponse } from './summaryValidation'
 import { extractVideoId, generateTaskId, isValidVideoIdFormat } from './summaryUtils'
 import type { SummaryRouterDependencies, SummaryContext, BackendProcessingPayload } from './summaryTypes'
+import { mapDbSummaryToViewer } from '@/server/mappers/summaryMappers'
 
 /**
  * Health check handler
@@ -351,7 +352,8 @@ export function createGetByIdHandler(deps: SummaryRouterDependencies) {
         userId: ctx.userId 
       })
 
-      return summary
+      // Convert database object to UI-compatible format
+      return mapDbSummaryToViewer(summary)
     } catch (error) {
       logger.error('Error in getById', { error, input, userId: ctx.userId })
       monitoring?.logError({

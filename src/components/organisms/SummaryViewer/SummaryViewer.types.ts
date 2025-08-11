@@ -42,8 +42,22 @@ export interface BackendAcceleratedLearningPack {
   novel_idea_meter?: BackendNovelIdea[]
 }
 
-// Define Summary type based on Prisma model
-export interface Summary {
+/**
+ * UI-specific base summary interface for SummaryViewer component.
+ * 
+ * This interface defines the core structure expected by the SummaryViewer
+ * component, separate from the database model. Uses consistent naming
+ * conventions for UI layer and includes all fields needed for rendering.
+ * 
+ * **Design Notes:**
+ * - Separated from Prisma types for better maintainability
+ * - Maintains snake_case for consistency with AI backend data
+ * - JsonValue fields (keyPoints, metadata) can contain structured data
+ * - Date fields are kept as Date objects from database layer
+ * 
+ * @interface UiSummaryBase
+ */
+export interface UiSummaryBase {
   id: string
   userId: string
   videoId: string
@@ -54,14 +68,32 @@ export interface Summary {
   duration: number
   thumbnailUrl: string | null
   content: string
-  keyPoints: any
-  metadata: any
+  keyPoints: any // JsonValue from Prisma - can be array or object
+  metadata: any // JsonValue from Prisma - can be array or object
   createdAt: Date
   updatedAt: Date
 }
 
+/**
+ * Props interface for SummaryViewer component.
+ * 
+ * Defines the expected props structure for the SummaryViewer organism component.
+ * Uses UiSummaryBase as the foundation and extends with additional snake_case
+ * fields that come from AI backend processing.
+ * 
+ * **Property Categories:**
+ * - Core Video Data: videoTitle, channelName, content, duration, etc.
+ * - AI-Enhanced Data: key_moments, frameworks, playbooks, etc.
+ * - UI State: isStreaming, className for styling
+ * 
+ * **Naming Convention:**
+ * - Core fields: camelCase (matching video metadata)
+ * - AI backend fields: snake_case (matching AI service output)
+ * 
+ * @interface SummaryViewerProps
+ */
 export interface SummaryViewerProps {
-  summary: Partial<Summary> & {
+  summary: Partial<UiSummaryBase> & {
     content: string
     videoTitle: string
     channelName: string

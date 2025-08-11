@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import type { Summary } from "@prisma/client";
 import { ShareModal } from "@/components/molecules/ShareModal";
 import { ActionsSidebar } from "@/components/molecules/ActionsSidebar";
 import { KeyMomentsSidebar } from "@/components/molecules/KeyMomentsSidebar";
@@ -22,6 +21,46 @@ import type {
   BackendInsightEnrichment,
   BackendAcceleratedLearningPack,
 } from "./SummaryViewer.types";
+
+// Safe JSON parsing utility for Prisma Json fields
+function parseJsonField<T>(value: any, fallback: T | null = null): T | null {
+  // If already parsed (object/array), return as-is
+  if (typeof value === 'object' && value !== null) {
+    return value as T;
+  }
+  
+  // If string, try to parse
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      // Type guard: ensure parsed value is not null
+      return parsed !== null ? parsed as T : fallback;
+    } catch (error) {
+      console.warn('Failed to parse JSON field:', error);
+      return fallback;
+    }
+  }
+  
+  // Return fallback for null, undefined, empty string, etc.
+  return fallback;
+}
+
+// Type guards for validating parsed data
+function isValidKeyMomentsArray(value: any): value is BackendKeyMoment[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && 
+    typeof item.timestamp === 'string' && 
+    typeof item.insight === 'string'
+  );
+}
+
+function isValidFrameworksArray(value: any): value is BackendFramework[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && 
+    typeof item.name === 'string' && 
+    typeof item.description === 'string'
+  );
+}
 
 export function SummaryViewer({
   summary,
@@ -369,17 +408,21 @@ export function SummaryViewer({
   }
 
   // Extract structured data from summary - handle both direct fields and nested JSON structures
-  const keyMoments: BackendKeyMoment[] = summary.keyMoments || summary.metadata?.key_moments || [];
-  const frameworks: BackendFramework[] = summary.frameworks || [];
-  const playbooks: BackendPlaybook[] = summary.playbooks || [];
+  // Parse JSON strings from database safely with validation
+  const parsedKeyMoments = parseJsonField<BackendKeyMoment[]>(summary.keyMoments, []) || parseJsonField<BackendKeyMoment[]>(summary.metadata?.key_moments, []) || [];
+  const keyMoments: BackendKeyMoment[] = isValidKeyMomentsArray(parsedKeyMoments) ? parsedKeyMoments : [];
+  
+  const parsedFrameworks = parseJsonField<BackendFramework[]>(summary.frameworks, []) || [];
+  const frameworks: BackendFramework[] = isValidFrameworksArray(parsedFrameworks) ? parsedFrameworks : [];
+  const playbooks: BackendPlaybook[] = parseJsonField<BackendPlaybook[]>(summary.playbooks, []) || [];
   
   // Handle learning pack data - could be in learningPack or nested structures
-  const learningPack = summary.learningPack || summary.accelerated_learning_pack || {};
-  const flashcards: BackendFlashcard[] = learningPack.feynman_flashcards || summary.flashcards || [];
-  const quizQuestions: BackendQuizQuestion[] = learningPack.quick_quiz || summary.quiz_questions || [];
+  const learningPack = parseJsonField<BackendAcceleratedLearningPack>(summary.learningPack, {}) || parseJsonField<BackendAcceleratedLearningPack>(summary.accelerated_learning_pack, {}) || {};
+  const flashcards: BackendFlashcard[] = learningPack.feynman_flashcards || parseJsonField<BackendFlashcard[]>(summary.flashcards, []) || [];
+  const quizQuestions: BackendQuizQuestion[] = learningPack.quick_quiz || parseJsonField<BackendQuizQuestion[]>(summary.quiz_questions, []) || [];
   const novelIdeas: BackendNovelIdea[] = learningPack.novel_idea_meter || [];
   
-  const insightEnrichment: BackendInsightEnrichment = summary.enrichment || summary.insight_enrichment || {};
+  const insightEnrichment: BackendInsightEnrichment = parseJsonField<BackendInsightEnrichment>(summary.enrichment, {}) || parseJsonField<BackendInsightEnrichment>(summary.insight_enrichment, {}) || {};
 
   // Get parsed section content directly
   const novelIdeasContent = sections.get("novel idea meter") || sections.get("novel ideas") || "";
