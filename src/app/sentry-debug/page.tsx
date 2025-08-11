@@ -111,7 +111,7 @@ export default function SentryDebugPage() {
           <li>2. Verify your Sentry project exists and DSN is correct</li>
           <li>3. Check if errors appear in Sentry within 5-10 seconds</li>
           <li>4. Look in: Issues → All Issues in your Sentry dashboard</li>
-          <li>5. Check your project's "Settings → Client Keys (DSN)" for the correct URL</li>
+          <li>5. Check your project&apos;s &ldquo;Settings → Client Keys (DSN)&rdquo; for the correct URL</li>
         </ul>
       </div>
     </div>

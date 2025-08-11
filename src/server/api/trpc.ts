@@ -1,16 +1,20 @@
+import 'server-only'
 import { initTRPC, TRPCError } from '@trpc/server'
 import { auth } from '@clerk/nextjs/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
-import { prisma } from '@/lib/db/prisma'
 import { headers } from 'next/headers'
-import { monitoring } from '@/lib/monitoring'
+
+// Lazy import heavy dependencies
+const lazyPrisma = () => import('@/lib/db/prisma').then(m => m.prisma)
+const lazyMonitoring = () => import('@/lib/monitoring').then(m => m.monitoring)
 
 /**
  * Create context for each request
  */
 export const createTRPCContext = async () => {
   const { userId } = await auth()
+  const prisma = await lazyPrisma()
 
   return {
     prisma,
@@ -47,6 +51,9 @@ const performanceMonitoring = t.middleware(async ({ ctx, next, path, type }) => 
     const result = await next()
     const duration = performance.now() - startTime
     
+    // Lazy load monitoring for performance tracking
+    const monitoring = await lazyMonitoring()
+    
     // Track successful API call
     monitoring.logApiPerformance(endpoint, duration, 200)
     
@@ -63,29 +70,37 @@ const performanceMonitoring = t.middleware(async ({ ctx, next, path, type }) => 
   } catch (error) {
     const duration = performance.now() - startTime
     
-    // Track failed API call
-    monitoring.logApiPerformance(endpoint, duration, 500)
+    // Lazy load monitoring for error tracking
+    const monitoring = await lazyMonitoring().catch(() => null)
     
-    // Track API error metrics
-    monitoring.logUserAction('api_call', {
-      endpoint,
-      duration: Math.round(duration),
-      status: 'error',
-      type,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      userId: ctx.userId || 'anonymous',
-    })
-    
-    // Log the error for monitoring
-    monitoring.logError({
-      error: error instanceof Error ? error : new Error('Unknown API error'),
-      context: {
+    if (monitoring) {
+      // Track failed API call
+      monitoring.logApiPerformance(endpoint, duration, 500)
+      
+      // Track API error metrics
+      monitoring.logUserAction('api_call', {
         endpoint,
         duration: Math.round(duration),
+        status: 'error',
         type,
+        error: error instanceof Error ? error.message : 'Unknown error',
         userId: ctx.userId || 'anonymous',
-      },
-    })
+      })
+      
+      // Log the error for monitoring
+      monitoring.logError({
+        error: error instanceof Error ? error : new Error('Unknown API error'),
+        context: {
+          endpoint,
+          duration: Math.round(duration),
+          type,
+          userId: ctx.userId || 'anonymous',
+        },
+      })
+    } else {
+      // Fallback to console logging if monitoring unavailable
+      console.error(`❌ API ${endpoint} failed after ${duration.toFixed(2)}ms:`, error)
+    }
     
     throw error
   }

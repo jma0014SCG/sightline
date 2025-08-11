@@ -1,4 +1,9 @@
+import 'server-only'
+
 // Performance API is available globally in modern browsers and Node.js
+
+// OpenTelemetry kill switch - allows disabling OTel without breaking the app
+export const OTEL_ENABLED = process.env.NEXT_PUBLIC_OTEL === '1' || process.env.OTEL_ENABLED === '1'
 
 // Dynamic imports for alert system to avoid circular dependencies
 const getAlertSystem = () => import('./alert-system')
@@ -226,8 +231,13 @@ class MonitoringService {
 
 export const monitoring = MonitoringService.getInstance()
 
-// Helper functions for common use cases
+// Helper functions for common use cases with OTel guards
 export const logError = (error: Error, context?: Record<string, any>) => {
+  if (!OTEL_ENABLED) {
+    // Fallback to console logging when OTel is disabled
+    console.error('🔴 Error (OTel disabled):', error.message, { context })
+    return
+  }
   monitoring.logError({ error, context })
 }
 
@@ -235,6 +245,11 @@ export const logApiCall = async <T>(
   endpoint: string,
   fn: () => Promise<T>
 ): Promise<T> => {
+  if (!OTEL_ENABLED) {
+    // No-op wrapper when OTel is disabled - just execute the function
+    return await fn()
+  }
+  
   const start = performance.now()
   let status = 200
   
@@ -258,6 +273,12 @@ export const withErrorBoundary = <T extends any[], R>(
     try {
       return await fn(...args)
     } catch (error) {
+      if (!OTEL_ENABLED) {
+        // Fallback to console logging when OTel is disabled
+        console.error('🔴 Error Boundary (OTel disabled):', error, { context, args })
+        throw error
+      }
+      
       monitoring.logError({
         error: error instanceof Error ? error : new Error(String(error)),
         context: {
@@ -270,10 +291,15 @@ export const withErrorBoundary = <T extends any[], R>(
   }
 }
 
-// Custom hook for React components
+// Custom hook for React components with OTel guards
 export const useErrorTracking = () => {
   return {
     logError: (error: Error, context?: Record<string, any>) => {
+      if (!OTEL_ENABLED) {
+        console.error('🔴 useErrorTracking (OTel disabled):', error.message, { context })
+        return
+      }
+      
       monitoring.logError({
         error,
         context: {
@@ -284,14 +310,36 @@ export const useErrorTracking = () => {
       })
     },
     logUserAction: (action: string, context?: Record<string, any>) => {
+      if (!OTEL_ENABLED) {
+        console.log('👤 User Action (OTel disabled):', action, { context })
+        return
+      }
+      
       monitoring.logUserAction(action, context)
     },
   }
 }
 
-// Performance monitoring integration
+// Performance monitoring integration - server-side initialization
+export const initializeServerMonitoring = () => {
+  // Skip performance monitoring if OTel is disabled
+  if (!OTEL_ENABLED) {
+    console.log('📡 Server monitoring disabled (OTEL_ENABLED=false)')
+    return
+  }
+  
+  console.log('📡 Server monitoring initialized')
+}
+
+// Client-side performance monitoring (called from components)
 export const startPerformanceMonitoring = () => {
   if (typeof window === 'undefined') return
+  
+  // Skip performance monitoring if OTel is disabled
+  if (!OTEL_ENABLED) {
+    console.log('📡 Performance monitoring disabled (OTEL_ENABLED=false)')
+    return
+  }
 
   // Monitor Core Web Vitals with performance budget checking
   import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {

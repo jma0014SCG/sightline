@@ -2,8 +2,13 @@
 
 import { useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { startPerformanceMonitoring, monitoring } from "@/lib/monitoring";
-import { setSentryUser } from "../../../instrumentation-client";
+
+// Use client-side monitoring utilities
+import { startPerformanceMonitoring, monitoring } from "@/lib/monitoring.client";
+
+// Lazy import client-side dependencies only
+const lazySetSentryUser = () => import("../../../instrumentation-client").then(m => m.setSentryUser)
+
 import { api } from "@/lib/api/trpc";
 
 export function MonitoringProvider({
@@ -23,11 +28,15 @@ export function MonitoringProvider({
     // Set Sentry user context when auth state changes
     if (isLoaded) {
       if (user && dbUser) {
-        setSentryUser({
-          id: user.id,
-          email: user.primaryEmailAddress?.emailAddress,
-          name: user.fullName || user.firstName || undefined,
-          plan: dbUser.plan || "FREE",
+        lazySetSentryUser().then(({ setSentryUser }) => {
+          setSentryUser({
+            id: user.id,
+            email: user.primaryEmailAddress?.emailAddress,
+            name: user.fullName || user.firstName || undefined,
+            plan: dbUser.plan || "FREE",
+          });
+        }).catch(() => {
+          console.log('📡 Sentry user context unavailable');
         });
 
         // Track user plan for monitoring
@@ -40,7 +49,11 @@ export function MonitoringProvider({
           },
         });
       } else {
-        setSentryUser(null);
+        lazySetSentryUser().then(({ setSentryUser }) => {
+          setSentryUser(null);
+        }).catch(() => {
+          // Silent fail for Sentry unavailable
+        });
       }
     }
   }, [user, dbUser, isLoaded]);

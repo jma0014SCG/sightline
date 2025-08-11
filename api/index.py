@@ -3,8 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables first
 load_dotenv()
+
+# Initialize monitoring on startup (proper entrypoint)
+from monitoring import initialize_monitoring
 
 # Create FastAPI app
 app = FastAPI(
@@ -12,6 +15,17 @@ app = FastAPI(
     description="AI-powered YouTube video summarization API",
     version="0.1.0"
 )
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup."""
+    # Initialize monitoring service with proper error handling
+    try:
+        monitoring = initialize_monitoring()
+        print("📡 FastAPI monitoring initialized on startup")
+    except Exception as e:
+        print(f"⚠️  Failed to initialize monitoring: {e}")
+        print("🔄 Application will continue without monitoring")
 
 # Configure CORS
 app.add_middleware(
@@ -29,7 +43,7 @@ app.add_middleware(
 # Health check endpoint
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": "sightline-api"}
+    return {"ok": True, "layer": "fastapi"}
 
 # Root endpoint
 @app.get("/api")

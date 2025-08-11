@@ -19,12 +19,19 @@ class FastAPIMonitoring:
     
     def __init__(self):
         self.sentry_enabled = False
+        self.otel_enabled = os.getenv('OTEL_ENABLED') == '1' or os.getenv('NEXT_PUBLIC_OTEL') == '1'
         self.start_time = time.time()
         self.request_count = 0
         self.error_count = 0
         
-        # Initialize Sentry if available and configured
+        # Initialize Sentry first (lighter dependency)
         self._init_sentry()
+        
+        # Initialize OpenTelemetry only if enabled
+        if self.otel_enabled:
+            self._init_otel()
+        else:
+            logger.info("📡 OpenTelemetry disabled via environment variables")
     
     def _init_sentry(self):
         """Initialize Sentry SDK if available."""
@@ -58,6 +65,52 @@ class FastAPIMonitoring:
             logger.info("⚠️  Sentry SDK not installed - error tracking disabled")
         except Exception as e:
             logger.error(f"❌ Failed to initialize Sentry: {e}")
+    
+    def _init_otel(self):
+        """Initialize OpenTelemetry if available and enabled."""
+        try:
+            # Import OpenTelemetry components
+            from opentelemetry import trace
+            from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+            from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+            from opentelemetry.instrumentation.requests import RequestsInstrumentor
+            from opentelemetry.sdk.trace import TracerProvider
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor
+            from opentelemetry.sdk.resources import Resource
+            
+            # Set up resource
+            resource = Resource.create({
+                "service.name": "sightline-fastapi",
+                "service.version": "1.0.0",
+                "service.environment": os.getenv('NODE_ENV', 'development'),
+            })
+            
+            # Set up tracer provider
+            trace.set_tracer_provider(TracerProvider(resource=resource))
+            tracer = trace.get_tracer(__name__)
+            
+            # Set up OTLP exporter (if endpoint configured)
+            otlp_endpoint = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT')
+            if otlp_endpoint:
+                otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+                span_processor = BatchSpanProcessor(otlp_exporter)
+                trace.get_tracer_provider().add_span_processor(span_processor)
+                logger.info(f"✅ OpenTelemetry OTLP exporter configured: {otlp_endpoint}")
+            else:
+                logger.info("⚠️  OTLP endpoint not configured - traces will not be exported")
+            
+            # Instrument FastAPI and requests
+            FastAPIInstrumentor.instrument()
+            RequestsInstrumentor.instrument()
+            
+            logger.info("✅ OpenTelemetry monitoring initialized for FastAPI")
+            
+        except ImportError as e:
+            logger.warning(f"⚠️  OpenTelemetry dependencies not installed: {e}")
+            self.otel_enabled = False
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize OpenTelemetry: {e}")
+            self.otel_enabled = False
     
     def _filter_sentry_events(self, event, hint):
         """Filter Sentry events before sending."""
@@ -136,7 +189,7 @@ class FastAPIMonitoring:
         if metric_name == 'summary_creation_time':
             video_length = context.get('video_length', 0) if context else 0
             if video_length > 0:
-                efficiency_ratio = duration_ms / video_length
+                efficiency_ratio = value / video_length  # Fixed: use value instead of undefined duration_ms
                 logger.info(f"📈 Summary efficiency ratio: {efficiency_ratio:.2f} (processing_time/video_length)")
         
         # Send to monitoring system
@@ -187,6 +240,7 @@ class FastAPIMonitoring:
             "total_errors": self.error_count,
             "error_rate": (self.error_count / max(self.request_count, 1)) * 100,
             "sentry_enabled": self.sentry_enabled,
+            "otel_enabled": self.otel_enabled,
             "service": "sightline-fastapi",
             "version": "1.0.0"
         }
@@ -203,26 +257,41 @@ class FastAPIMonitoring:
                     scope.set_context("error_context", context)
                 sentry_sdk.capture_exception(error)
 
-# Global monitoring instance
-monitoring = FastAPIMonitoring()
+# Global monitoring instance - initialized once on module import
+monitoring = None
 
-# Convenience functions
+def initialize_monitoring():
+    """Initialize monitoring on startup - call this from FastAPI startup event."""
+    global monitoring
+    if monitoring is None:
+        monitoring = FastAPIMonitoring()
+        logger.info("📡 FastAPI monitoring service initialized")
+    return monitoring
+
+def get_monitoring():
+    """Get monitoring instance, initialize if needed."""
+    global monitoring
+    if monitoring is None:
+        monitoring = initialize_monitoring()
+    return monitoring
+
+# Convenience functions that ensure monitoring is initialized
 def track_operation(operation_name: str, context: Optional[Dict[str, Any]] = None):
     """Decorator/context manager for tracking operations."""
-    return monitoring.track_operation(operation_name, context)
+    return get_monitoring().track_operation(operation_name, context)
 
 def track_business_metric(metric_name: str, value: float, context: Optional[Dict[str, Any]] = None):
     """Track business metric."""
-    return monitoring.track_business_metric(metric_name, value, context)
+    return get_monitoring().track_business_metric(metric_name, value, context)
 
 def log_ai_processing(model: str, tokens_used: int, duration_ms: float, context: Optional[Dict[str, Any]] = None):
     """Log AI processing metrics."""
-    return monitoring.log_ai_processing(model, tokens_used, duration_ms, context)
+    return get_monitoring().log_ai_processing(model, tokens_used, duration_ms, context)
 
 def capture_exception(error: Exception, context: Optional[Dict[str, Any]] = None):
     """Capture exception with context."""
-    return monitoring.capture_exception(error, context)
+    return get_monitoring().capture_exception(error, context)
 
 def get_health_metrics():
     """Get health metrics."""
-    return monitoring.get_health_metrics()
+    return get_monitoring().get_health_metrics()
