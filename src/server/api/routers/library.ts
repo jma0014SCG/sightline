@@ -163,23 +163,8 @@ export const libraryRouter = createTRPCRouter({
         cursor: cursor ? { id: cursor } : undefined,
         orderBy,
         include: {
-          categories: {
-            select: {
-              id: true,
-              name: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
+          categories: true,
+          tags: true,
         },
       })
 

@@ -66,18 +66,19 @@ export function SummaryCard({
     return count.toString()
   }
 
-  // Extract key insights from content for preview
-  const getKeyInsights = () => {
-    if (summary.keyPoints && Array.isArray(summary.keyPoints)) {
-      return summary.keyPoints.slice(0, 3).map(point => String(point))
+  // Get preview text - prefer synopsis, fall back to extracting from content
+  const getPreviewText = () => {
+    // First preference: Use synopsis if available
+    if (summary.synopsis && summary.synopsis.trim()) {
+      return summary.synopsis.trim()
     }
     
     // Fallback: Extract first few sentences from content
     const sentences = summary.content.split(/[.!?]+/).filter(s => s.trim().length > 0)
-    return sentences.slice(0, 2).map(s => s.trim())
+    return sentences.slice(0, 2).join('. ').trim()
   }
 
-  const keyInsights = getKeyInsights()
+  const previewText = getPreviewText()
 
   // Helper function to render tags with colors
   const renderTags = (tags: Tag[], limit = 3) => {
@@ -219,10 +220,10 @@ export function SummaryCard({
                 {summary.videoTitle}
               </h3>
 
-              {/* Key insights preview - single line */}
-              {keyInsights.length > 0 && (
+              {/* Preview text - single line */}
+              {previewText && (
                 <p className="text-xs text-gray-600 line-clamp-1 mb-1.5 leading-snug">
-                  {keyInsights[0].length > 100 ? `${keyInsights[0].substring(0, 100)}...` : keyInsights[0]}
+                  {previewText.length > 100 ? `${previewText.substring(0, 100)}...` : previewText}
                 </p>
               )}
 
@@ -263,9 +264,7 @@ export function SummaryCard({
                       View
                     </span>
                   )}
-                  {keyInsights.length > 1 && (
-                    <span className="text-blue-600">+{keyInsights.length - 1} more</span>
-                  )}
+                  {/* Remove the "more insights" since we're now showing synopsis */}
                 </div>
                 
                 {/* Hover Actions - appear on card hover */}
@@ -425,10 +424,10 @@ export function SummaryCard({
                 {summary.videoTitle}
               </h3>
 
-              {/* Key insights preview - expanded for wider cards */}
-              {keyInsights.length > 0 && (
+              {/* Preview text - expanded for wider cards */}
+              {previewText && (
                 <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-                  {keyInsights[0].length > 140 ? `${keyInsights[0].substring(0, 140)}...` : keyInsights[0]}
+                  {previewText.length > 140 ? `${previewText.substring(0, 140)}...` : previewText}
                 </p>
               )}
 
@@ -469,9 +468,7 @@ export function SummaryCard({
                   Summary
                 </span>
               )}
-              {keyInsights.length > 1 && (
-                <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
-              )}
+              {/* Remove the "more insights" since we're now showing synopsis */}
             </div>
           </div>
 

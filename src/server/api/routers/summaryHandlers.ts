@@ -3,6 +3,7 @@ import { summarySchemas, ANONYMOUS_USER_ID, type CreateInput, type CreateAnonymo
 import { extractVideoId, generateTaskId, isValidVideoIdFormat } from './summaryUtils'
 import type { SummaryRouterDependencies, SummaryContext, BackendProcessingPayload } from './summaryTypes'
 import { mapDbSummaryToViewer } from '@/server/mappers/summaryMappers'
+import { classifySummaryContent } from '@/lib/classificationService'
 
 /**
  * Health check handler
@@ -313,23 +314,8 @@ export function createGetByIdHandler(deps: SummaryRouterDependencies) {
           userId: ctx.userId, // Ensure user can only access their own summaries
         },
         include: {
-          categories: {
-            select: {
-              id: true,
-              name: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
+          categories: true,
+          tags: true,
         },
       })
 
@@ -415,23 +401,8 @@ export function createUpdateHandler(deps: SummaryRouterDependencies) {
       const summary = await ctx.prisma.summary.findUnique({
         where: { id: input.id },
         include: {
-          categories: {
-            select: {
-              id: true,
-              name: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
+          categories: true,
+          tags: true,
         },
       })
 
@@ -783,6 +754,23 @@ async function triggerBackendProcessing({
       })
 
       logger.info('Database updated successfully', { summaryId: payload.summary_id })
+
+      // Trigger Smart Collections classification
+      try {
+        logger.info('Starting Smart Collections classification', { summaryId: payload.summary_id })
+        await classifySummaryContent(
+          payload.summary_id, 
+          backendResult.summary || '', 
+          backendResult.video_title
+        )
+        logger.info('Smart Collections classification completed', { summaryId: payload.summary_id })
+      } catch (classificationError) {
+        // Don't throw - classification failures shouldn't break summary creation
+        logger.warn('Classification failed, continuing without tags', { 
+          summaryId: payload.summary_id, 
+          error: classificationError instanceof Error ? classificationError.message : 'Unknown classification error'
+        })
+      }
     } catch (dbError) {
       logger.error('Failed to update database after backend processing', { 
         error: dbError, 

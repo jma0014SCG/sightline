@@ -99,6 +99,7 @@ export function mapDbSummaryToViewer(
   content: string
   videoTitle: string
   channelName: string
+  synopsis?: string | null
   keyPoints?: any
   duration?: number
   thumbnailUrl?: string | null
@@ -133,6 +134,7 @@ export function mapDbSummaryToViewer(
     duration: dbSummary.duration,
     thumbnailUrl: dbSummary.thumbnailUrl,
     content: dbSummary.content,
+    synopsis: dbSummary.synopsis,
     keyPoints: parsedKeyPoints,
     metadata: parsedMetadata,
     createdAt: dbSummary.createdAt,

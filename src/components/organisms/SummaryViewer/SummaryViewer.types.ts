@@ -68,6 +68,7 @@ export interface UiSummaryBase {
   duration: number
   thumbnailUrl: string | null
   content: string
+  synopsis: string | null // Video synopsis from AI processing
   keyPoints: any // JsonValue from Prisma - can be array or object
   metadata: any // JsonValue from Prisma - can be array or object
   createdAt: Date
@@ -97,6 +98,7 @@ export interface SummaryViewerProps {
     content: string
     videoTitle: string
     channelName: string
+    synopsis?: string | null // Video synopsis from AI processing
     keyPoints?: any // JsonValue from Prisma - can be array or object
     duration?: number
     thumbnailUrl?: string | null
