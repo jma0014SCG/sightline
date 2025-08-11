@@ -312,52 +312,96 @@ export function LibraryControls({
             )}
           </div>
 
-          {/* Popular Tags Row */}
+          {/* Smart Tags Row - Organized by Categories */}
           {availableTags && availableTags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Popular:</span>
-              
-              {availableTags.slice(0, 6).map((tag) => {
-                const getTagColor = (type: string) => {
-                  switch (type) {
-                    case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
-                    case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
-                    case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
-                    case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
-                    case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
-                    case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                    case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
-                    default: return 'bg-gray-100 text-gray-700 border-gray-200'
-                  }
-                }
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-gray-700 hidden sm:block">Smart Tags:</span>
                 
-                return (
+                {/* Priority tags by type - showing most relevant first */}
+                {(() => {
+                  // Group tags by type for organized display
+                  const tagsByType = availableTags.reduce((acc, tag) => {
+                    if (!acc[tag.type]) acc[tag.type] = []
+                    acc[tag.type].push(tag)
+                    return acc
+                  }, {} as Record<string, typeof availableTags>)
+
+                  // Priority order for tag types
+                  const typeOrder = ['PERSON', 'COMPANY', 'TECHNOLOGY', 'FRAMEWORK', 'CONCEPT', 'TOOL', 'PRODUCT']
+                  const displayTags: typeof availableTags = []
+                  
+                  // Add top tags from each category
+                  typeOrder.forEach(type => {
+                    if (tagsByType[type]) {
+                      displayTags.push(...tagsByType[type].slice(0, 1))
+                    }
+                  })
+                  
+                  // Fill remaining slots with highest count tags
+                  const remainingTags = availableTags
+                    .filter(tag => !displayTags.find(dt => dt.id === tag.id))
+                    .sort((a, b) => b.count - a.count)
+                  
+                  const finalTags = [...displayTags, ...remainingTags].slice(0, 8)
+
+                  const getTagColor = (type: string) => {
+                    switch (type) {
+                      case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
+                      case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
+                      case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
+                      case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
+                      case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                      case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                      case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
+                      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+                    }
+                  }
+
+                  const getTypeIcon = (type: string) => {
+                    switch (type) {
+                      case 'PERSON': return '👤'
+                      case 'COMPANY': return '🏢'
+                      case 'TECHNOLOGY': return '⚡'
+                      case 'PRODUCT': return '📦'
+                      case 'CONCEPT': return '💡'
+                      case 'FRAMEWORK': return '🏗️'
+                      case 'TOOL': return '🔧'
+                      default: return '🏷️'
+                    }
+                  }
+                  
+                  return finalTags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      onClick={() => handleTagToggle(tag.name)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all hover:shadow-sm",
+                        filters.tags?.includes(tag.name)
+                          ? getTagColor(tag.type)
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                      )}
+                      title={`${tag.type.toLowerCase().replace('_', ' ')} • ${tag.count} summaries`}
+                    >
+                      <span className="text-xs opacity-70">{getTypeIcon(tag.type)}</span>
+                      {tag.name}
+                      <span className="ml-0.5 text-xs opacity-60 bg-white/50 px-1 rounded">
+                        {tag.count}
+                      </span>
+                    </button>
+                  ))
+                })()}
+                
+                {availableTags.length > 8 && (
                   <button
-                    key={tag.id}
-                    onClick={() => handleTagToggle(tag.name)}
-                    className={cn(
-                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                      filters.tags?.includes(tag.name)
-                        ? getTagColor(tag.type)
-                        : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
-                    )}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded-full hover:bg-gray-50 transition-all"
                   >
-                    {tag.name}
-                    <span className="ml-1 text-xs opacity-60">
-                      {tag.count}
-                    </span>
+                    <Filter className="h-3 w-3" />
+                    +{availableTags.length - 8} more tags
                   </button>
-                )
-              })}
-              
-              {availableTags.length > 6 && (
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
-                >
-                  +{availableTags.length - 6} more
-                </button>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -393,44 +437,104 @@ export function LibraryControls({
                 </div>
               )}
 
-              {/* All Tags */}
-              {availableTags && availableTags.length > 6 && (
+              {/* All Tags - Organized by Type */}
+              {availableTags && availableTags.length > 8 && (
                 <div>
-                  <span className="text-sm font-medium text-gray-700 block mb-2">All Tags:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {availableTags.slice(6).map((tag) => {
-                      const getTagColor = (type: string) => {
-                        switch (type) {
-                          case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
-                          case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
-                          case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
-                          case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
-                          case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
-                          case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                          case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
-                          default: return 'bg-gray-100 text-gray-700 border-gray-200'
-                        }
-                      }
-
-                      return (
-                        <button
-                          key={tag.id}
-                          onClick={() => handleTagToggle(tag.name)}
-                          className={cn(
-                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                            filters.tags?.includes(tag.name)
-                              ? getTagColor(tag.type)
-                              : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
-                          )}
-                        >
-                          {tag.name}
-                          <span className="ml-1 text-xs opacity-60">
-                            {tag.count}
-                          </span>
-                        </button>
-                      )
-                    })}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm font-medium text-gray-700">All Smart Tags</span>
+                    <span className="text-xs text-gray-500">({availableTags.length} total)</span>
                   </div>
+                  
+                  {(() => {
+                    // Group all tags by type for organized display
+                    const tagsByType = availableTags.reduce((acc, tag) => {
+                      if (!acc[tag.type]) acc[tag.type] = []
+                      acc[tag.type].push(tag)
+                      return acc
+                    }, {} as Record<string, typeof availableTags>)
+
+                    const getTagColor = (type: string) => {
+                      switch (type) {
+                        case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
+                        case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
+                        case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
+                        case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
+                        case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                        case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                        case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
+                        default: return 'bg-gray-100 text-gray-700 border-gray-200'
+                      }
+                    }
+
+                    const getTypeIcon = (type: string) => {
+                      switch (type) {
+                        case 'PERSON': return '👤'
+                        case 'COMPANY': return '🏢'
+                        case 'TECHNOLOGY': return '⚡'
+                        case 'PRODUCT': return '📦'
+                        case 'CONCEPT': return '💡'
+                        case 'FRAMEWORK': return '🏗️'
+                        case 'TOOL': return '🔧'
+                        default: return '🏷️'
+                      }
+                    }
+
+                    const getTypeName = (type: string) => {
+                      return type.toLowerCase().replace('_', ' ')
+                        .split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ')
+                    }
+
+                    // Sort types by priority and name
+                    const typeOrder = ['PERSON', 'COMPANY', 'TECHNOLOGY', 'FRAMEWORK', 'CONCEPT', 'TOOL', 'PRODUCT']
+                    const sortedTypes = Object.keys(tagsByType).sort((a, b) => {
+                      const aIndex = typeOrder.indexOf(a)
+                      const bIndex = typeOrder.indexOf(b)
+                      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
+                      if (aIndex !== -1) return -1
+                      if (bIndex !== -1) return 1
+                      return a.localeCompare(b)
+                    })
+
+                    return (
+                      <div className="space-y-4">
+                        {sortedTypes.map(type => (
+                          <div key={type}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                                <span>{getTypeIcon(type)}</span>
+                                {getTypeName(type)}
+                                <span className="text-gray-400">({tagsByType[type].length})</span>
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {tagsByType[type]
+                                .sort((a, b) => b.count - a.count)
+                                .map((tag) => (
+                                <button
+                                  key={tag.id}
+                                  onClick={() => handleTagToggle(tag.name)}
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all hover:shadow-sm",
+                                    filters.tags?.includes(tag.name)
+                                      ? getTagColor(tag.type)
+                                      : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                                  )}
+                                  title={`${tag.count} summaries`}
+                                >
+                                  {tag.name}
+                                  <span className="text-xs opacity-60 bg-white/50 px-1 rounded">
+                                    {tag.count}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
             </div>

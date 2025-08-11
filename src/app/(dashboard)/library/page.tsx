@@ -314,47 +314,57 @@ export default function LibraryPage() {
 
   return (
     <div>
-      {/* Enhanced Premium Header */}
+      {/* Condensed Header with Integrated Analytics */}
       <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 border border-gray-100 rounded-2xl mb-8 overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#3b82f6_1px,transparent_1px),linear-gradient(to_bottom,#3b82f6_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.03]"></div>
         
-        <div className="relative p-8">
-          <div className="flex items-start justify-between mb-6">
+        <div className="relative p-6">
+          <div className="flex items-start justify-between mb-5">
             <div className="flex-1">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
                 Your Knowledge Library
               </h1>
-              <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
-                Transform YouTube videos into actionable insights. Build your personal learning repository with AI-powered summaries.
+              <p className="text-base text-gray-600 max-w-2xl">
+                Transform YouTube videos into actionable insights with AI-powered summaries.
               </p>
             </div>
             
-            {/* Learning Metrics Dashboard */}
-            <div className="flex items-center gap-8">
+            {/* Integrated Analytics Dashboard */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 min-w-0">
               {/* Total Summaries */}
-              <div className="text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <div className="text-center min-w-0">
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   {totalCount || 0}
                 </div>
-                <div className="text-sm text-gray-500 font-medium">Summaries</div>
+                <div className="text-xs text-gray-500 font-medium">Summaries</div>
               </div>
               
               {/* Estimated Time Saved */}
-              <div className="text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <div className="text-center min-w-0">
+                <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   {Math.round((totalCount || 0) * 0.8)}h
                 </div>
-                <div className="text-sm text-gray-500 font-medium">Time Saved</div>
+                <div className="text-xs text-gray-500 font-medium">Time Saved</div>
               </div>
               
-              {/* Learning Streak (placeholder) */}
-              <div className="text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {/* Learning Streak */}
+              <div className="text-center min-w-0">
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   7
                 </div>
-                <div className="text-sm text-gray-500 font-medium">Day Streak</div>
+                <div className="text-xs text-gray-500 font-medium">Day Streak</div>
               </div>
+
+              {/* Popular Category */}
+              {allSummaries.length > 0 && (
+                <div className="text-center min-w-0">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                    85%
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">Efficiency</div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -537,71 +547,6 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      {/* Learning Analytics Dashboard */}
-      {allSummaries.length > 0 && (
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Learning Streak Card */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200/60 rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-700">7 days</div>
-                  <div className="text-sm font-medium text-green-600">Learning streak</div>
-                </div>
-              </div>
-              <div className="text-xs text-green-600/80">
-                Keep it up! You&apos;re building great habits.
-              </div>
-            </div>
-          </div>
-          
-          {/* Popular Category Card */}
-          <div className="bg-gradient-to-br from-purple-50 to-violet-100 border border-purple-200/60 rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -mr-10 -mt-10"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 11l4 4 4-4m-4-8v8" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-purple-700">Tech</div>
-                  <div className="text-sm font-medium text-purple-600">Most watched</div>
-                </div>
-              </div>
-              <div className="text-xs text-purple-600/80">
-                {Math.floor((totalCount || 0) * 0.4)} technology summaries
-              </div>
-            </div>
-          </div>
-          
-          {/* Time Efficiency Card */}
-          <div className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200/60 rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-orange-700">85%</div>
-                  <div className="text-sm font-medium text-orange-600">Time saved</div>
-                </div>
-              </div>
-              <div className="text-xs text-orange-600/80">
-                Equivalent to {Math.round((totalCount || 0) * 1.2)} hours of content
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Quick Actions Bar */}
       {allSummaries.length > 0 && (
