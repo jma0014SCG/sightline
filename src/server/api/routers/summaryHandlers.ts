@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { summarySchemas, ANONYMOUS_USER_ID, type CreateAnonymousInput, type GetByIdInput, type HealthResponse } from './summaryValidation'
+import { summarySchemas, ANONYMOUS_USER_ID, type CreateInput, type CreateAnonymousInput, type GetByIdInput, type HealthResponse } from './summaryValidation'
 import { extractVideoId, generateTaskId, isValidVideoIdFormat } from './summaryUtils'
 import type { SummaryRouterDependencies, SummaryContext, BackendProcessingPayload } from './summaryTypes'
 
@@ -9,6 +9,133 @@ import type { SummaryRouterDependencies, SummaryContext, BackendProcessingPayloa
 export function createHealthHandler() {
   return (): HealthResponse => {
     return { ok: true, layer: 'trpc' }
+  }
+}
+
+/**
+ * Authenticated summary creation handler
+ */
+export function createHandler(deps: SummaryRouterDependencies) {
+  return async (ctx: SummaryContext, input: CreateInput) => {
+    const { logger, monitoring, security, config } = deps
+    
+    try {
+      // Ensure user is authenticated
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Must be logged in to create summaries',
+        })
+      }
+
+      // Sanitize and validate inputs
+      const sanitizedUrl = security.sanitizeUrl(input.url)
+      
+      // Additional security checks
+      if (security.containsSuspiciousContent(sanitizedUrl)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid input detected',
+        })
+      }
+
+      const videoId = extractVideoId(sanitizedUrl)
+      if (!videoId || !security.isValidYouTubeVideoId(videoId)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid YouTube video URL',
+        })
+      }
+
+      logger.info('Creating authenticated summary', { 
+        videoId, 
+        userId: ctx.userId
+      })
+
+      // Check for duplicate video for this user
+      const existingSummary = await ctx.prisma.summary.findFirst({
+        where: {
+          videoId,
+          userId: ctx.userId,
+        },
+      })
+
+      if (existingSummary) {
+        logger.info('Found existing summary for video', { videoId, userId: ctx.userId })
+        monitoring?.logBusinessMetric('summary_duplicate_request', 1, { 
+          videoId, 
+          userId: ctx.userId,
+          userType: 'authenticated' 
+        })
+        
+        return {
+          ...existingSummary,
+          isAnonymous: false,
+          canSave: true,
+          task_id: '', // Will be updated if processing is needed
+        }
+      }
+
+      const task_id = generateTaskId()
+      
+      // Create summary record
+      const summary = await ctx.prisma.summary.create({
+        data: {
+          userId: ctx.userId,
+          videoUrl: sanitizedUrl,
+          videoId,
+          videoTitle: `Video ${videoId}`,
+          channelName: 'Unknown',
+          channelId: 'unknown',
+          duration: 0,
+          content: '',
+        },
+      })
+
+      monitoring?.logBusinessMetric('summary_created', 1, { 
+        videoId, 
+        userId: ctx.userId,
+        userType: 'authenticated',
+        taskId: task_id 
+      })
+
+      logger.info('Authenticated summary created', { id: summary.id, taskId: task_id, userId: ctx.userId })
+
+      // Trigger backend processing
+      await triggerBackendProcessing({
+        payload: {
+          youtube_url: sanitizedUrl,
+          task_id,
+          anonymous: false,
+          summary_id: summary.id,
+          user_id: ctx.userId,
+        },
+        backendUrl: config?.backendUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+        logger
+      })
+
+      return {
+        ...summary,
+        isAnonymous: false,
+        canSave: true,
+        task_id,
+      }
+    } catch (error) {
+      logger.error('Error in create', { error, input, userId: ctx.userId })
+      monitoring?.logError({
+        error: error instanceof Error ? error : new Error('Unknown error in create'),
+        context: { input, userId: ctx.userId },
+      })
+      
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to create summary',
+      })
+    }
   }
 }
 
@@ -49,7 +176,7 @@ export function createAnonymousHandler(deps: SummaryRouterDependencies) {
 
       // Check if anonymous user has already created a summary
       // Note: browserFingerprint logic will be handled elsewhere for anonymous users
-      const existingAnonymousSummary = await db.summary.findFirst({
+      const existingAnonymousSummary = await ctx.prisma.summary.findFirst({
         where: {
           userId: anonymousUserId,
           // We'll use videoId for duplicate checking instead
@@ -64,7 +191,7 @@ export function createAnonymousHandler(deps: SummaryRouterDependencies) {
       }
 
       // Check for duplicate video
-      const existingSummary = await db.summary.findFirst({
+      const existingSummary = await ctx.prisma.summary.findFirst({
         where: {
           videoId,
           userId: anonymousUserId,
@@ -87,7 +214,7 @@ export function createAnonymousHandler(deps: SummaryRouterDependencies) {
       }
 
       // Ensure anonymous user exists
-      await db.user.upsert({
+      await ctx.prisma.user.upsert({
         where: { id: anonymousUserId },
         update: {},
         create: {
@@ -101,7 +228,7 @@ export function createAnonymousHandler(deps: SummaryRouterDependencies) {
       const task_id = generateTaskId()
       
       // Create summary record
-      const summary = await db.summary.create({
+      const summary = await ctx.prisma.summary.create({
         data: {
           userId: anonymousUserId,
           videoUrl: sanitizedUrl,
@@ -257,7 +384,7 @@ async function triggerBackendProcessing({
   logger: SummaryRouterDependencies['logger']
 }) {
   try {
-    const response = await fetch(`${backendUrl}/summarize`, {
+    const response = await fetch(`${backendUrl}/api/summarize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -265,6 +392,59 @@ async function triggerBackendProcessing({
 
     if (!response.ok) {
       logger.error('Backend processing failed', { status: response.status })
+      return
+    }
+
+    // TEMPORARY FIX: Process Python backend response and update database
+    // This bypasses the DATABASE_URL issue in the Python backend
+    const backendResult = await response.json()
+    logger.info('Backend processing completed', { 
+      summaryId: payload.summary_id,
+      contentLength: backendResult.summary?.length || 0,
+      processingSource: backendResult.processing_source || 'unknown'
+    })
+
+    // Import Prisma client here to avoid circular dependencies
+    const { PrismaClient } = require('@prisma/client')
+    const prisma = new PrismaClient()
+
+    try {
+      // Update the database with the processed content
+      await prisma.summary.update({
+        where: { id: payload.summary_id },
+        data: {
+          content: backendResult.summary || '',
+          keyMoments: backendResult.key_moments ? JSON.stringify(backendResult.key_moments) : null,
+          frameworks: backendResult.frameworks ? JSON.stringify(backendResult.frameworks) : null,
+          playbooks: backendResult.playbooks ? JSON.stringify(backendResult.playbooks) : null,
+          debunkedAssumptions: backendResult.debunked_assumptions ? JSON.stringify(backendResult.debunked_assumptions) : null,
+          inPractice: backendResult.in_practice ? JSON.stringify(backendResult.in_practice) : null,
+          learningPack: backendResult.accelerated_learning_pack ? JSON.stringify(backendResult.accelerated_learning_pack) : null,
+          enrichment: backendResult.insight_enrichment ? JSON.stringify(backendResult.insight_enrichment) : null,
+          metadata: backendResult.metadata ? JSON.stringify(backendResult.metadata) : null,
+          processingSource: backendResult.processing_source || 'unknown',
+          // Update video metadata
+          videoTitle: backendResult.video_title || undefined,
+          channelName: backendResult.channel_name || undefined,
+          channelId: backendResult.channel_id || undefined,
+          duration: backendResult.duration || undefined,
+          thumbnailUrl: backendResult.thumbnail_url || undefined,
+          description: backendResult.description || undefined,
+          viewCount: backendResult.view_count || undefined,
+          likeCount: backendResult.like_count || undefined,
+          commentCount: backendResult.comment_count || undefined,
+          uploadDate: backendResult.upload_date ? new Date(backendResult.upload_date) : undefined,
+        },
+      })
+
+      logger.info('Database updated successfully', { summaryId: payload.summary_id })
+    } catch (dbError) {
+      logger.error('Failed to update database after backend processing', { 
+        error: dbError, 
+        summaryId: payload.summary_id 
+      })
+    } finally {
+      await prisma.$disconnect()
     }
   } catch (error) {
     logger.error('Failed to trigger backend processing', { error })

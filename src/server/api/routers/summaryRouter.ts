@@ -1,7 +1,7 @@
 import 'server-only'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/api/trpc'
 import { summarySchemas } from './summaryValidation'
-import { createHealthHandler, createAnonymousHandler, createGetByIdHandler } from './summaryHandlers'
+import { createHealthHandler, createHandler, createAnonymousHandler, createGetByIdHandler } from './summaryHandlers'
 import type { SummaryRouterDependencies } from './summaryTypes'
 
 /**
@@ -12,6 +12,7 @@ import type { SummaryRouterDependencies } from './summaryTypes'
  */
 export function createSummaryRouter(deps: SummaryRouterDependencies) {
   const healthHandler = createHealthHandler()
+  const createSummaryHandler = createHandler(deps)
   const anonymousHandler = createAnonymousHandler(deps)
   const getByIdHandler = createGetByIdHandler(deps)
 
@@ -22,6 +23,19 @@ export function createSummaryRouter(deps: SummaryRouterDependencies) {
     health: publicProcedure
       .output(summarySchemas.health)
       .query(healthHandler),
+
+    /**
+     * Create video summary for authenticated users
+     * 
+     * Allows authenticated users to create video summaries. Validates YouTube URLs,
+     * checks for duplicate videos for the same user, creates database records,
+     * and triggers backend AI processing. No usage limits for authenticated users.
+     */
+    create: protectedProcedure
+      .input(summarySchemas.create)
+      .mutation(async ({ ctx, input }) => {
+        return createSummaryHandler(ctx, input)
+      }),
 
     /**
      * Get summary by ID for authenticated users
@@ -58,7 +72,7 @@ export function createSummaryRouter(deps: SummaryRouterDependencies) {
 export function createDefaultSummaryRouter() {
   // Simple dependency injection with fallbacks
   const deps: SummaryRouterDependencies = {
-    db: {} as any, // Will be injected by tRPC context
+    db: null as any, // Will be resolved from tRPC context at runtime
     logger: {
       info: (msg: string, meta?: any) => console.log(`INFO: ${msg}`, meta),
       error: (msg: string, meta?: any) => console.error(`ERROR: ${msg}`, meta),
@@ -72,7 +86,7 @@ export function createDefaultSummaryRouter() {
       isValidYouTubeVideoId: (id: string) => /^[a-zA-Z0-9_-]{11}$/.test(id),
     },
     config: {
-      backendUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     }
   }
 

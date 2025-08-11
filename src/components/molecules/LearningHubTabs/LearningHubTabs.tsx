@@ -107,30 +107,36 @@ export function LearningHubTabs({
   }
 
   // Function to get content for copying based on active tab
+  // Priority: 1) Markdown content (richer), 2) Structured data fallback
   const getCopyContent = () => {
     switch (activeTab) {
       case "frameworks":
+        if (frameworksContent) return frameworksContent;
         if (frameworks.length > 0) {
           return frameworks.map(f => `${f.name}: ${f.description}`).join('\n\n');
         }
-        return frameworksContent;
+        return '';
       case "flashcards":
+        if (flashcardsContent) return flashcardsContent;
         if (flashcards.length > 0) {
           return flashcards.map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
         }
-        return flashcardsContent;
+        return '';
       case "glossary":
+        // Glossary only has structured data, no markdown version
         return glossary.map(g => `${g.term}: ${g.definition}`).join('\n\n');
       case "quiz":
+        if (quickQuizContent) return quickQuizContent;
         if (quizQuestions.length > 0) {
           return quizQuestions.map((q, i) => `${i + 1}. ${q.question}\nAnswer: ${q.answer}`).join('\n\n');
         }
-        return quickQuizContent;
+        return '';
       case "ideas":
+        if (novelIdeasContent) return novelIdeasContent;
         if (novelIdeas.length > 0) {
           return novelIdeas.map(i => `${i.insight} (Novelty: ${i.score}/5)`).join('\n\n');
         }
-        return novelIdeasContent;
+        return '';
       default:
         return '';
     }
@@ -141,7 +147,17 @@ export function LearningHubTabs({
       case "frameworks":
         return (
           <div className="space-y-3">
-            {frameworks.length > 0 ? (
+            {/* Priority: 1) Markdown content (richer), 2) Structured data fallback */}
+            {frameworksContent ? (
+              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {frameworksContent}
+                </ReactMarkdown>
+              </div>
+            ) : frameworks.length > 0 ? (
               frameworks.map((framework, index) => (
                 <div
                   key={index}
@@ -155,15 +171,6 @@ export function LearningHubTabs({
                   </p>
                 </div>
               ))
-            ) : frameworksContent ? (
-              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {frameworksContent}
-                </ReactMarkdown>
-              </div>
             ) : null}
           </div>
         );
@@ -172,7 +179,17 @@ export function LearningHubTabs({
       case "flashcards":
         return (
           <div className="space-y-3">
-            {flashcards.length > 0 ? (
+            {/* Priority: 1) Markdown content (richer), 2) Structured data fallback */}
+            {flashcardsContent ? (
+              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {flashcardsContent}
+                </ReactMarkdown>
+              </div>
+            ) : flashcards.length > 0 ? (
               flashcards.map((flashcard, index) => (
                 <div
                   key={index}
@@ -184,15 +201,6 @@ export function LearningHubTabs({
                   <p className="text-sm text-gray-900 leading-snug">{flashcard.answer}</p>
                 </div>
               ))
-            ) : flashcardsContent ? (
-              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {flashcardsContent}
-                </ReactMarkdown>
-              </div>
             ) : null}
           </div>
         );
@@ -224,7 +232,17 @@ export function LearningHubTabs({
       case "quiz":
         return (
           <div className="space-y-3">
-            {quizQuestions.length > 0 ? (
+            {/* Priority: 1) Markdown content (richer), 2) Structured data fallback */}
+            {quickQuizContent ? (
+              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {quickQuizContent}
+                </ReactMarkdown>
+              </div>
+            ) : quizQuestions.length > 0 ? (
               quizQuestions.map((quiz, index) => (
                 <div
                   key={index}
@@ -239,15 +257,6 @@ export function LearningHubTabs({
                   </p>
                 </div>
               ))
-            ) : quickQuizContent ? (
-              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {quickQuizContent}
-                </ReactMarkdown>
-              </div>
             ) : null}
           </div>
         );
@@ -255,7 +264,17 @@ export function LearningHubTabs({
       case "ideas":
         return (
           <div className="space-y-4">
-            {novelIdeas.length > 0 ? (
+            {/* Priority: 1) Markdown content (richer), 2) Structured data fallback */}
+            {novelIdeasContent ? (
+              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {novelIdeasContent}
+                </ReactMarkdown>
+              </div>
+            ) : novelIdeas.length > 0 ? (
               novelIdeas.map((idea, index) => (
                 <div
                   key={index}
@@ -299,15 +318,6 @@ export function LearningHubTabs({
                   </div>
                 </div>
               ))
-            ) : novelIdeasContent ? (
-              <div className="prose prose-sm max-w-none prose-p:text-gray-900 prose-li:text-gray-900 prose-strong:text-gray-900">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {novelIdeasContent}
-                </ReactMarkdown>
-              </div>
             ) : null}
           </div>
         );

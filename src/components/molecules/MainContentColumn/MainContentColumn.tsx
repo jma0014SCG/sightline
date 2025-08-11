@@ -91,9 +91,12 @@ const PrimaryContentTabs = ({
       label: 'Playbooks',
       icon: '📋',
       color: 'blue',
-      content: summary.playbooks && summary.playbooks.length > 0
-        ? summary.playbooks.map(p => `**TRIGGER:** ${p.trigger}\n\n**ACTION:** ${p.action}`).join('\n\n---\n\n')
-        : sections.get("playbooks") || sections.get("playbooks & heuristics") || 'No playbooks identified.'
+      // Priority: 1) Markdown sections first (richer content), 2) Structured data fallback
+      content: sections.get("playbooks") || 
+        sections.get("playbooks & heuristics") ||
+        (summary.playbooks && summary.playbooks.length > 0
+          ? summary.playbooks.map(p => `**TRIGGER:** ${p.trigger}\n\n**ACTION:** ${p.action}`).join('\n\n---\n\n')
+          : 'No playbooks identified.')
     }
   ].filter(tab => tab.content && tab.content.trim().length > 0);
   

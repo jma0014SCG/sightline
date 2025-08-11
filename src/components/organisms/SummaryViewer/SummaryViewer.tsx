@@ -208,12 +208,70 @@ export function SummaryViewer({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  /**
+   * DATA PRIORITY PATTERN: Markdown-First Approach
+   * 
+   * This component prioritizes markdown sections from Gumloop over structured backend data.
+   * 
+   * Rationale:
+   * 1. Markdown sections contain richer formatting and more complete content from Gumloop
+   * 2. Structured data may have parsing issues or be incomplete  
+   * 3. Markdown preserves the original Gumloop formatting (tables, lists, emphasis)
+   * 
+   * Priority Order:
+   * 1. FIRST: Parsed markdown sections from summary.content
+   * 2. SECOND: Structured backend fields (e.g., summary.playbooks, summary.frameworks)
+   * 3. THIRD: Default/placeholder content
+   * 
+   * All child components (MainContentColumn, LearningHubTabs, InsightEnrichment) follow
+   * this same markdown-first pattern for consistency.
+   */
+  
   // Parse content into sections
   const sections = new Map<string, string>();
 
   // Parse the content into sections based on markdown headers
   if (summary.content) {
-    const lines = summary.content.split("\n");
+    // Enhanced Gumloop content unwrapping - handle multiple format variations
+    let contentToParse = summary.content;
+    
+    // Strip markdown code block wrapper if present
+    const markdownBlockPatterns = [
+      '```markdown\n',
+      '```markdown',
+      '```\n',
+      '📄 MARKDOWN BLOCK\n',
+      '📄 MARKDOWN BLOCK',
+      '## MARKDOWN OUTPUT\n',
+      '## MARKDOWN OUTPUT'
+    ];
+    
+    for (const pattern of markdownBlockPatterns) {
+      const startIndex = contentToParse.indexOf(pattern);
+      if (startIndex !== -1) {
+        const contentStart = startIndex + pattern.length;
+        
+        // For markdown blocks, find the closing ```
+        if (pattern.startsWith('```')) {
+          const markdownEnd = contentToParse.indexOf('```', contentStart);
+          contentToParse = markdownEnd !== -1 
+            ? contentToParse.slice(contentStart, markdownEnd)
+            : contentToParse.slice(contentStart);
+        } else {
+          contentToParse = contentToParse.slice(contentStart);
+        }
+        break;
+      }
+    }
+    
+    // Clean up any remaining wrapper content
+    contentToParse = contentToParse
+      .replace(/^[\s\n]*/, '') // Remove leading whitespace
+      .replace(/[\s\n]*$/, '') // Remove trailing whitespace
+      .replace(/^---+[\s\n]*/, '') // Remove horizontal rules at start
+      .replace(/[\s\n]*---+$/, ''); // Remove horizontal rules at end
+
+    const lines = contentToParse.split("\n");
     let currentSection = "";
     let currentContent: string[] = [];
 
@@ -310,16 +368,18 @@ export function SummaryViewer({
     });
   }
 
-  // Extract structured data from summary
-  const keyMoments: BackendKeyMoment[] = summary.metadata?.key_moments || [];
+  // Extract structured data from summary - handle both direct fields and nested JSON structures
+  const keyMoments: BackendKeyMoment[] = summary.keyMoments || summary.metadata?.key_moments || [];
   const frameworks: BackendFramework[] = summary.frameworks || [];
   const playbooks: BackendPlaybook[] = summary.playbooks || [];
-  const flashcards: BackendFlashcard[] = summary.flashcards || [];
-  const quizQuestions: BackendQuizQuestion[] = summary.quiz_questions || [];
-  const novelIdeas: BackendNovelIdea[] =
-    summary.accelerated_learning_pack?.novel_idea_meter || [];
-  const insightEnrichment: BackendInsightEnrichment =
-    summary.insight_enrichment || {};
+  
+  // Handle learning pack data - could be in learningPack or nested structures
+  const learningPack = summary.learningPack || summary.accelerated_learning_pack || {};
+  const flashcards: BackendFlashcard[] = learningPack.feynman_flashcards || summary.flashcards || [];
+  const quizQuestions: BackendQuizQuestion[] = learningPack.quick_quiz || summary.quiz_questions || [];
+  const novelIdeas: BackendNovelIdea[] = learningPack.novel_idea_meter || [];
+  
+  const insightEnrichment: BackendInsightEnrichment = summary.enrichment || summary.insight_enrichment || {};
 
   // Get parsed section content directly
   const novelIdeasContent = sections.get("novel idea meter") || sections.get("novel ideas") || "";

@@ -19,6 +19,19 @@ export const ANONYMOUS_USER_ID = 'ANONYMOUS_USER'
  */
 export const summarySchemas = {
   /**
+   * Schema for authenticated summary creation
+   */
+  create: z.object({
+    url: z.string()
+      .url('Invalid URL format')
+      .min(1, 'URL is required')
+      .max(2048, 'URL too long')
+      .refine((url) => {
+        return YOUTUBE_URL_PATTERNS.some(pattern => pattern.test(url))
+      }, 'Only YouTube URLs are allowed'),
+  }),
+
+  /**
    * Schema for anonymous summary creation
    */
   createAnonymous: z.object({
@@ -89,6 +102,7 @@ export const summarySchemas = {
 /**
  * Type exports for TypeScript inference
  */
+export type CreateInput = z.infer<typeof summarySchemas.create>
 export type CreateAnonymousInput = z.infer<typeof summarySchemas.createAnonymous>
 export type GetByIdInput = z.infer<typeof summarySchemas.getById>
 export type HealthResponse = z.infer<typeof summarySchemas.health>

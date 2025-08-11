@@ -29,7 +29,7 @@ async def summarize_video(
     """Summarize a YouTube video"""
     try:
         # Extract video ID from URL
-        video_id = extract_video_id(request.url)
+        video_id = extract_video_id(request.youtube_url)
         if not video_id:
             raise HTTPException(status_code=400, detail="Invalid YouTube URL")
         
@@ -228,12 +228,20 @@ async def summarize_video(
             summary_content = summary.content
             key_points = summary.key_points
         
-        # TODO: Save to database in background
-        # background_tasks.add_task(save_summary_to_db, ...)
+        # NOTE: Database update temporarily disabled due to DATABASE_URL access issues
+        # Instead, the tRPC handler will handle database updates after receiving the response
+        print(f"⚠️  Database update skipped for summary {request.summary_id}")
+        print(f"   Content length: {len(summary_content)} chars")
+        print(f"   Processing source: {'gumloop' if is_gumloop else 'standard'}")
+        print(f"   Key moments: {len(key_moments) if key_moments else 0}")
+        print(f"   Structured data fields: {sum(1 for x in [frameworks, playbooks, debunked_assumptions, in_practice, accelerated_learning_pack, insight_enrichment, metadata] if x is not None)}")
+        
+        # TODO: Fix DATABASE_URL environment variable access for Python backend
+        # background_tasks.add_task(update_summary_in_database, ...)
         
         return SummarizeResponse(
             video_id=video_id,
-            video_url=request.url,
+            video_url=request.youtube_url,
             video_title=video_info.title,
             channel_name=video_info.channel_name,
             channel_id=video_info.channel_id,
@@ -281,3 +289,93 @@ def extract_video_id(url: str) -> Optional[str]:
             return match.group(1)
     
     return None
+
+async def update_summary_in_database(
+    summary_id: str,
+    content: str,
+    key_moments=None,
+    frameworks=None,
+    playbooks=None,
+    debunked_assumptions=None,
+    in_practice=None,
+    learningPack=None,
+    enrichment=None,
+    metadata=None,
+    processing_source: str = "standard"
+):
+    """Update summary in database with AI-generated content"""
+    try:
+        import os
+        import asyncpg
+        
+        # Get database URL from environment
+        database_url = os.getenv('DATABASE_URL')
+        if not database_url:
+            print("❌ No DATABASE_URL found, skipping database update")
+            return
+        
+        # Connect to database
+        conn = await asyncpg.connect(database_url)
+        
+        try:
+            # Prepare JSON fields - handle both objects and lists properly
+            import json
+            
+            # Convert Pydantic models to JSON-serializable format
+            def safe_json_convert(obj):
+                if obj is None:
+                    return None
+                if hasattr(obj, 'dict'):
+                    return obj.dict()
+                elif isinstance(obj, list):
+                    return [item.dict() if hasattr(item, 'dict') else item for item in obj]
+                return obj
+            
+            key_moments_json = json.dumps(safe_json_convert(key_moments)) if key_moments else None
+            frameworks_json = json.dumps(safe_json_convert(frameworks)) if frameworks else None
+            playbooks_json = json.dumps(safe_json_convert(playbooks)) if playbooks else None
+            debunked_json = json.dumps(safe_json_convert(debunked_assumptions)) if debunked_assumptions else None
+            in_practice_json = json.dumps(safe_json_convert(in_practice)) if in_practice else None
+            learning_pack_json = json.dumps(safe_json_convert(learningPack)) if learningPack else None
+            enrichment_json = json.dumps(safe_json_convert(enrichment)) if enrichment else None
+            metadata_json = json.dumps(safe_json_convert(metadata)) if metadata else None
+            
+            # Update summary with AI-generated content - FIX: Use correct Prisma column names
+            await conn.execute('''
+                UPDATE "Summary"
+                SET 
+                    content = $2,
+                    "keyMoments" = $3::jsonb,
+                    frameworks = $4::jsonb,
+                    playbooks = $5::jsonb,
+                    "debunkedAssumptions" = $6::jsonb,
+                    "inPractice" = $7::jsonb,
+                    "learningPack" = $8::jsonb,
+                    enrichment = $9::jsonb,
+                    metadata = $10::jsonb,
+                    "processingSource" = $11,
+                    "updatedAt" = NOW()
+                WHERE id = $1
+            ''', 
+                summary_id,
+                content,
+                key_moments_json,
+                frameworks_json,
+                playbooks_json,
+                debunked_json,
+                in_practice_json,
+                learning_pack_json,
+                enrichment_json,
+                metadata_json,
+                processing_source
+            )
+            
+            print(f"✅ Successfully updated summary {summary_id} in database")
+            
+        finally:
+            await conn.close()
+            
+    except Exception as e:
+        print(f"❌ Error updating summary in database: {e}")
+        import traceback
+        traceback.print_exc()

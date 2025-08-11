@@ -2,7 +2,11 @@ from pydantic import BaseModel, HttpUrl
 from typing import Optional
 
 class SummarizeRequest(BaseModel):
-    url: str
+    youtube_url: str
+    task_id: str
+    anonymous: bool
+    summary_id: str
+    user_id: Optional[str] = None
     options: Optional[dict] = None
 
 class TranscriptRequest(BaseModel):
