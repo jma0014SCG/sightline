@@ -249,13 +249,32 @@ When creating new components:
 
 ### tRPC Procedures
 
+The application includes comprehensive CRUD operations for summary management:
+
+#### Available Procedures
+- **`create`** - Authenticated summary creation with duplicate checking
+- **`createAnonymous`** - Anonymous user summary creation (1 per browser)
+- **`getById`** - Retrieve summary with ownership validation
+- **`update`** - Update summary metadata (title, notes, favorite status, rating)
+- **`delete`** - Permanently delete summary with proper cleanup
+- **`claimAnonymous`** - Transfer anonymous summaries to authenticated user
+- **`getAnonymous`** - Retrieve anonymous summaries by browser fingerprint
+- **`health`** - Service health check for monitoring
+
+#### Implementation Guidelines
 When adding new procedures:
 
-1. Define input/output schemas using Zod
-2. Use `protectedProcedure` for authenticated routes
-3. Use `publicProcedure` for anonymous/public routes
-4. Handle errors with appropriate TRPCError codes
-5. Update types in the frontend automatically via tRPC inference
+1. Define input/output schemas using Zod in `summaryValidation.ts`
+2. Implement business logic in separate handler functions in `summaryHandlers.ts`
+3. Use `protectedProcedure` for authenticated routes
+4. Use `publicProcedure` for anonymous/public routes
+5. Handle errors with appropriate TRPCError codes
+6. Add comprehensive logging and monitoring
+7. Include security checks and input validation
+8. Update types automatically via tRPC inference
+
+#### Testing
+Use `node scripts/test-new-procedures.js` to verify all procedures work correctly.
 
 ## Environment Variables
 

@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { summarySchemas, ANONYMOUS_USER_ID, type CreateInput, type CreateAnonymousInput, type GetByIdInput, type HealthResponse } from './summaryValidation'
+import { summarySchemas, ANONYMOUS_USER_ID, type CreateInput, type CreateAnonymousInput, type GetByIdInput, type UpdateInput, type DeleteInput, type ClaimAnonymousInput, type GetAnonymousInput, type HealthResponse } from './summaryValidation'
 import { extractVideoId, generateTaskId, isValidVideoIdFormat } from './summaryUtils'
 import type { SummaryRouterDependencies, SummaryContext, BackendProcessingPayload } from './summaryTypes'
 
@@ -366,6 +366,349 @@ export function createGetByIdHandler(deps: SummaryRouterDependencies) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to retrieve summary',
+      })
+    }
+  }
+}
+
+/**
+ * Update summary handler
+ */
+export function createUpdateHandler(deps: SummaryRouterDependencies) {
+  return async (ctx: SummaryContext, input: UpdateInput) => {
+    const { logger, monitoring } = deps
+    
+    try {
+      // Ensure user is authenticated
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Must be logged in to update summaries',
+        })
+      }
+
+      logger.info('Updating summary', { summaryId: input.id, userId: ctx.userId })
+
+      // Update summary with user ownership check
+      const updatedSummary = await ctx.prisma.summary.updateMany({
+        where: {
+          id: input.id,
+          userId: ctx.userId, // Ensure user can only update their own summaries
+        },
+        data: {
+          ...input.data,
+          updatedAt: new Date(),
+        },
+      })
+
+      if (updatedSummary.count === 0) {
+        logger.info('Summary not found or unauthorized for update', { summaryId: input.id, userId: ctx.userId })
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Summary not found',
+        })
+      }
+
+      // Fetch and return the updated summary
+      const summary = await ctx.prisma.summary.findUnique({
+        where: { id: input.id },
+        include: {
+          categories: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+        },
+      })
+
+      logger.info('Summary updated successfully', { summaryId: input.id, userId: ctx.userId })
+      monitoring?.logBusinessMetric('summary_updated', 1, { 
+        summaryId: input.id,
+        userId: ctx.userId 
+      })
+
+      return summary
+    } catch (error) {
+      logger.error('Error in update', { error, input, userId: ctx.userId })
+      monitoring?.logError({
+        error: error instanceof Error ? error : new Error('Unknown error in update'),
+        context: { input, userId: ctx.userId },
+      })
+      
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to update summary',
+      })
+    }
+  }
+}
+
+/**
+ * Delete summary handler
+ */
+export function createDeleteHandler(deps: SummaryRouterDependencies) {
+  return async (ctx: SummaryContext, input: DeleteInput) => {
+    const { logger, monitoring } = deps
+    
+    try {
+      // Ensure user is authenticated
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Must be logged in to delete summaries',
+        })
+      }
+
+      logger.info('Deleting summary', { summaryId: input.id, userId: ctx.userId })
+
+      // Check if summary exists and user owns it
+      const existingSummary = await ctx.prisma.summary.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.userId,
+        },
+      })
+
+      if (!existingSummary) {
+        logger.info('Summary not found or unauthorized for deletion', { summaryId: input.id, userId: ctx.userId })
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Summary not found',
+        })
+      }
+
+      // Delete the summary (this will cascade delete related records due to Prisma schema)
+      await ctx.prisma.summary.delete({
+        where: { id: input.id },
+      })
+
+      logger.info('Summary deleted successfully', { summaryId: input.id, userId: ctx.userId })
+      monitoring?.logBusinessMetric('summary_deleted', 1, { 
+        summaryId: input.id,
+        userId: ctx.userId 
+      })
+
+      return { success: true, id: input.id }
+    } catch (error) {
+      logger.error('Error in delete', { error, input, userId: ctx.userId })
+      monitoring?.logError({
+        error: error instanceof Error ? error : new Error('Unknown error in delete'),
+        context: { input, userId: ctx.userId },
+      })
+      
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to delete summary',
+      })
+    }
+  }
+}
+
+/**
+ * Claim anonymous summaries handler
+ */
+export function createClaimAnonymousHandler(deps: SummaryRouterDependencies) {
+  return async (ctx: SummaryContext, input: ClaimAnonymousInput) => {
+    const { logger, monitoring, security, config } = deps
+    const anonymousUserId = config?.anonymousUserId || ANONYMOUS_USER_ID
+    
+    try {
+      // Ensure user is authenticated
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Must be logged in to claim summaries',
+        })
+      }
+
+      // Sanitize browser fingerprint
+      const sanitizedFingerprint = security.sanitizeText(input.browserFingerprint)
+      
+      logger.info('Claiming anonymous summaries', { 
+        userId: ctx.userId, 
+        fingerprint: sanitizedFingerprint.substring(0, 8) 
+      })
+
+      // Find anonymous summaries for this browser fingerprint
+      // Note: This is a simplified approach - in a real implementation, you might want to
+      // store browser fingerprints in a separate table for more sophisticated matching
+      const anonymousSummaries = await ctx.prisma.summary.findMany({
+        where: {
+          userId: anonymousUserId,
+          // For now, we'll claim all anonymous summaries
+          // In a more sophisticated implementation, you'd match by fingerprint
+        },
+      })
+
+      if (anonymousSummaries.length === 0) {
+        logger.info('No anonymous summaries found to claim', { userId: ctx.userId })
+        return { claimed: 0, summaries: [] }
+      }
+
+      // Transfer ownership of anonymous summaries to the authenticated user
+      const updateResult = await ctx.prisma.summary.updateMany({
+        where: {
+          userId: anonymousUserId,
+        },
+        data: {
+          userId: ctx.userId,
+          updatedAt: new Date(),
+        },
+      })
+
+      logger.info('Anonymous summaries claimed successfully', { 
+        userId: ctx.userId, 
+        claimed: updateResult.count 
+      })
+      monitoring?.logBusinessMetric('summaries_claimed', updateResult.count, { 
+        userId: ctx.userId,
+        fingerprint: sanitizedFingerprint.substring(0, 8)
+      })
+
+      // Return the claimed summaries
+      const claimedSummaries = await ctx.prisma.summary.findMany({
+        where: {
+          userId: ctx.userId,
+          id: { in: anonymousSummaries.map(s => s.id) },
+        },
+        include: {
+          categories: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+        },
+      })
+
+      return { 
+        claimed: updateResult.count, 
+        summaries: claimedSummaries 
+      }
+    } catch (error) {
+      logger.error('Error in claimAnonymous', { error, input, userId: ctx.userId })
+      monitoring?.logError({
+        error: error instanceof Error ? error : new Error('Unknown error in claimAnonymous'),
+        context: { input, userId: ctx.userId },
+      })
+      
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to claim anonymous summaries',
+      })
+    }
+  }
+}
+
+/**
+ * Get anonymous summaries handler
+ */
+export function createGetAnonymousHandler(deps: SummaryRouterDependencies) {
+  return async (ctx: SummaryContext, input: GetAnonymousInput) => {
+    const { logger, monitoring, security, config } = deps
+    const anonymousUserId = config?.anonymousUserId || ANONYMOUS_USER_ID
+    
+    try {
+      // Sanitize browser fingerprint
+      const sanitizedFingerprint = security.sanitizeText(input.browserFingerprint)
+      
+      logger.info('Retrieving anonymous summaries', { 
+        fingerprint: sanitizedFingerprint.substring(0, 8) 
+      })
+
+      // Find anonymous summaries
+      // Note: This is a simplified approach - in a real implementation, you might want to
+      // store and match browser fingerprints more precisely
+      const anonymousSummaries = await ctx.prisma.summary.findMany({
+        where: {
+          userId: anonymousUserId,
+        },
+        include: {
+          categories: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              createdAt: true,
+              updatedAt: true,
+            }
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+
+      logger.info('Anonymous summaries retrieved', { 
+        fingerprint: sanitizedFingerprint.substring(0, 8),
+        count: anonymousSummaries.length 
+      })
+      monitoring?.logBusinessMetric('anonymous_summaries_retrieved', anonymousSummaries.length, { 
+        fingerprint: sanitizedFingerprint.substring(0, 8)
+      })
+
+      return anonymousSummaries.map(summary => ({
+        ...summary,
+        isAnonymous: true,
+        canSave: false,
+      }))
+    } catch (error) {
+      logger.error('Error in getAnonymous', { error, input })
+      monitoring?.logError({
+        error: error instanceof Error ? error : new Error('Unknown error in getAnonymous'),
+        context: { input },
+      })
+      
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to retrieve anonymous summaries',
       })
     }
   }

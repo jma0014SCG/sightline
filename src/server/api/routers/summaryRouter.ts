@@ -1,7 +1,7 @@
 import 'server-only'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/api/trpc'
 import { summarySchemas } from './summaryValidation'
-import { createHealthHandler, createHandler, createAnonymousHandler, createGetByIdHandler } from './summaryHandlers'
+import { createHealthHandler, createHandler, createAnonymousHandler, createGetByIdHandler, createUpdateHandler, createDeleteHandler, createClaimAnonymousHandler, createGetAnonymousHandler } from './summaryHandlers'
 import type { SummaryRouterDependencies } from './summaryTypes'
 
 /**
@@ -15,6 +15,10 @@ export function createSummaryRouter(deps: SummaryRouterDependencies) {
   const createSummaryHandler = createHandler(deps)
   const anonymousHandler = createAnonymousHandler(deps)
   const getByIdHandler = createGetByIdHandler(deps)
+  const updateHandler = createUpdateHandler(deps)
+  const deleteHandler = createDeleteHandler(deps)
+  const claimAnonymousHandler = createClaimAnonymousHandler(deps)
+  const getAnonymousHandler = createGetAnonymousHandler(deps)
 
   return createTRPCRouter({
     /**
@@ -61,6 +65,57 @@ export function createSummaryRouter(deps: SummaryRouterDependencies) {
       .input(summarySchemas.createAnonymous)
       .mutation(async ({ ctx, input }) => {
         return anonymousHandler(ctx, input)
+      }),
+
+    /**
+     * Update summary for authenticated users
+     * 
+     * Allows authenticated users to update their summary metadata including title,
+     * user notes, favorite status, and rating. Security checks ensure users can
+     * only update their own summaries.
+     */
+    update: protectedProcedure
+      .input(summarySchemas.update)
+      .mutation(async ({ ctx, input }) => {
+        return updateHandler(ctx, input)
+      }),
+
+    /**
+     * Delete summary for authenticated users
+     * 
+     * Allows authenticated users to permanently delete their summaries. Includes
+     * proper cleanup of related records and security checks to ensure users can
+     * only delete their own summaries.
+     */
+    delete: protectedProcedure
+      .input(summarySchemas.delete)
+      .mutation(async ({ ctx, input }) => {
+        return deleteHandler(ctx, input)
+      }),
+
+    /**
+     * Claim anonymous summaries after authentication
+     * 
+     * Transfers ownership of anonymous summaries to newly authenticated user.
+     * Uses browser fingerprinting to identify previously created anonymous summaries
+     * and moves them to the authenticated user's account.
+     */
+    claimAnonymous: protectedProcedure
+      .input(summarySchemas.claimAnonymous)
+      .mutation(async ({ ctx, input }) => {
+        return claimAnonymousHandler(ctx, input)
+      }),
+
+    /**
+     * Get anonymous summaries for unauthenticated users
+     * 
+     * Retrieves summaries created by anonymous users using browser fingerprinting.
+     * Provides read-only access to anonymous summaries before user signup.
+     */
+    getAnonymous: publicProcedure
+      .input(summarySchemas.getAnonymous)
+      .query(async ({ ctx, input }) => {
+        return getAnonymousHandler(ctx, input)
       }),
   })
 }

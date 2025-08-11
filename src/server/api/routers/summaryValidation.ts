@@ -79,6 +79,50 @@ export const summarySchemas = {
   }),
 
   /**
+   * Schema for update summary input
+   */
+  update: z.object({
+    id: z.string()
+      .min(1, 'Summary ID is required')
+      .max(255, 'Summary ID too long'),
+    data: z.object({
+      videoTitle: z.string().max(500, 'Title too long').optional(),
+      userNotes: z.string().max(10000, 'Notes too long').optional(),
+      isFavorite: z.boolean().optional(),
+      rating: z.number().int().min(1).max(5).optional(),
+    }).refine(data => Object.keys(data).length > 0, {
+      message: 'At least one field must be provided for update'
+    }),
+  }),
+
+  /**
+   * Schema for delete summary input
+   */
+  delete: z.object({
+    id: z.string()
+      .min(1, 'Summary ID is required')
+      .max(255, 'Summary ID too long'),
+  }),
+
+  /**
+   * Schema for claiming anonymous summaries
+   */
+  claimAnonymous: z.object({
+    browserFingerprint: z.string()
+      .min(1, 'Browser fingerprint is required')
+      .max(255, 'Browser fingerprint too long'),
+  }),
+
+  /**
+   * Schema for getting anonymous summaries
+   */
+  getAnonymous: z.object({
+    browserFingerprint: z.string()
+      .min(1, 'Browser fingerprint is required')
+      .max(255, 'Browser fingerprint too long'),
+  }),
+
+  /**
    * Schema for summary response
    */
   summaryResponse: z.object({
@@ -105,5 +149,9 @@ export const summarySchemas = {
 export type CreateInput = z.infer<typeof summarySchemas.create>
 export type CreateAnonymousInput = z.infer<typeof summarySchemas.createAnonymous>
 export type GetByIdInput = z.infer<typeof summarySchemas.getById>
+export type UpdateInput = z.infer<typeof summarySchemas.update>
+export type DeleteInput = z.infer<typeof summarySchemas.delete>
+export type ClaimAnonymousInput = z.infer<typeof summarySchemas.claimAnonymous>
+export type GetAnonymousInput = z.infer<typeof summarySchemas.getAnonymous>
 export type HealthResponse = z.infer<typeof summarySchemas.health>
 export type SummaryResponse = z.infer<typeof summarySchemas.summaryResponse>
