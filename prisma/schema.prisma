@@ -165,6 +165,17 @@ enum Plan {
   ENTERPRISE
 }
 
+// Progress tracking for async summary generation
+model Progress {
+  taskId    String   @id @map("task_id")
+  data      Json     // Contains: progress, stage, status, cid, etc.
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at") // Set to createdAt + 4 hours
+  
+  @@index([expiresAt]) // For efficient cleanup queries
+  @@map("progress")
+}
+
 // Usage tracking for preventing limit bypass via deletion
 model UsageEvent {
   id        String   @id @default(cuid())

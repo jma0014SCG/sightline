@@ -1,10 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import json
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Add current directory to Python path for imports
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+
+# Setup structured logging
+from logging_config import setup_logging, get_logger
+setup_logging(level="INFO")
+logger = get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -12,6 +22,12 @@ app = FastAPI(
     description="AI-powered YouTube video summarization API",
     version="0.1.0"
 )
+
+# Import correlation middleware
+from middleware.correlation import CorrelationMiddleware
+
+# Add correlation middleware first
+app.add_middleware(CorrelationMiddleware)
 
 # Configure CORS
 app.add_middleware(
@@ -41,29 +57,61 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Global progress tracking storage - persistent across function calls
-progress_storage = {}
+# Import progress storage service
+from services.progress_storage import progress_storage
 
-# Progress tracking endpoint - always available
+# Progress tracking endpoint - uses database storage
 @app.get("/api/progress/{task_id}")
 async def get_progress(task_id: str):
     """Get progress for a task ID. Returns default values if task not found."""
-    progress = progress_storage.get(task_id, {
-        "progress": 0, 
-        "stage": "Starting...", 
-        "status": "processing",
-        "task_id": task_id
-    })
+    progress = await progress_storage.get_progress(task_id)
+    
+    if progress is None:
+        # Return "queued" state for unknown tasks
+        return {
+            "progress": 0, 
+            "stage": "Queued...", 
+            "status": "queued",
+            "task_id": task_id
+        }
+    
     return progress
 
 # Progress cleanup endpoint for completed tasks
 @app.delete("/api/progress/{task_id}")
 async def cleanup_progress(task_id: str):
-    """Clean up completed progress data to prevent memory leaks."""
-    if task_id in progress_storage:
-        del progress_storage[task_id]
-        return {"status": "cleaned"}
-    return {"status": "not_found"}
+    """Clean up completed progress data."""
+    deleted = await progress_storage.delete_progress(task_id)
+    return {"status": "cleaned" if deleted else "not_found"}
+
+# Debug endpoint for development only
+@app.get("/api/progress/debug/{task_id}")
+async def debug_progress(task_id: str):
+    """Get raw progress record with metadata (dev only)."""
+    if os.getenv("NODE_ENV") != "development" and os.getenv("ENVIRONMENT") != "development":
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    debug_info = await progress_storage.get_debug_info(task_id)
+    if debug_info is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    return debug_info
+
+# Cleanup expired records periodically
+@app.on_event("startup")
+async def startup_event():
+    """Initialize progress storage and schedule cleanup."""
+    await progress_storage.init()
+    
+    # Run cleanup on startup
+    deleted_count = await progress_storage.cleanup_expired()
+    if deleted_count > 0:
+        print(f"🧹 Cleaned up {deleted_count} expired progress records")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close database connections on shutdown."""
+    await progress_storage.close()
 
 # Import and include routers
 try:
@@ -81,13 +129,27 @@ except ImportError as e:
     
     # Create working summarize endpoint as fallback
     @app.post("/api/summarize")
-    async def working_summarize(request: dict):
+    async def working_summarize(request: Request):
         import uuid
         import asyncio
         import re
+        from datetime import datetime
+        
+        # Extract correlation ID from request state (set by middleware)
+        from middleware.correlation import extract_correlation_id, extract_task_id
+        cid = extract_correlation_id(request)
         
         # Generate task ID immediately
         task_id = str(uuid.uuid4())
+        
+        # Set task ID in logging context
+        from logging_config import set_correlation_context
+        set_correlation_context(task_id=task_id)
+        
+        # Structured logging with correlation ID
+        logger.info("Starting summarization", 
+                   url=body.get("url"),
+                   task_id=task_id)
         
         try:
             # Import required modules here to avoid import issues
@@ -98,13 +160,15 @@ except ImportError as e:
             from services.youtube_service import YouTubeService
             from services.langchain_service import LangChainService
             
-            url = request.get("url", "")
+            # Get request body
+            body = await request.json()
+            url = body.get("url", "")
             if not url:
-                progress_storage[task_id] = {"progress": 0, "stage": "Error: URL is required", "status": "error", "task_id": task_id}
-                return {"error": "URL is required", "task_id": task_id}
+                await progress_storage.set_progress(task_id, {"progress": 0, "stage": "Error: URL is required", "status": "error", "task_id": task_id, "cid": cid})
+                return {"error": "URL is required", "task_id": task_id, "cid": cid}
             
             # Initialize progress tracking immediately
-            progress_storage[task_id] = {"progress": 5, "stage": "Initializing...", "status": "processing", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 5, "stage": "Initializing...", "status": "processing", "task_id": task_id, "cid": cid})
             
             # Extract video ID
             patterns = [
@@ -120,11 +184,11 @@ except ImportError as e:
                     break
             
             if not video_id:
-                progress_storage[task_id] = {"progress": 0, "stage": "Error: Invalid YouTube URL", "status": "error", "task_id": task_id}
-                return {"error": "Invalid YouTube URL", "task_id": task_id}
+                await progress_storage.set_progress(task_id, {"progress": 0, "stage": "Error: Invalid YouTube URL", "status": "error", "task_id": task_id, "cid": cid})
+                return {"error": "Invalid YouTube URL", "task_id": task_id, "cid": cid}
             
             # Initialize services
-            progress_storage[task_id] = {"progress": 10, "stage": "Connecting to YouTube...", "status": "processing", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 10, "stage": "Connecting to YouTube...", "status": "processing", "task_id": task_id, "cid": cid})
             await asyncio.sleep(0.1)  # Brief pause to ensure progress is visible
             
             youtube_service = YouTubeService()
@@ -134,23 +198,23 @@ except ImportError as e:
             print(f"🔄 Processing video ID: {video_id}")
             
             # Update progress: Getting video info and transcript in parallel
-            progress_storage[task_id] = {"progress": 25, "stage": "Fetching video data and transcript...", "status": "processing", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 25, "stage": "Fetching video data and transcript...", "status": "processing", "task_id": task_id, "cid": cid})
             video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
             print(f"📹 Video info: {video_info.title} by {video_info.channel_name} ({video_info.view_count} views)")
             print(f"📝 Transcript source: {'Gumloop' if is_gumloop else 'Standard'}")
             
             if not transcript:
-                progress_storage[task_id] = {"progress": 40, "stage": "Error: No transcript available", "status": "error", "task_id": task_id}
+                await progress_storage.set_progress(task_id, {"progress": 40, "stage": "Error: No transcript available", "status": "error", "task_id": task_id, "cid": cid})
                 return {"error": "Could not retrieve transcript for this video. The video may not have captions available.", "task_id": task_id}
             
             print(f"📝 Retrieved transcript ({len(transcript)} characters)")
             
             # Update progress: Analyzing content
-            progress_storage[task_id] = {"progress": 60, "stage": "Analyzing content with AI...", "status": "processing", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 60, "stage": "Analyzing content with AI...", "status": "processing", "task_id": task_id, "cid": cid})
             await asyncio.sleep(0.1)
             
             # Update progress: Generating summary
-            progress_storage[task_id] = {"progress": 80, "stage": "Generating your summary...", "status": "processing", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 80, "stage": "Generating your summary...", "status": "processing", "task_id": task_id, "cid": cid})
             summary = await langchain_service.summarize_transcript(
                 transcript=transcript,
                 video_title=video_info.title,
@@ -159,7 +223,7 @@ except ImportError as e:
             )
             
             # Update progress: Complete - this is critical for frontend coordination
-            progress_storage[task_id] = {"progress": 100, "stage": "Summary ready!", "status": "completed", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 100, "stage": "Summary ready!", "status": "completed", "task_id": task_id, "cid": cid})
             print(f"✅ Progress marked as complete for task {task_id}")
             
             result = {
@@ -221,7 +285,7 @@ except ImportError as e:
         except Exception as e:
             # Always update progress with error state
             error_msg = f"Summarization failed: {str(e)}"
-            progress_storage[task_id] = {"progress": 0, "stage": f"Error: {str(e)}", "status": "error", "task_id": task_id}
+            await progress_storage.set_progress(task_id, {"progress": 0, "stage": f"Error: {str(e)}", "status": "error", "task_id": task_id, "cid": cid})
             print(f"❌ Error in summarization (task {task_id}): {error_msg}")
             return {"error": error_msg, "task_id": task_id}
     
@@ -237,6 +301,128 @@ except ImportError as e:
             }
         except Exception as e:
             return {"error": str(e)}
+    
+    # Development-only synthetic test endpoint (always enabled for local testing)
+    if True:  # Enable for testing - normally: os.getenv("NODE_ENV") == "development"
+        @app.post("/api/dev/synthetic")
+        async def synthetic_summary(request: Request):
+            """Synthetic test endpoint that triggers a fixed public video summary with correlation tracking"""
+            import uuid
+            import asyncio
+            from datetime import datetime
+            
+            # Generate correlation ID
+            cid = request.headers.get("x-correlation-id", str(uuid.uuid4()))
+            
+            # Fixed public test video (Rick Astley - Never Gonna Give You Up)
+            TEST_VIDEO_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            
+            # Generate task ID
+            task_id = str(uuid.uuid4())
+            
+            # Structured logging with correlation ID
+            print(json.dumps({
+                "timestamp": datetime.now().isoformat(),
+                "level": "INFO",
+                "component": "api.synthetic",
+                "cid": cid,
+                "task_id": task_id,
+                "message": "Starting synthetic summary test",
+                "video_url": TEST_VIDEO_URL
+            }))
+            
+            try:
+                # Initialize progress with correlation ID
+                await progress_storage.set_progress(task_id, {
+                    "progress": 5,
+                    "stage": "Synthetic test starting...",
+                    "status": "processing",
+                    "task_id": task_id,
+                    "cid": cid
+                })
+                
+                # Log progress update
+                print(json.dumps({
+                    "timestamp": datetime.now().isoformat(),
+                    "level": "INFO",
+                    "component": "api.synthetic.progress",
+                    "cid": cid,
+                    "task_id": task_id,
+                    "progress": 5,
+                    "message": "Progress initialized"
+                }))
+                
+                # Simulate processing stages with delays
+                stages = [
+                    (25, "Fetching test video data..."),
+                    (50, "Processing synthetic transcript..."),
+                    (75, "Generating test summary..."),
+                    (100, "Synthetic test complete!")
+                ]
+                
+                for progress, stage in stages:
+                    await asyncio.sleep(0.5)  # Simulate processing time
+                    await progress_storage.set_progress(task_id, {
+                        "progress": progress,
+                        "stage": stage,
+                        "status": "completed" if progress == 100 else "processing",
+                        "task_id": task_id,
+                        "cid": cid
+                    })
+                    
+                    print(json.dumps({
+                        "timestamp": datetime.now().isoformat(),
+                        "level": "INFO",
+                        "component": "api.synthetic.progress",
+                        "cid": cid,
+                        "task_id": task_id,
+                        "progress": progress,
+                        "stage": stage,
+                        "message": f"Progress update: {stage}"
+                    }))
+                
+                # Return response with correlation ID
+                response = {
+                    "task_id": task_id,
+                    "cid": cid,
+                    "video_url": TEST_VIDEO_URL,
+                    "message": "Synthetic test initiated successfully",
+                    "poll_endpoint": f"/api/progress/{task_id}"
+                }
+                
+                print(json.dumps({
+                    "timestamp": datetime.now().isoformat(),
+                    "level": "INFO",
+                    "component": "api.synthetic",
+                    "cid": cid,
+                    "task_id": task_id,
+                    "message": "Synthetic test completed",
+                    "response": response
+                }))
+                
+                return response
+                
+            except Exception as e:
+                error_msg = f"Synthetic test failed: {str(e)}"
+                await progress_storage.set_progress(task_id, {
+                    "progress": 0,
+                    "stage": f"Error: {str(e)}",
+                    "status": "error",
+                    "task_id": task_id,
+                    "cid": cid
+                })
+                
+                print(json.dumps({
+                    "timestamp": datetime.now().isoformat(),
+                    "level": "ERROR",
+                    "component": "api.synthetic",
+                    "cid": cid,
+                    "task_id": task_id,
+                    "error": str(e),
+                    "message": error_msg
+                }))
+                
+                return {"error": error_msg, "task_id": task_id, "cid": cid}
 
 # Error handlers
 @app.exception_handler(HTTPException)

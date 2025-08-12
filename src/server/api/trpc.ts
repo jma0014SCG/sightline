@@ -5,17 +5,32 @@ import { ZodError } from 'zod'
 import { prisma } from '@/lib/db/prisma'
 import { headers } from 'next/headers'
 import { monitoring } from '@/lib/monitoring'
+import { getCorrelationId, generateCorrelationId } from '@/lib/api/correlation'
+import { createLogger } from '@/lib/logger'
 
 /**
  * Create context for each request
  */
 export const createTRPCContext = async () => {
   const { userId } = await auth()
+  const headersList = headers()
+  
+  // Extract or generate correlation ID
+  const correlationId = getCorrelationId(Object.fromEntries(headersList.entries()))
+  const requestId = generateCorrelationId('trpc')
 
   return {
     prisma,
     userId,
-    headers: headers(),
+    headers: headersList,
+    correlationId,
+    requestId,
+    logger: createLogger({
+      component: 'trpc',
+      correlationId,
+      requestId,
+      userId: userId || undefined,
+    }),
   }
 }
 
@@ -37,36 +52,60 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 })
 
 /**
- * Performance monitoring middleware - tracks API call performance
+ * Performance monitoring middleware - tracks API call performance with correlation ID
  */
 const performanceMonitoring = t.middleware(async ({ ctx, next, path, type }) => {
   const startTime = performance.now()
   const endpoint = `${type}:${path}`
   
+  // Log request start
+  ctx.logger.info(`API Request: ${endpoint}`, {
+    endpoint,
+    type,
+    userId: ctx.userId || 'anonymous',
+  })
+  
   try {
     const result = await next()
     const duration = performance.now() - startTime
     
+    // Log successful completion
+    ctx.logger.info(`API Response: ${endpoint}`, {
+      endpoint,
+      duration: Math.round(duration),
+      status: 'success',
+    })
+    
     // Track successful API call
     monitoring.logApiPerformance(endpoint, duration, 200)
     
-    // Track API usage metrics
+    // Track API usage metrics with correlation ID
     monitoring.logUserAction('api_call', {
       endpoint,
       duration: Math.round(duration),
       status: 'success',
       type,
       userId: ctx.userId || 'anonymous',
+      correlationId: ctx.correlationId,
+      requestId: ctx.requestId,
     })
     
     return result
   } catch (error) {
     const duration = performance.now() - startTime
     
+    // Log error with structured format
+    ctx.logger.error(`API Error: ${endpoint}`, error instanceof Error ? error : undefined, {
+      endpoint,
+      duration: Math.round(duration),
+      status: 'error',
+      errorMessage: error instanceof Error ? error.message : String(error),
+    })
+    
     // Track failed API call
     monitoring.logApiPerformance(endpoint, duration, 500)
     
-    // Track API error metrics
+    // Track API error metrics with correlation ID
     monitoring.logUserAction('api_call', {
       endpoint,
       duration: Math.round(duration),
@@ -74,6 +113,8 @@ const performanceMonitoring = t.middleware(async ({ ctx, next, path, type }) => 
       type,
       error: error instanceof Error ? error.message : 'Unknown error',
       userId: ctx.userId || 'anonymous',
+      correlationId: ctx.correlationId,
+      requestId: ctx.requestId,
     })
     
     // Log the error for monitoring
@@ -84,6 +125,8 @@ const performanceMonitoring = t.middleware(async ({ ctx, next, path, type }) => 
         duration: Math.round(duration),
         type,
         userId: ctx.userId || 'anonymous',
+        correlationId: ctx.correlationId,
+        requestId: ctx.requestId,
       },
     })
     
@@ -141,6 +184,9 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
       user: user,
       prisma: ctx.prisma,
       headers: ctx.headers,
+      correlationId: ctx.correlationId,
+      requestId: ctx.requestId,
+      logger: ctx.logger.child({ userId: ctx.userId }),
     },
   })
 })

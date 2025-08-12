@@ -4,13 +4,19 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { api } from '@/lib/api/trpc'
+import { LogViewer } from './LogViewer'
+import { correlationStore, generateCorrelationId } from '@/lib/api/correlation'
+import { createLogger } from '@/lib/logger'
 
 export function DebugPanel() {
   const [testUrl, setTestUrl] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
   const [logs, setLogs] = useState<string[]>([])
   const [testTaskId, setTestTaskId] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
+  const [showLogViewer, setShowLogViewer] = useState(false)
+  const [currentCorrelationId, setCurrentCorrelationId] = useState<string | null>(null)
   const { isAuthenticated, user, isLoading, login } = useAuth()
+  const logger = createLogger('debug-panel')
   
   // Test progress tracking
   const { progress, stage, status } = useProgressTracking({
@@ -45,20 +51,36 @@ export function DebugPanel() {
   })
 
   const testSummarization = async () => {
+    // Generate correlation ID for this flow
+    const correlationId = generateCorrelationId('debug')
+    setCurrentCorrelationId(correlationId)
+    correlationStore.setContext({ correlationId, userId: user?.id })
+    
+    logger.info('Starting summarization test', {
+      url: testUrl,
+      authenticated: isAuthenticated,
+      user: user?.email,
+      correlationId,
+    })
+    
     addLog('🚀 Starting summarization test...')
+    addLog(`🔗 Correlation ID: ${correlationId}`)
     addLog(`Auth status: ${isAuthenticated ? 'Authenticated' : 'Not authenticated'}`)
     addLog(`User: ${user?.email || 'None'}`)
     addLog(`URL: ${testUrl}`)
 
     if (!isAuthenticated) {
+      logger.warn('Not authenticated - cannot proceed')
       addLog('❌ Not authenticated - redirecting would happen here')
       return
     }
 
     try {
       addLog('📤 Calling createSummary mutation...')
+      logger.info('Calling createSummary mutation', { url: testUrl })
       await createSummary.mutateAsync({ url: testUrl })
     } catch (error) {
+      logger.error('Summarization failed', error as Error)
       addLog(`❌ Exception caught: ${error}`)
     }
   }
@@ -128,14 +150,24 @@ export function DebugPanel() {
   }
 
   const testBackendProgress = async () => {
+    const correlationId = generateCorrelationId('debug-backend')
+    setCurrentCorrelationId(correlationId)
+    
+    logger.info('Testing backend progress endpoint', { correlationId })
     addLog('🔍 Testing backend progress endpoint...')
+    addLog(`🔗 Correlation ID: ${correlationId}`)
     
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
       const testId = 'test-task-123'
       
-      const response = await fetch(`${backendUrl}/api/progress/${testId}`)
+      const response = await fetch(`${backendUrl}/api/progress/${testId}`, {
+        headers: {
+          'x-correlation-id': correlationId,
+        },
+      })
       const data = await response.json()
+      logger.info('Backend response received', { status: response.status, data })
       addLog(`📊 Backend response: ${JSON.stringify(data, null, 2)}`)
       
       if (response.ok) {
@@ -144,7 +176,49 @@ export function DebugPanel() {
         addLog(`⚠️ Backend returned ${response.status}`)
       }
     } catch (error) {
+      logger.error('Backend progress test failed', error as Error)
       addLog(`❌ Backend progress test failed: ${error}`)
+    }
+  }
+
+  const testSyntheticSummary = async () => {
+    const correlationId = generateCorrelationId('synthetic')
+    setCurrentCorrelationId(correlationId)
+    
+    logger.info('Testing synthetic summary endpoint', { correlationId })
+    addLog('🧪 Testing synthetic summary endpoint...')
+    addLog(`🔗 Correlation ID: ${correlationId}`)
+    
+    try {
+      const response = await fetch('/api/dev/synthetic-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-correlation-id': correlationId,
+        },
+        body: JSON.stringify({
+          url: testUrl,
+          simulateDelay: 2000,
+        }),
+      })
+      
+      const data = await response.json()
+      logger.info('Synthetic summary received', { 
+        status: response.status, 
+        taskId: data.task_id,
+        summaryId: data.id,
+      })
+      
+      addLog(`✅ Synthetic summary created: ${data.id}`)
+      addLog(`🆔 Task ID: ${data.task_id}`)
+      addLog(`📝 Title: ${data.title}`)
+      
+      if (data.task_id) {
+        setTestTaskId(data.task_id)
+      }
+    } catch (error) {
+      logger.error('Synthetic summary test failed', error as Error)
+      addLog(`❌ Synthetic test failed: ${error}`)
     }
   }
 
@@ -167,6 +241,11 @@ export function DebugPanel() {
       <div className="mb-2 text-xs">
         <div>Auth: {isLoading ? 'Loading...' : isAuthenticated ? '✅ Yes' : '❌ No'}</div>
         <div>User: {user?.email || 'None'}</div>
+        {currentCorrelationId && (
+          <div className="mt-1 p-1 bg-purple-50 rounded">
+            <div className="text-purple-700">CID: {currentCorrelationId}</div>
+          </div>
+        )}
         {testTaskId && (
           <div className="mt-1 p-2 bg-blue-50 rounded">
             <div>Progress: {progress}% ({status})</div>
@@ -225,6 +304,20 @@ export function DebugPanel() {
               >
                 Test OAuth
               </button>
+              <button
+                onClick={testSyntheticSummary}
+                className="text-xs bg-purple-500 text-white px-2 py-1 rounded"
+              >
+                Synthetic
+              </button>
+              <button
+                onClick={() => setShowLogViewer(!showLogViewer)}
+                className={`text-xs px-2 py-1 rounded ${
+                  showLogViewer ? 'bg-green-500 text-white' : 'bg-gray-300'
+                }`}
+              >
+                Logs
+              </button>
             </>
           )}
           <button
@@ -236,17 +329,26 @@ export function DebugPanel() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-2 rounded text-xs">
-        {logs.length === 0 ? (
-          <div className="text-gray-500">No logs yet. Click a test button.</div>
-        ) : (
-          logs.map((log, index) => (
-            <div key={index} className="mb-1 font-mono whitespace-pre-wrap">
-              {log}
-            </div>
-          ))
-        )}
-      </div>
+      {showLogViewer ? (
+        <LogViewer 
+          maxLogs={200} 
+          filter={{ 
+            correlationId: currentCorrelationId || undefined 
+          }} 
+        />
+      ) : (
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-2 rounded text-xs">
+          {logs.length === 0 ? (
+            <div className="text-gray-500">No logs yet. Click a test button.</div>
+          ) : (
+            logs.map((log, index) => (
+              <div key={index} className="mb-1 font-mono whitespace-pre-wrap">
+                {log}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }

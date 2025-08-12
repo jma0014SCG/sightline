@@ -182,14 +182,25 @@ export const summaryRouter = createTRPCRouter({
           })
         }
 
-        logger.info('Anonymous summary creation started', {
+        // Use correlation ID from context
+        const cid = ctx.correlationId
+        
+        ctx.logger.info('Anonymous summary creation started', {
           videoId,
           clientIP,
           browserFingerprint: input.browserFingerprint,
           url: sanitizedUrl,
+        })
+        
+        // Structured logging with correlation ID
+        ctx.logger.info('Starting anonymous summary creation', {
+          browserFingerprint: input.browserFingerprint,
+          videoId,
+          url: sanitizedUrl,
+          component: 'tRPC.summary.createAnonymous',
           timestamp: new Date().toISOString()
         })
-
+        
         // Call FastAPI backend
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
         
@@ -197,6 +208,7 @@ export const summaryRouter = createTRPCRouter({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Correlation-Id': cid,
             // No Authorization header for anonymous requests
           },
           body: JSON.stringify({ url: sanitizedUrl }),
@@ -547,13 +559,27 @@ export const summaryRouter = createTRPCRouter({
         console.log('⚠️  TESTING MODE: Calling backend without authentication')
         
         // Call FastAPI backend
+        // Generate correlation ID for request tracing
+        const cid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
         console.log('🔗 Backend URL:', backendUrl)
+        
+        // Structured logging with correlation ID
+        logger.info('Starting summary creation', {
+          cid,
+          userId,
+          videoId,
+          url: sanitizedUrl,
+          component: 'tRPC.summary.create',
+          timestamp: new Date().toISOString()
+        })
         
         const response = await fetch(`${backendUrl}/api/summarize`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Correlation-Id': cid,
             // No Authorization header for testing
           },
           body: JSON.stringify({ url: sanitizedUrl }),
@@ -648,6 +674,16 @@ export const summaryRouter = createTRPCRouter({
         const sanitizedTitle = sanitizeText(data.video_title || 'Untitled Video')
         const sanitizedChannelName = sanitizeText(data.channel_name || 'Unknown Channel')
 
+        // Log database write with correlation ID
+        logger.info('Writing summary to database', {
+          cid,
+          userId,
+          videoId: data.video_id || videoId,
+          component: 'tRPC.summary.create.db',
+          operation: 'upsert',
+          timestamp: new Date().toISOString()
+        })
+        
         // Create or update summary in database
         const summary = await ctx.prisma.summary.upsert({
           where: {
@@ -727,6 +763,17 @@ export const summaryRouter = createTRPCRouter({
             processingSource: data.processing_source || 'standard',
             processingVersion: data.processing_version || 'v1.0',
           },
+        })
+        
+        // Log successful database write
+        logger.info('Summary written to database successfully', {
+          cid,
+          summaryId: summary.id,
+          userId,
+          videoId: summary.videoId,
+          component: 'tRPC.summary.create.db',
+          operation: 'upsert_complete',
+          timestamp: new Date().toISOString()
         })
 
         // Update user's total summary count only for new summaries

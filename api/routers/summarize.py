@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Request
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 import re
 import sys
 import os
+import uuid
 # Add parent directory to path to find other modules
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -13,6 +14,7 @@ from dependencies import get_current_user, User
 from services.youtube_service import YouTubeService
 from services.langchain_service import LangChainService
 from services.gumloop_parser import is_gumloop_summary, parse_gumloop_summary, extract_key_points_from_gumloop
+from services.progress_storage import progress_storage
 from models.requests import SummarizeRequest
 from models.responses import SummarizeResponse
 
@@ -24,14 +26,46 @@ langchain_service = LangChainService()
 async def summarize_video(
     request: SummarizeRequest,
     background_tasks: BackgroundTasks,
+    http_request: Request,
     # current_user: User = Depends(get_current_user)  # Temporarily disabled for testing
 ):
     """Summarize a YouTube video"""
+    # Generate task ID for progress tracking
+    task_id = str(uuid.uuid4())
+    
+    # Get correlation ID from request if available
+    cid = http_request.headers.get('x-correlation-id', task_id)
+    
     try:
+        # Initialize progress tracking
+        await progress_storage.set_progress(task_id, {
+            "progress": 5,
+            "stage": "Initializing...",
+            "status": "processing",
+            "task_id": task_id,
+            "cid": cid
+        })
+        
         # Extract video ID from URL
         video_id = extract_video_id(request.url)
         if not video_id:
+            await progress_storage.set_progress(task_id, {
+                "progress": 0,
+                "stage": "Error: Invalid YouTube URL",
+                "status": "error",
+                "task_id": task_id,
+                "cid": cid
+            })
             raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+        
+        # Update progress: Fetching video data
+        await progress_storage.set_progress(task_id, {
+            "progress": 25,
+            "stage": "Fetching video data and transcript...",
+            "status": "processing",
+            "task_id": task_id,
+            "cid": cid
+        })
         
         # Get video metadata and transcript in parallel
         video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
@@ -63,6 +97,15 @@ async def summarize_video(
         glossary = []
         tools = []
         resources = []
+        
+        # Update progress: Analyzing content
+        await progress_storage.set_progress(task_id, {
+            "progress": 60,
+            "stage": "Analyzing content with AI...",
+            "status": "processing",
+            "task_id": task_id,
+            "cid": cid
+        })
         
         # Check if transcript is in Gumloop format
         if is_gumloop and is_gumloop_summary(transcript):
@@ -228,6 +271,15 @@ async def summarize_video(
             summary_content = summary.content
             key_points = summary.key_points
         
+        # Update progress: Complete
+        await progress_storage.set_progress(task_id, {
+            "progress": 100,
+            "stage": "Summary ready!",
+            "status": "completed",
+            "task_id": task_id,
+            "cid": cid
+        })
+        
         # TODO: Save to database in background
         # background_tasks.add_task(save_summary_to_db, ...)
         
@@ -242,6 +294,7 @@ async def summarize_video(
             summary=summary_content,
             key_points=key_points,
             user_id="test-user",  # Temporarily using test user ID
+            task_id=task_id,  # Include task ID for progress tracking
             # Enhanced YouTube metadata from YouTubeMetadataService
             description=video_info.description,
             view_count=video_info.view_count,
@@ -263,9 +316,25 @@ async def summarize_video(
             glossary=glossary
         )
         
-    except HTTPException:
+    except HTTPException as he:
+        # Update progress with error state
+        await progress_storage.set_progress(task_id, {
+            "progress": 0,
+            "stage": f"Error: {he.detail}",
+            "status": "error",
+            "task_id": task_id,
+            "cid": cid
+        })
         raise
     except Exception as e:
+        # Update progress with error state
+        await progress_storage.set_progress(task_id, {
+            "progress": 0,
+            "stage": f"Error: {str(e)}",
+            "status": "error",
+            "task_id": task_id,
+            "cid": cid
+        })
         raise HTTPException(status_code=500, detail=str(e))
 
 def extract_video_id(url: str) -> Optional[str]:

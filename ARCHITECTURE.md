@@ -72,19 +72,23 @@ tRPC API (summary.create/createAnonymous)
     ↓
 Usage Limit Validation & Browser Fingerprinting
     ↓
-FastAPI Backend (/api/summarize)
+FastAPI Backend (/api/summarize) → Returns task_id
     ↓
-Multi-Service Transcript Acquisition
+Progress Tracking Initialization (5%)
+    ↓
+Multi-Service Transcript Acquisition (25%)
     ↓ 
-OpenAI Processing (LangChain + GPT-4)
+OpenAI Processing (LangChain + GPT-4) (60%)
     ↓
 Smart Collections Classification
     ↓
 PostgreSQL Storage
     ↓
-Real-time Progress Updates
+Progress Completion (100%)
     ↓
-Frontend Display
+Real-time Progress Updates (via /api/progress/{task_id})
+    ↓
+Frontend Display with useProgressTracking Hook
 ```
 
 ### 2. Authentication Flow

@@ -98,6 +98,7 @@ class SummarizeResponse(BaseModel):
     summary: str
     key_points: List[str]
     user_id: str
+    task_id: Optional[str] = None  # Add task_id for progress tracking
     created_at: datetime = datetime.utcnow()
     
     

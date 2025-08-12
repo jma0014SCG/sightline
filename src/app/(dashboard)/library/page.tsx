@@ -104,6 +104,12 @@ export default function LibraryPage() {
     onSuccess: (summary) => {
       console.log('✅ Summary created successfully:', summary)
       
+      // If we got a real task_id from backend, switch to using it for progress tracking
+      if (summary.task_id && summary.task_id !== currentTaskId) {
+        console.log('🔄 Switching to real task_id:', summary.task_id)
+        setCurrentTaskId(summary.task_id)
+      }
+      
       // Invalidate caches to show new summary and updated usage stats
       utils.library.getAll.invalidate()
       utils.billing.getUsageStats.invalidate()
