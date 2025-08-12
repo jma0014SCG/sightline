@@ -21,6 +21,7 @@ interface SummaryCardProps {
   isSelected?: boolean
   onSelect?: (id: string, selected: boolean) => void
   showSelection?: boolean
+  isSharing?: boolean
 }
 
 export function SummaryCard({ 
@@ -31,7 +32,8 @@ export function SummaryCard({
   viewMode = 'grid',
   isSelected = false,
   onSelect,
-  showSelection = false
+  showSelection = false,
+  isSharing = false
 }: SummaryCardProps) {
   const [showActions, setShowActions] = useState(false)
   
@@ -267,46 +269,58 @@ export function SummaryCard({
                   {/* Remove the "more insights" since we're now showing synopsis */}
                 </div>
                 
-                {/* Hover Actions - appear on card hover */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {/* Enhanced Action Buttons - Always visible with better UX */}
+                <div className="flex items-center gap-2 z-10 relative">
                   {onShare && (
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                         onShare(summary.id)
                       }}
-                      className="rounded-lg p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                      aria-label="Share summary"
-                      title="Share"
+                      disabled={isSharing}
+                      className={`rounded-lg p-2 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 shadow-sm transition-all duration-200 ${isSharing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      aria-label={isSharing ? "Creating share link..." : "Share summary"}
+                      title={isSharing ? "Creating share link..." : "Share this summary"}
+                      style={{ pointerEvents: 'auto' }}
                     >
-                      <Share2 className="h-4 w-4" />
+                      {isSharing ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-600 border-t-transparent" />
+                      ) : (
+                        <Share2 className="h-4 w-4" />
+                      )}
                     </button>
                   )}
                   {onDelete && (
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                         onDelete(summary.id)
                       }}
-                      className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="rounded-lg p-2 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 shadow-sm transition-all duration-200"
                       aria-label="Delete summary"
-                      title="Delete"
+                      title="Delete this summary"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                   
-                  {/* Fallback more actions button */}
+                  {/* More actions button */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.preventDefault()
+                      e.stopPropagation()
                       setShowActions(!showActions)
                     }}
-                    className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                    className="rounded-lg p-2 bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 shadow-sm transition-all duration-200"
                     aria-label="More actions"
-                    title="More"
+                    title="More actions"
+                    style={{ pointerEvents: 'auto' }}
                   >
                     <MoreVertical className="h-4 w-4" />
                   </button>
@@ -507,32 +521,41 @@ export function SummaryCard({
         </div>
       </Link>
 
-      {/* Always visible action buttons in bottom-right corner */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-1">
+      {/* Enhanced action buttons with improved visibility and accessibility */}
+      <div className="absolute bottom-3 right-3 flex items-center gap-2 z-10">
         {onShare && (
           <button
+            type="button"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               onShare(summary.id)
             }}
-            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-blue-600 shadow-sm transition-colors"
-            aria-label="Share summary"
-            title="Share"
+            disabled={isSharing}
+            className={`relative rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${isSharing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label={isSharing ? "Creating share link..." : "Share summary"}
+            title={isSharing ? "Creating share link..." : "Share this summary"}
+            style={{ pointerEvents: 'auto' }}
           >
-            <Share2 className="h-4 w-4" />
+            {isSharing ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-700 border-t-transparent" />
+            ) : (
+              <Share2 className="h-4 w-4" />
+            )}
           </button>
         )}
         {onDelete && (
           <button
+            type="button"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               onDelete(summary.id)
             }}
-            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-red-600 shadow-sm transition-colors"
+            className="relative rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-300 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
             aria-label="Delete summary"
-            title="Delete"
+            title="Delete this summary"
+            style={{ pointerEvents: 'auto' }}
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -540,13 +563,16 @@ export function SummaryCard({
         
         {/* More actions button */}
         <button
+          type="button"
           onClick={(e) => {
             e.preventDefault()
+            e.stopPropagation()
             setShowActions(!showActions)
           }}
-          className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-700 shadow-sm transition-colors"
+          className="relative rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
           aria-label="More actions"
-          title="More"
+          title="More actions"
+          style={{ pointerEvents: 'auto' }}
         >
           <MoreVertical className="h-4 w-4" />
         </button>

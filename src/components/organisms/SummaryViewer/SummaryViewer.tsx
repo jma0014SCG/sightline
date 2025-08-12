@@ -69,6 +69,7 @@ export function SummaryViewer({
 }: SummaryViewerProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedSections, setCopiedSections] = useState<Set<string>>(new Set());
+  const [isSharing, setIsSharing] = useState(false);
   
   // Progressive disclosure: Start with reference sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
@@ -88,8 +89,14 @@ export function SummaryViewer({
   const [playerReady, setPlayerReady] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
 
-  const openShareModal = () => setShowShareModal(true);
-  const closeShareModal = () => setShowShareModal(false);
+  const openShareModal = () => {
+    setIsSharing(true);
+    setShowShareModal(true);
+  };
+  const closeShareModal = () => {
+    setIsSharing(false);
+    setShowShareModal(false);
+  };
 
   // Initialize YouTube player
   const initializePlayer = useCallback(() => {
@@ -505,7 +512,7 @@ export function SummaryViewer({
         {/* Sidebar (1/3 width on large screens) */}
         <div className="lg:col-span-1 space-y-4">
           {/* Actions Sidebar */}
-          <ActionsSidebar summary={summary} onShare={openShareModal} />
+          <ActionsSidebar summary={summary} onShare={openShareModal} isSharing={isSharing} />
 
           {/* Key Moments Sidebar */}
           {keyMoments.length > 0 && (
@@ -575,6 +582,7 @@ export function SummaryViewer({
         onClose={closeShareModal}
         summaryId={summary.id || ""}
         summaryTitle={summary.videoTitle || "Untitled Summary"}
+        onSuccess={() => setIsSharing(false)}
       />
     </article>
   );

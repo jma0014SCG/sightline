@@ -31,6 +31,7 @@ export default function LibraryPage() {
     summaryId: '',
     summaryTitle: '',
   })
+  const [sharingInProgress, setSharingInProgress] = useState<string | null>(null)
   
   // Progress state for summary creation
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
@@ -137,6 +138,10 @@ export default function LibraryPage() {
       utils.library.getAll.invalidate()
       utils.billing.getUsageStats.invalidate()
     },
+    onError: (error) => {
+      console.error('Failed to delete summary:', error)
+      alert('Unable to delete summary. Please check your internet connection and try again.')
+    }
   })
 
 
@@ -191,6 +196,7 @@ export default function LibraryPage() {
   const handleShare = useCallback((summaryId: string) => {
     const summary = allSummaries.find(s => s.id === summaryId)
     if (summary) {
+      setSharingInProgress(summaryId)
       setShareModalState({
         isOpen: true,
         summaryId,
@@ -205,6 +211,7 @@ export default function LibraryPage() {
       summaryId: '',
       summaryTitle: '',
     })
+    setSharingInProgress(null)
   }, [])
 
   // Selection handlers
@@ -611,6 +618,7 @@ export default function LibraryPage() {
                   isSelected={selectedIds.includes(summary.id)}
                   onSelect={handleSelectItem}
                   showSelection={effectiveShowSelection}
+                  isSharing={sharingInProgress === summary.id}
                   className="hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 hover:-translate-y-1"
                 />
               </div>

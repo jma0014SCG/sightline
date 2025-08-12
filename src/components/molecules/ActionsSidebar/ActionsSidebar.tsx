@@ -12,9 +12,10 @@ interface ActionsSidebarProps {
   }
   onShare: () => void
   className?: string
+  isSharing?: boolean
 }
 
-export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarProps) {
+export function ActionsSidebar({ summary, onShare, className, isSharing = false }: ActionsSidebarProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -94,19 +95,33 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
 
         {/* Share */}
         <button
-          onClick={onShare}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onShare()
+          }}
+          disabled={isSharing}
           className={cn(
-            "w-full flex items-center gap-2 p-3 rounded-lg text-left transition-all duration-200",
+            "w-full flex items-center gap-2 p-3 rounded-lg text-left transition-all duration-200 relative z-10",
             "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-            "border border-slate-200 hover:border-blue-300 hover:shadow-sm"
+            "border border-slate-200 hover:border-blue-300 hover:shadow-sm",
+            isSharing && "opacity-50 cursor-not-allowed"
           )}
-          aria-label="Share summary"
+          style={{ pointerEvents: 'auto' }}
+          aria-label={isSharing ? "Creating share link..." : "Share summary"}
         >
-          <Share2 className="h-4 w-4 text-gray-900 flex-shrink-0" />
+          {isSharing ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-900 border-t-transparent flex-shrink-0" />
+          ) : (
+            <Share2 className="h-4 w-4 text-gray-900 flex-shrink-0" />
+          )}
           <div className="flex-1">
-            <div className="text-sm font-semibold text-gray-900">Share</div>
+            <div className="text-sm font-semibold text-gray-900">
+              {isSharing ? 'Creating...' : 'Share'}
+            </div>
             <div className="text-xs text-gray-600">
-              Create public link
+              {isSharing ? 'Please wait' : 'Create public link'}
             </div>
           </div>
         </button>

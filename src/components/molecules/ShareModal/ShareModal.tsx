@@ -10,9 +10,10 @@ interface ShareModalProps {
   onClose: () => void
   summaryId: string
   summaryTitle: string
+  onSuccess?: () => void
 }
 
-export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, summaryId, summaryTitle, onSuccess }: ShareModalProps) {
   const [copied, setCopied] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
 
@@ -27,22 +28,33 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
     onSuccess: () => {
       refetch()
       setIsCreating(false)
+      onSuccess?.()
     },
     onError: (error) => {
       setIsCreating(false)
-      alert('Failed to create share link: ' + error.message)
+      console.error('Failed to create share link:', error)
+      // More user-friendly error message
+      alert('Unable to create share link. Please check your internet connection and try again.')
     }
   })
 
   const deleteShareLink = api.share.delete.useMutation({
     onSuccess: () => {
       refetch()
+    },
+    onError: (error) => {
+      console.error('Failed to delete share link:', error)
+      alert('Unable to delete share link. Please try again.')
     }
   })
 
   const togglePublic = api.share.togglePublic.useMutation({
     onSuccess: () => {
       refetch()
+    },
+    onError: (error) => {
+      console.error('Failed to update share link privacy:', error)
+      alert('Unable to update privacy settings. Please try again.')
     }
   })
 
@@ -57,7 +69,20 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      // Silent fail for clipboard operations
+      console.error('Failed to copy to clipboard:', err)
+      // Fallback: Try to select the text for manual copy
+      try {
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (fallbackErr) {
+        alert('Unable to copy link. Please manually copy the link from the text field above.')
+      }
     }
   }
 
@@ -124,9 +149,15 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
                 Generate a public link that allows anyone to view this summary without signing in.
               </p>
               <button
-                onClick={handleCreateLink}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleCreateLink()
+                }}
                 disabled={isCreating}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 relative z-10"
+                style={{ pointerEvents: 'auto' }}
               >
                 {isCreating ? (
                   <>
@@ -175,8 +206,14 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
                   />
                   <button
-                    onClick={() => handleCopy(existingShareLink.url)}
-                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-1"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleCopy(existingShareLink.url)
+                    }}
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-1 relative z-10"
+                    style={{ pointerEvents: 'auto' }}
                   >
                     {copied ? (
                       <>
@@ -207,8 +244,14 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
               {/* Quick share buttons */}
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleCopy(existingShareLink.url)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleCopy(existingShareLink.url)
+                  }}
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium relative z-10"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <Copy className="h-4 w-4" />
                   Copy Link
@@ -227,14 +270,20 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
               {/* Actions */}
               <div className="pt-4 border-t border-gray-200 space-y-2">
                 <button
-                  onClick={handleTogglePublic}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleTogglePublic()
+                  }}
                   disabled={togglePublic.isPending}
                   className={cn(
-                    "w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm",
+                    "w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm relative z-10",
                     existingShareLink.isPublic
                       ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       : "bg-green-100 text-green-700 hover:bg-green-200"
                   )}
+                  style={{ pointerEvents: 'auto' }}
                 >
                   {existingShareLink.isPublic ? (
                     <>
@@ -250,9 +299,15 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
                 </button>
                 
                 <button
-                  onClick={handleDelete}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleDelete()
+                  }}
                   disabled={deleteShareLink.isPending}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-medium transition-colors text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-medium transition-colors text-sm relative z-10"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete Share Link
