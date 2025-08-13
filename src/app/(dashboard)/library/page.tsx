@@ -14,9 +14,13 @@ import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
+import { useToast } from '@/components/providers/ToastProvider'
 
 export default function LibraryPage() {
   const router = useRouter()
+  const { toast } = useToast()
+  const utils = api.useUtils()
+  
   const [isCreatingSummary, setIsCreatingSummary] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
@@ -38,9 +42,18 @@ export default function LibraryPage() {
   // Real-time progress tracking
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
     taskId: currentTaskId,
-    onComplete: () => {
+    onComplete: async () => {
       console.log('Progress tracking completed')
       setCurrentTaskId(null)
+      
+      // Invalidate the library query to refresh the list
+      await utils.library.getAll.invalidate()
+      
+      // Refresh the page to ensure all data is up to date
+      router.refresh()
+      
+      // Show success toast
+      toast.success('Summary created successfully!')
     },
     onError: (error) => {
       console.error('Progress tracking error:', error)
@@ -126,9 +139,6 @@ export default function LibraryPage() {
     }
   })
 
-  // Get the utils to invalidate queries
-  const utils = api.useUtils()
-  
   // Get usage stats
   const { data: usage } = api.billing.getUsageStats.useQuery()
 
