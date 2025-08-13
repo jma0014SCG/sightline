@@ -7,6 +7,8 @@ import rehypeHighlight from "rehype-highlight";
 import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare, RefreshCw, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SummaryViewerProps } from "@/components/organisms/SummaryViewer/SummaryViewer.types";
+import { api } from "@/lib/api/trpc";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface MainContentColumnProps {
   summary: SummaryViewerProps["summary"];
@@ -56,13 +58,51 @@ const formatRelativeDate = (date: Date | string | null): string => {
 };
 
 // Video Metadata Section Component
-const VideoMetadataSection = ({ summary }: { summary: SummaryViewerProps["summary"] }) => {
+const VideoMetadataSection = ({ summary, onMetadataRefresh }: { 
+  summary: SummaryViewerProps["summary"];
+  onMetadataRefresh?: (updatedSummary: any) => void;
+}) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const { showSuccess, showError } = useToast();
+  
+  const refreshMetadata = api.summary.refreshMetadata.useMutation({
+    onSuccess: (data) => {
+      showSuccess("Video statistics have been updated successfully.");
+      setLastRefreshed(new Date());
+      if (onMetadataRefresh && data.summary) {
+        onMetadataRefresh(data.summary);
+      }
+    },
+    onError: (error) => {
+      showError(error.message || "Failed to refresh metadata. Please try again later.");
+    },
+  });
+
+  const handleRefresh = async () => {
+    if (isRefreshing || !summary.id) return;
+    
+    setIsRefreshing(true);
+    try {
+      await refreshMetadata.mutateAsync({ summaryId: summary.id });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Calculate if metadata is stale (older than 7 days)
+  const isStale = () => {
+    if (!summary.updatedAt) return true;
+    const updatedDate = new Date(summary.updatedAt);
+    const daysSinceUpdate = (Date.now() - updatedDate.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceUpdate > 7;
+  };
   
   // Check if we have any metadata to display
   const hasMetadata = summary.viewCount || summary.likeCount || summary.commentCount || summary.uploadDate || summary.description;
   
-  if (!hasMetadata) return null;
+  if (!hasMetadata && !summary.id) return null;
   
   return (
     <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-6">
@@ -113,6 +153,44 @@ const VideoMetadataSection = ({ summary }: { summary: SummaryViewerProps["summar
                 <span className="text-gray-500 text-sm ml-1">comments</span>
               </div>
             )}
+          </div>
+          
+          {/* Refresh button and last updated info */}
+          <div className="flex items-center justify-between mt-3">
+            <div className="text-xs text-gray-500">
+              {lastRefreshed ? (
+                <span>Last refreshed: {formatRelativeDate(lastRefreshed)}</span>
+              ) : summary.updatedAt ? (
+                <span className={cn(
+                  "flex items-center gap-1",
+                  isStale() && "text-amber-600"
+                )}>
+                  {isStale() && <Info className="h-3 w-3" />}
+                  Last updated: {formatRelativeDate(summary.updatedAt)}
+                </span>
+              ) : (
+                <span>No metadata available</span>
+              )}
+            </div>
+            
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all",
+                "bg-white border border-gray-200 text-gray-700",
+                "hover:bg-gray-50 hover:border-gray-300",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                isStale() && "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+              )}
+              title={isStale() ? "Metadata is stale. Click to refresh." : "Refresh video statistics"}
+            >
+              <RefreshCw className={cn(
+                "h-3.5 w-3.5",
+                isRefreshing && "animate-spin"
+              )} />
+              {isRefreshing ? "Refreshing..." : isStale() ? "Update Stats" : "Refresh"}
+            </button>
           </div>
           
           {/* Description (expandable) */}

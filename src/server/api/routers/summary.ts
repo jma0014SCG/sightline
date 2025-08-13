@@ -1303,4 +1303,240 @@ export const summaryRouter = createTRPCRouter({
         canSave: false,
       }
     }),
+
+  /**
+   * Refresh YouTube metadata for a summary
+   * Fetches fresh metadata from YouTube API and updates the database
+   */
+  refreshMetadata: protectedProcedure
+    .input(
+      z.object({
+        summaryId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // First, get the summary to verify ownership and get video ID
+      const summary = await ctx.prisma.summary.findUnique({
+        where: {
+          id: input.summaryId,
+        },
+        select: {
+          id: true,
+          userId: true,
+          videoId: true,
+        },
+      })
+
+      if (!summary) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Summary not found',
+        })
+      }
+
+      // Verify ownership
+      if (summary.userId !== ctx.userId) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to update this summary',
+        })
+      }
+
+      try {
+        // Call the Python API to fetch fresh metadata
+        const response = await fetch(`${process.env.PYTHON_API_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            video_id: summary.videoId,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch metadata from API')
+        }
+
+        const metadata = await response.json()
+
+        // Update the summary with fresh metadata
+        const updatedSummary = await ctx.prisma.summary.update({
+          where: {
+            id: input.summaryId,
+          },
+          data: {
+            viewCount: metadata.view_count || null,
+            likeCount: metadata.like_count || null,
+            commentCount: metadata.comment_count || null,
+            uploadDate: metadata.upload_date ? new Date(metadata.upload_date) : null,
+            description: metadata.description || null,
+            updatedAt: new Date(), // Mark as updated
+          },
+        })
+
+        return {
+          success: true,
+          summary: updatedSummary,
+          message: 'Metadata refreshed successfully',
+        }
+      } catch (error) {
+        console.error('Error refreshing metadata:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to refresh metadata. Please try again later.',
+        })
+      }
+    }),
+
+  /**
+   * Get stale summaries that need metadata refresh
+   * Returns summaries where metadata is older than specified days
+   */
+  getStaleMetadata: protectedProcedure
+    .input(
+      z.object({
+        daysOld: z.number().min(1).max(365).default(7),
+        limit: z.number().min(1).max(100).default(10),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - input.daysOld)
+
+      const staleSummaries = await ctx.prisma.summary.findMany({
+        where: {
+          userId: ctx.userId,
+          OR: [
+            // No metadata at all
+            {
+              viewCount: null,
+              likeCount: null,
+              commentCount: null,
+            },
+            // Or metadata is old
+            {
+              updatedAt: {
+                lt: cutoffDate,
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          videoTitle: true,
+          channelName: true,
+          thumbnailUrl: true,
+          updatedAt: true,
+          viewCount: true,
+          likeCount: true,
+          uploadDate: true,
+        },
+        orderBy: {
+          updatedAt: 'asc', // Oldest first
+        },
+        take: input.limit,
+      })
+
+      return {
+        summaries: staleSummaries,
+        count: staleSummaries.length,
+        cutoffDate,
+      }
+    }),
+
+  /**
+   * Bulk refresh metadata for multiple summaries
+   * Useful for refreshing all stale summaries at once
+   */
+  bulkRefreshMetadata: protectedProcedure
+    .input(
+      z.object({
+        summaryIds: z.array(z.string()).min(1).max(20), // Limit to 20 at a time
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership of all summaries
+      const summaries = await ctx.prisma.summary.findMany({
+        where: {
+          id: {
+            in: input.summaryIds,
+          },
+          userId: ctx.userId,
+        },
+        select: {
+          id: true,
+          videoId: true,
+        },
+      })
+
+      if (summaries.length !== input.summaryIds.length) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to update one or more summaries',
+        })
+      }
+
+      const results = []
+      const errors = []
+
+      // Process each summary
+      for (const summary of summaries) {
+        try {
+          // Call the Python API to fetch fresh metadata
+          const response = await fetch(`${process.env.PYTHON_API_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              video_id: summary.videoId,
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch metadata from API')
+          }
+
+          const metadata = await response.json()
+
+          // Update the summary with fresh metadata
+          await ctx.prisma.summary.update({
+            where: {
+              id: summary.id,
+            },
+            data: {
+              viewCount: metadata.view_count || null,
+              likeCount: metadata.like_count || null,
+              commentCount: metadata.comment_count || null,
+              uploadDate: metadata.upload_date ? new Date(metadata.upload_date) : null,
+              description: metadata.description || null,
+              updatedAt: new Date(),
+            },
+          })
+
+          results.push({
+            id: summary.id,
+            success: true,
+          })
+        } catch (error) {
+          console.error(`Error refreshing metadata for ${summary.id}:`, error)
+          errors.push({
+            id: summary.id,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
+        }
+
+        // Add a small delay to avoid overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+
+      return {
+        success: results.length > 0,
+        results,
+        errors,
+        message: `Refreshed ${results.length} of ${input.summaryIds.length} summaries`,
+      }
+    }),
 })
