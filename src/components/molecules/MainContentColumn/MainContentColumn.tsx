@@ -4,7 +4,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp } from "lucide-react";
+import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare, RefreshCw, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SummaryViewerProps } from "@/components/organisms/SummaryViewer/SummaryViewer.types";
 
@@ -20,6 +20,123 @@ interface MainContentColumnProps {
   formatDuration: (seconds: number) => string;
   className?: string;
 }
+
+// Helper function to format counts
+const formatCount = (count?: number | null): string => {
+  if (!count) return '';
+  if (count >= 1_000_000_000) {
+    return `${(count / 1_000_000_000).toFixed(1)}B`;
+  }
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}K`;
+  }
+  return count.toString();
+};
+
+// Helper function to format relative dates
+const formatRelativeDate = (date: Date | string | null): string => {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = now.getTime() - dateObj.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffMonths < 12) return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`;
+  return `${diffYears} year${diffYears === 1 ? '' : 's'} ago`;
+};
+
+// Video Metadata Section Component
+const VideoMetadataSection = ({ summary }: { summary: SummaryViewerProps["summary"] }) => {
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  
+  // Check if we have any metadata to display
+  const hasMetadata = summary.viewCount || summary.likeCount || summary.commentCount || summary.uploadDate || summary.description;
+  
+  if (!hasMetadata) return null;
+  
+  return (
+    <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-6">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          {/* Video title and channel */}
+          <div className="mb-3">
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">{summary.videoTitle}</h2>
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <span className="font-medium">{summary.channelName}</span>
+              {summary.uploadDate && (
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span title={new Date(summary.uploadDate).toLocaleDateString()}>
+                      Uploaded {formatRelativeDate(summary.uploadDate)}
+                    </span>
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Engagement metrics */}
+          <div className="flex items-center gap-6 py-3 border-t border-b border-gray-200">
+            {summary.viewCount && (
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-gray-500" />
+                <div>
+                  <span className="font-semibold text-gray-900">{formatCount(summary.viewCount)}</span>
+                  <span className="text-gray-500 text-sm ml-1">views</span>
+                </div>
+              </div>
+            )}
+            
+            {summary.likeCount && (
+              <div className="flex items-center gap-2">
+                <ThumbsUp className="h-4 w-4 text-green-500" />
+                <span className="font-semibold text-gray-900">{formatCount(summary.likeCount)}</span>
+              </div>
+            )}
+            
+            {summary.commentCount && (
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-blue-500" />
+                <span className="font-semibold text-gray-900">{formatCount(summary.commentCount)}</span>
+                <span className="text-gray-500 text-sm ml-1">comments</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Description (expandable) */}
+          {summary.description && (
+            <div className="mt-3">
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium mb-2 flex items-center gap-1"
+              >
+                <Info className="h-3.5 w-3.5" />
+                {showFullDescription ? 'Hide description' : 'Show description'}
+              </button>
+              {showFullDescription && (
+                <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-3 max-h-64 overflow-y-auto">
+                  {summary.description}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Collapsible Synopsis Component
 const SynopsisSection = ({ synopsis }: { synopsis: string }) => {
@@ -296,6 +413,9 @@ export function MainContentColumn({
           </div>
         </div>
       )}
+
+      {/* Video Metadata Section */}
+      <VideoMetadataSection summary={summary} />
 
       {/* Primary Content Tabs */}
       <PrimaryContentTabs

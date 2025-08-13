@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, ThumbsUp, MessageSquare } from 'lucide-react'
+import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, ThumbsUp, MessageSquare, Calendar, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import type { Summary, Category, Tag } from '@prisma/client'
@@ -55,6 +55,24 @@ export function SummaryCard({
       day: 'numeric',
       year: 'numeric'
     })
+  }
+
+  const formatRelativeDate = (date: Date | string | null) => {
+    if (!date) return null
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    const now = new Date()
+    const diffMs = now.getTime() - dateObj.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const diffMonths = Math.floor(diffDays / 30)
+    const diffYears = Math.floor(diffDays / 365)
+    
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+    if (diffMonths < 12) return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`
+    return `${diffYears} year${diffYears === 1 ? '' : 's'} ago`
   }
 
   // formatCount is now imported from tag-utils
@@ -212,34 +230,43 @@ export function SummaryCard({
               {/* Footer */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  {/* YouTube metadata */}
-                  {formatCount(summary.viewCount) && (
+                  {/* Upload date if available */}
+                  {summary.uploadDate && (
+                    <>
+                      <span className="flex items-center gap-1" title={formatDate(summary.uploadDate)}>
+                        <Calendar className="h-3 w-3" />
+                        {formatRelativeDate(summary.uploadDate)}
+                      </span>
+                      <span className="text-gray-400">•</span>
+                    </>
+                  )}
+                  
+                  {/* YouTube metadata with better formatting */}
+                  {summary.viewCount && (
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" />
-                      {formatCount(summary.viewCount)}
+                      <span className="font-medium">{formatCount(summary.viewCount)}</span>
                     </span>
                   )}
-                  {formatCount(summary.likeCount) && (
+                  {summary.likeCount && (
                     <span className="flex items-center gap-1">
-                      <ThumbsUp className="h-3 w-3" />
-                      {formatCount(summary.likeCount)}
+                      <ThumbsUp className="h-3 w-3 text-green-500" />
+                      <span className="font-medium">{formatCount(summary.likeCount)}</span>
                     </span>
                   )}
-                  {formatCount(summary.commentCount) && (
+                  {summary.commentCount && (
                     <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" />
-                      {formatCount(summary.commentCount)}
+                      <MessageSquare className="h-3 w-3 text-blue-500" />
+                      <span className="font-medium">{formatCount(summary.commentCount)}</span>
                     </span>
                   )}
+                  
                   {/* Fallback if no metadata */}
-                  {!summary.viewCount && !summary.likeCount && (
+                  {!summary.viewCount && !summary.likeCount && !summary.uploadDate && (
                     <span className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      View
+                      <Clock className="h-3 w-3" />
+                      <span>{formatDate(summary.createdAt)}</span>
                     </span>
-                  )}
-                  {keyInsights.length > 1 && (
-                    <span className="text-blue-600">+{keyInsights.length - 1} more</span>
                   )}
                 </div>
                 
@@ -416,36 +443,53 @@ export function SummaryCard({
               )}
             </div>
 
-            {/* Footer - simplified */}
-            <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-              {/* YouTube metadata */}
-              {formatCount(summary.viewCount) && (
+            {/* Footer - enhanced with upload date */}
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+              {/* Upload date if available */}
+              {summary.uploadDate && (
+                <>
+                  <span className="flex items-center gap-1" title={formatDate(summary.uploadDate)}>
+                    <Calendar className="h-3 w-3" />
+                    {formatRelativeDate(summary.uploadDate)}
+                  </span>
+                  {(summary.viewCount || summary.likeCount) && <span className="text-gray-400">•</span>}
+                </>
+              )}
+              
+              {/* YouTube metadata with colored icons */}
+              {summary.viewCount && (
                 <span className="flex items-center gap-1">
                   <Eye className="h-3 w-3" />
-                  {formatCount(summary.viewCount)}
+                  <span className="font-medium">{formatCount(summary.viewCount)}</span>
                 </span>
               )}
-              {formatCount(summary.likeCount) && (
+              {summary.likeCount && (
                 <span className="flex items-center gap-1">
-                  <ThumbsUp className="h-3 w-3" />
-                  {formatCount(summary.likeCount)}
+                  <ThumbsUp className="h-3 w-3 text-green-500" />
+                  <span className="font-medium">{formatCount(summary.likeCount)}</span>
                 </span>
               )}
-              {formatCount(summary.commentCount) && (
+              {summary.commentCount && (
                 <span className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" />
-                  {formatCount(summary.commentCount)}
+                  <MessageSquare className="h-3 w-3 text-blue-500" />
+                  <span className="font-medium">{formatCount(summary.commentCount)}</span>
                 </span>
               )}
+              
               {/* Fallback if no metadata */}
-              {!summary.viewCount && !summary.likeCount && (
+              {!summary.viewCount && !summary.likeCount && !summary.uploadDate && (
                 <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  Summary
+                  <Clock className="h-3 w-3" />
+                  <span>{formatDate(summary.createdAt)}</span>
                 </span>
               )}
+              
+              {/* Insights count */}
               {keyInsights.length > 1 && (
-                <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
+                <>
+                  {(summary.viewCount || summary.likeCount || summary.uploadDate) && <span className="text-gray-400">•</span>}
+                  <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
+                </>
               )}
             </div>
           </div>
