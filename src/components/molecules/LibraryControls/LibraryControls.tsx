@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, Filter, Grid, List, SortDesc, Clock, Calendar, Play, Star, Zap, X, Plus } from 'lucide-react'
+import { Search, Filter, Grid, List, SortDesc, Clock, Calendar, Play, Star, Zap, X, Plus, Folder, Hash, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TagBadge } from '@/components/atoms/TagBadge'
 import { CategoryBadge } from '@/components/atoms/CategoryBadge'
@@ -51,6 +51,7 @@ export function LibraryControls({
   const [showFilters, setShowFilters] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
   const [showUrlHint, setShowUrlHint] = useState(false)
+  const [expandedTagTypes, setExpandedTagTypes] = useState<Set<string>>(new Set())
   const searchRef = useRef<HTMLInputElement>(null)
 
   // Quick filter presets
@@ -189,6 +190,25 @@ export function LibraryControls({
   const hasActiveFilters = filters.search || filters.dateRange || filters.durationRange || 
     (filters.categories && filters.categories.length > 0) || 
     (filters.tags && filters.tags.length > 0)
+
+  // Group tags by type for better organization
+  const groupedTags = availableTags.reduce((acc, tag) => {
+    const type = tag.type || 'other'
+    if (!acc[type]) acc[type] = []
+    acc[type].push(tag)
+    return acc
+  }, {} as Record<string, typeof availableTags>)
+
+  // Toggle expanded state for tag type sections
+  const toggleTagTypeExpansion = (type: string) => {
+    const newExpanded = new Set(expandedTagTypes)
+    if (newExpanded.has(type)) {
+      newExpanded.delete(type)
+    } else {
+      newExpanded.add(type)
+    }
+    setExpandedTagTypes(newExpanded)
+  }
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -343,50 +363,103 @@ export function LibraryControls({
           )}
         </div>
 
-        {/* Advanced Filters - Collapsible */}
+        {/* Advanced Filters - Collapsible with Enhanced Layout */}
         {showFilters && ((availableCategories && availableCategories.length > 0) || (availableTags && availableTags.length > 0)) && (
-          <div className="border-t border-gray-200 pt-3">
-            <div className="space-y-3">
-              {/* Categories */}
-              {availableCategories && availableCategories.length > 0 && (
-                <div>
-                  <span className="text-sm font-medium text-gray-700 block mb-2">Categories:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {availableCategories.map((category) => (
-                      <CategoryBadge
-                        key={category.id}
-                        name={category.name}
-                        count={category.count}
-                        selected={filters.categories?.includes(category.name)}
-                        onClick={() => handleCategoryToggle(category.name)}
-                        size="sm"
-                        interactive
-                      />
-                    ))}
-                  </div>
+          <div className="border-t border-gray-200 pt-4 space-y-4">
+            {/* Categories Section with Enhanced Visual Hierarchy */}
+            {availableCategories && availableCategories.length > 0 && (
+              <div className="bg-purple-50/50 rounded-lg p-3 border border-purple-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <Folder className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-semibold text-purple-900">
+                    Categories
+                  </span>
+                  <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                    {availableCategories.length}
+                  </span>
                 </div>
-              )}
+                <div className="flex flex-wrap gap-2">
+                  {availableCategories.map((category) => (
+                    <CategoryBadge
+                      key={category.id}
+                      name={category.name}
+                      count={category.count}
+                      selected={filters.categories?.includes(category.name)}
+                      onClick={() => handleCategoryToggle(category.name)}
+                      size="sm"
+                      interactive
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* All Tags */}
-              {availableTags && availableTags.length > 6 && (
-                <div>
-                  <span className="text-sm font-medium text-gray-700 block mb-2">All Tags:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {availableTags.slice(6).map((tag) => (
-                      <TagBadge
-                        key={tag.id}
-                        name={tag.name}
-                        type={tag.type}
-                        count={tag.count}
-                        selected={filters.tags?.includes(tag.name)}
-                        onClick={() => handleTagToggle(tag.name)}
-                        size="sm"
-                      />
-                    ))}
-                  </div>
+            {/* Tags Section with Type Grouping */}
+            {availableTags && availableTags.length > 6 && (
+              <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <Hash className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-900">
+                    All Tags
+                  </span>
+                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                    {availableTags.length - 6}
+                  </span>
                 </div>
-              )}
-            </div>
+                
+                {/* Grouped Tags by Type */}
+                <div className="space-y-3">
+                  {Object.entries(groupedTags).map(([type, tags]) => {
+                    // Skip the first 6 tags that are shown in the popular section
+                    const remainingTags = tags.filter(tag => 
+                      !availableTags.slice(0, 6).find(t => t.id === tag.id)
+                    )
+                    
+                    if (remainingTags.length === 0) return null
+                    
+                    const isExpanded = expandedTagTypes.has(type)
+                    const displayTags = isExpanded ? remainingTags : remainingTags.slice(0, 8)
+                    const hasMore = remainingTags.length > 8
+                    
+                    return (
+                      <div key={type} className="pb-2 border-b border-blue-100 last:border-b-0">
+                        <button
+                          onClick={() => toggleTagTypeExpansion(type)}
+                          className="flex items-center gap-1.5 text-xs font-medium text-blue-800 hover:text-blue-900 mb-2 transition-colors"
+                        >
+                          {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          <span className="capitalize">{type}s</span>
+                          <span className="text-blue-600">({remainingTags.length})</span>
+                        </button>
+                        
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                          {displayTags.map((tag) => (
+                            <TagBadge
+                              key={tag.id}
+                              name={tag.name}
+                              type={tag.type}
+                              count={tag.count}
+                              selected={filters.tags?.includes(tag.name)}
+                              onClick={() => handleTagToggle(tag.name)}
+                              size="sm"
+                            />
+                          ))}
+                        </div>
+                        
+                        {!isExpanded && hasMore && (
+                          <button
+                            onClick={() => toggleTagTypeExpansion(type)}
+                            className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+                          >
+                            Show {remainingTags.length - 8} more {type}s
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
