@@ -1006,6 +1006,10 @@ export const summaryRouter = createTRPCRouter({
           id: input.id,
           userId: ctx.userId,
         },
+        include: {
+          tags: true,
+          categories: true,
+        },
       })
 
       if (!summary) {

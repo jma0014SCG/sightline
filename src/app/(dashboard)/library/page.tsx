@@ -7,6 +7,7 @@ import { SummaryCard } from '@/components/molecules/SummaryCard'
 import { LibraryControls, type LibraryFilters } from '@/components/molecules/LibraryControls'
 import { QuickActionsBar } from '@/components/molecules/QuickActionsBar'
 import { ShareModal } from '@/components/molecules/ShareModal'
+import { TagStatsBar } from '@/components/molecules/TagStatsBar'
 import { Skeleton } from '@/components/atoms/Skeleton'
 import { FloatingActionButton } from '@/components/atoms/FloatingActionButton'
 import { api } from '@/components/providers/TRPCProvider'
@@ -362,6 +363,38 @@ export default function LibraryPage() {
           </div>
         </div>
       </div>
+
+      {/* Tag Stats Bar - Visual Tag Cloud */}
+      {(availableTags && availableTags.length > 0) || (availableCategories && availableCategories.length > 0) ? (
+        <div className="mb-6">
+          <TagStatsBar
+            tags={availableTags || []}
+            categories={availableCategories || []}
+            selectedTags={filters.tags}
+            selectedCategories={filters.categories}
+            onTagClick={(tagName) => {
+              const currentTags = filters.tags || []
+              const newTags = currentTags.includes(tagName)
+                ? currentTags.filter(t => t !== tagName)
+                : [...currentTags, tagName]
+              setFilters({ 
+                ...filters, 
+                tags: newTags.length > 0 ? newTags : undefined 
+              })
+            }}
+            onCategoryClick={(categoryName) => {
+              const currentCategories = filters.categories || []
+              const newCategories = currentCategories.includes(categoryName)
+                ? currentCategories.filter(c => c !== categoryName)
+                : [...currentCategories, categoryName]
+              setFilters({ 
+                ...filters, 
+                categories: newCategories.length > 0 ? newCategories : undefined 
+              })
+            }}
+          />
+        </div>
+      ) : null}
 
       {/* Create New Summary Section */}
       <div ref={createSummaryRef} className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">

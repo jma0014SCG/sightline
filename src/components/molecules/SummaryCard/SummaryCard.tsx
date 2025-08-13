@@ -6,6 +6,9 @@ import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, Th
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import type { Summary, Category, Tag } from '@prisma/client'
+import { TagBadge } from '@/components/atoms/TagBadge'
+import { CategoryBadge } from '@/components/atoms/CategoryBadge'
+import { formatCount } from '@/lib/tag-utils'
 
 type SummaryWithRelations = Summary & {
   categories?: Category[]
@@ -54,17 +57,7 @@ export function SummaryCard({
     })
   }
 
-  // Format large numbers (e.g., 1.2M views, 45K likes)
-  const formatCount = (count: number | null | undefined) => {
-    if (!count || count === 0) return null
-    
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`
-    } else if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`
-    }
-    return count.toString()
-  }
+  // formatCount is now imported from tag-utils
 
   // Extract key insights from content for preview
   const getKeyInsights = () => {
@@ -81,34 +74,18 @@ export function SummaryCard({
 
   // Helper function to render tags with colors
   const renderTags = (tags: Tag[], limit = 3) => {
-    const getTagColor = (type: string) => {
-      switch (type) {
-        case 'PERSON': return 'bg-blue-100 text-blue-700 border-blue-200'
-        case 'COMPANY': return 'bg-green-100 text-green-700 border-green-200'
-        case 'TECHNOLOGY': return 'bg-orange-100 text-orange-700 border-orange-200'
-        case 'PRODUCT': return 'bg-pink-100 text-pink-700 border-pink-200'
-        case 'CONCEPT': return 'bg-indigo-100 text-indigo-700 border-indigo-200'
-        case 'FRAMEWORK': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-        case 'TOOL': return 'bg-teal-100 text-teal-700 border-teal-200'
-        default: return 'bg-gray-100 text-gray-700 border-gray-200'
-      }
-    }
-
     const displayTags = tags.slice(0, limit)
     const remainingCount = tags.length - limit
 
     return (
       <div className="flex flex-wrap gap-1">
         {displayTags.map((tag) => (
-          <span
+          <TagBadge
             key={tag.id}
-            className={cn(
-              "inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border",
-              getTagColor(tag.type)
-            )}
-          >
-            {tag.name}
-          </span>
+            name={tag.name}
+            type={tag.type}
+            size="sm"
+          />
         ))}
         {remainingCount > 0 && (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
@@ -127,13 +104,11 @@ export function SummaryCard({
     return (
       <div className="flex flex-wrap gap-1">
         {displayCategories.map((category) => (
-          <span
+          <CategoryBadge
             key={category.id}
-            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 border border-purple-200"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-            {category.name}
-          </span>
+            name={category.name}
+            size="sm"
+          />
         ))}
         {remainingCount > 0 && (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
