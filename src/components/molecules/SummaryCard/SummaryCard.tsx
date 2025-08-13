@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, ThumbsUp, MessageSquare, Calendar, Clock } from 'lucide-react'
+import { MoreVertical, Eye, Share2, Trash2, Edit3, Play, CheckSquare, Square, Calendar, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import type { Summary, Category, Tag } from '@prisma/client'
@@ -37,6 +37,8 @@ export function SummaryCard({
   showSelection = false
 }: SummaryCardProps) {
   const [showActions, setShowActions] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null)
   
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -76,6 +78,22 @@ export function SummaryCard({
   }
 
   // formatCount is now imported from tag-utils
+  
+  // Handle hover preview
+  const handleMouseEnter = () => {
+    const timer = setTimeout(() => {
+      setShowPreview(true)
+    }, 500)
+    setHoverTimer(timer)
+  }
+  
+  const handleMouseLeave = () => {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer)
+      setHoverTimer(null)
+    }
+    setShowPreview(false)
+  }
 
   // Extract key insights from content for preview
   const getKeyInsights = () => {
@@ -90,47 +108,73 @@ export function SummaryCard({
 
   const keyInsights = getKeyInsights()
 
-  // Helper function to render tags with colors
+  // State for expanding tags
+  const [showAllTags, setShowAllTags] = useState(false)
+  
+  // Helper function to render tags with improved accessibility
   const renderTags = (tags: Tag[], limit = 3) => {
-    const displayTags = tags.slice(0, limit)
+    const displayTags = showAllTags ? tags : tags.slice(0, limit)
     const remainingCount = tags.length - limit
 
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5 items-center">
         {displayTags.map((tag) => (
           <TagBadge
             key={tag.id}
             name={tag.name}
             type={tag.type}
             size="sm"
+            className="min-h-[32px] hover:scale-105 transition-transform duration-200"
           />
         ))}
-        {remainingCount > 0 && (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
+        {remainingCount > 0 && !showAllTags && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setShowAllTags(true)
+            }}
+            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 hover:scale-105 cursor-pointer"
+            aria-label={`Show ${remainingCount} more tags`}
+          >
             +{remainingCount} more
-          </span>
+          </button>
+        )}
+        {showAllTags && tags.length > limit && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setShowAllTags(false)
+            }}
+            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 hover:scale-105 cursor-pointer"
+            aria-label="Show less tags"
+          >
+            Show less
+          </button>
         )}
       </div>
     )
   }
 
-  // Helper function to render categories
+  // Helper function to render categories with better accessibility
   const renderCategories = (categories: Category[], limit = 2) => {
     const displayCategories = categories.slice(0, limit)
     const remainingCount = categories.length - limit
 
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {displayCategories.map((category) => (
           <CategoryBadge
             key={category.id}
             name={category.name}
             size="sm"
+            className="min-h-[32px] hover:scale-105 transition-transform duration-200"
           />
         ))}
         {remainingCount > 0 && (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border border-gray-200 bg-gray-100 text-gray-600">
-            +{remainingCount} more
+          <span className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded-full border border-gray-200 bg-gray-50 text-gray-600">
+            +{remainingCount}
           </span>
         )}
       </div>
@@ -141,10 +185,14 @@ export function SummaryCard({
     return (
       <article 
         className={cn(
-          "group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-md",
+          "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200",
+        "hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5",
+        "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500",
           isSelected && "border-blue-500 bg-blue-50",
           className
         )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Selection overlay */}
         {showSelection && (
@@ -167,15 +215,15 @@ export function SummaryCard({
         )}
         <Link href={`/library/${summary.id}`} className="block">
           <div className="flex gap-3 p-3">
-            {/* Compact Thumbnail */}
-            <div className="relative h-16 w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+            {/* Enhanced Thumbnail - 25% larger */}
+            <div className="relative h-20 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
@@ -200,21 +248,21 @@ export function SummaryCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              {/* Header with channel info */}
+              {/* Header with channel info - improved contrast */}
               <div className="mb-1 flex items-center gap-2 text-xs">
-                <span className="font-medium text-blue-600">{summary.channelName}</span>
+                <span className="font-semibold text-blue-600">{summary.channelName}</span>
                 <span className="text-gray-400">•</span>
-                <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
+                <time className="text-gray-600 font-medium">{formatDate(summary.createdAt)}</time>
               </div>
 
-              {/* Title */}
-              <h3 className="mb-1.5 line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+              {/* Title - Enhanced typography */}
+              <h3 className="mb-1.5 line-clamp-2 text-base font-bold text-gray-950 group-hover:text-blue-600 transition-colors duration-200">
                 {summary.videoTitle}
               </h3>
 
-              {/* Key insights preview - single line */}
+              {/* Key insights preview - improved readability */}
               {keyInsights.length > 0 && (
-                <p className="text-xs text-gray-600 line-clamp-1 mb-1.5 leading-snug">
+                <p className="text-xs text-gray-500 line-clamp-1 mb-1.5 leading-relaxed">
                   {keyInsights[0].length > 100 ? `${keyInsights[0].substring(0, 100)}...` : keyInsights[0]}
                 </p>
               )}
@@ -227,9 +275,9 @@ export function SummaryCard({
                 </div>
               )}
 
-              {/* Footer */}
+              {/* Footer - Enhanced engagement bar */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2.5 text-xs text-gray-600 font-medium">
                   {/* Upload date if available */}
                   {summary.uploadDate && (
                     <>
@@ -241,23 +289,23 @@ export function SummaryCard({
                     </>
                   )}
                   
-                  {/* YouTube metadata with better formatting */}
+                  {/* Compact engagement metrics with emojis */}
                   {summary.viewCount && (
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      <span className="font-medium">{formatCount(summary.viewCount)}</span>
+                    <span className="flex items-center gap-0.5">
+                      <span className="text-sm">👁</span>
+                      <span>{formatCount(summary.viewCount)}</span>
                     </span>
                   )}
-                  {summary.likeCount && (
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="h-3 w-3 text-green-500" />
-                      <span className="font-medium">{formatCount(summary.likeCount)}</span>
+                  {summary.likeCount && summary.viewCount && (
+                    <span className="flex items-center gap-0.5">
+                      <span className="text-sm">👍</span>
+                      <span>{Math.round((summary.likeCount / summary.viewCount) * 100)}%</span>
                     </span>
                   )}
                   {summary.commentCount && (
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3 text-blue-500" />
-                      <span className="font-medium">{formatCount(summary.commentCount)}</span>
+                    <span className="flex items-center gap-0.5">
+                      <span className="text-sm">💬</span>
+                      <span>{formatCount(summary.commentCount)}</span>
                     </span>
                   )}
                   
@@ -271,7 +319,7 @@ export function SummaryCard({
                 </div>
                 
                 {/* Hover Actions - appear on card hover */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">
                   {onShare && (
                     <button
                       onClick={(e) => {
@@ -382,14 +430,18 @@ export function SummaryCard({
     )
   }
 
-  // Grid view - reverted to smaller thumbnail size
+  // Grid view - enhanced with better visual hierarchy
   return (
     <article 
       className={cn(
-        "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-lg",
+        "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200",
+        "hover:border-gray-300 hover:shadow-xl hover:-translate-y-1",
+        "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500",
         isSelected && "border-blue-500 bg-blue-50",
         className
       )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Selection overlay */}
       {showSelection && (
@@ -422,14 +474,14 @@ export function SummaryCard({
                 <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
               </div>
 
-              {/* Title */}
-              <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+              {/* Title - Enhanced with better weight and size */}
+              <h3 className="mb-2 line-clamp-2 text-lg font-bold text-gray-950 group-hover:text-blue-600 transition-colors duration-200">
                 {summary.videoTitle}
               </h3>
 
-              {/* Key insights preview - expanded for wider cards */}
+              {/* Key insights preview - better contrast */}
               {keyInsights.length > 0 && (
-                <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+                <p className="text-sm text-gray-500 line-clamp-2 mb-3 leading-relaxed">
                   {keyInsights[0].length > 140 ? `${keyInsights[0].substring(0, 140)}...` : keyInsights[0]}
                 </p>
               )}
@@ -443,8 +495,8 @@ export function SummaryCard({
               )}
             </div>
 
-            {/* Footer - enhanced with upload date */}
-            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+            {/* Footer - Compact engagement bar */}
+            <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
               {/* Upload date if available */}
               {summary.uploadDate && (
                 <>
@@ -456,23 +508,29 @@ export function SummaryCard({
                 </>
               )}
               
-              {/* YouTube metadata with colored icons */}
+              {/* Compact engagement metrics */}
               {summary.viewCount && (
-                <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  <span className="font-medium">{formatCount(summary.viewCount)}</span>
+                <span className="flex items-center gap-0.5 font-medium">
+                  <span className="text-base">👁</span>
+                  <span>{formatCount(summary.viewCount)}</span>
                 </span>
               )}
-              {summary.likeCount && (
-                <span className="flex items-center gap-1">
-                  <ThumbsUp className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">{formatCount(summary.likeCount)}</span>
+              {summary.likeCount && summary.viewCount && (
+                <span className="flex items-center gap-0.5 font-medium">
+                  <span className="text-base">👍</span>
+                  <span>{Math.round((summary.likeCount / summary.viewCount) * 100)}%</span>
                 </span>
               )}
               {summary.commentCount && (
-                <span className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3 text-blue-500" />
-                  <span className="font-medium">{formatCount(summary.commentCount)}</span>
+                <span className="flex items-center gap-0.5 font-medium">
+                  <span className="text-base">💬</span>
+                  <span>{formatCount(summary.commentCount)}</span>
+                </span>
+              )}
+              {summary.duration && (
+                <span className="flex items-center gap-0.5 font-medium">
+                  <span className="text-base">⏱</span>
+                  <span>{formatDuration(summary.duration)}</span>
                 </span>
               )}
               
@@ -494,16 +552,16 @@ export function SummaryCard({
             </div>
           </div>
 
-          {/* Enhanced Thumbnail */}
+          {/* Enhanced Thumbnail - 25% larger with shadow */}
           <div className="ml-4 flex-shrink-0">
-            <div className="relative h-20 w-36 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative h-24 w-44 overflow-hidden rounded-xl bg-gray-100 shadow-md">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
@@ -529,8 +587,34 @@ export function SummaryCard({
         </div>
       </Link>
 
-      {/* Always visible action buttons in bottom-right corner */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-1">
+      {/* Quick Preview Tooltip */}
+      {showPreview && keyInsights.length > 0 && (
+        <div className="absolute top-full left-4 right-4 mt-2 z-50 p-4 bg-white rounded-xl shadow-2xl border border-gray-200 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-sm text-gray-900">Quick Preview</h4>
+            <div className="space-y-1">
+              {keyInsights.slice(0, 3).map((insight, index) => (
+                <p key={index} className="text-xs text-gray-600 line-clamp-2">
+                  • {insight}
+                </p>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <span className="text-xs text-gray-500">
+                📚 {Math.ceil(summary.content.split(' ').length / 200)} min read
+              </span>
+              {summary.duration && (
+                <span className="text-xs text-gray-500">
+                  🎥 {formatDuration(summary.duration)} video
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced action buttons with better visibility */}
+      <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
         {onShare && (
           <button
             onClick={(e) => {
@@ -538,7 +622,7 @@ export function SummaryCard({
               e.stopPropagation()
               onShare(summary.id)
             }}
-            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-blue-600 shadow-sm transition-colors"
+            className="rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-blue-600 hover:border-blue-300 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
             aria-label="Share summary"
             title="Share"
           >
@@ -552,7 +636,7 @@ export function SummaryCard({
               e.stopPropagation()
               onDelete(summary.id)
             }}
-            className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-red-600 shadow-sm transition-colors"
+            className="rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-red-600 hover:border-red-300 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
             aria-label="Delete summary"
             title="Delete"
           >
@@ -566,7 +650,7 @@ export function SummaryCard({
             e.preventDefault()
             setShowActions(!showActions)
           }}
-          className="rounded-lg p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-700 shadow-sm transition-colors"
+          className="rounded-lg p-2 bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-800 hover:border-gray-300 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
           aria-label="More actions"
           title="More"
         >
