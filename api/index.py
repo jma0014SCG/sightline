@@ -302,6 +302,61 @@ except ImportError as e:
         except Exception as e:
             return {"error": str(e)}
     
+    # Metadata refresh endpoint
+    @app.post("/api/refresh-metadata")
+    async def refresh_metadata(request: Request):
+        """Refresh YouTube metadata for an existing summary"""
+        try:
+            from datetime import datetime
+            
+            body = await request.json()
+            video_id = body.get("video_id")
+            
+            if not video_id:
+                raise HTTPException(status_code=400, detail="video_id is required")
+            
+            # Extract correlation ID
+            from middleware.correlation import extract_correlation_id
+            cid = extract_correlation_id(request)
+            
+            logger.info("Refreshing metadata", video_id=video_id, cid=cid)
+            
+            # Initialize metadata service
+            from services.youtube_metadata_service import YouTubeMetadataService
+            metadata_service = YouTubeMetadataService()
+            
+            # Fetch fresh metadata
+            metadata = await metadata_service.get_metadata(video_id)
+            
+            # Format response
+            result = {
+                "video_id": video_id,
+                "title": metadata.get('title'),
+                "description": metadata.get('description'),
+                "channel_name": metadata.get('channel_name'),
+                "view_count": metadata.get('view_count'),
+                "like_count": metadata.get('like_count'),
+                "comment_count": metadata.get('comment_count'),
+                "upload_date": metadata.get('upload_date').isoformat() if metadata.get('upload_date') else None,
+                "duration": metadata.get('duration'),
+                "thumbnail_url": metadata.get('thumbnail_url'),
+                "refreshed_at": datetime.now().isoformat(),
+                "cid": cid
+            }
+            
+            logger.info("Metadata refreshed successfully", 
+                       video_id=video_id, 
+                       view_count=result.get('view_count'),
+                       cid=cid)
+            
+            return result
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error("Failed to refresh metadata", error=str(e))
+            raise HTTPException(status_code=500, detail=f"Failed to refresh metadata: {str(e)}")
+    
     # Development-only synthetic test endpoint (always enabled for local testing)
     if True:  # Enable for testing - normally: os.getenv("NODE_ENV") == "development"
         @app.post("/api/dev/synthetic")

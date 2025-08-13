@@ -337,6 +337,51 @@ async def summarize_video(
         })
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/refresh-metadata")
+async def refresh_metadata(
+    request: dict,
+    http_request: Request
+):
+    """Refresh YouTube metadata for an existing summary"""
+    from datetime import datetime
+    from services.youtube_metadata_service import YouTubeMetadataService
+    
+    video_id = request.get("video_id")
+    
+    if not video_id:
+        raise HTTPException(status_code=400, detail="video_id is required")
+    
+    # Get correlation ID from request
+    cid = http_request.headers.get('x-correlation-id', str(uuid.uuid4()))
+    
+    try:
+        # Initialize metadata service
+        metadata_service = YouTubeMetadataService()
+        
+        # Fetch fresh metadata
+        metadata = await metadata_service.get_metadata(video_id)
+        
+        # Format response
+        result = {
+            "video_id": video_id,
+            "title": metadata.get('title'),
+            "description": metadata.get('description'),
+            "channel_name": metadata.get('channel_name'),
+            "view_count": metadata.get('view_count'),
+            "like_count": metadata.get('like_count'),
+            "comment_count": metadata.get('comment_count'),
+            "upload_date": metadata.get('upload_date').isoformat() if metadata.get('upload_date') else None,
+            "duration": metadata.get('duration'),
+            "thumbnail_url": metadata.get('thumbnail_url'),
+            "refreshed_at": datetime.now().isoformat(),
+            "cid": cid
+        }
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to refresh metadata: {str(e)}")
+
 def extract_video_id(url: str) -> Optional[str]:
     """Extract video ID from YouTube URL"""
     patterns = [
