@@ -2,19 +2,21 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { SummaryViewer, SummaryViewerImproved } from '@/components/organisms/SummaryViewer'
-import { SummaryHeader, SummaryHeaderCompact } from '@/components/molecules/SummaryHeader'
+import { SummaryViewer } from '@/components/organisms/SummaryViewer'
+import { SummaryViewerImproved } from '@/components/organisms/SummaryViewer/SummaryViewerImproved'
+import { SummaryHeader } from '@/components/molecules/SummaryHeader'
+import { SummaryHeaderCompact } from '@/components/molecules/SummaryHeader/SummaryHeaderCompact'
 import { api } from '@/components/providers/TRPCProvider'
 import { useToast } from '@/components/providers/ToastProvider'
 import { useFeatureFlag } from '@/lib/feature-flags'
 
-export default function SummaryPage() {
+export default function ImprovedSummaryPage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
   const id = params.id as string
   
-  // Feature flag for improved layout
+  // Feature flag to control which layout to use
   const useImprovedLayout = useFeatureFlag('improvedSummaryLayout')
 
   const { data: summary, isLoading } = api.summary.getById.useQuery({ id })
@@ -29,12 +31,10 @@ export default function SummaryPage() {
   })
 
   const handleTagClick = (tagName: string) => {
-    // Navigate to library with tag filter
     router.push(`/library?tag=${encodeURIComponent(tagName)}`)
   }
 
   const handleCategoryClick = (categoryName: string) => {
-    // Navigate to library with category filter
     router.push(`/library?category=${encodeURIComponent(categoryName)}`)
   }
 
@@ -89,10 +89,10 @@ export default function SummaryPage() {
     )
   }
 
-  // Original layout (fallback)
+  // Fall back to original layout
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Header with Tags and Categories */}
+      {/* Original Header with Tags and Categories */}
       <SummaryHeader
         summary={summary}
         onBack={() => router.push('/library')}
@@ -102,7 +102,7 @@ export default function SummaryPage() {
         onCategoryClick={handleCategoryClick}
       />
 
-      {/* Summary Content */}
+      {/* Original Summary Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <SummaryViewer summary={summary} />
       </main>
