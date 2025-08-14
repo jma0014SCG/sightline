@@ -9,7 +9,7 @@ export interface FeatureFlags {
 }
 
 const DEFAULT_FLAGS: FeatureFlags = {
-  improvedSummaryLayout: process.env.NEXT_PUBLIC_IMPROVED_SUMMARY_LAYOUT === 'true' || false,
+  improvedSummaryLayout: process.env.NEXT_PUBLIC_IMPROVED_SUMMARY_LAYOUT === 'true' || true,
 };
 
 class FeatureFlagManager {

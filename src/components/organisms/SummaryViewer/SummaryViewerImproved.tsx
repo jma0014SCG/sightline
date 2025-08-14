@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ShareModal } from "@/components/molecules/ShareModal";
 import { 
   Clock, Eye, ThumbsUp, MessageSquare, Calendar, 
   Copy, Share2, Download, ChevronRight, Play,
-  Lightbulb, Brain, BookOpen, Plus, ExternalLink, FileText,
-  AlertTriangle
+  Lightbulb, BookOpen, Plus, ExternalLink, FileText,
+  AlertTriangle, Menu, X
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -35,11 +36,17 @@ export function SummaryViewerImproved({
   isStreaming = false,
   className,
 }: SummaryViewerProps) {
+  const router = useRouter();
   const [showShareModal, setShowShareModal] = useState(false);
   const [activeTab, setActiveTab] = useState("summary");
   const [showAllTags, setShowAllTags] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [showMobileToolkit, setShowMobileToolkit] = useState(false);
+  const toastContext = useToast();
+  const toast = {
+    success: toastContext.showSuccess,
+    error: toastContext.showError
+  };
   
   // YouTube player state
   const [player, setPlayer] = useState<any>(null);
@@ -69,6 +76,30 @@ export function SummaryViewerImproved({
     if (currentSection && currentContent.length > 0) {
       sections.set(currentSection.toLowerCase(), currentContent.join("\n").trim());
     }
+
+    // Add common section name variations for better content extraction
+    const sectionAliases = new Map<string, string[]>([
+      ["playbooks", ["playbooks & heuristics", "playbook", "strategic playbooks", "heuristics"]],
+      ["in practice", ["practical applications", "application", "implementation", "how to apply"]],
+      ["debunked assumptions", ["myths debunked", "common misconceptions", "debunked myths", "assumptions"]],
+      ["glossary", ["terms", "definitions", "key terms", "terminology", "glossary (≤15 terms)"]],
+      ["frameworks", ["strategic frameworks", "mental models", "framework", "models"]],
+      ["tl;dr", ["tl;dr (≤100 words)", "summary", "quick summary", "overview"]],
+      ["feynman flashcards", ["feynman flashcards (≤10)", "flashcards", "flash cards"]],
+      ["quick quiz", ["quick quiz (3 q&a)", "quiz"]],
+      ["novel idea meter", ["novel-idea meter", "novel ideas", "innovation", "new concepts", "fresh insights"]],
+      ["insight enrichment", ["additional insights", "enrichment", "meta insights"]],
+      ["how to think like", ["thinking patterns", "mental models", "thinking framework", "cognitive patterns"]],
+    ]);
+
+    // Create reverse lookup for section aliases
+    sectionAliases.forEach((aliases, canonical) => {
+      aliases.forEach((alias) => {
+        if (sections.has(alias.toLowerCase()) && !sections.has(canonical)) {
+          sections.set(canonical, sections.get(alias.toLowerCase()) || "");
+        }
+      });
+    });
   }
 
   // Helper functions
@@ -104,7 +135,10 @@ export function SummaryViewerImproved({
   };
 
   const handleTimestampClick = (timestamp: string) => {
-    if (!player || !playerReady) return;
+    if (!player || !playerReady) {
+      return;
+    }
+    
     // Parse various timestamp formats
     const parts = timestamp.split(':').map(Number);
     let totalSeconds = 0;
@@ -115,13 +149,23 @@ export function SummaryViewerImproved({
       // MM:SS format
       totalSeconds = parts[0] * 60 + parts[1];
     }
-    player.seekTo(totalSeconds, true);
+    
+    // Use the YouTube Player API methods
+    if (typeof player.seekTo === 'function') {
+      player.seekTo(totalSeconds, true);
+    }
+    
+    if (typeof player.playVideo === 'function') {
+      player.playVideo();
+    }
   };
 
   // Initialize YouTube player
   const initializePlayer = useCallback(() => {
-    if (!playerRef.current || !summary.videoId) return;
-
+    if (!playerRef.current || !summary.videoId) {
+      return;
+    }
+    
     const newPlayer = new (window as any).YT.Player(playerRef.current, {
       height: "315",
       width: "560",
@@ -157,37 +201,85 @@ export function SummaryViewerImproved({
         script.src = "https://www.youtube.com/iframe_api";
         script.async = true;
         document.body.appendChild(script);
+
+        // Set up the callback for when the API is ready
+        (window as any).onYouTubeIframeAPIReady = () => {
+          initializePlayer();
+        };
+      } else if ((window as any).YT && (window as any).YT.Player) {
+        // API is loaded but player not initialized
+        initializePlayer();
       }
-
-      (window as any).onYouTubeIframeAPIReady = initializePlayer;
     }
+  }, [summary.videoId, initializePlayer]);
 
+  // Separate cleanup effect for player destruction
+  useEffect(() => {
     return () => {
-      if (player && player.destroy) {
+      if (player && typeof player.destroy === 'function') {
         player.destroy();
       }
     };
-  }, [summary.videoId, initializePlayer, player]);
+  }, [player]);
 
-  // Extract structured backend data (same as original SummaryViewer)
-  const keyMoments: BackendKeyMoment[] = summary.metadata?.key_moments || [];
-  const frameworks: BackendFramework[] = summary.frameworks || [];
-  const playbooks: BackendPlaybook[] = summary.playbooks || [];
-  const flashcards: BackendFlashcard[] = summary.flashcards || [];
-  const quizQuestions: BackendQuizQuestion[] = summary.quiz_questions || [];
-  const novelIdeas: BackendNovelIdea[] = summary.accelerated_learning_pack?.novel_idea_meter || [];
-  const insightEnrichment: BackendInsightEnrichment = summary.insight_enrichment || {};
+  // Extract structured backend data with multiple fallbacks
+  const keyMoments: BackendKeyMoment[] = 
+    summary.metadata?.key_moments || 
+    summary.key_moments || 
+    [];
   
-  // Get content sections with fallbacks
-  const tldrContent = sections.get("tl;dr") || sections.get("tl;dr (≤100 words)") || sections.get("summary") || "";
-  const inPracticeContent = sections.get("in practice") || sections.get("practical applications") || "";
-  const debunkedContent = sections.get("debunked assumptions") || sections.get("myths debunked") || "";
-  const frameworksContent = sections.get("frameworks") || sections.get("strategic frameworks") || "";
-  const playbooksContent = sections.get("playbooks") || sections.get("playbooks & heuristics") || "";
-  const glossaryContent = sections.get("glossary") || sections.get("glossary (≤15 terms)") || "";
-  const flashcardsContent = sections.get("feynman flashcards (≤10)") || sections.get("flashcards") || "";
-  const quizContent = sections.get("quick quiz (3 q&a)") || sections.get("quiz") || "";
-  const novelIdeasContent = sections.get("novel idea meter") || sections.get("novel ideas") || "";
+  // Removed unused variables (frameworks and playbooks are parsed from content sections)
+  
+  const flashcards: BackendFlashcard[] = 
+    summary.metadata?.flashcards || 
+    summary.flashcards || 
+    summary.metadata?.accelerated_learning_pack?.feynman_flashcards?.map((fc: any) => ({
+      question: fc.q,
+      answer: fc.a
+    })) ||
+    [];
+  
+  const quizQuestions: BackendQuizQuestion[] = 
+    summary.metadata?.quiz_questions || 
+    summary.quiz_questions || 
+    summary.metadata?.accelerated_learning_pack?.quick_quiz?.map((q: any) => ({
+      question: q.q,
+      answer: q.a
+    })) ||
+    [];
+  
+  const novelIdeas: BackendNovelIdea[] = 
+    summary.metadata?.accelerated_learning_pack?.novel_idea_meter ||
+    summary.accelerated_learning_pack?.novel_idea_meter ||
+    summary.metadata?.novel_ideas ||
+    [];
+  
+  const insightEnrichment: BackendInsightEnrichment = 
+    summary.metadata?.insight_enrichment || 
+    summary.insight_enrichment || 
+    {};
+  
+  // Get content sections with fallbacks (using canonical names after alias mapping)
+  const tldrContent = sections.get("tl;dr") || "";
+  const inPracticeContent = sections.get("in practice") || "";
+  const debunkedContent = sections.get("debunked assumptions") || "";
+  const frameworksContent = sections.get("frameworks") || "";
+  const playbooksContent = sections.get("playbooks") || "";
+  const glossaryContent = sections.get("glossary") || "";
+  const flashcardsContent = sections.get("feynman flashcards") || "";
+  const quizContent = sections.get("quick quiz") || "";
+  const novelIdeasContent = sections.get("novel idea meter") || "";
+  const insightEnrichmentContent = sections.get("insight enrichment") || "";
+  const howToThinkContent = sections.get("how to think like") || "";
+  
+  // Handler functions for navigation
+  const handleTagClick = (tagName: string) => {
+    router.push(`/library?tag=${encodeURIComponent(tagName)}`);
+  };
+  
+  const handleCategoryClick = (categoryName: string) => {
+    router.push(`/library?category=${encodeURIComponent(categoryName)}`);
+  };
 
   return (
     <article className={cn("min-h-screen bg-gray-50", className)}>
@@ -222,12 +314,12 @@ export function SummaryViewerImproved({
             )}
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {new Date(summary.createdAt).toLocaleDateString()}
+              {summary.createdAt ? new Date(summary.createdAt).toLocaleDateString() : 'Unknown'}
             </span>
           </div>
 
           {/* Compact Horizontal Tag Bar */}
-          {(summary.tags?.length > 0 || summary.categories?.length > 0) && (
+          {((summary.tags && summary.tags.length > 0) || (summary.categories && summary.categories.length > 0)) && (
             <div className="flex items-center gap-2">
               <ScrollArea className="max-w-full">
                 <div className="flex items-center gap-2 pb-2">
@@ -239,6 +331,7 @@ export function SummaryViewerImproved({
                       interactive
                       size="sm"
                       className="hover:scale-105"
+                      onClick={() => handleCategoryClick(cat.name)}
                     />
                   ))}
                   
@@ -250,11 +343,12 @@ export function SummaryViewerImproved({
                       type={tag.type}
                       interactive
                       size="sm"
+                      onClick={() => handleTagClick(tag.name)}
                     />
                   ))}
                   
                   {/* More button */}
-                  {summary.tags?.length > 5 && !showAllTags && (
+                  {summary.tags && summary.tags.length > 5 && !showAllTags && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -274,11 +368,11 @@ export function SummaryViewerImproved({
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           
           {/* Left Column - Primary Content (60%) */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="xl:col-span-3 order-2 xl:order-1 space-y-6">
             
             {/* TL;DR Card - Always Visible */}
             <Card className="p-6 bg-gradient-to-r from-blue-50 to-white border-blue-200">
@@ -308,85 +402,160 @@ export function SummaryViewerImproved({
 
             {/* Main Content Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="summary">Full Summary</TabsTrigger>
-                <TabsTrigger value="insights">Key Insights</TabsTrigger>
-                <TabsTrigger value="learning">Learning Hub</TabsTrigger>
+              <TabsList className="grid grid-cols-2 sm:grid-cols-3 w-full">
+                <TabsTrigger value="summary" className="text-xs sm:text-sm">Summary</TabsTrigger>
+                <TabsTrigger value="insights" className="text-xs sm:text-sm">Insights</TabsTrigger>
+                <TabsTrigger value="learning" className="col-span-2 sm:col-span-1 text-xs sm:text-sm">Learning</TabsTrigger>
               </TabsList>
 
-              {/* Summary Tab */}
+              {/* Summary Tab - Now with tabbed layout like Learning */}
               <TabsContent value="summary" className="space-y-4 mt-4">
-                {/* In Practice Section */}
-                {inPracticeContent && (
-                  <Card className="p-5">
-                    <h3 className="font-semibold text-gray-900 mb-3">In Practice</h3>
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {inPracticeContent}
-                      </ReactMarkdown>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Full Summary */}
                 <Card className="p-5">
-                  <h3 className="font-semibold text-gray-900 mb-3">Complete Summary</h3>
-                  <div className="prose prose-sm max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {summary.content || ""}
-                    </ReactMarkdown>
-                  </div>
+                  <Tabs defaultValue="practice" className="w-full">
+                    <TabsList className="grid grid-cols-3 w-full mb-4 gap-1">
+                      <TabsTrigger value="practice" className="text-xs">In Practice</TabsTrigger>
+                      <TabsTrigger value="enrichment" className="text-xs">Enrichment</TabsTrigger>
+                      <TabsTrigger value="summary" className="text-xs">Full Text</TabsTrigger>
+                    </TabsList>
+                    
+                    {/* In Practice Tab */}
+                    <TabsContent value="practice">
+                      {inPracticeContent ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {inPracticeContent}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No practical applications available</p>
+                      )}
+                    </TabsContent>
+                    
+                    {/* Insight Enrichment Tab */}
+                    <TabsContent value="enrichment">
+                      {((insightEnrichment && Object.keys(insightEnrichment).length > 0 && 
+                        (insightEnrichment.sentiment || insightEnrichment.stats_tools_links?.length || insightEnrichment.risks_blockers_questions?.length)) || 
+                        insightEnrichmentContent) ? (
+                        <div className="space-y-4">
+                          {insightEnrichment.sentiment && (
+                            <div className="p-3 bg-indigo-50 rounded-lg">
+                              <span className="text-sm font-medium text-gray-600">Sentiment: </span>
+                              <span className="text-sm font-medium capitalize">{insightEnrichment.sentiment}</span>
+                            </div>
+                          )}
+                          {insightEnrichment.stats_tools_links && insightEnrichment.stats_tools_links.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-2">Tools & Resources:</p>
+                              <div className="space-y-2">
+                                {insightEnrichment.stats_tools_links.map((link, idx) => (
+                                  <div key={idx} className="p-2 bg-blue-50 rounded text-sm text-blue-700 flex items-start gap-1">
+                                    <ExternalLink className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                                    <span className="break-all">{link}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {insightEnrichment.risks_blockers_questions && insightEnrichment.risks_blockers_questions.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-2">Risks & Questions:</p>
+                              <div className="space-y-2">
+                                {insightEnrichment.risks_blockers_questions.map((item, idx) => (
+                                  <div key={idx} className="p-2 bg-amber-50 rounded text-sm text-gray-700">
+                                    {item}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {insightEnrichmentContent && !insightEnrichment.sentiment && !insightEnrichment.stats_tools_links?.length && !insightEnrichment.risks_blockers_questions?.length && (
+                            <div className="prose prose-sm max-w-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {insightEnrichmentContent}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No enrichment data available</p>
+                      )}
+                    </TabsContent>
+                    
+                    {/* Full Summary Tab */}
+                    <TabsContent value="summary">
+                      <div className="prose prose-sm max-w-none max-h-96 overflow-y-auto">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {summary.content || "Summary not available"}
+                        </ReactMarkdown>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </Card>
+
               </TabsContent>
 
-              {/* Insights Tab */}
+              {/* Insights Tab - Now with tabbed layout like Learning */}
               <TabsContent value="insights" className="space-y-4 mt-4">
-                {/* Debunked Assumptions */}
-                {debunkedContent && (
-                  <Card className="p-5 bg-gradient-to-r from-amber-50 to-white border-amber-200">
-                    <h3 className="font-semibold text-gray-900 mb-3">Debunked Assumptions</h3>
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {debunkedContent}
-                      </ReactMarkdown>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Frameworks */}
-                {frameworksContent && (
-                  <Card className="p-5">
-                    <h3 className="font-semibold text-gray-900 mb-3">Strategic Frameworks</h3>
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {frameworksContent}
-                      </ReactMarkdown>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Playbooks */}
-                {playbooksContent && (
-                  <Card className="p-5 bg-gradient-to-r from-purple-50 to-white border-purple-200">
-                    <h3 className="font-semibold text-gray-900 mb-3">Playbooks & Heuristics</h3>
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {playbooksContent}
-                      </ReactMarkdown>
-                    </div>
-                  </Card>
-                )}
+                <Card className="p-5">
+                  <Tabs defaultValue="debunked" className="w-full">
+                    <TabsList className="grid grid-cols-3 w-full mb-4 gap-1">
+                      <TabsTrigger value="debunked" className="text-xs">Debunked</TabsTrigger>
+                      <TabsTrigger value="frameworks" className="text-xs">Frameworks</TabsTrigger>
+                      <TabsTrigger value="playbooks" className="text-xs">Playbooks</TabsTrigger>
+                    </TabsList>
+                    
+                    {/* Debunked Assumptions Tab */}
+                    <TabsContent value="debunked">
+                      {debunkedContent ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {debunkedContent}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No debunked assumptions available</p>
+                      )}
+                    </TabsContent>
+                    
+                    {/* Frameworks Tab */}
+                    <TabsContent value="frameworks">
+                      {frameworksContent ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {frameworksContent}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No frameworks available</p>
+                      )}
+                    </TabsContent>
+                    
+                    {/* Playbooks Tab */}
+                    <TabsContent value="playbooks">
+                      {playbooksContent ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {playbooksContent}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No playbooks available</p>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </Card>
               </TabsContent>
 
               {/* Learning Hub Tab */}
               <TabsContent value="learning" className="space-y-4 mt-4">
                 <Card className="p-5">
                   <Tabs defaultValue="flashcards" className="w-full">
-                    <TabsList className="grid grid-cols-4 w-full mb-4">
-                      <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
-                      <TabsTrigger value="quiz">Quiz</TabsTrigger>
-                      <TabsTrigger value="glossary">Glossary</TabsTrigger>
-                      <TabsTrigger value="ideas">Novel Ideas</TabsTrigger>
+                    <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full mb-4 gap-1">
+                      <TabsTrigger value="flashcards" className="text-xs">Flashcards</TabsTrigger>
+                      <TabsTrigger value="quiz" className="text-xs">Quiz</TabsTrigger>
+                      <TabsTrigger value="glossary" className="text-xs">Glossary</TabsTrigger>
+                      <TabsTrigger value="ideas" className="text-xs">Ideas</TabsTrigger>
+                      <TabsTrigger value="thinking" className="col-span-2 sm:col-span-1 text-xs">Thinking</TabsTrigger>
                     </TabsList>
                     
                     {/* Flashcards */}
@@ -474,15 +643,44 @@ export function SummaryViewerImproved({
                         <p className="text-sm text-gray-500">No novel ideas available</p>
                       )}
                     </TabsContent>
+                    
+                    {/* How to Think Like */}
+                    <TabsContent value="thinking">
+                      {howToThinkContent ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {howToThinkContent}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No thinking patterns available</p>
+                      )}
+                    </TabsContent>
                   </Tabs>
                 </Card>
               </TabsContent>
             </Tabs>
           </div>
 
-          {/* Right Column - Video & Toolkit (40%) - Sticky */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-24 space-y-4">
+          {/* Right Column - Video & Toolkit (40%) - Sticky on desktop */}
+          <div className="xl:col-span-2 order-1 xl:order-2">
+            {/* Mobile toggle button */}
+            <div className="xl:hidden mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowMobileToolkit(!showMobileToolkit)}
+                className="w-full flex items-center justify-between"
+                aria-label="Toggle toolkit"
+              >
+                <span>Video & Toolkit</span>
+                {showMobileToolkit ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              </Button>
+            </div>
+            
+            <div className={cn(
+              "xl:sticky xl:top-24 space-y-4",
+              !showMobileToolkit && "hidden xl:block"
+            )}>
               
               {/* Video Player */}
               {summary.videoId && (
@@ -493,43 +691,49 @@ export function SummaryViewerImproved({
                 </Card>
               )}
 
-              {/* Unified Summary Toolkit */}
+              {/* Unified Summary Toolkit - Default to Moments tab */}
               <Card className="p-4">
-                <Tabs defaultValue="actions" className="w-full">
+                <Tabs defaultValue="moments" className="w-full">
                   <TabsList className="grid grid-cols-2 w-full mb-3">
-                    <TabsTrigger value="actions">Quick Actions</TabsTrigger>
-                    <TabsTrigger value="moments">Key Moments</TabsTrigger>
+                    <TabsTrigger value="actions" className="text-xs sm:text-sm">Actions</TabsTrigger>
+                    <TabsTrigger value="moments" className="text-xs sm:text-sm">Moments</TabsTrigger>
                   </TabsList>
 
                   {/* Quick Actions */}
                   <TabsContent value="actions" className="space-y-2">
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleCopy(summary.content || "", 'full')}
-                        className="w-full"
+                        className="w-full text-xs sm:text-sm"
+                        aria-label="Copy summary to clipboard"
                       >
-                        <Copy className="h-4 w-4 mr-1" />
-                        Copy
+                        <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Copy</span>
+                        <span className="sm:hidden">Copy</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setShowShareModal(true)}
-                        className="w-full"
+                        className="w-full text-xs sm:text-sm"
+                        aria-label="Share summary"
                       >
-                        <Share2 className="h-4 w-4 mr-1" />
-                        Share
+                        <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Share</span>
+                        <span className="sm:hidden">Share</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleExport}
-                        className="w-full"
+                        className="w-full col-span-2 sm:col-span-1 text-xs sm:text-sm"
+                        aria-label="Export as markdown"
                       >
-                        <Download className="h-4 w-4 mr-1" />
-                        Export
+                        <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Export</span>
+                        <span className="sm:hidden">Export</span>
                       </Button>
                     </div>
                   </TabsContent>
@@ -543,8 +747,15 @@ export function SummaryViewerImproved({
                             <button
                               key={idx}
                               onClick={() => handleTimestampClick(moment.timestamp)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleTimestampClick(moment.timestamp);
+                                }
+                              }}
                               className="w-full text-left p-2 hover:bg-gray-50 rounded-lg transition-colors flex items-start gap-2"
                               disabled={!playerReady}
+                              aria-label={`Jump to ${moment.timestamp}`}
                             >
                               <Play className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                               <div>
@@ -575,42 +786,7 @@ export function SummaryViewerImproved({
                 </Tabs>
               </Card>
 
-              {/* Insight Enrichment Card */}
-              {(insightEnrichment.sentiment || insightEnrichment.stats_tools_links?.length || insightEnrichment.risks_blockers_questions?.length) && (
-                <Card className="p-4 bg-gradient-to-r from-indigo-50 to-white border-indigo-200">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-indigo-600" />
-                    Insight Enrichment
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    {insightEnrichment.sentiment && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Sentiment</span>
-                        <span className="font-medium capitalize">{insightEnrichment.sentiment}</span>
-                      </div>
-                    )}
-                    {insightEnrichment.stats_tools_links && insightEnrichment.stats_tools_links.length > 0 && (
-                      <div>
-                        <span className="text-gray-600">Tools & Resources</span>
-                        <div className="mt-1 space-y-1">
-                          {insightEnrichment.stats_tools_links.slice(0, 3).map((link, idx) => (
-                            <div key={idx} className="text-xs text-blue-600 truncate">
-                              <ExternalLink className="h-3 w-3 inline mr-1" />
-                              {link}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {insightEnrichment.risks_blockers_questions && insightEnrichment.risks_blockers_questions.length > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Risks & Questions</span>
-                        <span className="font-medium">{insightEnrichment.risks_blockers_questions.length} identified</span>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              )}
+              {/* Insight Enrichment moved to Summary tab - removed from sidebar */}
             </div>
           </div>
         </div>

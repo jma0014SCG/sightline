@@ -88,6 +88,9 @@ export interface SummaryViewerProps {
     glossary?: any[]
     tools?: string[]
     resources?: string[]
+    // Tags and categories for navigation
+    tags?: Array<{ id: string; name: string; type: string }>
+    categories?: Array<{ id: string; name: string }>
   }
   isStreaming?: boolean
   className?: string
