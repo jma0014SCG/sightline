@@ -214,9 +214,9 @@ export function SummaryCard({
           </div>
         )}
         <Link href={`/library/${summary.id}`} className="block">
-          <div className="flex gap-3 p-3">
+          <div className="flex gap-4 p-4">
             {/* Thumbnail - 16:9 aspect ratio */}
-            <div className="relative h-[72px] w-[128px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
+            <div className="relative h-[96px] w-[170px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
@@ -546,9 +546,9 @@ export function SummaryCard({
             </div>
           </div>
 
-          {/* Thumbnail - 16:9 aspect ratio */}
+          {/* Thumbnail - 16:9 aspect ratio - slightly larger */}
           <div className="flex-shrink-0">
-            <div className="relative h-[90px] w-[160px] overflow-hidden rounded-lg bg-gray-100 shadow-sm">
+            <div className="relative h-[108px] w-[192px] overflow-hidden rounded-lg bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
