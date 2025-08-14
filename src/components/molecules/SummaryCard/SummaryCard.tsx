@@ -542,13 +542,7 @@ export function SummaryCard({
                 </span>
               )}
               
-              {/* Insights count */}
-              {keyInsights.length > 1 && (
-                <>
-                  {(summary.viewCount || summary.likeCount || summary.uploadDate) && <span className="text-gray-400">•</span>}
-                  <span className="text-blue-600 font-medium">+{keyInsights.length - 1} insights</span>
-                </>
-              )}
+              {/* Removed insights count for cleaner design */}
             </div>
           </div>
 
