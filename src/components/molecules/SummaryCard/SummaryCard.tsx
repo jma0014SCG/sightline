@@ -490,7 +490,7 @@ export function SummaryCard({
               {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
                 <div className="mb-2 flex flex-wrap gap-1">
                   {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 2)}
-                  {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 4)}
+                  {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 2)}
                 </div>
               )}
             </div>
@@ -552,9 +552,9 @@ export function SummaryCard({
             </div>
           </div>
 
-          {/* Enhanced Thumbnail - 25% larger with shadow */}
+          {/* Enhanced Thumbnail - properly sized */}
           <div className="ml-4 flex-shrink-0">
-            <div className="relative h-24 w-44 overflow-hidden rounded-xl bg-gray-100 shadow-md">
+            <div className="relative h-20 w-36 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
