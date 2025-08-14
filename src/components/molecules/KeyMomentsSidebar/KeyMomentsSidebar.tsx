@@ -89,19 +89,19 @@ export function KeyMomentsSidebar({
                 aria-label={`Jump to ${moment.timestamp} in video`}
                 title={playerReady ? `Jump to ${moment.timestamp}: ${moment.insight}` : 'Player not ready'}
               >
-                {/* Timestamp Badge - Left Side */}
+                {/* Timestamp Badge - Left Side (smaller, lighter) */}
                 <div className={cn(
-                  "flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold border-2",
+                  "flex-shrink-0 px-2 py-1 rounded text-xs",
                   playerReady
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-gray-300 text-gray-500 border-gray-300"
+                    ? "bg-blue-100 text-blue-600 font-medium"
+                    : "bg-gray-100 text-gray-400"
                 )}>
                   {moment.timestamp}
                 </div>
                 
-                {/* Insight Text - Right Side */}
+                {/* Insight Text - Right Side (larger, bolder) */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 leading-snug font-medium">
+                  <p className="text-sm text-gray-900 leading-relaxed font-semibold">
                     {moment.insight}
                   </p>
                 </div>

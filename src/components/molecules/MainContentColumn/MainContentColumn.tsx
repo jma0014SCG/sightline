@@ -105,7 +105,7 @@ const VideoMetadataSection = ({ summary, onMetadataRefresh }: {
   if (!hasMetadata && !summary.id) return null;
   
   return (
-    <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-6">
+    <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-3">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* Video title and channel */}
@@ -304,11 +304,11 @@ const PrimaryContentTabs = ({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors",
-                activeTab === tab.id ? "bg-white" : "hover:bg-gray-100",
-                activeTab === tab.id && tab.color === 'amber' && "border-amber-500 text-amber-700",
-                activeTab === tab.id && tab.color === 'orange' && "border-orange-500 text-orange-700", 
-                activeTab === tab.id && tab.color === 'blue' && "border-blue-500 text-blue-700",
+                "flex-1 px-3 py-2.5 text-sm border-b-2 transition-all duration-200",
+                activeTab === tab.id ? "bg-white font-semibold shadow-sm" : "hover:bg-gray-100 font-medium",
+                activeTab === tab.id && tab.color === 'amber' && "border-amber-500 text-amber-700 bg-amber-50",
+                activeTab === tab.id && tab.color === 'orange' && "border-orange-500 text-orange-700 bg-orange-50", 
+                activeTab === tab.id && tab.color === 'blue' && "border-blue-500 text-blue-700 bg-blue-50",
                 activeTab !== tab.id && "border-transparent text-gray-600 hover:text-gray-800"
               )}
             >
@@ -379,7 +379,7 @@ export function MainContentColumn({
   };
   
   return (
-    <div className={cn("space-y-6 lg:space-y-8", className)}>
+    <div className={cn("space-y-3 lg:space-y-4", className)}>
       {/* Header with Video Info */}
       <header className="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="space-y-3">
@@ -495,6 +495,58 @@ export function MainContentColumn({
       {/* Video Metadata Section */}
       <VideoMetadataSection summary={summary} />
 
+      {/* Debunked Assumptions Section - Elevated for better visibility */}
+      {sections.get("debunked assumptions") && (
+        <section className="bg-white border border-gray-200 border-l-4 border-l-red-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between gap-4 p-4 bg-red-50">
+            <button
+              onClick={() => toggleSection("debunked")}
+              className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
+              aria-expanded={!collapsedSections.has("debunked")}
+              aria-controls="debunked-content"
+            >
+              <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <span className="text-red-600">💡</span>
+                <span>Debunked Assumptions</span>
+                <span className="text-xs text-gray-500 ml-2">Common misconceptions clarified</span>
+              </h2>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-gray-700 transition-transform duration-200",
+                  collapsedSections.has("debunked") ? "" : "rotate-180",
+                )}
+              />
+            </button>
+
+            {/* Copy Button */}
+            <button
+              onClick={() => handleCopy(sections.get("debunked assumptions") || '', 'debunked')}
+              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all flex-shrink-0"
+              title="Copy Debunked Assumptions section"
+              aria-label="Copy Debunked Assumptions section"
+            >
+              {copiedSections.has('debunked') ? (
+                <Check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+          {!collapsedSections.has("debunked") && (
+            <div id="debunked-content" className="p-4 lg:p-6">
+              <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-6 prose-p:mb-4 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {sections.get("debunked assumptions")}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Primary Content Tabs */}
       <PrimaryContentTabs
         sections={sections}
@@ -506,52 +558,52 @@ export function MainContentColumn({
       />
 
       {/* Secondary Sections */}
-      <div className="space-y-6">{/* Reduced from space-y-10 */}
+      <div className="space-y-3">{/* Further reduced for tighter spacing */}
 
-        {/* Debunked Assumptions Section */}
-        {sections.get("debunked assumptions") && (
-          <section className="bg-white border border-gray-200 border-t-4 border-t-red-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between gap-4 p-4 bg-slate-100">
+        {/* Strategic Frameworks Section - moved here */}
+        {sections.get("frameworks") && (
+          <section className="bg-white border border-gray-200 border-t-4 border-t-purple-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between gap-4 p-4 bg-purple-50">
               <button
-                onClick={() => toggleSection("debunked")}
+                onClick={() => toggleSection("frameworks")}
                 className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
-                aria-expanded={!collapsedSections.has("debunked")}
-                aria-controls="debunked-content"
+                aria-expanded={!collapsedSections.has("frameworks")}
+                aria-controls="frameworks-content"
               >
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <span className="text-red-600">💡</span>
-                  <span>Debunked Assumptions</span>
+                  <span className="text-purple-600">🏗️</span>
+                  <span>Strategic Frameworks</span>
                 </h2>
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 text-gray-700 transition-transform duration-200",
-                    collapsedSections.has("debunked") ? "" : "rotate-180",
+                    collapsedSections.has("frameworks") ? "" : "rotate-180",
                   )}
                 />
               </button>
 
               {/* Copy Button */}
               <button
-                onClick={() => handleCopy(sections.get("debunked assumptions") || '', 'debunked')}
-                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0"
-                title="Copy Debunked Assumptions section"
-                aria-label="Copy Debunked Assumptions section"
+                onClick={() => handleCopy(sections.get("frameworks") || '', 'frameworks')}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-100 rounded-lg transition-all flex-shrink-0"
+                title="Copy Strategic Frameworks section"
+                aria-label="Copy Strategic Frameworks section"
               >
-                {copiedSections.has('debunked') ? (
+                {copiedSections.has('frameworks') ? (
                   <Check className="h-4 w-4 text-green-600" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
               </button>
             </div>
-            {!collapsedSections.has("debunked") && (
-              <div id="debunked-content" className="p-4 lg:p-6">
+            {!collapsedSections.has("frameworks") && (
+              <div id="frameworks-content" className="p-4 lg:p-6">
                 <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-6 prose-p:mb-4 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeHighlight]}
                   >
-                    {sections.get("debunked assumptions")}
+                    {sections.get("frameworks")}
                   </ReactMarkdown>
                 </div>
               </div>

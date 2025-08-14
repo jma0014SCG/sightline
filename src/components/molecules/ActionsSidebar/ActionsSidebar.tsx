@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Download, Share2, Check } from 'lucide-react'
+import { Copy, Download, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Summary } from '@prisma/client'
 
@@ -16,6 +16,7 @@ interface ActionsSidebarProps {
 
 export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarProps) {
   const [copied, setCopied] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleCopy = async () => {
     try {
@@ -40,13 +41,76 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
   }
 
   return (
-    <div className={cn("bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200", className)}>
-      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-        <span className="text-blue-600">⚡</span>
-        Quick Actions
-      </h3>
+    <div className={cn("bg-gradient-to-br from-gray-50 to-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200", className)}>
+      {/* Header with toggle */}
+      <div className="p-4">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="w-full flex items-center justify-between text-left hover:opacity-90 transition-opacity"
+        >
+          <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <span className="text-blue-600">⚡</span>
+            Quick Actions
+          </h3>
+          {isCollapsed ? (
+            <ChevronDown className="h-4 w-4 text-gray-600" />
+          ) : (
+            <ChevronUp className="h-4 w-4 text-gray-600" />
+          )}
+        </button>
+      </div>
       
-      <div className="space-y-2">
+      {/* Icon-only mode when collapsed */}
+      {isCollapsed ? (
+        <div className="px-4 pb-4">
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={handleCopy}
+              className={cn(
+                "p-2 rounded-lg transition-all duration-200",
+                "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "border border-slate-200 hover:border-blue-300",
+                copied && "bg-green-50 border-green-300"
+              )}
+              title={copied ? 'Copied!' : 'Copy Summary'}
+              aria-label="Copy entire summary"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4 text-gray-700" />
+              )}
+            </button>
+            
+            <button
+              onClick={handleDownload}
+              className={cn(
+                "p-2 rounded-lg transition-all duration-200",
+                "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "border border-slate-200 hover:border-blue-300"
+              )}
+              title="Export as Markdown"
+              aria-label="Download as Markdown file"
+            >
+              <Download className="h-4 w-4 text-gray-700" />
+            </button>
+            
+            <button
+              onClick={onShare}
+              className={cn(
+                "p-2 rounded-lg transition-all duration-200",
+                "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "border border-slate-200 hover:border-blue-300"
+              )}
+              title="Share Summary"
+              aria-label="Share summary"
+            >
+              <Share2 className="h-4 w-4 text-gray-700" />
+            </button>
+          </div>
+        </div>
+      ) : (
+      <div className="px-4 pb-4 space-y-2">
         {/* Copy Summary */}
         <button
           onClick={handleCopy}
@@ -111,6 +175,7 @@ export function ActionsSidebar({ summary, onShare, className }: ActionsSidebarPr
           </div>
         </button>
       </div>
+      )}
     </div>
   )
 }

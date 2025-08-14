@@ -382,8 +382,8 @@ export function SummaryViewer({
       )}
       aria-label="Video summary"
     >
-      {/* Optimized Layout - 2/3 + 1/3 split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      {/* Optimized Layout - 2/3 + 1/3 split with reduced spacing */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
         {/* Main Content Column (2/3 width on large screens) */}
         <div className="lg:col-span-2">
           <MainContentColumn
@@ -399,8 +399,8 @@ export function SummaryViewer({
           />
         </div>
 
-        {/* Sidebar (1/3 width on large screens) */}
-        <div className="lg:col-span-1 space-y-4">
+        {/* Sidebar (1/3 width on large screens) - Reduced spacing */}
+        <div className="lg:col-span-1 space-y-3">
           {/* Actions Sidebar */}
           <ActionsSidebar summary={summary} onShare={openShareModal} />
 
