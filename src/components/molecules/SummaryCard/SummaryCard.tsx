@@ -215,15 +215,15 @@ export function SummaryCard({
         )}
         <Link href={`/library/${summary.id}`} className="block">
           <div className="flex gap-3 p-3">
-            {/* Enhanced Thumbnail - 25% larger */}
-            <div className="relative h-20 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
+            {/* Thumbnail - 16:9 aspect ratio */}
+            <div className="relative h-[72px] w-[128px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
@@ -463,8 +463,8 @@ export function SummaryCard({
         </div>
       )}
       <Link href={`/library/${summary.id}`} className="block">
-        <div className="flex items-stretch gap-4 p-4 pb-12 min-h-[120px]">
-          <div className="flex-1 flex flex-col justify-between">
+        <div className="flex items-start gap-4 p-4 pb-12">
+          <div className="flex-1 min-w-0">
             {/* Main content area */}
             <div>
               {/* Header with channel info */}
@@ -552,16 +552,16 @@ export function SummaryCard({
             </div>
           </div>
 
-          {/* Enhanced Thumbnail - properly sized */}
-          <div className="ml-4 flex-shrink-0">
-            <div className="relative h-20 w-36 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
+          {/* Thumbnail - 16:9 aspect ratio */}
+          <div className="flex-shrink-0">
+            <div className="relative h-[90px] w-[160px] overflow-hidden rounded-lg bg-gray-100 shadow-sm">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
                     src={summary.thumbnailUrl}
                     alt={summary.videoTitle}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
