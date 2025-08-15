@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { stripe, PRICING_PLANS, getPlanByPriceId } from '@/lib/stripe'
+import { ensureStripeCustomer } from '@/lib/stripe/planSync'
+import { currentUser } from '@clerk/nextjs/server'
 
 export const billingRouter = createTRPCRouter({
   // Get current subscription status
