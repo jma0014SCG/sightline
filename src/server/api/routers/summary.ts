@@ -10,6 +10,11 @@ import { classifySummaryContent } from '@/lib/classificationService'
 import { monitoring } from '@/lib/monitoring'
 import { checkBusinessMetric } from '@/lib/performance-budgets'
 import { emailService } from '@/lib/emailService'
+import { 
+  enforceAnonymousUsageLimit, 
+  recordAnonymousUsage,
+  ANONYMOUS_USER_ID 
+} from './summary/guards'
 
 // Create an event emitter for streaming
 const ee = new EventEmitter()
@@ -51,7 +56,7 @@ function extractVideoId(url: string): string | null {
 }
 
 // Constants for anonymous user
-const ANONYMOUS_USER_ID = 'ANONYMOUS_USER'
+// ANONYMOUS_USER_ID is now imported from ./summary/guards
 
 export const summaryRouter = createTRPCRouter({
   /**
@@ -104,43 +109,8 @@ export const summaryRouter = createTRPCRouter({
                       headersList.get('x-real-ip') || 
                       'unknown'
       
-      // Check if this browser fingerprint has already created a summary (SECURITY FIX - use usage events)
-      const existingUsageByFingerprint = await ctx.prisma.usageEvent.findFirst({
-        where: {
-          userId: ANONYMOUS_USER_ID,
-          eventType: 'summary_created',
-          metadata: {
-            path: ['browserFingerprint'],
-            equals: input.browserFingerprint,
-          },
-        },
-      })
-
-      if (existingUsageByFingerprint) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Welcome back! You\'ve already used your free trial. Sign up now to get 1 free summary every month!',
-        })
-      }
-
-      // Also check by IP as a backup (SECURITY FIX - use usage events)
-      const existingUsageByIP = await ctx.prisma.usageEvent.findFirst({
-        where: {
-          userId: ANONYMOUS_USER_ID,
-          eventType: 'summary_created',
-          metadata: {
-            path: ['clientIP'],
-            equals: clientIP,
-          },
-        },
-      })
-
-      if (existingUsageByIP) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'A free summary has already been used from this location. Sign up now to get 1 free summary every month!',
-        })
-      }
+      // Use the new guard to check and enforce usage limits
+      await enforceAnonymousUsageLimit(ctx.prisma, input.browserFingerprint, clientIP)
 
       try {
         // Track summary creation start
@@ -336,24 +306,20 @@ export const summaryRouter = createTRPCRouter({
           },
         })
 
-        // Record anonymous usage event for limit enforcement (SECURITY FIX)
-        await ctx.prisma.usageEvent.create({
-          data: {
-            userId: ANONYMOUS_USER_ID,
-            eventType: 'summary_created',
-            summaryId: summary.id,
+        // Record anonymous usage event for limit enforcement
+        await recordAnonymousUsage(
+          ctx.prisma,
+          input.browserFingerprint,
+          clientIP,
+          summary.id,
+          {
+            plan: 'ANONYMOUS',
+            videoTitle: summary.videoTitle,
+            channelName: summary.channelName,
+            duration: summary.duration,
             videoId: summary.videoId,
-            metadata: {
-              plan: 'ANONYMOUS',
-              browserFingerprint: input.browserFingerprint,
-              clientIP,
-              videoTitle: summary.videoTitle,
-              channelName: summary.channelName,
-              duration: summary.duration,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        })
+          }
+        )
 
         // Classify summary content asynchronously (fire and forget)
         classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)

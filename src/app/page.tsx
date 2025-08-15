@@ -14,7 +14,8 @@ import { api } from '@/components/providers/TRPCProvider'
 import { DebugPanel } from '@/components/debug/DebugPanel'
 import { SignInModal } from '@/components/modals/SignInModal'
 import { AuthPromptModal } from '@/components/modals/AuthPromptModal'
-import { getBrowserFingerprint, hasUsedFreeSummary, markFreeSummaryUsed } from '@/lib/browser-fingerprint'
+import { getBrowserFingerprint, markFreeSummaryUsed } from '@/lib/browser-fingerprint'
+import { getSimpleFingerprint, hasReachedFreeLimit, incrementFreeSummariesUsed } from '@/lib/anonUsage'
 import { 
   Zap, 
   BookOpen, 
@@ -209,8 +210,9 @@ export default function HomePage() {
         setCurrentTaskId(data.task_id)
       }
       
-      // Mark that free summary has been used
-      markFreeSummaryUsed()
+      // Mark that free summary has been used (both old and new tracking)
+      markFreeSummaryUsed() // Keep for backward compatibility
+      incrementFreeSummariesUsed() // New tracking system
       
       // Wait for progress to complete (100%) or a maximum timeout before showing summary
       const waitForProgressCompletion = () => {
@@ -322,16 +324,16 @@ export default function HomePage() {
         // This ensures better coordination with progress tracking
       } else {
         // Check if they've already used their free summary
-        if (hasUsedFreeSummary()) {
-          console.log('❌ Free summary already used')
+        if (hasReachedFreeLimit()) {
+          console.log('❌ Free summary limit reached')
           setCurrentTaskId(null)
           setShowAuthPrompt(true)
           return
         }
         
         console.log('📤 Calling anonymous createSummary mutation...')
-        // Use the fingerprint provided by URLInput component
-        const browserFingerprint = fingerprint || await getBrowserFingerprint()
+        // Use the simple fingerprint for anonymous tracking
+        const browserFingerprint = await getSimpleFingerprint()
         const result = await createAnonymousSummary.mutateAsync({ url, browserFingerprint })
         console.log('✅ Anonymous mutation result:', result)
         

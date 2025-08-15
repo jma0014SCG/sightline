@@ -4,10 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link2, Loader2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/hooks/useAuth";
-import {
-  getBrowserFingerprint,
-  hasUsedFreeSummary,
-} from "@/lib/browser-fingerprint";
+import { getSimpleFingerprint, hasReachedFreeLimit } from "@/lib/anonUsage";
 
 interface URLInputProps {
   onSubmit: (url: string, fingerprint?: string) => void;
@@ -39,7 +36,7 @@ export function URLInput({
   // Handle client-side hydration
   useEffect(() => {
     setIsHydrated(true);
-    setClientAnonymousUsed(hasUsedFreeSummary());
+    setClientAnonymousUsed(hasReachedFreeLimit());
   }, []);
 
   // Get appropriate button text based on user status
@@ -109,13 +106,13 @@ export function URLInput({
       return;
     }
 
-    // Generate browser fingerprint for anonymous users
+    // Generate simple fingerprint for anonymous users
     let fingerprint: string | undefined;
     if (!isAuthenticated) {
       try {
-        fingerprint = await getBrowserFingerprint();
+        fingerprint = await getSimpleFingerprint();
       } catch (error) {
-        console.error("Failed to generate browser fingerprint:", error);
+        console.error("Failed to generate fingerprint:", error);
         setError("Unable to process request. Please try again.");
         return;
       }
