@@ -1,0 +1,19 @@
+Unused dependencies
+* @stripe/stripe-js
+* @trpc/next
+* class-variance-authority
+* isomorphic-dompurify
+Unused devDependencies
+* @eslint/eslintrc
+* @types/jest
+* @typescript-eslint/eslint-plugin
+* @typescript-eslint/parser
+* autoprefixer
+* globals
+* jest-environment-jsdom
+* postcss
+* prettier-plugin-tailwindcss
+Missing dependencies
+* next-auth: ./src/types/next-auth.d.ts
+* @jest/globals: ./src/server/api/routers/__tests__/usage-limit-security.test.ts
+* msw-trpc: ./src/server/api/routers/__tests__/usage-limit-security.test.ts

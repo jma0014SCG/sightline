@@ -1,0 +1,211 @@
+instrumentation-client.ts:80 - captureClientError
+instrumentation-client.ts:106 - trackUserInteraction
+instrumentation-client.ts:4 - onRouterTransitionStart
+instrumentation.ts:1 - register
+playwright.config.ts:19 - default
+tailwind.config.ts:238 - default
+scripts/backfill-usage-events.ts:181 - backfillUsageEvents (used in module)
+src/middleware.ts:3 - default
+src/middleware.ts:5 - config
+e2e/helpers/global-setup.ts:8 - default
+e2e/helpers/global-teardown.ts:8 - default
+e2e/helpers/performance-utils.ts:149 - PerformanceThresholds (used in module)
+e2e/helpers/selectors.ts:160 - getSelector
+e2e/helpers/selectors.ts:154 - SelectorPath (used in module)
+e2e/helpers/selectors.ts:155 - SelectorValue
+e2e/helpers/selectors.ts:177 - PATTERNS
+e2e/helpers/selectors.ts:196 - A11Y_SELECTORS
+e2e/helpers/wait-utils.ts:10 - waitForServer
+e2e/helpers/wait-utils.ts:20 - waitForAuth
+e2e/helpers/wait-utils.ts:78 - waitForModal
+e2e/helpers/wait-utils.ts:91 - waitForApiResponse
+e2e/helpers/wait-utils.ts:114 - waitForElementStable
+e2e/helpers/wait-utils.ts:146 - waitForFormSubmission
+e2e/helpers/wait-utils.ts:170 - retryWithBackoff
+src/app/error.tsx:5 - default
+src/app/global-error.tsx:6 - default
+src/app/loading.tsx:1 - default
+src/hooks/useAnalytics.ts:6 - AnalyticsEventProperties (used in module)
+src/hooks/useAnalytics.ts:10 - SummaryCreatedProperties (used in module)
+src/hooks/useAnalytics.ts:22 - UserActionProperties
+src/hooks/useAnalytics.ts:29 - ConversionProperties (used in module)
+src/hooks/useToast.ts:13 - useToast
+src/hooks/useToast.ts:5 - Toast (used in module)
+src/lib/anonUsage.ts:14 - generateSimpleFingerprint (used in module)
+src/lib/anonUsage.ts:69 - getFreeSummariesUsed (used in module)
+src/lib/anonUsage.ts:115 - getAnonymousUsageData
+src/lib/anonUsage.ts:129 - clearAnonymousUsageData
+src/lib/anonUsage.ts:109 - AnonymousUsageData (used in module)
+src/lib/browser-fingerprint.ts:20 - generateBrowserFingerprint (used in module)
+src/lib/browser-fingerprint.ts:105 - hasUsedFreeSummary
+src/lib/cache.ts:294 - withCache
+src/lib/cache.ts:216 - getFromCache
+src/lib/cache.ts:217 - setInCache
+src/lib/cache.ts:219 - deleteFromCache
+src/lib/cache.ts:220 - cacheExists
+src/lib/cache.ts:223 - USER_CACHE_TTL (used in module)
+src/lib/cache.ts:224 - SUMMARY_CACHE_TTL (used in module)
+src/lib/cache.ts:225 - LIBRARY_CACHE_TTL (used in module)
+src/lib/cache.ts:230 - cacheUser
+src/lib/cache.ts:240 - getCachedUser
+src/lib/cache.ts:247 - cacheSummary
+src/lib/cache.ts:257 - getCachedSummary
+src/lib/cache.ts:264 - cacheLibrary
+src/lib/cache.ts:275 - getCachedLibrary
+src/lib/cache.ts:283 - invalidateUserCache
+src/lib/cache.ts:316 - default
+src/lib/emailService.ts:295 - withEmailService
+src/lib/emailService.ts:12 - SubscriberData (used in module)
+src/lib/emailService.ts:20 - SubscriberUpdate (used in module)
+src/lib/emailService.ts:29 - EMAIL_GROUPS (used in module)
+src/lib/emailService.ts:38 - EmailGroup (used in module)
+src/lib/env.ts:44 - Env (used in module)
+src/lib/env.ts:69 - default
+src/lib/feature-flags.ts:6 - FeatureFlags (used in module)
+src/lib/feature-flags.ts:79 - featureFlags (used in module)
+src/lib/logger.ts:7 - LogLevel (used in module)
+src/lib/logger.ts:27 - LoggerOptions (used in module)
+src/lib/monitoring.ts:230 - logError (used in module)
+src/lib/monitoring.ts:234 - logApiCall
+src/lib/monitoring.ts:253 - withErrorBoundary
+src/lib/monitoring.ts:274 - useErrorTracking
+src/lib/performance.ts:25 - measurePerformance
+src/lib/performance.ts:61 - measureAsyncPerformance
+src/lib/performance.ts:98 - reportWebVitals
+src/lib/performance.ts:128 - logMemoryUsage
+src/lib/performance.ts:172 - createIntersectionObserver
+src/lib/rateLimit.ts:17 - rateLimit (used in module)
+src/lib/rateLimit.ts:73 - summaryRateLimit
+src/lib/rateLimit.ts:78 - apiRateLimit
+src/lib/rateLimit.ts:83 - authRateLimit
+src/lib/rateLimits.ts:101 - getGlobalRateLimitKey
+src/lib/rateLimits.ts:113 - createRateLimitHeaders
+src/lib/rateLimits.ts:139 - createRateLimitError
+src/lib/rateLimits.ts:75 - RateLimitConfig (used in module)
+src/lib/rateLimits.ts:106 - RateLimitHeaders (used in module)
+src/lib/rateLimits.ts:128 - RateLimitError (used in module)
+src/lib/security.ts:142 - getClientIP
+src/lib/security.ts:181 - generateSecureToken
+src/lib/stripe-client.ts:63 - formatPrice
+src/lib/stripe-client.ts:71 - isUserOnPlan
+src/lib/stripe-client.ts:4 - PRICING_PLANS (used in module)
+src/lib/stripe-client.ts:60 - PricingPlan (used in module)
+src/lib/tag-utils.ts:6 - TagType (used in module)
+src/lib/tag-utils.ts:17 - TAG_COLORS (used in module)
+src/lib/tag-utils.ts:28 - TAG_COLORS_HOVER (used in module)
+src/test-utils/component-mocks.ts:174 - createMockURLValidation
+src/test-utils/component-mocks.ts:193 - createMockShareData
+src/test-utils/component-mocks.ts:208 - createMockAuthStates
+src/test-utils/component-mocks.ts:233 - createMockToast
+src/test-utils/db.ts:5 - createMockPrisma
+src/test-utils/db.ts:10 - resetMockPrisma
+src/test-utils/db.ts:15 - setupCommonMocks
+src/test-utils/db.ts:29 - mockDbSuccess
+src/test-utils/db.ts:37 - mockDbError
+src/test-utils/db.ts:46 - mockCount
+src/test-utils/db.ts:54 - mockFindManyWithPagination
+src/test-utils/db.ts:71 - mockAggregate
+src/test-utils/mocks.ts:106 - createMockStripeSubscription
+src/test-utils/mocks.ts:135 - createMockOpenAIClassificationResponse
+src/test-utils/msw-handlers.ts:13 - tRPCHandlers (used in module)
+src/test-utils/msw-handlers.ts:223 - componentSpecificHandlers (used in module)
+src/test-utils/msw-server.ts:5 - server (used in module)
+src/test-utils/msw-server.ts:8 - setupMSW
+src/test-utils/msw-server.ts:20 - addTestHandlers
+src/test-utils/msw-server.ts:25 - overrideHandlers
+src/test-utils/react.tsx:33 - createTestWrapper (used in module)
+src/test-utils/react.tsx:74 - createMockAuthUser
+src/test-utils/react.tsx:91 - createMockTRPCUtils
+src/test-utils/react.tsx:143 - createMockTRPCHooks
+src/test-utils/react.tsx:160 - createMockProgressTracking
+src/test-utils/react.tsx:172 - MOCK_BROWSER_FINGERPRINT
+src/test-utils/react.tsx:175 - waitForAsync
+src/test-utils/react.tsx:178 - mockIntersectionObserver (used in module)
+src/test-utils/react.tsx:189 - createMockURL
+src/test-utils/react.tsx:197 - userEvent
+src/test-utils/trpc.ts:9 - MockContext (used in module)
+src/test-utils/trpc.ts:44 - createTestRouter
+src/test-utils/trpc.ts:45 - testProcedure
+src/test-utils/trpc.ts:59 - createCaller (used in module)
+src/test-utils/trpc.ts:64 - RouterInput
+src/test-utils/trpc.ts:80 - waitFor
+.next/types/app/layout.ts:49 - PageProps
+.next/types/app/layout.ts:53 - LayoutProps (used in module)
+.next/types/app/page.ts:49 - PageProps (used in module)
+.next/types/app/page.ts:53 - LayoutProps
+src/app/(dashboard)/layout.tsx:9 - default
+src/app/sentry-debug/page.tsx:6 - default
+src/app/sentry-quick-test/page.tsx:5 - default
+src/app/sentry-test/page.tsx:3 - default
+src/app/upgrade/page.tsx:62 - default
+src/lib/api/correlation.ts:33 - withCorrelationId
+src/lib/api/correlation.ts:63 - createCorrelationContext
+src/lib/api/correlation.ts:7 - CORRELATION_HEADER (used in module)
+src/lib/api/correlation.ts:8 - REQUEST_ID_HEADER
+src/lib/api/correlation.ts:53 - CorrelationContext (used in module)
+src/lib/db/index.ts:1 - prisma
+src/app/(dashboard)/billing/page.tsx:19 - default
+src/app/(dashboard)/library/page.tsx:20 - default
+src/app/(dashboard)/settings/page.tsx:17 - default
+src/app/(demo)/demo/page.tsx:8 - default
+src/app/admin/monitoring/page.tsx:35 - default
+src/app/api/health/route.ts:126 - dynamic
+src/app/debug/smart-tagging/page.tsx:49 - default
+src/app/share/[slug]/page.tsx:12 - default
+src/app/sign-in/[[...sign-in]]/page.tsx:3 - default
+src/app/sign-up/[[...sign-up]]/page.tsx:3 - default
+src/app/upgrade/success/page.tsx:8 - default
+src/components/atoms/CategoryBadge/index.ts:1 - CategoryBadge
+src/components/atoms/FloatingActionButton/index.ts:1 - FloatingActionButton
+src/components/atoms/Skeleton/index.ts:1 - Skeleton
+src/components/atoms/TagBadge/index.ts:1 - TagBadge
+src/components/atoms/Toast/index.ts:1 - Toast
+src/components/atoms/Toast/index.ts:2 - ToastType
+src/components/atoms/Toast/index.ts:2 - ToastProps
+src/components/molecules/ActionsSidebar/index.ts:1 - ActionsSidebar
+src/components/molecules/InsightEnrichment/index.ts:1 - InsightEnrichment
+src/components/molecules/KeyMomentsSidebar/index.ts:1 - KeyMomentsSidebar
+src/components/molecules/LearningHubTabs/index.ts:1 - LearningHubTabs
+src/components/molecules/LibraryControls/index.ts:1 - LibraryControls
+src/components/molecules/LibraryControls/index.ts:2 - LibraryFilters
+src/components/molecules/MainContentColumn/index.ts:1 - MainContentColumn
+src/components/molecules/QuickActionsBar/index.ts:1 - QuickActionsBar
+src/components/molecules/ShareModal/index.ts:1 - ShareModal
+src/components/molecules/SummaryCard/index.ts:1 - SummaryCard
+src/components/molecules/SummaryHeader/index.ts:1 - SummaryHeader
+src/components/molecules/SummaryHeader/index.ts:2 - SummaryHeaderCompact
+src/components/molecules/TagStatsBar/index.ts:1 - TagStatsBar
+src/components/molecules/URLInput/index.ts:1 - URLInput
+src/components/organisms/PricingPlans/index.ts:1 - PricingPlans
+src/components/organisms/SummaryViewer/index.ts:1 - SummaryViewer
+src/components/organisms/SummaryViewer/index.ts:2 - SummaryViewerImproved
+src/components/organisms/SummaryViewer/index.ts:3 - SummaryViewerProps
+src/components/organisms/SummaryViewer/SummaryViewer.types.ts:46 - Summary (used in module)
+src/server/api/middleware/usageGuard.ts:296 - usageGuardMiddleware (used in module)
+src/server/api/middleware/usageGuardCompat.ts:28 - enforceAnonymousUsageLimitCompat
+src/server/api/middleware/usageGuardCompat.ts:58 - recordAnonymousUsageCompat
+src/server/api/middleware/usageGuardCompat.ts:94 - checkAuthenticatedUsageSafe
+src/server/api/middleware/usageGuardCompat.ts:22 - USE_NEW_USAGE_GUARD (used in module)
+src/server/api/middleware/usageGuardCompat.ts:118 - ANONYMOUS_USER_ID (used in module)
+src/server/api/middleware/usageGuardCompat.ts:120 - enforceAnonymousUsageLimit (used in module)
+src/server/api/middleware/usageGuardCompat.ts:121 - recordAnonymousUsage (used in module)
+src/app/(dashboard)/library/[id]/page-improved.tsx:13 - default
+src/app/(dashboard)/library/[id]/page.tsx:11 - default
+src/app/api/dev/synthetic-summary/route.ts:106 - POST
+src/app/api/dev/synthetic-summary/route.ts:210 - GET
+src/app/api/stripe/webhook/route.ts:25 - POST
+src/app/api/stripe/webhook/route.ts:11 - runtime
+src/app/api/trpc/[trpc]/route.ts:22 - GET
+src/app/api/trpc/[trpc]/route.ts:22 - POST
+src/app/api/webhooks/stripe/route.ts:9 - runtime
+src/server/api/routers/summary/enhanced.example.ts:17 - enhancedSummaryRouter
+src/server/api/routers/summary/enhanced.example.ts:133 - manualCheckExample
+src/server/api/routers/summary/guards.ts:17 - checkAnonymousUsageLimit (used in module)
+src/server/api/routers/summary/guards.ts:156 - getAnonymousUsageCount
+src/server/api/routers/summary/safeIntegration.ts:41 - enforceAnonymousUsageLimitSafe
+src/server/api/routers/summary/safeIntegration.ts:83 - recordAnonymousUsageSafe
+src/server/api/routers/summary/safeIntegration.ts:122 - checkAuthenticatedUsageSafe
+src/server/api/routers/summary/safeIntegration.ts:154 - recordUsageEventSafe
+src/server/api/routers/summary/safeIntegration.ts:214 - isNewUsageGuardEnabled
+src/server/api/routers/summary/safeIntegration.ts:221 - ANONYMOUS_USER_ID
+src/app/(dashboard)/library/[id]/edit/page.tsx:9 - default

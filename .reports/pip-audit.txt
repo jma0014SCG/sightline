@@ -1,0 +1,10 @@
+Name             Version ID                  Fix Versions
+---------------- ------- ------------------- ------------
+langchain        0.2.6   GHSA-45pg-36p6-83v9 0.2.19
+langchain        0.2.6   GHSA-hc5w-c9f8-9cc4
+python-jose      3.3.0   PYSEC-2024-232      3.4.0
+python-jose      3.3.0   PYSEC-2024-233      3.4.0
+python-multipart 0.0.9   GHSA-59g5-xgcq-4qw3 0.0.18
+starlette        0.37.2  GHSA-f96h-pmfr-66vw 0.40.0
+starlette        0.37.2  GHSA-2c2j-9gv5-cj73 0.47.2
+ecdsa            0.19.1  GHSA-wj6h-64fc-37mp
