@@ -44,13 +44,15 @@ export default function LibraryPage() {
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
     taskId: currentTaskId,
     onComplete: (data) => {
-      console.log('Progress tracking completed:', data)
-      // Don't clear task ID here - let onSuccess handle it
-      // This prevents the progress bar from disappearing prematurely
+      console.log('Progress tracking completed at 100%:', data)
+      // Clear task ID here when progress actually reaches 100%
+      setCurrentTaskId(null)
+      setIsCreatingSummary(false)
     },
     onError: (error) => {
       console.error('Progress tracking error:', error)
       setCurrentTaskId(null)
+      setIsCreatingSummary(false)
     }
   })
   
@@ -110,8 +112,14 @@ export default function LibraryPage() {
     onSuccess: (summary) => {
       console.log('✅ Summary created successfully:', summary)
       
-      // Clear task ID immediately to stop progress tracking
-      setCurrentTaskId(null)
+      // DON'T clear task ID here - let the progress complete naturally
+      // The onComplete callback will clear it when progress reaches 100%
+      
+      // If we got a real task_id from backend, switch to using it for progress tracking
+      if (summary.task_id && summary.task_id !== currentTaskId) {
+        console.log('🔄 Switching to real task_id:', summary.task_id)
+        setCurrentTaskId(summary.task_id)
+      }
       
       // Invalidate caches to show new summary
       utils.library.getAll.invalidate()
