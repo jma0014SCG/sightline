@@ -24,7 +24,7 @@ interface PreviousTaskData {
 const BACKOFF_BASE = 1000 // Start at 1 second
 const BACKOFF_MAX = 8000 // Max 8 seconds between retries
 const BACKOFF_JITTER = 200 // ±200ms random jitter
-const MAX_DURATION = 30000 // Give up after 30 seconds
+const MAX_DURATION = 120000 // Give up after 120 seconds (2 minutes) for backend processing
 
 export function useProgressTracking({
   taskId,
@@ -88,7 +88,7 @@ export function useProgressTracking({
       try {
         // Check timeout
         if (startTimeRef.current && Date.now() - startTimeRef.current > MAX_DURATION) {
-          console.log('⏱️ Progress tracking timeout after 30 seconds')
+          console.log('⏱️ Progress tracking timeout after 2 minutes')
           if (onError) {
             onError('Progress tracking timeout')
           }
@@ -108,7 +108,7 @@ export function useProgressTracking({
             ? 2 * timeProgress * timeProgress 
             : 1 - Math.pow(-2 * timeProgress + 2, 3) / 2
           
-          const simulatedProgress = Math.min(Math.floor(easedProgress * 95), 95) // 95% in 50 seconds
+          const simulatedProgress = Math.min(Math.floor(easedProgress * 100), 100) // 100% in 50 seconds
           
           const stages = [
             'Connecting to YouTube...',
@@ -120,14 +120,28 @@ export function useProgressTracking({
             'Finalizing your results...'
           ]
           
-          const stageIndex = Math.floor((simulatedProgress / 95) * stages.length)
+          const stageIndex = Math.floor((simulatedProgress / 100) * stages.length)
           const currentStage = stages[Math.min(stageIndex, stages.length - 1)]
           
           // Only update progress if it's higher (prevent regression during task transitions)
           if (simulatedProgress >= progress) {
             setProgress(simulatedProgress)
             setStage(currentStage)
-            setStatus('processing')
+            
+            // Mark as completed when we reach 100%
+            if (simulatedProgress >= 100) {
+              setStatus('completed')
+              if (onComplete) {
+                onComplete({
+                  progress: 100,
+                  stage: 'Summary ready!',
+                  status: 'completed',
+                  task_id: taskId
+                })
+              }
+            } else {
+              setStatus('processing')
+            }
           }
           
           // Store current task data for potential transitions
@@ -170,7 +184,7 @@ export function useProgressTracking({
             const easedProgress = timeProgress < 0.5 
               ? 2 * timeProgress * timeProgress 
               : 1 - Math.pow(-2 * timeProgress + 2, 3) / 2
-            const simulatedProgress = Math.min(Math.floor(easedProgress * 95), 95)
+            const simulatedProgress = Math.min(Math.floor(easedProgress * 100), 100)
             
             // Only update if progress is moving forward
             if (simulatedProgress >= progress) {
@@ -236,7 +250,7 @@ export function useProgressTracking({
           const easedProgress = timeProgress < 0.5 
             ? 2 * timeProgress * timeProgress 
             : 1 - Math.pow(-2 * timeProgress + 2, 3) / 2
-          const simulatedProgress = Math.min(Math.floor(easedProgress * 95), 95)
+          const simulatedProgress = Math.min(Math.floor(easedProgress * 100), 100)
           
           // Only update if progress is moving forward
           if (simulatedProgress >= progress) {

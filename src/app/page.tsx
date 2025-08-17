@@ -150,51 +150,33 @@ export default function HomePage() {
         setCurrentTaskId(data.task_id)
       }
       
-      // Wait for progress to complete (100%) or a maximum timeout before showing summary
-      const waitForProgressCompletion = () => {
-        const checkProgress = async () => {
-          if (progressStatus === 'completed' || progress >= 100) {
-            console.log('📊 Progress completed, showing summary immediately')
-            setCurrentSummary(data)
-            setCurrentTaskId(null) // Clear task ID after showing summary
-            
-            // Auto-scroll to summary section
-            setTimeout(() => {
-              const summaryElement = document.getElementById('summary-section')
-              if (summaryElement) {
-                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-            }, 100)
-          } else {
-            // Check again in 500ms if progress isn't complete yet
-            setTimeout(checkProgress, 500)
-          }
-        }
-        
-        // Start checking immediately, but with a 3-second safety timeout
-        checkProgress()
-        setTimeout(() => {
-          if (!currentSummary) {
-            console.log('⏰ Progress timeout, showing summary anyway')
-            setCurrentSummary(data)
-            setCurrentTaskId(null)
-            
-            setTimeout(() => {
-              const summaryElement = document.getElementById('summary-section')
-              if (summaryElement) {
-                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-            }, 100)
-          }
-        }, 3000)
-      }
+      // Store summary immediately - don't wait for progress
+      // The summary is already ready from the backend
+      console.log('✅ Summary ready, displaying immediately')
+      setCurrentSummary(data)
+      setCurrentTaskId(null) // Clear task ID to stop progress tracking
       
-      waitForProgressCompletion()
+      // Auto-scroll to summary section after a brief delay
+      setTimeout(() => {
+        const summaryElement = document.getElementById('summary-section')
+        if (summaryElement) {
+          summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
     },
     onError: (error) => {
       console.error('❌ Summarization failed:', error)
-      alert(`Summarization failed: ${error.message}`)
       setCurrentTaskId(null) // Stop progress tracking
+      
+      // Show user-friendly error message
+      const errorMessage = error.message.includes('network') 
+        ? 'Network error. Please check your connection and try again.'
+        : error.message.includes('limit')
+        ? 'You have reached your summary limit. Please upgrade your plan.'
+        : 'Unable to create summary. Please try pasting the link again.'
+      
+      setSuccessMessage(`❌ ${errorMessage}`)
+      setTimeout(() => setSuccessMessage(null), 5000)
       
       // Track error
       analytics.trackErrorOccurred({
@@ -234,57 +216,25 @@ export default function HomePage() {
       markFreeSummaryUsed() // Keep for backward compatibility
       incrementFreeSummariesUsed() // New tracking system
       
-      // Wait for progress to complete (100%) or a maximum timeout before showing summary
-      const waitForProgressCompletion = () => {
-        const checkProgress = async () => {
-          if (progressStatus === 'completed' || progress >= 100) {
-            console.log('📊 Progress completed, showing anonymous summary immediately')
-            setCurrentSummary(data)
-            setAnonymousSummaryId(data.id)
-            setCurrentTaskId(null) // Clear task ID after showing summary
-            
-            // Auto-scroll to summary section
-            setTimeout(() => {
-              const summaryElement = document.getElementById('summary-section')
-              if (summaryElement) {
-                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-            }, 100)
-            
-            // Show auth prompt after a short delay
-            setTimeout(() => {
-              setShowAuthPrompt(true)
-            }, 2000)
-          } else {
-            // Check again in 500ms if progress isn't complete yet
-            setTimeout(checkProgress, 500)
-          }
-        }
-        
-        // Start checking immediately, but with a 3-second safety timeout
-        checkProgress()
-        setTimeout(() => {
-          if (!currentSummary) {
-            console.log('⏰ Progress timeout, showing anonymous summary anyway')
-            setCurrentSummary(data)
-            setAnonymousSummaryId(data.id)
-            setCurrentTaskId(null)
-            
-            setTimeout(() => {
-              const summaryElement = document.getElementById('summary-section')
-              if (summaryElement) {
-                summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-            }, 100)
-            
-            setTimeout(() => {
-              setShowAuthPrompt(true)
-            }, 2000)
-          }
-        }, 3000)
-      }
+      // Store summary immediately - don't wait for progress
+      // The summary is already ready from the backend
+      console.log('✅ Anonymous summary ready, displaying immediately')
+      setCurrentSummary(data)
+      setAnonymousSummaryId(data.id)
+      setCurrentTaskId(null) // Clear task ID to stop progress tracking
       
-      waitForProgressCompletion()
+      // Auto-scroll to summary section after a brief delay
+      setTimeout(() => {
+        const summaryElement = document.getElementById('summary-section')
+        if (summaryElement) {
+          summaryElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
+      
+      // Show auth prompt after a short delay
+      setTimeout(() => {
+        setShowAuthPrompt(true)
+      }, 2000)
     },
     onError: (error) => {
       console.error('❌ Anonymous summarization failed:', error)
@@ -307,7 +257,13 @@ export default function HomePage() {
         })
         setShowAuthPrompt(true)
       } else {
-        alert(`Summarization failed: ${error.message}`)
+        // Show user-friendly error message
+        const errorMessage = error.message.includes('network') 
+          ? 'Network error. Please check your connection and try again.'
+          : 'Unable to create summary. Please try pasting the link again.'
+        
+        setSuccessMessage(`❌ ${errorMessage}`)
+        setTimeout(() => setSuccessMessage(null), 5000)
       }
       setCurrentTaskId(null) // Stop progress tracking
     }
