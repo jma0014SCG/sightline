@@ -449,7 +449,7 @@ The authentication system has been enhanced with modal-based login and anonymous
 - **Anonymous**: 1 summary ever (browser fingerprint + IP tracking)
 - **Free Plan**: 3 summaries ever (total lifetime limit)
 - **Pro Plan**: 25 summaries/month (monthly reset on 1st)
-- **Complete Plan**: Unlimited summaries
+- **Enterprise Plan**: Unlimited summaries
 
 #### Database Changes
 

@@ -163,7 +163,7 @@ for comprehensive technical details.
 - **Anonymous**: 1 summary ever (tracked by browser fingerprint + IP)
 - **Free Plan**: 3 summaries total (lifetime limit)
 - **Pro Plan**: 25 summaries/month (resets on 1st)
-- **Complete Plan**: Unlimited summaries
+- **Enterprise Plan**: Unlimited summaries
 
 ## Development Workflow
 

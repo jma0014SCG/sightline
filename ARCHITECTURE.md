@@ -220,6 +220,85 @@ model Tag {
 - **Retry Logic**: Automatic retry for transient failures
 - **Degraded Mode**: System operates without classification if service unavailable
 
+### 4. Rich Content Fields (Gumloop Integration)
+
+The system extracts and stores structured content from video summaries using AI processing.
+
+#### Rich Content JSON Fields
+
+**Summary Model Fields** (stored as JSON in PostgreSQL):
+
+```typescript
+interface RichContentFields {
+  // Core structured content
+  keyMoments: Array<{
+    timestamp: string
+    title: string
+    description: string
+  }>
+  
+  // Learning materials
+  frameworks: Array<{
+    name: string
+    description: string
+    application: string
+  }>
+  
+  debunkedAssumptions: Array<{
+    assumption: string
+    reality: string
+  }>
+  
+  inPractice: Array<{
+    scenario: string
+    application: string
+  }>
+  
+  // Actionable content
+  playbooks: Array<{
+    trigger: string
+    action: string
+  }>
+  
+  // Educational pack
+  learningPack: {
+    flashcards: Array<{ question: string; answer: string }>
+    quiz: Array<{ question: string; options: string[]; correct: number }>
+    glossary: Array<{ term: string; definition: string }>
+  }
+  
+  // Meta-analysis
+  enrichment: {
+    sentiment: string
+    tools: string[]
+    resources: string[]
+    riskAnalysis: string
+  }
+  
+  // Expert analysis
+  thinkingStyle: {
+    approach: string
+    patterns: string[]
+  }
+}
+```
+
+#### UI Component Mapping
+
+- **MainContentColumn**: Displays TL;DR, In Practice, Playbooks, Debunked Assumptions
+- **KeyMomentsSidebar**: Clickable timestamps with YouTube player integration
+- **LearningHubTabs**: Frameworks, Flashcards, Quiz, Glossary
+- **InsightEnrichment**: Sentiment, tools, resources, risk analysis
+- **Novel Idea Meter**: Ideas with novelty scores (1-5 stars)
+
+#### Processing Pipeline
+
+1. **Video Transcript** → FastAPI backend
+2. **LangChain + OpenAI** → Structured extraction
+3. **Gumloop Service** → Enhanced processing
+4. **Database Storage** → JSON fields in Summary model
+5. **Frontend Display** → Type-safe component rendering
+
 ## Core Components {#core-components}
 
 ### Frontend Architecture (Next.js 14 + App Router)
@@ -980,7 +1059,7 @@ UsageEvent {
 **Payments & Billing**:
 
 - **Stripe**: Subscription management and payment processing
-  - Products: Pro Plan ($9.99/month), Complete Plan (future)
+  - Products: Pro Plan ($9.99/month), Enterprise Plan (future)
   - Webhooks: Subscription status updates
   - Customer Portal: Self-service subscription management
 

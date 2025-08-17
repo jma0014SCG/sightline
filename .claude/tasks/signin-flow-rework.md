@@ -307,7 +307,7 @@ To continue:
 - **Anonymous Users**: 1 summary ever (unchanged)
 - **Free Plan**: 3 summaries ever (changed from 5/month)
 - **Pro Plan**: 25 summaries/month (changed from unlimited)
-- **Complete Plan**: Unlimited (unchanged)
+- **Enterprise Plan**: Unlimited (unchanged)
 
 **Implementation Details:**
 - FREE plan uses total count checking (summaries ever)

@@ -137,7 +137,8 @@ pnpm lint && pnpm typecheck && pnpm format:check
 
 - **[Architecture Guide](ARCHITECTURE.md)** - Technical architecture, data flow, dependencies
 - **[Contributing Guide](CONTRIBUTING.md)** - Development workflow, testing, PR process
-- **[API Documentation](API/)** - Complete tRPC and FastAPI reference
+- **[API Documentation](api/README.md)** - Complete tRPC and FastAPI reference
+- **[Backend Code](api/)** - Python FastAPI implementation
 - **[Documentation Index](Docs/INDEX.md)** - Complete navigation hub
 
 ### 🏗️ Development Resources

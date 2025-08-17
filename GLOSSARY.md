@@ -219,7 +219,7 @@ Entry-level tier with 3 lifetime summaries, personal library access, and basic S
 **Pro Plan**  
 Premium tier at $9.99/month with 25 summaries per month, unlimited library storage, and advanced sharing features.
 
-**Complete Plan**  
+**Enterprise Plan**  
 Highest tier (future) with unlimited summaries, priority processing, and enterprise features.
 
 ## Development Terms

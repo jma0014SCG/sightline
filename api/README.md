@@ -258,7 +258,7 @@ try {
 - **Anonymous**: 1 summary (lifetime, per browser fingerprint + IP)
 - **Free Plan**: 3 summaries (lifetime limit)
 - **Pro Plan**: 25 summaries/month (resets on billing cycle)
-- **Complete Plan**: Unlimited summaries
+- **Enterprise Plan**: Unlimited summaries
 
 ### Rate Limit Headers
 
@@ -401,7 +401,7 @@ const createSummary = async (url: string) => {
 
 - Free Plan: 3 summaries total (lifetime)
 - Pro Plan: 25 summaries/month
-- Complete Plan: Unlimited
+- Enterprise Plan: Unlimited
 
 ### `getById`
 
@@ -528,6 +528,165 @@ const deleteSummary = async (id: string) => {
   utils.library.getAll.invalidate()
   
   toast.success('Summary deleted')
+}
+```
+
+### `toggleFavorite`
+
+Toggle favorite status for a summary.
+
+**Usage**:
+
+```typescript
+api.summary.toggleFavorite.mutate({ id })
+```
+
+**Input Schema**:
+
+```typescript
+{
+  id: string // Summary ID
+}
+```
+
+**Output**: Updated summary with new favorite status
+
+**Example**:
+
+```typescript
+const toggleFavorite = async (id: string) => {
+  const updated = await api.summary.toggleFavorite.mutate({ id })
+  toast.success(updated.isFavorite ? 'Added to favorites' : 'Removed from favorites')
+  return updated
+}
+```
+
+### `rate`
+
+Rate a summary from 1 to 5 stars.
+
+**Usage**:
+
+```typescript
+api.summary.rate.mutate({ id, rating })
+```
+
+**Input Schema**:
+
+```typescript
+{
+  id: string        // Summary ID
+  rating: number    // 1-5 stars
+}
+```
+
+**Output**: Updated summary with rating
+
+**Example**:
+
+```typescript
+const rateSummary = async (id: string, rating: number) => {
+  const updated = await api.summary.rate.mutate({ id, rating })
+  toast.success(`Rated ${rating} stars`)
+  return updated
+}
+```
+
+### `updateNotes`
+
+Add or update personal notes on a summary.
+
+**Usage**:
+
+```typescript
+api.summary.updateNotes.mutate({ id, notes })
+```
+
+**Input Schema**:
+
+```typescript
+{
+  id: string      // Summary ID
+  notes: string   // Personal notes text
+}
+```
+
+**Output**: Updated summary with notes
+
+**Example**:
+
+```typescript
+const saveNotes = async (id: string, notes: string) => {
+  const updated = await api.summary.updateNotes.mutate({ id, notes })
+  toast.success('Notes saved')
+  return updated
+}
+```
+
+### `getByVideoId`
+
+Check if a video has already been summarized.
+
+**Usage**:
+
+```typescript
+api.summary.getByVideoId.useQuery({ videoId })
+```
+
+**Input Schema**:
+
+```typescript
+{
+  videoId: string // YouTube video ID
+}
+```
+
+**Output**: Summary object or null
+
+**Example**:
+
+```typescript
+const checkExisting = async (videoId: string) => {
+  const existing = await api.summary.getByVideoId.query({ videoId })
+  if (existing) {
+    toast.info('This video has already been summarized')
+    router.push(`/library/${existing.id}`)
+  }
+  return existing
+}
+```
+
+### `claimAnonymousSummaries`
+
+Claim anonymous summaries after signup.
+
+**Usage**:
+
+```typescript
+api.summary.claimAnonymousSummaries.query({ fingerprint })
+```
+
+**Input Schema**:
+
+```typescript
+{
+  fingerprint: string // Browser fingerprint used for anonymous summaries
+}
+```
+
+**Output**: Array of claimed summaries
+
+**Example**:
+
+```typescript
+const claimSummaries = async () => {
+  const fingerprint = generateBrowserFingerprint()
+  const claimed = await api.summary.claimAnonymousSummaries.query({ fingerprint })
+  
+  if (claimed.length > 0) {
+    toast.success(`Claimed ${claimed.length} anonymous summaries`)
+  }
+  return claimed
 }
 ```
 

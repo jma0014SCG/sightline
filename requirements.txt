@@ -4,15 +4,18 @@ python-dotenv==1.0.1
 pydantic==2.7.4
 pydantic-settings==2.3.4
 asyncpg==0.29.0
-langchain==0.2.6
+langchain>=0.3.27
 langchain-openai==0.1.14
 openai==1.35.7
 youtube-transcript-api==1.1.1
 httpx==0.27.0
-python-jose[cryptography]==3.3.0
-python-multipart==0.0.9
+python-jose[cryptography]>=3.5.0
+python-multipart>=0.0.20
 redis==5.0.6
 upstash-redis==1.1.0
 gumloop==0.1.0
 google-api-python-client==2.149.0
 yt-dlp==2024.8.6
+# Note: ecdsa 0.19.1 has a known timing attack vulnerability (GHSA-wj6h-64fc-37mp)
+# but no fix is available. This is accepted as the project considers
+# side-channel attacks out of scope.

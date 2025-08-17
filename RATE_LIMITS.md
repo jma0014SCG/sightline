@@ -478,7 +478,7 @@ A: We implement automatic retries and fallback mechanisms. Users receive clear s
 ## Related Documentation
 
 - **[Security Policy](SECURITY.md)** - Rate limiting as part of overall security strategy
-- **[API Documentation](API/)** - Complete API reference with rate limit examples
+- **[API Documentation](api/README.md)** - Complete API reference with rate limit examples
 - **[Architecture Guide](ARCHITECTURE.md)** - System design including rate limiting infrastructure
 - **[Monitoring Guide](Docs/operations/monitoring.md)** - Operational monitoring setup and dashboards
 
