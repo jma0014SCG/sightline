@@ -68,7 +68,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          formButtonPrimary: 'bg-primary-600 hover:bg-primary-700',
+          footerActionLink: 'text-primary-600 hover:text-primary-700',
+        },
+        layout: {
+          shimmer: true,
+          animations: true,
+        }
+      }}
+      telemetry={false}
+    >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
           <PostHogProvider>

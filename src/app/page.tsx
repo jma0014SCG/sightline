@@ -40,8 +40,15 @@ import {
 
 export default function HomePage() {
   const router = useRouter()
-  const { isAuthenticated, authModal, openAuthModal, closeAuthModal } = useAuth()
+  const { isAuthenticated, user, authModal, openAuthModal, closeAuthModal } = useAuth()
   const analytics = useAnalytics()
+  
+  // Query usage stats for authenticated users
+  const { data: usageStats } = api.billing.getUsageStats.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  )
+  
   const [currentSummary, setCurrentSummary] = useState<any>(null)
   const [animatedText, setAnimatedText] = useState('')
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -105,6 +112,19 @@ export default function HomePage() {
     'Stay ahead while everyone else is still buffering',
     'Learn faster. Retain more.'
   ], [])
+  
+  // Prefetch auth components on hover for better performance
+  const prefetchAuth = useCallback(() => {
+    // Trigger Clerk resource loading
+    if (!authModal.isOpen && typeof window !== 'undefined') {
+      // Preload Clerk components
+      import('@clerk/nextjs').then(() => {
+        console.log('Auth components preloaded')
+      }).catch(err => {
+        console.warn('Failed to preload auth components:', err)
+      })
+    }
+  }, [authModal.isOpen])
 
   // Authenticated summary creation
   const createSummary = api.summary.create.useMutation({
@@ -483,12 +503,26 @@ export default function HomePage() {
 
             {/* Actions */}
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => openAuthModal('sign-in')}
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 hidden sm:block min-h-[44px] touch-manipulation"
-              >
-                Sign In
-              </button>
+              {isAuthenticated && user ? (
+                <button 
+                  onClick={() => router.push('/library')} 
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-sm font-medium">
+                    {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="hidden sm:inline text-sm font-medium">Library</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => openAuthModal('sign-in')}
+                  onMouseEnter={prefetchAuth}
+                  className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 min-h-[44px] touch-manipulation px-2 sm:px-3"
+                >
+                  <span className="sm:hidden">Sign In</span>
+                  <span className="hidden sm:inline">Sign In</span>
+                </button>
+              )}
               <button
                 onClick={focusUrlInput}
                 className="bg-prussian-blue text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-paynes-gray transition-colors duration-200 min-h-[36px] touch-manipulation"
@@ -640,6 +674,29 @@ export default function HomePage() {
                       Paste any YouTube URL to get started
                     </p>
                   </div>
+
+                  {/* Display remaining summaries for authenticated users */}
+                  {isAuthenticated && usageStats && (
+                    <div className="mb-4 text-center">
+                      <span className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm">
+                        <span className="font-semibold">
+                          {usageStats.monthlyLimit === -1 
+                            ? 'Unlimited summaries' 
+                            : usageStats.monthlyLimit === 0
+                            ? 'No summaries available'
+                            : `${Math.max(0, usageStats.monthlyLimit - usageStats.currentMonthUsage)} summaries remaining this month`}
+                        </span>
+                        {usageStats.monthlyLimit > 0 && usageStats.currentMonthUsage >= usageStats.monthlyLimit && (
+                          <button 
+                            onClick={() => router.push('/billing')} 
+                            className="underline hover:text-amber-800 transition-colors"
+                          >
+                            Upgrade
+                          </button>
+                        )}
+                      </span>
+                    </div>
+                  )}
 
                   <URLInput 
                     onSubmit={handleUrlSubmit}
@@ -1590,7 +1647,11 @@ Don&apos;t Miss Out - Try Sightline Free
           aria-label="Summarize a video"
         >
           <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
-          <span className="hidden sm:block font-medium text-sm">Summarize Video</span>
+          <span className="hidden sm:block font-medium text-sm">
+            {isAuthenticated && usageStats && usageStats.monthlyLimit > 0
+              ? `Summarize (${Math.max(0, usageStats.monthlyLimit - usageStats.currentMonthUsage)} left)`
+              : 'Summarize Video'}
+          </span>
         </button>
       </div>
 
