@@ -39,7 +39,7 @@ export const shareRouter = createTRPCRouter({
         return {
           id: existingLink.id,
           slug: existingLink.slug,
-          url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${existingLink.slug}`,
+          url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${existingLink.slug}`,
           views: existingLink.views,
           expiresAt: existingLink.expiresAt,
           isPublic: existingLink.isPublic,
@@ -83,7 +83,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,
@@ -111,7 +111,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,

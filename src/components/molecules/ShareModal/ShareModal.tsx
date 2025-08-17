@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Share2, Copy, Check, ExternalLink, Eye, Trash2, Globe, Lock } from 'lucide-react'
 import { api } from '@/components/providers/TRPCProvider'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/providers/ToastProvider'
 
 interface ShareModalProps {
   isOpen: boolean
@@ -15,11 +16,12 @@ interface ShareModalProps {
 export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareModalProps) {
   const [copied, setCopied] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const { toast } = useToast()
 
   // Get existing share link
   const { data: existingShareLink, refetch } = api.share.get.useQuery(
     { summaryId },
-    { enabled: isOpen }
+    { enabled: isOpen && !!summaryId }
   )
 
   // Mutations
@@ -27,22 +29,34 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
     onSuccess: () => {
       refetch()
       setIsCreating(false)
+      toast.success('Share link created successfully!')
     },
     onError: (error) => {
       setIsCreating(false)
-      alert('Failed to create share link: ' + error.message)
+      toast.error('Failed to create share link')
+      console.error('Share link creation error:', error)
     }
   })
 
   const deleteShareLink = api.share.delete.useMutation({
     onSuccess: () => {
       refetch()
+      toast.success('Share link deleted')
+    },
+    onError: (error) => {
+      toast.error('Failed to delete share link')
+      console.error('Share link deletion error:', error)
     }
   })
 
   const togglePublic = api.share.togglePublic.useMutation({
     onSuccess: () => {
       refetch()
+      toast.success('Share link visibility updated')
+    },
+    onError: (error) => {
+      toast.error('Failed to update share link')
+      console.error('Toggle public error:', error)
     }
   })
 
@@ -55,9 +69,11 @@ export function ShareModal({ isOpen, onClose, summaryId, summaryTitle }: ShareMo
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
+      toast.success('Link copied to clipboard!')
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      // Silent fail for clipboard operations
+      toast.error('Failed to copy to clipboard')
+      console.error('Clipboard error:', err)
     }
   }
 
