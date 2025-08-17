@@ -376,12 +376,12 @@ export function SummaryCard({
           <>
             {/* Backdrop */}
             <div 
-              className="fixed inset-0 z-20" 
+              className="fixed inset-0 z-40" 
               onClick={() => setShowActions(false)}
             />
             
-            {/* Dropdown */}
-            <div className="absolute right-4 top-4 z-30 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl">
+            {/* Dropdown - positioned near the 3-dot button */}
+            <div className="absolute right-2 bottom-16 z-50 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
               <Link
                 href={`/library/${summary.id}`}
                 className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -669,8 +669,8 @@ export function SummaryCard({
             onClick={() => setShowActions(false)}
           />
           
-          {/* Dropdown */}
-          <div className="absolute right-4 top-4 z-30 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl">
+          {/* Dropdown - positioned above the action buttons */}
+          <div className="absolute right-2 bottom-14 z-50 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
             <Link
               href={`/library/${summary.id}`}
               className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
