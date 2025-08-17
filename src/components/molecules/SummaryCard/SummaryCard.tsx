@@ -134,7 +134,7 @@ export function SummaryCard({
               e.stopPropagation()
               setShowAllTags(true)
             }}
-            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 hover:scale-105 cursor-pointer"
+            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-semibold rounded-full bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 hover:from-gray-100 hover:to-gray-200 hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer border border-gray-200/50"
             aria-label={`Show ${remainingCount} more tags`}
           >
             +{remainingCount} more
@@ -147,7 +147,7 @@ export function SummaryCard({
               e.stopPropagation()
               setShowAllTags(false)
             }}
-            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-medium rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 hover:scale-105 cursor-pointer"
+            className="inline-flex items-center px-2.5 py-1.5 min-h-[32px] text-xs font-semibold rounded-full bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 hover:from-gray-100 hover:to-gray-200 hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer border border-gray-200/50"
             aria-label="Show less tags"
           >
             Show less
@@ -185,10 +185,10 @@ export function SummaryCard({
     return (
       <article 
         className={cn(
-          "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200",
-        "hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5",
+          "group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/50 transition-all duration-300",
+        "hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30",
         "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500",
-          isSelected && "border-blue-500 bg-blue-50",
+          isSelected && "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50",
           className
         )}
         onMouseEnter={handleMouseEnter}
@@ -215,8 +215,8 @@ export function SummaryCard({
         )}
         <Link href={`/library/${summary.id}`} className="block">
           <div className="flex gap-4 p-4">
-            {/* Thumbnail - 16:9 aspect ratio */}
-            <div className="relative h-[96px] w-[170px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
+            {/* Thumbnail - 16:9 aspect ratio with enhanced display */}
+            <div className="relative h-[96px] w-[170px] flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shadow-md group-hover:shadow-lg transition-shadow duration-300">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
@@ -225,11 +225,11 @@ export function SummaryCard({
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  {/* Play overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="flex items-center justify-center w-8 h-8 bg-white/90 rounded-full backdrop-blur-sm">
-                        <Play className="h-4 w-4 text-gray-900 ml-0.5" />
+                  {/* Enhanced play overlay with smooth animation */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-center justify-center w-12 h-12 bg-white/95 rounded-full backdrop-blur-sm shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 ease-out">
+                        <Play className="h-5 w-5 text-blue-600 ml-0.5" />
                       </div>
                     </div>
                   </div>
@@ -240,23 +240,27 @@ export function SummaryCard({
                 </div>
               )}
               
-              {/* Duration badge */}
-              <div className="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              {/* Enhanced duration badge */}
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                <Clock className="h-3 w-3" />
                 {formatDuration(summary.duration)}
               </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              {/* Header with channel info - improved contrast */}
-              <div className="mb-1 flex items-center gap-2 text-xs">
-                <span className="font-semibold text-blue-600">{summary.channelName}</span>
-                <span className="text-gray-400">•</span>
-                <time className="text-gray-600 font-medium">{formatDate(summary.createdAt)}</time>
+              {/* Header with channel info - enhanced visual hierarchy */}
+              <div className="mb-2 flex items-center gap-2 text-xs">
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">{summary.channelName}</span>
+                <span className="text-gray-300">•</span>
+                <time className="flex items-center gap-1 text-gray-600 font-medium">
+                  <Calendar className="h-3 w-3 text-gray-400" />
+                  {formatDate(summary.createdAt)}
+                </time>
               </div>
 
-              {/* Title - Enhanced typography */}
-              <h3 className="mb-1.5 line-clamp-2 text-base font-bold text-gray-950 group-hover:text-blue-600 transition-colors duration-200">
+              {/* Title - Enhanced typography with smooth hover */}
+              <h3 className="mb-2 line-clamp-2 text-base font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300">
                 {summary.videoTitle}
               </h3>
 
@@ -318,8 +322,8 @@ export function SummaryCard({
                   )}
                 </div>
                 
-                {/* Hover Actions - appear on card hover */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">
+                {/* Enhanced action buttons - always visible but subtle */}
+                <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100">
                   {onShare && (
                     <button
                       onClick={(e) => {
@@ -327,7 +331,7 @@ export function SummaryCard({
                         e.stopPropagation()
                         onShare(summary.id)
                       }}
-                      className="rounded-lg p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="rounded-lg p-1.5 text-gray-500 bg-white/50 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md transition-all duration-200"
                       aria-label="Share summary"
                       title="Share"
                     >
@@ -341,7 +345,7 @@ export function SummaryCard({
                         e.stopPropagation()
                         onDelete(summary.id)
                       }}
-                      className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="rounded-lg p-1.5 text-gray-500 bg-white/50 hover:bg-red-50 hover:text-red-600 hover:shadow-md transition-all duration-200"
                       aria-label="Delete summary"
                       title="Delete"
                     >
@@ -434,10 +438,10 @@ export function SummaryCard({
   return (
     <article 
       className={cn(
-        "group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200",
-        "hover:border-gray-300 hover:shadow-xl hover:-translate-y-1",
+        "group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/30 transition-all duration-300",
+        "hover:border-blue-300 hover:shadow-2xl hover:-translate-y-1.5 hover:bg-gradient-to-br hover:from-white hover:to-blue-50/40",
         "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500",
-        isSelected && "border-blue-500 bg-blue-50",
+        isSelected && "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50",
         className
       )}
       onMouseEnter={handleMouseEnter}
@@ -467,17 +471,28 @@ export function SummaryCard({
           <div className="flex-1 min-w-0">
             {/* Main content area */}
             <div>
-              {/* Header with channel info */}
+              {/* Header with channel info - enhanced */}
               <div className="mb-2 flex items-center gap-2 text-sm">
-                <span className="font-medium text-blue-600">{summary.channelName}</span>
-                <span className="text-gray-400">•</span>
-                <time className="text-gray-500">{formatDate(summary.createdAt)}</time>
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">{summary.channelName}</span>
+                <span className="text-gray-300">•</span>
+                <time className="flex items-center gap-1 text-gray-600 font-medium">
+                  <Calendar className="h-3 w-3 text-gray-400" />
+                  {formatDate(summary.createdAt)}
+                </time>
               </div>
 
-              {/* Title - Enhanced with better weight and size */}
-              <h3 className="mb-2 line-clamp-2 text-lg font-bold text-gray-950 group-hover:text-blue-600 transition-colors duration-200">
+              {/* Title - Enhanced with gradient on hover */}
+              <h3 className="mb-3 line-clamp-2 text-lg font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300">
                 {summary.videoTitle}
               </h3>
+
+              {/* Reading Progress Indicator */}
+              <div className="mb-3 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
+                  style={{ width: `${summary.lastViewedAt ? '45%' : '0%'}` }}
+                />
+              </div>
 
               {/* Key insights preview - better contrast */}
               {keyInsights.length > 0 && (
@@ -557,11 +572,11 @@ export function SummaryCard({
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  {/* Play overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="flex items-center justify-center w-8 h-8 bg-white/90 rounded-full backdrop-blur-sm">
-                        <Play className="h-4 w-4 text-gray-900 ml-0.5" />
+                  {/* Enhanced play overlay with smooth animation */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-center justify-center w-12 h-12 bg-white/95 rounded-full backdrop-blur-sm shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 ease-out">
+                        <Play className="h-5 w-5 text-blue-600 ml-0.5" />
                       </div>
                     </div>
                   </div>
@@ -572,8 +587,9 @@ export function SummaryCard({
                 </div>
               )}
               
-              {/* Duration badge */}
-              <div className="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              {/* Enhanced duration badge */}
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                <Clock className="h-3 w-3" />
                 {formatDuration(summary.duration)}
               </div>
             </div>
