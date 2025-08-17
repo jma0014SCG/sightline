@@ -43,18 +43,10 @@ export default function LibraryPage() {
   // Real-time progress tracking
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
     taskId: currentTaskId,
-    onComplete: async () => {
-      console.log('Progress tracking completed')
-      setCurrentTaskId(null)
-      
-      // Invalidate the library query to refresh the list
-      await utils.library.getAll.invalidate()
-      
-      // Refresh the page to ensure all data is up to date
-      router.refresh()
-      
-      // Show success toast
-      toast.success('Summary created successfully!')
+    onComplete: (data) => {
+      console.log('Progress tracking completed:', data)
+      // Don't clear task ID here - let onSuccess handle it
+      // This prevents the progress bar from disappearing prematurely
     },
     onError: (error) => {
       console.error('Progress tracking error:', error)
@@ -118,25 +110,30 @@ export default function LibraryPage() {
     onSuccess: (summary) => {
       console.log('✅ Summary created successfully:', summary)
       
-      // If we got a real task_id from backend, switch to using it for progress tracking
-      if (summary.task_id && summary.task_id !== currentTaskId) {
-        console.log('🔄 Switching to real task_id:', summary.task_id)
-        setCurrentTaskId(summary.task_id)
-      }
+      // Clear task ID immediately to stop progress tracking
+      setCurrentTaskId(null)
       
-      // Invalidate caches to show new summary and updated usage stats
+      // Invalidate caches to show new summary
       utils.library.getAll.invalidate()
       utils.billing.getUsageStats.invalidate()
       
-      // Stop progress tracking after a brief moment to show completion
-      setTimeout(() => {
-        setCurrentTaskId(null)
-      }, 1500)
+      // Show success toast
+      toast.success('Summary created and saved to your library!')
+      
+      // Refresh to ensure data is up to date
+      router.refresh()
     },
     onError: (error) => {
       console.error('❌ Summarization failed:', error)
-      setCurrentTaskId(null) // Stop progress tracking
-      // The error will be handled by the existing error handling
+      setCurrentTaskId(null)
+      setIsCreatingSummary(false)
+      
+      // Show user-friendly error message
+      const errorMessage = error.message.includes('limit')
+        ? 'You have reached your summary limit. Please upgrade your plan.'
+        : 'Unable to create summary. Please try again.'
+      
+      toast.error(errorMessage)
     }
   })
 
@@ -430,7 +427,7 @@ export default function LibraryPage() {
         )}
 
         {/* Progress indicator */}
-        {createSummary.isPending && (
+        {(createSummary.isPending || currentTaskId) && (
           <div className="mt-4 p-4 bg-white/70 border border-blue-300 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="flex space-x-1">
