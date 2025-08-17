@@ -42,6 +42,7 @@ export function SummaryViewerImproved({
   const [showAllTags, setShowAllTags] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [showMobileToolkit, setShowMobileToolkit] = useState(false);
+  const [showAllKeyMoments, setShowAllKeyMoments] = useState(false);
   const toastContext = useToast();
   const toast = {
     success: toastContext.showSuccess,
@@ -742,8 +743,8 @@ export function SummaryViewerImproved({
                   <TabsContent value="moments" className="space-y-2">
                     {keyMoments.length > 0 ? (
                       <>
-                        <ScrollArea className="h-64">
-                          {keyMoments.map((moment: BackendKeyMoment, idx: number) => (
+                        <ScrollArea className={showAllKeyMoments ? "h-96" : "h-64"}>
+                          {(showAllKeyMoments ? keyMoments : keyMoments.slice(0, 5)).map((moment: BackendKeyMoment, idx: number) => (
                             <button
                               key={idx}
                               onClick={() => handleTimestampClick(moment.timestamp)}
@@ -771,9 +772,14 @@ export function SummaryViewerImproved({
                         </ScrollArea>
                         
                         {keyMoments.length > 5 && (
-                          <Button variant="ghost" size="sm" className="w-full">
-                            <ChevronRight className="h-4 w-4 mr-1" />
-                            View All {keyMoments.length} Key Moments
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => setShowAllKeyMoments(!showAllKeyMoments)}
+                          >
+                            <ChevronRight className={cn("h-4 w-4 mr-1 transition-transform", showAllKeyMoments && "rotate-90")} />
+                            {showAllKeyMoments ? "Show Less" : `View All ${keyMoments.length} Key Moments`}
                           </Button>
                         )}
                       </>
