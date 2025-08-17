@@ -822,7 +822,7 @@ export default function HomePage() {
             {/* Background pattern for premium feel */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-50/30 to-transparent blur-3xl"></div>
             
-            <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
+            <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 lg:gap-8">
               {/* Huberman Lab */}
               <div 
                 className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
@@ -977,6 +977,223 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+
+              {/* a16z Podcast */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="a16z Podcast - Venture Capital & Tech content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/a16z.png"
+                      alt="a16z Podcast"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    a16z Podcast
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Venture Capital
+                  </p>
+                </div>
+              </div>
+
+              {/* Acquired */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Acquired - Tech Business Stories content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/acquired.png"
+                      alt="Acquired"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Acquired
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Tech Business Stories
+                  </p>
+                </div>
+              </div>
+
+              {/* The Daily */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Daily - News & Current Affairs content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/daily.png"
+                      alt="The Daily"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    The Daily
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    News & Current Affairs
+                  </p>
+                </div>
+              </div>
+
+              {/* Hidden Brain */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Hidden Brain - Psychology & Behavior content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/hiddenbrain.png"
+                      alt="Hidden Brain"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Hidden Brain
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Psychology & Behavior
+                  </p>
+                </div>
+              </div>
+
+              {/* Alex Hormozi */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Alex Hormozi - Business & Entrepreneurship content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/hormozi.png"
+                      alt="Alex Hormozi"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Alex Hormozi
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Entrepreneurship
+                  </p>
+                </div>
+              </div>
+
+              {/* The Journal */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="The Journal - Business & Finance content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/journal.png"
+                      alt="The Journal"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    The Journal
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Business & Finance
+                  </p>
+                </div>
+              </div>
+
+              {/* Pod Save America */}
+              <div 
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                role="img"
+                aria-label="Pod Save America - Politics & Policy content"
+                tabIndex={0}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mb-4 ring-2 ring-gray-100 group-hover:ring-primary-200 transition-all duration-300">
+                    <Image
+                      src="/images/podcasts/podsaveamerica.png"
+                      alt="Pod Save America"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-700 group-hover:text-primary-700 transition-colors text-center leading-tight">
+                    Pod Save America
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 text-center">
+                    Politics & Policy
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -984,7 +1201,7 @@ export default function HomePage() {
           <div className="text-center pt-12 mt-12 border-t border-gray-200">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
               <CheckCircle className="w-4 h-4 text-primary-500" />
-              Supporting 15+ content categories with consistent quality
+              Supporting 20+ premium podcasts and content creators with consistent quality
             </div>
           </div>
         </div>
