@@ -7,7 +7,6 @@ import { SummaryCard } from '@/components/molecules/SummaryCard'
 import { LibraryControls, type LibraryFilters } from '@/components/molecules/LibraryControls'
 import { QuickActionsBar } from '@/components/molecules/QuickActionsBar'
 import { ShareModal } from '@/components/molecules/ShareModal'
-import { TagStatsBar } from '@/components/molecules/TagStatsBar'
 import { Skeleton } from '@/components/atoms/Skeleton'
 import { FloatingActionButton } from '@/components/atoms/FloatingActionButton'
 import { api } from '@/components/providers/TRPCProvider'
@@ -23,7 +22,7 @@ export default function LibraryPage() {
   const utils = api.useUtils()
   
   const [isCreatingSummary, setIsCreatingSummary] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [showFab, setShowFab] = useState(true)
   const createSummaryRef = useRef<HTMLDivElement>(null)
@@ -337,8 +336,8 @@ export default function LibraryPage() {
   return (
     <div>
       {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900">Library</h1>
             {usage && usage.monthlyLimit > 0 && (
@@ -369,40 +368,8 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      {/* Tag Stats Bar - Visual Tag Cloud */}
-      {(availableTags && availableTags.length > 0) || (availableCategories && availableCategories.length > 0) ? (
-        <div className="mb-6">
-          <TagStatsBar
-            tags={availableTags || []}
-            categories={availableCategories || []}
-            selectedTags={filters.tags}
-            selectedCategories={filters.categories}
-            onTagClick={(tagName) => {
-              const currentTags = filters.tags || []
-              const newTags = currentTags.includes(tagName)
-                ? currentTags.filter(t => t !== tagName)
-                : [...currentTags, tagName]
-              setFilters({ 
-                ...filters, 
-                tags: newTags.length > 0 ? newTags : undefined 
-              })
-            }}
-            onCategoryClick={(categoryName) => {
-              const currentCategories = filters.categories || []
-              const newCategories = currentCategories.includes(categoryName)
-                ? currentCategories.filter(c => c !== categoryName)
-                : [...currentCategories, categoryName]
-              setFilters({ 
-                ...filters, 
-                categories: newCategories.length > 0 ? newCategories : undefined 
-              })
-            }}
-          />
-        </div>
-      ) : null}
-
       {/* Create New Summary Section */}
-      <div ref={createSummaryRef} className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+      <div ref={createSummaryRef} className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-lg">
             <Plus className="h-5 w-5 text-white" />
@@ -461,12 +428,12 @@ export default function LibraryPage() {
       </div>
 
       {/* Search and Filter Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex items-center justify-center w-6 h-6 bg-gray-100 rounded">
             <Search className="h-4 w-4 text-gray-600" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900">Search & Filter Your Summaries</h3>
+          <h3 className="text-lg font-medium text-gray-900">Search & Filter</h3>
         </div>
         
         <LibraryControls

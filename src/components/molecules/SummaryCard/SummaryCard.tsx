@@ -251,7 +251,7 @@ export function SummaryCard({
             <div className="flex-1 min-w-0">
               {/* Header with channel info - enhanced visual hierarchy */}
               <div className="mb-2 flex items-center gap-2 text-xs">
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">{summary.channelName}</span>
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 truncate max-w-[150px] inline-block align-bottom">{summary.channelName}</span>
                 <span className="text-gray-300">•</span>
                 <time className="flex items-center gap-1 text-gray-600 font-medium">
                   <Calendar className="h-3 w-3 text-gray-400" />
@@ -259,15 +259,15 @@ export function SummaryCard({
                 </time>
               </div>
 
-              {/* Title - Enhanced typography with smooth hover */}
-              <h3 className="mb-2 line-clamp-2 text-base font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300">
-                {summary.videoTitle}
+              {/* Title - Enhanced typography with smooth hover and better text wrapping */}
+              <h3 className="mb-2 text-base font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 break-words">
+                <span className="line-clamp-2">{summary.videoTitle}</span>
               </h3>
 
-              {/* Key insights preview - improved readability */}
+              {/* Key insights preview - improved readability and text wrapping */}
               {keyInsights.length > 0 && (
-                <p className="text-xs text-gray-500 line-clamp-1 mb-1.5 leading-relaxed">
-                  {keyInsights[0].length > 100 ? `${keyInsights[0].substring(0, 100)}...` : keyInsights[0]}
+                <p className="text-xs text-gray-500 mb-1.5 leading-relaxed break-words">
+                  <span className="line-clamp-1">{keyInsights[0]}</span>
                 </p>
               )}
 
@@ -473,7 +473,7 @@ export function SummaryCard({
             <div>
               {/* Header with channel info - enhanced */}
               <div className="mb-2 flex items-center gap-2 text-sm">
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">{summary.channelName}</span>
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 truncate max-w-[200px] inline-block align-bottom">{summary.channelName}</span>
                 <span className="text-gray-300">•</span>
                 <time className="flex items-center gap-1 text-gray-600 font-medium">
                   <Calendar className="h-3 w-3 text-gray-400" />
@@ -481,23 +481,15 @@ export function SummaryCard({
                 </time>
               </div>
 
-              {/* Title - Enhanced with gradient on hover */}
-              <h3 className="mb-3 line-clamp-2 text-lg font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300">
-                {summary.videoTitle}
+              {/* Title - Enhanced with gradient on hover and better text wrapping */}
+              <h3 className="mb-3 text-lg font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 break-words">
+                <span className="line-clamp-2">{summary.videoTitle}</span>
               </h3>
 
-              {/* Reading Progress Indicator */}
-              <div className="mb-3 h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
-                  style={{ width: `${summary.lastViewedAt ? '45%' : '0%'}` }}
-                />
-              </div>
-
-              {/* Key insights preview - better contrast */}
+              {/* Key insights preview - better contrast and text wrapping */}
               {keyInsights.length > 0 && (
-                <p className="text-sm text-gray-500 line-clamp-2 mb-3 leading-relaxed">
-                  {keyInsights[0].length > 140 ? `${keyInsights[0].substring(0, 140)}...` : keyInsights[0]}
+                <p className="text-sm text-gray-500 mb-3 leading-relaxed break-words">
+                  <span className="line-clamp-2">{keyInsights[0]}</span>
                 </p>
               )}
 
