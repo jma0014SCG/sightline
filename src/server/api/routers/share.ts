@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { nanoid } from 'nanoid'
+import { getShareUrl } from '@/lib/url'
 
 export const shareRouter = createTRPCRouter({
   // Create a share link for a summary
@@ -39,7 +40,7 @@ export const shareRouter = createTRPCRouter({
         return {
           id: existingLink.id,
           slug: existingLink.slug,
-          url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${existingLink.slug}`,
+          url: getShareUrl(existingLink.slug),
           views: existingLink.views,
           expiresAt: existingLink.expiresAt,
           isPublic: existingLink.isPublic,
@@ -83,7 +84,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
+        url: getShareUrl(shareLink.slug),
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,
@@ -111,7 +112,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: shareLink.id,
         slug: shareLink.slug,
-        url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareLink.slug}`,
+        url: getShareUrl(shareLink.slug),
         views: shareLink.views,
         expiresAt: shareLink.expiresAt,
         isPublic: shareLink.isPublic,
@@ -251,7 +252,7 @@ export const shareRouter = createTRPCRouter({
       return {
         id: updatedLink.id,
         slug: updatedLink.slug,
-        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${updatedLink.slug}`,
+        url: getShareUrl(updatedLink.slug),
         views: updatedLink.views,
         expiresAt: updatedLink.expiresAt,
         isPublic: updatedLink.isPublic,
@@ -284,7 +285,7 @@ export const shareRouter = createTRPCRouter({
       return shareLinks.map((link: any) => ({
         id: link.id,
         slug: link.slug,
-        url: `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${link.slug}`,
+        url: getShareUrl(link.slug),
         views: link.views,
         expiresAt: link.expiresAt,
         isPublic: link.isPublic,
