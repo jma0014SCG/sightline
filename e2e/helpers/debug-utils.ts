@@ -391,7 +391,7 @@ export class DebugUtils {
           }
         });
 
-        return [...new Set(similar)].slice(0, 5); // Limit to 5 suggestions
+        return Array.from(new Set(similar)).slice(0, 5); // Limit to 5 suggestions
       }, selectorParts);
 
       if (similarSelectors.length > 0) {

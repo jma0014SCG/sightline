@@ -51,12 +51,11 @@ export class TestDatabaseManager {
       data: {
         id: "test-anonymous-user",
         email: "anonymous@test.com",
-        firstName: "Anonymous",
-        lastName: "User",
-        imageUrl: "https://avatars.githubusercontent.com/u/1234?v=4",
+        name: "Anonymous User",
+        image: "https://avatars.githubusercontent.com/u/1234?v=4",
         plan: "FREE",
-        summariesCreated: 1,
-        summariesThisMonth: 1,
+        summariesUsed: 1,
+        summariesLimit: 3,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -67,14 +66,12 @@ export class TestDatabaseManager {
     const freeUser = await this.prisma.user.create({
       data: {
         id: "test-free-user",
-        clerkId: "test-free-clerk-id",
         email: "free@test.com",
-        firstName: "Free",
-        lastName: "User",
-        imageUrl: "https://avatars.githubusercontent.com/u/5678?v=4",
+        name: "Free User",
+        image: "https://avatars.githubusercontent.com/u/5678?v=4",
         plan: "FREE",
-        summariesCreated: 2,
-        summariesThisMonth: 2,
+        summariesUsed: 2,
+        summariesLimit: 3,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -85,17 +82,14 @@ export class TestDatabaseManager {
     const proUser = await this.prisma.user.create({
       data: {
         id: "test-pro-user",
-        clerkId: "test-pro-clerk-id",
         email: "pro@test.com",
-        firstName: "Pro",
-        lastName: "User",
-        imageUrl: "https://avatars.githubusercontent.com/u/9012?v=4",
+        name: "Pro User",
+        image: "https://avatars.githubusercontent.com/u/9012?v=4",
         plan: "PRO",
         stripeCustomerId: "cus_test_pro_customer",
         stripeSubscriptionId: "sub_test_pro_subscription",
-        subscriptionStatus: "active",
-        summariesCreated: 15,
-        summariesThisMonth: 8,
+        summariesUsed: 15,
+        summariesLimit: 25,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -132,17 +126,16 @@ export class TestDatabaseManager {
         data: {
           id: `test-summary-${user.id}-${i + 1}`,
           userId: user.id,
-          url: `https://youtube.com/watch?v=test-${user.plan.toLowerCase()}-${i + 1}`,
+          videoUrl: `https://youtube.com/watch?v=test-${user.plan.toLowerCase()}-${i + 1}`,
           videoId: `test-${user.plan.toLowerCase()}-${i + 1}`,
           videoTitle: `Test Video ${i + 1} - ${user.plan} User`,
           channelName: "Test Channel",
           duration: 600 + i * 120, // 10+ minutes
           thumbnailUrl: `https://img.youtube.com/vi/test-${user.plan.toLowerCase()}-${i + 1}/maxresdefault.jpg`,
-          status: "COMPLETED",
-          summary: this.generateTestSummaryContent(user.plan, i + 1),
-          tldr: `This is a test TL;DR for ${user.plan} user summary ${i + 1}`,
-          keyInsights: [
-            `Key insight ${i + 1} for ${user.plan} user`,
+          channelId: "test-channel-id",
+          content: this.generateTestSummaryContent(user.plan, i + 1),
+          keyPoints: [
+            `Key point ${i + 1} for ${user.plan} user`,
             `Important point ${i + 1} about the video content`,
           ],
           keyMoments: [
@@ -211,7 +204,7 @@ This test content is designed to be substantial enough to test rendering perform
           OR: [
             { userId: { startsWith: "test-" } },
             { videoId: { startsWith: "test-" } },
-            { url: { contains: "test-" } },
+            { videoUrl: { contains: "test-" } },
           ],
         },
       });
@@ -220,7 +213,7 @@ This test content is designed to be substantial enough to test rendering perform
         where: {
           OR: [
             { id: { startsWith: "test-" } },
-            { clerkId: { startsWith: "test-" } },
+            { id: { startsWith: "test-" } },
             { email: { endsWith: "@test.com" } },
           ],
         },
@@ -269,13 +262,11 @@ This test content is designed to be substantial enough to test rendering perform
         await this.prisma.user.create({
           data: {
             id: "test-empty-user",
-            clerkId: "test-empty-clerk-id",
             email: "empty@test.com",
-            firstName: "Empty",
-            lastName: "User",
+            name: "Empty User",
             plan: "PRO",
-            summariesCreated: 0,
-            summariesThisMonth: 0,
+            summariesUsed: 0,
+            summariesLimit: 3,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -287,13 +278,11 @@ This test content is designed to be substantial enough to test rendering perform
         const fullUser = await this.prisma.user.create({
           data: {
             id: "test-full-user",
-            clerkId: "test-full-clerk-id",
             email: "full@test.com",
-            firstName: "Full",
-            lastName: "User",
+            name: "Full User",
             plan: "PRO",
-            summariesCreated: 100,
-            summariesThisMonth: 25,
+            summariesUsed: 100,
+            summariesLimit: 100,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -305,14 +294,13 @@ This test content is designed to be substantial enough to test rendering perform
             data: {
               id: `test-full-summary-${i}`,
               userId: fullUser.id,
-              url: `https://youtube.com/watch?v=full-test-${i}`,
+              videoUrl: `https://youtube.com/watch?v=full-test-${i}`,
               videoId: `full-test-${i}`,
               videoTitle: `Performance Test Video ${i + 1}`,
               channelName: "Performance Test Channel",
+              channelId: "test-channel-id",
               duration: 300 + i * 60,
-              status: "COMPLETED",
-              summary: `Performance test summary ${i + 1}`,
-              tldr: `Performance test TL;DR ${i + 1}`,
+              content: `Performance test summary ${i + 1}`,
               createdAt: new Date(Date.now() - i * 60 * 60 * 1000),
               updatedAt: new Date(Date.now() - i * 60 * 60 * 1000),
             },
@@ -325,13 +313,11 @@ This test content is designed to be substantial enough to test rendering perform
         await this.prisma.user.create({
           data: {
             id: "test-limited-user",
-            clerkId: "test-limited-clerk-id",
             email: "limited@test.com",
-            firstName: "Limited",
-            lastName: "User",
+            name: "Limited User",
             plan: "FREE",
-            summariesCreated: 3, // At FREE limit
-            summariesThisMonth: 3,
+            summariesUsed: 3, // At FREE limit
+            summariesLimit: 3,
             createdAt: new Date(),
             updatedAt: new Date(),
           },

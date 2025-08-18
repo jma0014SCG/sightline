@@ -53,8 +53,9 @@ export function DebugPanel() {
   const testSummarization = async () => {
     // Generate correlation ID for this flow
     const correlationId = generateCorrelationId('debug')
+    const requestId = generateCorrelationId('req')
     setCurrentCorrelationId(correlationId)
-    correlationStore.setContext({ correlationId, userId: user?.id })
+    correlationStore.setContext({ correlationId, requestId, userId: user?.id })
     
     logger.info('Starting summarization test', {
       url: testUrl,

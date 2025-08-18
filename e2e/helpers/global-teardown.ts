@@ -36,7 +36,7 @@ async function cleanupTestDatabase() {
         OR: [
           { userId: { startsWith: "test-" } },
           { videoTitle: { contains: "test" } },
-          { url: { contains: "test" } },
+          { videoUrl: { contains: "test" } },
         ],
       },
     });
@@ -45,7 +45,7 @@ async function cleanupTestDatabase() {
       where: {
         OR: [
           { id: { startsWith: "test-" } },
-          { clerkId: { startsWith: "test-" } },
+          { email: { contains: "test" } },
         ],
       },
     });

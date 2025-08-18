@@ -3,6 +3,7 @@
 export default function SentryTestPage() {
   const triggerError = () => {
     // This will throw: ReferenceError: myUndefinedFunction is not defined
+    // @ts-ignore - Intentional error for testing Sentry
     myUndefinedFunction();
   };
 
