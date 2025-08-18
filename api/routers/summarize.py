@@ -60,8 +60,8 @@ async def summarize_video(
         
         # Update progress: Fetching video data
         await progress_storage.set_progress(task_id, {
-            "progress": 25,
-            "stage": "Fetching video data and transcript...",
+            "progress": 20,
+            "stage": "Fetching video metadata...",
             "status": "processing",
             "task_id": task_id,
             "cid": cid
@@ -98,10 +98,10 @@ async def summarize_video(
         tools = []
         resources = []
         
-        # Update progress: Analyzing content
+        # Update progress: Processing with Gumloop (this takes most of the time)
         await progress_storage.set_progress(task_id, {
-            "progress": 60,
-            "stage": "Analyzing content with AI...",
+            "progress": 40,
+            "stage": "Processing with Gumloop AI (this may take 60-90 seconds)...",
             "status": "processing",
             "task_id": task_id,
             "cid": cid
