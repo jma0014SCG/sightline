@@ -1,0 +1,73 @@
+/*
+  # Security Headers
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  
+  # Cache static assets for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+
+/api/*
+  # Don't cache API responses by default
+  Cache-Control: no-cache, no-store, must-revalidate
+  
+  # CORS headers for API
+  Access-Control-Allow-Origin: https://sightline.ai
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
+
+/*.js
+  # Cache JavaScript files for 1 year (they have hashed names)
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript; charset=utf-8
+
+/*.css
+  # Cache CSS files for 1 year (they have hashed names)
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: text/css; charset=utf-8
+
+/*.woff2
+  # Cache fonts for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: font/woff2
+
+/images/*
+  # Cache images for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+  
+  # Add vary header for responsive images
+  Vary: Accept
+
+/*.webp
+  # Modern image format
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/webp
+
+/*.avif
+  # Modern image format
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: image/avif
+
+/
+  # Cache the homepage for 1 hour
+  Cache-Control: public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400
+  
+  # Preconnect to external services
+  Link: <https://fonts.googleapis.com>; rel=preconnect
+  Link: <https://fonts.gstatic.com>; rel=preconnect; crossorigin
+  Link: <https://clerk.com>; rel=preconnect
+  Link: <https://api.stripe.com>; rel=preconnect
+
+/library
+  # Dynamic content - short cache
+  Cache-Control: private, max-age=0, must-revalidate
+  
+/library/*
+  # Dynamic content - short cache
+  Cache-Control: private, max-age=0, must-revalidate
+
+/share/*
+  # Public share pages - cache for 5 minutes
+  Cache-Control: public, max-age=300, s-maxage=300

@@ -1,0 +1,71 @@
+# Render.com Deployment Configuration
+# Alternative to Railway for Python API deployment
+
+services:
+  # Python FastAPI Backend
+  - type: web
+    name: sightline-api
+    runtime: python
+    region: oregon
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.index:app --host 0.0.0.0 --port $PORT --workers 4
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: ENVIRONMENT
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: GUMLOOP_API_KEY
+        sync: false
+      - key: OXYLABS_USERNAME
+        sync: false
+      - key: OXYLABS_PASSWORD
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+    domains:
+      - api.sightline.ai
+
+  # Background Worker (if needed for long-running tasks)
+  - type: worker
+    name: sightline-worker
+    runtime: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m celery -A api.worker worker --loglevel=info
+    envVars:
+      - fromService:
+          type: web
+          name: sightline-api
+          envVarKey: OPENAI_API_KEY
+      - fromService:
+          type: web
+          name: sightline-api
+          envVarKey: YOUTUBE_API_KEY
+    autoDeploy: true
+
+# Databases (if using Render's managed PostgreSQL)
+databases:
+  - name: sightline-db
+    region: oregon
+    plan: standard
+    databaseName: sightline
+    user: sightline_user
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all IPs (configure properly for production)
+
+# Redis for caching (optional)
+  - name: sightline-redis
+    type: redis
+    region: oregon
+    plan: starter
+    maxMemoryPolicy: allkeys-lru
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all IPs (configure properly for production)
