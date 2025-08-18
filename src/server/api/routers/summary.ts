@@ -10,6 +10,7 @@ import { classifySummaryContent } from '@/lib/classificationService'
 import { monitoring } from '@/lib/monitoring'
 import { checkBusinessMetric } from '@/lib/performance-budgets'
 import { emailService } from '@/lib/emailService'
+import { backendClient } from '@/lib/api/backend-client'
 import { 
   enforceAnonymousUsageLimit, 
   recordAnonymousUsage,
@@ -171,58 +172,31 @@ export const summaryRouter = createTRPCRouter({
           timestamp: new Date().toISOString()
         })
         
-        // Call FastAPI backend
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
-        
-        const response = await fetch(`${backendUrl}/api/summarize`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Correlation-Id': cid,
-            // No Authorization header for anonymous requests
-          },
-          body: JSON.stringify({ url: sanitizedUrl }),
-        })
-
-        console.log('📡 Anonymous response status:', response.status)
-
+        // Call FastAPI backend with optimized client
         let data
-        if (!response.ok) {
-          let errorMessage = 'Failed to summarize video'
-          try {
-            const responseText = await response.text()
-            try {
-              const errorData = JSON.parse(responseText)
-              errorMessage = errorData.detail || errorData.error || errorMessage
-            } catch (e) {
-              errorMessage = responseText || errorMessage
+        try {
+          data = await backendClient.post('/api/summarize', 
+            { url: sanitizedUrl },
+            {
+              headers: {
+                'X-Correlation-Id': cid,
+                // No Authorization header for anonymous requests
+              },
+              timeout: 120000, // 120 second timeout for summarization
             }
-          } catch (e) {
-            errorMessage = 'Failed to read error response'
-          }
-          
-          logger.error('Backend API error (anonymous)', {
-            error: errorMessage,
-            videoId,
-            clientIP,
-            status: response.status,
-            timestamp: new Date().toISOString()
+          )
+        } catch (error) {
+          ctx.logger.error('Backend API call failed', error instanceof Error ? error : undefined, {
+            url: sanitizedUrl,
+            correlationId: cid,
           })
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
-            message: errorMessage,
+            message: error instanceof Error ? error.message : 'Failed to summarize video',
           })
         }
 
-        try {
-          const responseText = await response.text()
-          data = JSON.parse(responseText)
-        } catch (e) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Invalid JSON response from backend',
-          })
-        }
+        console.log('📡 Anonymous response received')
         
         // Check if we got an error response
         if (data.error) {
@@ -524,12 +498,9 @@ export const summaryRouter = createTRPCRouter({
         // For testing without auth, call backend without auth token
         console.log('⚠️  TESTING MODE: Calling backend without authentication')
         
-        // Call FastAPI backend
+        // Call FastAPI backend with optimized client
         // Generate correlation ID for request tracing
         const cid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
-        console.log('🔗 Backend URL:', backendUrl)
         
         // Structured logging with correlation ID
         logger.info('Starting summary creation', {
@@ -541,56 +512,31 @@ export const summaryRouter = createTRPCRouter({
           timestamp: new Date().toISOString()
         })
         
-        const response = await fetch(`${backendUrl}/api/summarize`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Correlation-Id': cid,
-            // No Authorization header for testing
-          },
-          body: JSON.stringify({ url: sanitizedUrl }),
-        })
-
-        console.log('📡 Response status:', response.status)
-
         let data
-        if (!response.ok) {
-          let errorMessage = 'Failed to summarize video'
-          try {
-            const responseText = await response.text()
-            try {
-              const errorData = JSON.parse(responseText)
-              errorMessage = errorData.detail || errorData.error || errorMessage
-            } catch (e) {
-              errorMessage = responseText || errorMessage
+        try {
+          data = await backendClient.post('/api/summarize',
+            { url: sanitizedUrl },
+            {
+              headers: {
+                'X-Correlation-Id': cid,
+                // No Authorization header for testing
+              },
+              timeout: 120000, // 120 second timeout for summarization
             }
-          } catch (e) {
-            errorMessage = 'Failed to read error response'
-          }
-          
+          )
+          console.log('✅ Received response from FastAPI:', data)
+        } catch (error) {
           logger.error('Backend API error', {
-            error: errorMessage,
+            error: error instanceof Error ? error.message : 'Unknown error',
             videoId,
             userId,
-            status: response.status,
             timestamp: new Date().toISOString()
           })
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
-            message: errorMessage,
+            message: error instanceof Error ? error.message : 'Failed to summarize video',
           })
         }
-
-        try {
-          const responseText = await response.text()
-          data = JSON.parse(responseText)
-        } catch (e) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Invalid JSON response from backend',
-          })
-        }
-        console.log('✅ Received response from FastAPI:', data)
         
         // Check if we got an error response
         if (data.error) {

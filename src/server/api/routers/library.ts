@@ -157,31 +157,36 @@ export const libraryRouter = createTRPCRouter({
           break
       }
 
-      const items = await ctx.prisma.summary.findMany({
-        where,
-        take: limit + 1,
-        cursor: cursor ? { id: cursor } : undefined,
-        orderBy,
-        include: {
-          categories: {
-            select: {
-              id: true,
-              name: true,
-              createdAt: true,
-              updatedAt: true,
-            }
+      // Use a transaction to batch queries and improve performance
+      const [items, totalCount] = await ctx.prisma.$transaction([
+        ctx.prisma.summary.findMany({
+          where,
+          take: limit + 1,
+          cursor: cursor ? { id: cursor } : undefined,
+          orderBy,
+          include: {
+            categories: {
+              select: {
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+              }
+            },
+            tags: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                createdAt: true,
+                updatedAt: true,
+              }
+            },
           },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              createdAt: true,
-              updatedAt: true,
-            }
-          },
-        },
-      })
+        }),
+        // Get total count for pagination info (optional, but useful)
+        ctx.prisma.summary.count({ where })
+      ])
 
       let nextCursor: typeof cursor | undefined = undefined
       if (items.length > limit) {
@@ -192,6 +197,7 @@ export const libraryRouter = createTRPCRouter({
       return {
         items,
         nextCursor,
+        totalCount, // Include total count for better pagination UX
       }
     }),
 

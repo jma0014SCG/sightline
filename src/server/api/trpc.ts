@@ -7,6 +7,8 @@ import { headers } from 'next/headers'
 import { monitoring } from '@/lib/monitoring'
 import { getCorrelationId, generateCorrelationId } from '@/lib/api/correlation'
 import { createLogger } from '@/lib/logger'
+import { userCache } from '@/lib/cache/memory-cache'
+import type { User } from '@prisma/client'
 
 /**
  * Create context for each request
@@ -25,6 +27,7 @@ export const createTRPCContext = async () => {
     headers: headersList,
     correlationId,
     requestId,
+    userCache: new Map<string, User>(), // Per-request user cache
     logger: createLogger({
       component: 'trpc',
       correlationId,
@@ -148,32 +151,53 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
 
-  // Ensure user exists in our database
-  let user = await ctx.prisma.user.findUnique({
-    where: { id: ctx.userId }
-  })
-
-  // If user doesn't exist, create them with minimal data
-  // The webhook will update with full data when it fires
+  // Check per-request cache first
+  let user = ctx.userCache.get(ctx.userId)
+  
   if (!user) {
-    try {
-      user = await ctx.prisma.user.create({
-        data: {
-          id: ctx.userId,
-          email: `temp_${ctx.userId}@placeholder.com`, // Temporary email, webhook will update
-          name: null,
-          image: null,
-          emailVerified: null,
-        },
+    // Check global cache
+    const cacheKey = `user:${ctx.userId}`
+    user = userCache.get(cacheKey)
+    
+    if (!user) {
+      // Fetch from database
+      user = await ctx.prisma.user.findUnique({
+        where: { id: ctx.userId }
       })
+
+      // If user doesn't exist, create them with minimal data
+      // The webhook will update with full data when it fires
+      if (!user) {
+        try {
+          user = await ctx.prisma.user.create({
+            data: {
+              id: ctx.userId,
+              email: `temp_${ctx.userId}@placeholder.com`, // Temporary email, webhook will update
+              name: null,
+              image: null,
+              emailVerified: null,
+            },
+          })
+          
+          console.log(`Auto-created minimal user in database: ${ctx.userId}`)
+        } catch (error) {
+          console.error('Failed to create user in database:', error)
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Failed to initialize user account' 
+          })
+        }
+      }
       
-      console.log(`Auto-created minimal user in database: ${ctx.userId}`)
-    } catch (error) {
-      console.error('Failed to create user in database:', error)
-      throw new TRPCError({ 
-        code: 'INTERNAL_SERVER_ERROR', 
-        message: 'Failed to initialize user account' 
-      })
+      // Cache the user data
+      if (user) {
+        userCache.set(cacheKey, user, 60) // Cache for 1 minute
+      }
+    }
+    
+    // Store in per-request cache
+    if (user) {
+      ctx.userCache.set(ctx.userId, user)
     }
   }
 
@@ -181,11 +205,12 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
     ctx: {
       // infers the `userId` as non-nullable
       userId: ctx.userId as string,
-      user: user,
+      user: user!,
       prisma: ctx.prisma,
       headers: ctx.headers,
       correlationId: ctx.correlationId,
       requestId: ctx.requestId,
+      userCache: ctx.userCache,
       logger: ctx.logger.child({ userId: ctx.userId }),
     },
   })

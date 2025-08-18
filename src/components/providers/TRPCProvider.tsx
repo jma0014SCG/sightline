@@ -15,7 +15,14 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000,
+            staleTime: 5 * 60 * 1000, // 5 minutes instead of 1 minute
+            cacheTime: 10 * 60 * 1000, // 10 minutes cache time
+            retry: 2, // Reduce retries for faster failure
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+            refetchOnWindowFocus: false, // Disable aggressive refetching
+          },
+          mutations: {
+            retry: 1, // Single retry for mutations
           },
         },
       })
@@ -32,6 +39,12 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
+          maxBatchSize: 10, // Batch up to 10 requests
+          headers: () => {
+            return {
+              'x-trpc-source': 'client',
+            }
+          },
         }),
       ],
     })
