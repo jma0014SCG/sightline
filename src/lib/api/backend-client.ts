@@ -7,7 +7,7 @@ class BackendClient {
 
   constructor() {
     this.baseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
-    this.defaultTimeout = 120000 // 120 seconds (2 minutes)
+    this.defaultTimeout = 300000 // 300 seconds (5 minutes) - increased for longer videos
   }
 
   /**

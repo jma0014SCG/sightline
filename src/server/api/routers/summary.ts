@@ -182,7 +182,7 @@ export const summaryRouter = createTRPCRouter({
                 'X-Correlation-Id': cid,
                 // No Authorization header for anonymous requests
               },
-              timeout: 120000, // 120 second timeout for summarization
+              timeout: 300000, // 300 second timeout for summarization (5 minutes)
             }
           )
         } catch (error) {
@@ -521,7 +521,7 @@ export const summaryRouter = createTRPCRouter({
                 'X-Correlation-Id': cid,
                 // No Authorization header for testing
               },
-              timeout: 120000, // 120 second timeout for summarization
+              timeout: 300000, // 300 second timeout for summarization (5 minutes)
             }
           )
           console.log('✅ Received response from FastAPI:', data)

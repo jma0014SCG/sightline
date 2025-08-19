@@ -17,20 +17,20 @@ export const PERFORMANCE_BUDGETS = {
     FAST: 500,      // Fast APIs (health checks, auth)
     NORMAL: 2000,   // Normal APIs (CRUD operations)
     SLOW: 5000,     // Slow APIs (AI processing, external calls)
-    TIMEOUT: 30000, // Maximum timeout
+    TIMEOUT: 300000, // Maximum timeout (5 minutes - increased for longer videos)
   },
   
   // Business metrics budgets
   BUSINESS: {
     SUMMARY_CREATION: {
-      TARGET: 45000,   // 45 seconds target
-      WARNING: 60000,  // 60 seconds warning
-      CRITICAL: 90000, // 90 seconds critical
+      TARGET: 90000,   // 90 seconds target (reasonable for most videos)
+      WARNING: 180000,  // 3 minutes warning (for longer videos)
+      CRITICAL: 300000, // 5 minutes critical (maximum allowed)
     },
     AI_PROCESSING: {
-      TARGET: 15000,   // 15 seconds target
-      WARNING: 25000,  // 25 seconds warning
-      CRITICAL: 45000, // 45 seconds critical
+      TARGET: 60000,   // 60 seconds target (for longer videos)
+      WARNING: 120000,  // 2 minutes warning
+      CRITICAL: 240000, // 4 minutes critical
     },
     TRANSCRIPT_FETCH: {
       TARGET: 5000,    // 5 seconds target
@@ -135,9 +135,12 @@ export class PerformanceBudgetMonitor {
     if (endpoint.includes('/health') || endpoint.includes('/auth')) {
       threshold = budgets.FAST
       tier = 'fast'
-    } else if (endpoint.includes('/summarize') || endpoint.includes('/ai/')) {
-      threshold = budgets.SLOW
-      tier = 'slow'
+    } else if (endpoint.includes('/summarize') || endpoint.includes('/ai/') || 
+               endpoint.includes('mutation:summary.create') || 
+               endpoint.includes('mutation:summary.createAnonymous')) {
+      // Use the 5-minute timeout for summary creation mutations
+      threshold = 300000 // 5 minutes for summary creation
+      tier = 'summary_creation'
     }
     
     let status: PerformanceBudgetCheck['status'] = 'good'

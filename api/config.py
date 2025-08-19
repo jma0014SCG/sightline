@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     rate_limit_per_day: int = 100
     
     # Summarization Settings
-    max_video_duration: int = 7200  # 2 hours in seconds
+    max_video_duration: int = 21600  # 6 hours in seconds (increased from 2 hours)
     summary_cache_ttl: int = 86400  # 24 hours in seconds
     
     # Proxy Settings (optional)

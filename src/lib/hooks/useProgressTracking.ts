@@ -24,7 +24,7 @@ interface PreviousTaskData {
 const BACKOFF_BASE = 1000 // Start at 1 second
 const BACKOFF_MAX = 8000 // Max 8 seconds between retries
 const BACKOFF_JITTER = 200 // ±200ms random jitter
-const MAX_DURATION = 120000 // Give up after 120 seconds (2 minutes) for backend processing
+const MAX_DURATION = 300000 // Give up after 300 seconds (5 minutes) for backend processing - increased for longer videos
 
 export function useProgressTracking({
   taskId,

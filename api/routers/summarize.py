@@ -70,11 +70,13 @@ async def summarize_video(
         # Get video metadata and transcript in parallel
         video_info, (transcript, is_gumloop) = await youtube_service.get_video_data_parallel(video_id)
         
-        # Check video duration
-        if video_info.duration > 7200:  # 2 hours
+        # Check video duration (now supports up to 6 hours)
+        from config import settings
+        if video_info.duration > settings.max_video_duration:
+            hours = settings.max_video_duration / 3600
             raise HTTPException(
                 status_code=400, 
-                detail="Video is too long. Maximum duration is 2 hours."
+                detail=f"Video is too long. Maximum duration is {hours} hours."
             )
         
         if not transcript:
