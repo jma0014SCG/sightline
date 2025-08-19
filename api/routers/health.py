@@ -3,13 +3,14 @@
 from datetime import datetime, timezone
 from typing import Dict, Any
 import asyncio
+import os
 import psutil
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..config import get_settings
-from ..services.youtube_service import YouTubeService
-from ..services.gumloop_service import GumloopService
+from config import settings
+from services.youtube_service import YouTubeService
+from services.gumloop_service import GumloopService
 
 router = APIRouter(tags=["health"])
 
@@ -34,12 +35,12 @@ async def health_check() -> HealthStatus:
     Basic health check endpoint.
     Returns 200 if the service is running.
     """
-    settings = get_settings()
+    # Settings already imported at module level
     
     return HealthStatus(
         status="healthy",
         timestamp=datetime.now(timezone.utc).isoformat(),
-        environment=settings.ENVIRONMENT,
+        environment=os.getenv('NODE_ENV', 'development'),
         checks={
             "api": "operational",
             "memory_usage_mb": round(psutil.Process().memory_info().rss / 1024 / 1024, 2),
@@ -53,7 +54,7 @@ async def readiness_check() -> ReadinessStatus:
     Readiness check endpoint.
     Verifies that all required services are accessible.
     """
-    settings = get_settings()
+    # Settings already imported at module level
     services_status = {}
     details = {}
     
@@ -68,7 +69,7 @@ async def readiness_check() -> ReadinessStatus:
         details["youtube"] = str(e)
     
     # Check Gumloop service (if API key is configured)
-    if settings.GUMLOOP_API_KEY:
+    if settings.gumloop_api_key:
         try:
             gumloop_service = GumloopService()
             services_status["gumloop"] = True
@@ -81,7 +82,7 @@ async def readiness_check() -> ReadinessStatus:
         details["gumloop"] = "API key not configured"
     
     # Check OpenAI configuration
-    services_status["openai"] = bool(settings.OPENAI_API_KEY)
+    services_status["openai"] = bool(settings.openai_api_key)
     details["openai"] = "API key configured" if services_status["openai"] else "API key not configured"
     
     # Overall readiness
@@ -111,12 +112,12 @@ async def startup_check() -> Dict[str, Any]:
     Startup check endpoint.
     Used by orchestrators to determine if the service has started successfully.
     """
-    settings = get_settings()
+    # Settings already imported at module level
     
     return {
         "status": "started",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "environment": settings.ENVIRONMENT,
+        "environment": os.getenv('NODE_ENV', 'development'),
         "version": "1.0.0",
-        "python_api_url": settings.API_BASE_URL
+        "python_api_url": os.getenv('API_BASE_URL', 'http://localhost:8000')
     }
