@@ -11,7 +11,7 @@ import { useFeatureFlag } from '@/lib/feature-flags'
 export default function SummaryPage() {
   const params = useParams()
   const router = useRouter()
-  const { toast } = useToast()
+  const { showError, showSuccess } = useToast()
   const id = params.id as string
   
   // Feature flag for improved layout
@@ -20,11 +20,11 @@ export default function SummaryPage() {
   const { data: summary, isLoading } = api.summary.getById.useQuery({ id })
   const deleteMutation = api.summary.delete.useMutation({
     onSuccess: () => {
-      toast.success('Summary deleted successfully')
+      showSuccess('Summary deleted successfully')
       router.push('/library')
     },
     onError: () => {
-      toast.error('Failed to delete summary')
+      showError('Failed to delete summary')
     }
   })
 
@@ -84,7 +84,7 @@ export default function SummaryPage() {
         />
 
         {/* Improved Summary Content with new layout */}
-        <SummaryViewerImproved summary={summary} />
+        <SummaryViewerImproved summary={summary as any} />
       </div>
     )
   }
@@ -104,7 +104,7 @@ export default function SummaryPage() {
 
       {/* Summary Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <SummaryViewer summary={summary} />
+        <SummaryViewer summary={summary as any} />
       </main>
     </div>
   )

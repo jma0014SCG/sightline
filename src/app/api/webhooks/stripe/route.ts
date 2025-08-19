@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    logger.info('Processing Stripe webhook:', event.type)
+    logger.info('Processing Stripe webhook:', { eventType: event.type })
 
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        logger.warn('Payment failed for invoice:', invoice.id)
+        logger.warn('Payment failed for invoice:', { invoiceId: invoice.id })
         // You could send an email notification here
         break
       }

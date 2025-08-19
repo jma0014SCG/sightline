@@ -60,7 +60,7 @@ async function backfillUsageEvents() {
         }
 
         // Extract metadata for the usage event
-        const metadata = {
+        const metadata: any = {
           plan: summary.user?.plan || 'FREE',
           videoTitle: summary.videoTitle,
           channelName: summary.channelName,

@@ -56,7 +56,7 @@ making knowledge extraction time-consuming and inconsistent.
 
 1. **Try Without Signup** - Visit the homepage, paste any YouTube URL, get instant summary
 2. **Sign Up for More** - Create account for personal library and advanced features
-3. **Choose Your Plan** - Free (3 lifetime), Pro (25/month), or Complete (unlimited)
+3. **Choose Your Plan** - Free (3 lifetime), Pro (25/month), or Enterprise (unlimited)
 
 ### Tech Stack
 

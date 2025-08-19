@@ -115,7 +115,8 @@ async def shutdown_event():
 
 # Import and include routers
 try:
-    from routers import summarize, transcript
+    from routers import summarize, transcript, health
+    app.include_router(health.router, prefix="/api")
     app.include_router(summarize.router, prefix="/api")
     app.include_router(transcript.router, prefix="/api")
     print("✅ Routers imported successfully")

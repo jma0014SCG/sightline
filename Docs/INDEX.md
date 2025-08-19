@@ -3,8 +3,8 @@ title: "Documentation Index"
 description: "Central navigation hub for all Sightline.ai platform documentation"
 type: "guide"
 canonical_url: "/docs/"
-version: "1.0"
-last_updated: "2025-01-09"
+version: "1.1"
+last_updated: "2025-08-18"
 audience: ["all-users", "developers", "operators", "contributors"]
 complexity: "beginner"
 tags: ["navigation", "index", "documentation-hub", "quick-start"]
@@ -40,9 +40,10 @@ quick_start: true
 ### For New Developers
 
 1. **[README.md](../README.md)** - Project overview and quick start
-2. **[ARCHITECTURE.md](../ARCHITECTURE.md)** - System architecture and data flow
-3. **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Development setup and workflow
-4. **[GLOSSARY.md](../GLOSSARY.md)** - Platform terminology
+2. **[PROJECT_INDEX.md](../PROJECT_INDEX.md)** - Complete project structure and navigation
+3. **[ARCHITECTURE.md](../ARCHITECTURE.md)** - System architecture and data flow
+4. **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Development setup and workflow
+5. **[GLOSSARY.md](../GLOSSARY.md)** - Platform terminology
 
 ### For Contributors  
 
@@ -64,6 +65,7 @@ quick_start: true
 | Document | Purpose | Audience | Status |
 |----------|---------|----------|---------|
 | **[README.md](../README.md)** | Project overview, what/why/how/run/links | All users | ✅ Active |
+| **[PROJECT_INDEX.md](../PROJECT_INDEX.md)** | Complete directory index with deep analysis | Developers | ✅ Active |
 | **[ARCHITECTURE.md](../ARCHITECTURE.md)** | System diagrams ([overview](../ARCHITECTURE.md#system-overview)), data flow ([patterns](../ARCHITECTURE.md#data-flow)), dependencies ([external](../ARCHITECTURE.md#external-dependencies)) | Developers, Architects | ✅ Active |
 | **[CONTRIBUTING.md](../CONTRIBUTING.md)** | Development workflow, testing, PR process | Contributors | ✅ Active |
 | **[GLOSSARY.md](../GLOSSARY.md)** | Canonical terminology and definitions | All stakeholders | ✅ Active |

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import { api } from '@/components/providers/TRPCProvider'
-import { toast } from '@/hooks/useToast'
+import { useToast } from '@/components/providers/ToastProvider'
 
 const PLANS = [
   {
@@ -62,11 +62,12 @@ const PLANS = [
 export default function UpgradePage() {
   const router = useRouter()
   const { userId, isLoaded, isSignedIn } = useAuth()
+  const { showError } = useToast()
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   
   // Get user's current plan
-  const { data: userData } = api.auth.getUserProfile.useQuery(undefined, {
+  const { data: userData } = api.auth.getCurrentUser.useQuery(undefined, {
     enabled: isSignedIn && isLoaded,
   })
   
@@ -79,32 +80,20 @@ export default function UpgradePage() {
       }
     },
     onError: (error) => {
-      toast({
-        title: 'Upgrade failed',
-        description: error.message || 'Failed to start checkout process',
-        variant: 'destructive',
-      })
+      showError(error.message || 'Failed to start checkout process')
       setIsProcessing(false)
     },
   })
   
   const handleUpgrade = async (planId: string, priceId?: string) => {
     if (!isSignedIn) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to upgrade your plan',
-        variant: 'destructive',
-      })
+      showError('Please sign in to upgrade your plan')
       router.push('/sign-in?redirect=/upgrade')
       return
     }
     
     if (!priceId) {
-      toast({
-        title: 'Invalid plan',
-        description: 'This plan is not available for upgrade',
-        variant: 'destructive',
-      })
+      showError('This plan is not available for upgrade')
       return
     }
     

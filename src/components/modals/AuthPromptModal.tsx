@@ -209,7 +209,7 @@ export function AuthPromptModal({
               <Quote className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs text-gray-700 italic">
-                  "Jump started my AI coding ability and gave me 20+ hours of time back"
+                  &ldquo;Jump started my AI coding ability and gave me 20+ hours of time back&rdquo;
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   - Sarah K., Product Manager at Google

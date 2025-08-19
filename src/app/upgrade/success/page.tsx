@@ -50,7 +50,7 @@ export default function UpgradeSuccessPage() {
               </h1>
               
               <p className="text-gray-600 mb-6">
-                We're activating your new plan. This usually takes just a moment...
+                We&apos;re activating your new plan. This usually takes just a moment...
               </p>
               
               <div className="space-y-2">
@@ -90,7 +90,7 @@ export default function UpgradeSuccessPage() {
               {/* What's Included */}
               <div className="bg-gray-50 rounded-lg p-4 mb-8 text-left">
                 <h3 className="font-semibold text-gray-900 mb-3">
-                  What's included in your plan:
+                  What&apos;s included in your plan:
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-700">
                   <li className="flex items-start">

@@ -248,9 +248,7 @@ tests/
 ├── test_transcript_service.py   # Transcript service tests
 ├── test_ytdlp.py                # yt-dlp service tests
 ├── test-playbooks-parsing.py    # Playbooks parsing tests
-├── test-parsing.py              # Parsing tests
 ├── test-full-flow.js            # Full flow tests
-├── test-oauth.html              # OAuth tests
 ├── test-markdown-parsing.md     # Markdown parsing tests
 └── test-gumloop-output.md       # Gumloop output tests
 ```text

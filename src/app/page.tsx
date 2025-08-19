@@ -1242,8 +1242,6 @@ export default function HomePage() {
                 <iframe 
                   src="https://www.loom.com/embed/60df8f98f6c34a57b7bc71049b445f91?sid=4e7669a8-bfb7-4926-bfdc-d1032a24acdc" 
                   frameBorder="0"
-                  webkitallowfullscreen="true"
-                  mozallowfullscreen="true"
                   allowFullScreen
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                   className="rounded-lg"

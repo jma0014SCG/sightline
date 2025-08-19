@@ -129,12 +129,16 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any // Stripe.Invoice type issues
         
         // Reset monthly usage on successful payment
-        if (invoice.subscription && typeof invoice.subscription === 'string') {
+        const subscriptionId = typeof invoice.subscription === 'string' 
+          ? invoice.subscription 
+          : invoice.subscription?.id
+        
+        if (subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(
-            invoice.subscription
+            subscriptionId
           )
           
           const user = await prisma.user.findUnique({
@@ -151,7 +155,7 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        logger.warn('Payment failed for invoice:', invoice.id)
+        logger.warn('Payment failed for invoice:', { invoiceId: invoice.id })
         
         // Could send email notification or mark account as at-risk
         break
@@ -200,7 +204,7 @@ async function handleSubscriptionChange(
       where: { id: userId },
       data: {
         stripePriceId: priceId,
-        stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       },
     })
     

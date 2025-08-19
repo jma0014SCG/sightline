@@ -18,7 +18,7 @@ import { useToast } from '@/components/providers/ToastProvider'
 
 export default function LibraryPage() {
   const router = useRouter()
-  const { toast } = useToast()
+  const { showSuccess, showError } = useToast()
   const utils = api.useUtils()
   
   const [isCreatingSummary, setIsCreatingSummary] = useState(false)
@@ -125,7 +125,7 @@ export default function LibraryPage() {
       utils.billing.getUsageStats.invalidate()
       
       // Show success toast
-      toast.success('Summary created and saved to your library!')
+      showSuccess('Summary created and saved to your library!')
       
       // Refresh to ensure data is up to date
       router.refresh()
@@ -140,7 +140,7 @@ export default function LibraryPage() {
         ? 'You have reached your summary limit. Please upgrade your plan.'
         : 'Unable to create summary. Please try again.'
       
-      toast.error(errorMessage)
+      showError(errorMessage)
     }
   })
 
