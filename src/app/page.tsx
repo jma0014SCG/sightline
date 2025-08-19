@@ -1238,9 +1238,9 @@ export default function HomePage() {
           {/* Video Container */}
           <div className="mx-auto max-w-6xl">
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-prussian-blue-200/50 ring-1 ring-prussian-blue-200">
-              <div style={{ position: 'relative', paddingBottom: '41.25%', height: 0 }}>
+              <div style={{ position: 'relative', paddingBottom: '58.951965065502186%', height: 0 }}>
                 <iframe 
-                  src="https://www.loom.com/embed/60df8f98f6c34a57b7bc71049b445f91?sid=4e7669a8-bfb7-4926-bfdc-d1032a24acdc" 
+                  src="https://www.loom.com/embed/60baaa8d79454a8186a92b8e187b6845?sid=1d361d0a-b600-4adf-b8da-af810c52ab00" 
                   frameBorder="0"
                   allowFullScreen
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
