@@ -121,20 +121,6 @@ export function URLInput({
     onSubmit(url, fingerprint);
   };
 
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setUrl(text);
-      setError(null);
-      setIsValid(text.trim() !== "" && validateYouTubeUrl(text));
-    } catch (err) {
-      // Provide helpful error message for clipboard permission issues
-      setError(
-        "Clipboard access denied. Please paste manually or enable clipboard permissions.",
-      );
-      // Silent fail - user will see error message
-    }
-  };
 
   // Apply different styling based on className context
   const isCreateSummaryContext = className?.includes("create-summary");
@@ -190,23 +176,6 @@ export function URLInput({
               <CheckCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-400 animate-pulse" />
             )}
           </div>
-
-          <button
-            type="button"
-            onClick={handlePaste}
-            disabled={isLoading || disabled}
-            data-testid="paste-button"
-            className={cn(
-              "rounded-lg px-4 py-3 sm:px-4 sm:py-3 text-sm font-medium transition-all duration-300",
-              "focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
-              "min-h-[44px] min-w-[64px] hover:scale-105",
-              isCreateSummaryContext
-                ? "bg-white border-2 border-blue-200 text-gray-700 hover:bg-blue-50 focus:ring-blue-500/20"
-                : "bg-white border border-paynes-gray/20 text-paynes-gray hover:bg-anti-flash-white focus:ring-silver-lake-blue/50",
-            )}
-          >
-            Paste
-          </button>
 
           <button
             type="submit"
