@@ -70,7 +70,7 @@ export function KeyMomentsSidebar({
       </div>
       
       {!collapsedSections.has('key-moments') && (
-        <div id="key-moments-content" className="p-4">
+        <div id="key-moments-content" className="p-4 animate-smooth-expand">
           <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <div className="space-y-2">
               {keyMoments.map((moment, index) => (
@@ -79,12 +79,12 @@ export function KeyMomentsSidebar({
                 onClick={() => onTimestampClick(moment.timestamp)}
                 disabled={!playerReady}
                 className={cn(
-                  "w-full flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 hover:shadow-md hover:border-blue-200 text-left",
+                  "w-full flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 btn-hover-lift",
                   "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
                   playerReady ? "cursor-pointer" : "cursor-not-allowed",
                   index % 2 === 0 
-                    ? "bg-white border-gray-100 hover:bg-blue-50/30" 
-                    : "bg-gray-50 border-gray-150 hover:bg-blue-50/50"
+                    ? "bg-gradient-to-r from-white to-gray-50 border-gray-100 hover:from-blue-50 hover:to-white" 
+                    : "bg-gradient-to-r from-gray-50 to-white border-gray-150 hover:from-blue-50 hover:to-white"
                 )}
                 aria-label={`Jump to ${moment.timestamp} in video`}
                 title={playerReady ? `Jump to ${moment.timestamp}: ${moment.insight}` : 'Player not ready'}

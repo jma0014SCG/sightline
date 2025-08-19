@@ -4,11 +4,12 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare, RefreshCw, Info } from "lucide-react";
+import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare, RefreshCw, Info, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SummaryViewerProps } from "@/components/organisms/SummaryViewer/SummaryViewer.types";
 import { api } from "@/lib/api/trpc";
 import { useToast } from "@/components/providers/ToastProvider";
+import { calculateReadingTime } from "@/utils/readingTime";
 
 interface MainContentColumnProps {
   summary: SummaryViewerProps["summary"];
@@ -105,7 +106,7 @@ const VideoMetadataSection = ({ summary, onMetadataRefresh }: {
   if (!hasMetadata && !summary.id) return null;
   
   return (
-    <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-3">
+    <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 mb-6 card-shadow-sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* Video title and channel */}
@@ -294,21 +295,24 @@ const PrimaryContentTabs = ({
   
   const currentTab = tabs.find(tab => tab.id === activeTab) || tabs[0];
   
+  // Calculate reading time for current tab
+  const readingTime = currentTab ? calculateReadingTime(currentTab.content) : '';
+  
   return (
-    <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+    <section className="bg-white border border-gray-200 rounded-xl overflow-hidden card-shadow animate-fade-in">
       {/* Tab Navigation */}
-      <div className="bg-slate-50 border-b border-gray-200">
+      <div className="bg-gradient-to-r from-slate-50 to-white border-b border-gray-200">
         <nav className="flex">
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 px-3 py-2.5 text-sm border-b-2 transition-all duration-200",
+                "flex-1 px-3 py-2.5 text-sm border-b-2 transition-all duration-200 relative",
                 activeTab === tab.id ? "bg-white font-semibold shadow-sm" : "hover:bg-gray-100 font-medium",
-                activeTab === tab.id && tab.color === 'amber' && "border-amber-500 text-amber-700 bg-amber-50",
-                activeTab === tab.id && tab.color === 'orange' && "border-orange-500 text-orange-700 bg-orange-50", 
-                activeTab === tab.id && tab.color === 'blue' && "border-blue-500 text-blue-700 bg-blue-50",
+                activeTab === tab.id && tab.color === 'amber' && "border-amber-500 text-amber-700 bg-gradient-to-t from-amber-50 to-white",
+                activeTab === tab.id && tab.color === 'orange' && "border-orange-500 text-orange-700 bg-gradient-to-t from-orange-50 to-white", 
+                activeTab === tab.id && tab.color === 'blue' && "border-blue-500 text-blue-700 bg-gradient-to-t from-blue-50 to-white",
                 activeTab !== tab.id && "border-transparent text-gray-600 hover:text-gray-800"
               )}
             >
@@ -343,7 +347,14 @@ const PrimaryContentTabs = ({
       
       {/* Tab Content */}
       <div className="p-4 lg:p-6">
-        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-6 prose-p:mb-4 prose-li:text-gray-900 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
+        {/* Reading Time Badge */}
+        {readingTime && (
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="h-3.5 w-3.5 text-gray-500" />
+            <span className="reading-time-badge">{readingTime}</span>
+          </div>
+        )}
+        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-[1.7] prose-p:mb-4 prose-li:text-gray-700 prose-li:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeHighlight]}
@@ -379,9 +390,9 @@ export function MainContentColumn({
   };
   
   return (
-    <div className={cn("space-y-3 lg:space-y-4", className)}>
+    <div className={cn("section-spacing", className)}>
       {/* Header with Video Info */}
-      <header className="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <header className="bg-white border border-gray-200 rounded-xl p-4 lg:p-6 card-shadow">
         <div className="space-y-3">
           {/* Title */}
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight tracking-tight">
@@ -426,7 +437,7 @@ export function MainContentColumn({
 
       {/* YouTube Player */}
       {summary.videoId && (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden card-shadow">
           {/* Player Mode Controls - compact row */}
           <div className="flex items-center justify-between p-3 bg-slate-50 border-b border-gray-200">
             <span className="text-sm font-medium text-gray-700">Video Player</span>
@@ -562,8 +573,8 @@ export function MainContentColumn({
 
         {/* Strategic Frameworks Section - moved here */}
         {sections.get("frameworks") && (
-          <section className="bg-white border border-gray-200 border-t-4 border-t-purple-500 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between gap-4 p-4 bg-purple-50">
+          <section className="bg-white border border-gray-200 border-t-4 border-t-purple-500 rounded-xl overflow-hidden card-shadow">
+            <div className="flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-purple-50 to-white">
               <button
                 onClick={() => toggleSection("frameworks")}
                 className="flex-grow flex items-center justify-between text-left hover:opacity-90 transition-opacity"
