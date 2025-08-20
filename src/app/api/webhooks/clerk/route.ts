@@ -2,6 +2,7 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/db/prisma'
+import { preventWebhookReplay, trackWebhookRetry } from '@/lib/services/webhookSecurity'
 
 export async function POST(req: Request) {
   // Get the headers
@@ -38,6 +39,20 @@ export async function POST(req: Request) {
     return new Response('Error occured -- webhook verification failed', {
       status: 400,
     })
+  }
+
+  // Prevent replay attacks
+  const timestamp = parseInt(svix_timestamp) / 1000; // Convert to seconds
+  const replayCheck = await preventWebhookReplay(svix_id, timestamp);
+  
+  if (!replayCheck.valid) {
+    console.warn(`Webhook replay blocked: ${replayCheck.error}`);
+    // Return 200 to prevent retries for replay attacks
+    if (replayCheck.isReplay) {
+      return new Response('Webhook already processed', { status: 200 });
+    }
+    // Return 400 for invalid timestamps
+    return new Response(replayCheck.error || 'Invalid webhook', { status: 400 });
   }
 
   // Handle the webhook
@@ -93,9 +108,13 @@ export async function POST(req: Request) {
         console.log(`Unhandled event type: ${eventType}`)
     }
 
+    // Track successful processing
+    await trackWebhookRetry(svix_id, true);
     return new Response('Webhook handled successfully', { status: 200 })
   } catch (error) {
     console.error('Error handling webhook:', error)
+    // Track failed processing for retry logic
+    await trackWebhookRetry(svix_id, false);
     return new Response('Error handling webhook', { status: 500 })
   }
 }

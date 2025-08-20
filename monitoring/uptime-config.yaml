@@ -1,0 +1,175 @@
+# Uptime Monitoring Configuration
+# For use with UptimeRobot, Pingdom, or similar services
+
+monitors:
+  # Basic health check - Fast response expected
+  - name: "Sightline.ai - Basic Health"
+    url: "https://sightline.ai/api/health"
+    type: "HTTP"
+    interval: 60  # seconds
+    timeout: 10    # seconds
+    method: "GET"
+    expected_status: [200]
+    alert_contacts:
+      - email: "ops@sightline.ai"
+      - slack: "monitoring-alerts"
+    alert_threshold: 2  # Alert after 2 consecutive failures
+
+  # Detailed health check - Comprehensive but slower
+  - name: "Sightline.ai - Detailed Health"
+    url: "https://sightline.ai/api/health/detailed"
+    type: "HTTP"
+    interval: 300  # 5 minutes
+    timeout: 30     # seconds
+    method: "GET"
+    expected_status: [200, 503]  # 503 when unhealthy but still responding
+    alert_contacts:
+      - email: "ops@sightline.ai"
+      - slack: "monitoring-alerts"
+    alert_threshold: 1  # Alert immediately
+
+  # Database health check
+  - name: "Sightline.ai - Database Health"
+    url: "https://sightline.ai/api/health/database"
+    type: "HTTP"
+    interval: 120  # 2 minutes
+    timeout: 15    # seconds
+    method: "GET"
+    expected_status: [200]
+    alert_contacts:
+      - email: "ops@sightline.ai"
+      - slack: "database-alerts"
+    alert_threshold: 2
+
+  # Main website availability
+  - name: "Sightline.ai - Homepage"
+    url: "https://sightline.ai"
+    type: "HTTP"
+    interval: 60   # seconds
+    timeout: 15    # seconds
+    method: "GET"
+    expected_status: [200]
+    keyword_exists: "Sightline"  # Verify content loads
+    alert_contacts:
+      - email: "ops@sightline.ai"
+      - slack: "website-alerts"
+    alert_threshold: 2
+
+  # API endpoint monitoring
+  - name: "Sightline.ai - tRPC API"
+    url: "https://sightline.ai/api/trpc/health"
+    type: "HTTP"
+    interval: 120  # 2 minutes
+    timeout: 10    # seconds
+    method: "GET"
+    expected_status: [200, 405]  # 405 for GET on tRPC endpoint is normal
+    alert_contacts:
+      - email: "ops@sightline.ai"
+    alert_threshold: 3
+
+  # Critical user flows
+  - name: "Sightline.ai - Auth Flow"
+    url: "https://sightline.ai/sign-in"
+    type: "HTTP"
+    interval: 300  # 5 minutes
+    timeout: 20    # seconds
+    method: "GET"
+    expected_status: [200]
+    alert_contacts:
+      - email: "ops@sightline.ai"
+      - slack: "auth-alerts"
+    alert_threshold: 2
+
+# Alert escalation rules
+alert_escalation:
+  initial_delay: 0      # Alert immediately on threshold
+  repeat_interval: 300  # Repeat alerts every 5 minutes if still down
+  escalation_levels:
+    - level: 1
+      after_minutes: 5
+      contacts: ["ops@sightline.ai"]
+    - level: 2
+      after_minutes: 15
+      contacts: ["ops@sightline.ai", "team@sightline.ai"]
+    - level: 3
+      after_minutes: 30
+      contacts: ["ops@sightline.ai", "team@sightline.ai", "emergency@sightline.ai"]
+
+# Maintenance windows
+maintenance_windows:
+  - name: "Weekly maintenance"
+    schedule: "0 3 * * 0"  # Sunday 3 AM UTC
+    duration: 60           # minutes
+    monitors: ["all"]
+    
+  - name: "Database maintenance"
+    schedule: "0 4 1 * *"  # First day of month, 4 AM UTC
+    duration: 30           # minutes
+    monitors: ["Database Health"]
+
+# Response time thresholds
+performance_thresholds:
+  warning: 2000   # ms
+  critical: 5000  # ms
+
+# Locations to monitor from (if supported by service)
+monitoring_locations:
+  - "US-East"
+  - "US-West"
+  - "EU-West"
+  - "Asia-Pacific"
+
+# Status page configuration
+status_page:
+  enabled: true
+  url: "https://status.sightline.ai"
+  public: true
+  components:
+    - name: "API"
+      monitors: ["Basic Health", "tRPC API"]
+    - name: "Database"
+      monitors: ["Database Health"]
+    - name: "Website"
+      monitors: ["Homepage"]
+    - name: "Authentication"
+      monitors: ["Auth Flow"]
+
+# Webhook configuration for monitoring service
+webhook:
+  url: "${MONITORING_WEBHOOK_URL}"
+  secret: "${MONITORING_WEBHOOK_SECRET}"
+  events:
+    - "monitor.down"
+    - "monitor.up"
+    - "monitor.ssl_expiring"
+    - "performance.degraded"
+
+# SSL certificate monitoring
+ssl_monitoring:
+  enabled: true
+  domains:
+    - "sightline.ai"
+    - "*.sightline.ai"
+  alert_days_before_expiry: [30, 14, 7, 3, 1]
+
+# Additional monitoring integrations
+integrations:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#monitoring"
+    username: "Uptime Bot"
+    
+  pagerduty:
+    enabled: false
+    integration_key: "${PAGERDUTY_KEY}"
+    
+  datadog:
+    enabled: false
+    api_key: "${DATADOG_API_KEY}"
+    
+  custom_webhook:
+    url: "https://sightline.ai/api/webhooks/monitoring"
+    headers:
+      Authorization: "Bearer ${MONITORING_API_KEY}"
+    retry_count: 3
+    retry_delay: 5  # seconds

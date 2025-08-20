@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { stripe, getPlanByPriceId } from '@/lib/stripe'
 import { prisma } from '@/lib/db/prisma'
 import { logger } from '@/lib/logger'
+import { preventWebhookReplay, trackWebhookRetry } from '@/lib/services/webhookSecurity'
 
 // Disable body parsing for this endpoint
 export const runtime = 'nodejs'
@@ -25,6 +26,22 @@ export async function POST(request: NextRequest) {
         { error: 'Webhook signature verification failed' },
         { status: 400 }
       )
+    }
+
+    // Prevent replay attacks
+    const replayCheck = await preventWebhookReplay(event.id, event.created);
+    
+    if (!replayCheck.valid) {
+      logger.warn(`Stripe webhook replay blocked: ${replayCheck.error}`);
+      // Return 200 to prevent retries for replay attacks
+      if (replayCheck.isReplay) {
+        return NextResponse.json({ received: true }, { status: 200 });
+      }
+      // Return 400 for invalid timestamps
+      return NextResponse.json(
+        { error: replayCheck.error || 'Invalid webhook' },
+        { status: 400 }
+      );
     }
 
     logger.info('Processing Stripe webhook:', { eventType: event.type })
@@ -79,9 +96,15 @@ export async function POST(request: NextRequest) {
         logger.debug(`Unhandled event type: ${event.type}`)
     }
 
+    // Track successful processing
+    await trackWebhookRetry(event.id, true);
     return NextResponse.json({ received: true })
   } catch (error) {
     logger.error('Webhook error:', error)
+    // Track failed processing for retry logic
+    if ((event as any)?.id) {
+      await trackWebhookRetry((event as any).id, false);
+    }
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }

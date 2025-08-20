@@ -12,6 +12,9 @@ if (SENTRY_DSN) {
 
     // Performance Monitoring
     tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    
+    // Profile sampling - captures performance profiles
+    profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
     // Environment
     environment: process.env.NODE_ENV || "development",
@@ -46,6 +49,12 @@ if (SENTRY_DSN) {
         !process.env.SENTRY_SEND_IN_DEV
       ) {
         console.error("[Sentry Dev]", hint.originalException || event);
+        return null;
+      }
+
+      // Filter out health check endpoints to reduce noise
+      if (event.request?.url?.includes('/health') || 
+          event.request?.url?.includes('/api/health')) {
         return null;
       }
 

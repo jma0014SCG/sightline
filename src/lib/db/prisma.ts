@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { databaseMonitor } from '@/lib/monitoring/database-monitor'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -19,9 +20,13 @@ const createPrismaClient = () => {
         ],
   })
 
-  // Only add event handlers in development
-  if (process.env.NODE_ENV === 'development') {
-    client.$on('query', (e) => {
+  // Add event handlers for monitoring in all environments
+  client.$on('query', (e) => {
+    // Track query metrics
+    databaseMonitor.trackQuery(e.query, e.params, e.duration)
+    
+    // Only log to console in development
+    if (process.env.NODE_ENV === 'development') {
       console.log(JSON.stringify({
         timestamp: new Date().toISOString(),
         level: 'DEBUG',
@@ -31,36 +36,39 @@ const createPrismaClient = () => {
         duration: e.duration,
         message: `Query executed in ${e.duration}ms`
       }))
-    })
+    }
+  })
 
-    client.$on('error', (e) => {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        component: 'prisma.error',
-        message: e.message,
-        target: e.target
-      }))
-    })
+  client.$on('error', (e) => {
+    // Track error in monitor
+    databaseMonitor.trackError(e)
+    
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'ERROR',
+      component: 'prisma.error',
+      message: e.message,
+      target: e.target
+    }))
+  })
 
-    client.$on('warn', (e) => {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: 'WARN',
-        component: 'prisma.warn',
-        message: e.message
-      }))
-    })
+  client.$on('warn', (e) => {
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'WARN',
+      component: 'prisma.warn',
+      message: e.message
+    }))
+  })
 
-    client.$on('info', (e) => {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        component: 'prisma.info',
-        message: e.message
-      }))
-    })
-  }
+  client.$on('info', (e) => {
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'INFO',
+      component: 'prisma.info',
+      message: e.message
+    }))
+  })
 
   return client
 }
