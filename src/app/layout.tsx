@@ -3,7 +3,7 @@ import { Inter, Space_Mono } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
-import { MonitoringProvider } from '@/components/providers/MonitoringProvider'
+// import { MonitoringProvider } from '@/components/providers/MonitoringProvider' // Temporarily disabled for deployment
 import { PostHogProvider } from '@/components/providers/PostHogProvider'
 import './globals.css'
 
@@ -85,11 +85,11 @@ export default function RootLayout({
         <body className={`${inter.className} ${spaceMono.variable} antialiased`}>
           <PostHogProvider>
             <TRPCProvider>
-              <MonitoringProvider>
+              {/* <MonitoringProvider> */}
                 <ToastProvider>
                   {children}
                 </ToastProvider>
-              </MonitoringProvider>
+              {/* </MonitoringProvider> */}
             </TRPCProvider>
           </PostHogProvider>
         </body>

@@ -11,7 +11,7 @@ import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useToast } from '@/components/providers/ToastProvider'
 import { api } from '@/components/providers/TRPCProvider'
-import { DebugPanel } from '@/components/debug/DebugPanel'
+// import { DebugPanel } from '@/components/debug/DebugPanel' // Temporarily disabled for deployment
 import { SignInModal } from '@/components/modals/SignInModal'
 import { AuthPromptModal } from '@/components/modals/AuthPromptModal'
 import { getBrowserFingerprint, markFreeSummaryUsed } from '@/lib/browser-fingerprint'
@@ -1666,7 +1666,7 @@ Don&apos;t Miss Out - Try Sightline Free
       {/* Debug Panel - only in development */}
       {process.env.NODE_ENV === 'development' && (
         <div suppressHydrationWarning>
-          {typeof window !== 'undefined' && <DebugPanel />}
+          {/* {typeof window !== 'undefined' && <DebugPanel />} */}
         </div>
       )}
       
