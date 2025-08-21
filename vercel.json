@@ -1,28 +1,18 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
-  "devCommand": "pnpm dev",
-  "outputDirectory": ".next",
+  "buildCommand": "pnpm vercel-build",
+  "installCommand": "corepack enable && pnpm install --frozen-lockfile",
   "regions": ["iad1"],
-  "functions": {
-    "src/app/api/summarize/route.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/webhooks/clerk/route.ts": {
-      "maxDuration": 30
-    },
-    "src/app/api/webhooks/stripe/route.ts": {
-      "maxDuration": 30
-    },
-    "src/app/api/trpc/[trpc]/route.ts": {
-      "maxDuration": 300
-    }
-  },
   "crons": [],
   "env": {
     "NODE_ENV": "production",
-    "NEXT_TELEMETRY_DISABLED": "1"
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "CI": "1",
+    "HUSKY": "0",
+    "PRISMA_SKIP_POSTINSTALL": "1",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1",
+    "PUPPETEER_SKIP_DOWNLOAD": "1",
+    "SHARP_IGNORE_GLOBAL_LIBVIPS": "1"
   },
   "headers": [
     {

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "prisma generate && next build",
+    "vercel-build": "prisma generate --no-engine && next build",
     "build:analyze": "ANALYZE=true next build",
     "build:prod": "NODE_ENV=production next build",
     "start": "next start",
@@ -16,7 +17,7 @@
     "lint:fix": "next lint --fix",
     "lint:md": "markdownlint '**/*.md' --ignore 'node_modules/**' --ignore 'venv/**' --ignore 'test-results/**' --ignore 'playwright-report/**'",
     "lint:md:fix": "markdownlint '**/*.md' --ignore 'node_modules/**' --ignore 'venv/**' --ignore 'test-results/**' --ignore 'playwright-report/**' --fix",
-    "prepare": "test -d node_modules/husky && husky install || echo 'Skipping husky install'",
+    "prepare": "node -e \"if (process.env.VERCEL !== '1' && !process.env.CI) { require('child_process').execSync('test -d node_modules/husky && husky install || echo \\'Skipping husky install\\'', {stdio: 'inherit'}); }\"",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
@@ -52,6 +53,10 @@
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=20.0.0 <21.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.28.0",
     "@mailerlite/mailerlite-nodejs": "^1.4.1",
