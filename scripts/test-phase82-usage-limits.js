@@ -39,11 +39,17 @@ function log(message, type = 'info') {
 
 // Test data generators
 function generateTestUser(tier = 'FREE') {
+  const planMap = {
+    'FREE': 'FREE',
+    'PRO': 'PRO',
+    'ENTERPRISE': 'ENTERPRISE'
+  };
   return {
-    clerkId: `test_${tier.toLowerCase()}_${randomBytes(8).toString('hex')}`,
+    id: `test_${tier.toLowerCase()}_${randomBytes(8).toString('hex')}`,
     email: `test_${Date.now()}@example.com`,
     name: `Test User ${tier}`,
-    subscriptionTier: tier,
+    plan: planMap[tier] || 'FREE',
+    summariesLimit: tier === 'FREE' ? 3 : tier === 'PRO' ? 25 : 999999,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -55,9 +61,11 @@ function generateTestSummary(userId) {
     videoId: `test_video_${randomBytes(8).toString('hex')}`,
     videoTitle: 'Test Video',
     videoUrl: 'https://youtube.com/watch?v=test',
+    channelName: 'Test Channel',
+    channelId: 'test_channel_123',
+    duration: 300,
     content: 'Test summary content',
-    keyTakeaways: ['Test takeaway 1', 'Test takeaway 2'],
-    status: 'completed',
+    keyPoints: ['Test takeaway 1', 'Test takeaway 2'],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -70,7 +78,7 @@ async function testAnonymousUserLimits(prisma) {
   try {
     // Check if anonymous user exists
     let anonymousUser = await prisma.user.findUnique({
-      where: { clerkId: 'ANONYMOUS_USER' },
+      where: { id: 'ANONYMOUS_USER' },
       include: {
         summaries: true,
         _count: {
@@ -83,10 +91,11 @@ async function testAnonymousUserLimits(prisma) {
       log('Creating ANONYMOUS_USER account', 'info');
       anonymousUser = await prisma.user.create({
         data: {
-          clerkId: 'ANONYMOUS_USER',
+          id: 'ANONYMOUS_USER',
           email: 'anonymous@sightline.ai',
           name: 'Anonymous User',
-          subscriptionTier: 'ANONYMOUS',
+          plan: 'FREE',
+          summariesLimit: 1,
         },
         include: {
           summaries: true,
@@ -160,8 +169,8 @@ async function testFreePlanLimits(prisma) {
     // Get or create test free users
     const freeUsers = await prisma.user.findMany({
       where: {
-        subscriptionTier: 'FREE',
-        clerkId: { not: 'ANONYMOUS_USER' },
+        plan: 'FREE',
+        id: { not: 'ANONYMOUS_USER' },
       },
       include: {
         summaries: true,
@@ -248,7 +257,7 @@ async function testProPlanLimits(prisma) {
     // Get or create test pro users
     let proUsers = await prisma.user.findMany({
       where: {
-        subscriptionTier: 'PRO',
+        plan: 'PRO',
       },
       include: {
         summaries: {
@@ -386,7 +395,7 @@ async function testEnterprisePlan(prisma) {
     // Get or create enterprise users
     let enterpriseUsers = await prisma.user.findMany({
       where: {
-        subscriptionTier: 'ENTERPRISE',
+        plan: 'ENTERPRISE',
       },
       include: {
         _count: {
@@ -474,21 +483,21 @@ async function testLimitEnforcement(prisma) {
     }
     
     // Test subscription tier enum values
-    const validTiers = ['ANONYMOUS', 'FREE', 'PRO', 'ENTERPRISE'];
-    const dbTiers = await prisma.$queryRaw`
-      SELECT DISTINCT "subscriptionTier" 
+    const validPlans = ['FREE', 'PRO', 'ENTERPRISE'];
+    const dbPlans = await prisma.$queryRaw`
+      SELECT DISTINCT "plan" 
       FROM "User" 
-      WHERE "subscriptionTier" IS NOT NULL
+      WHERE "plan" IS NOT NULL
     `;
     
-    const invalidTiers = dbTiers
-      .map(t => t.subscriptionTier)
-      .filter(tier => !validTiers.includes(tier));
+    const invalidPlans = dbPlans
+      .map(t => t.plan)
+      .filter(plan => !validPlans.includes(plan));
     
-    if (invalidTiers.length === 0) {
-      log('All users have valid subscription tiers', 'success');
+    if (invalidPlans.length === 0) {
+      log('All users have valid subscription plans', 'success');
     } else {
-      log(`Found invalid tiers: ${invalidTiers.join(', ')}`, 'error');
+      log(`Found invalid plans: ${invalidPlans.join(', ')}`, 'error');
       return false;
     }
     
@@ -517,8 +526,8 @@ async function cleanupTestData(prisma) {
     const deletedUsers = await prisma.user.deleteMany({
       where: {
         AND: [
-          { clerkId: { startsWith: 'test_' } },
-          { clerkId: { not: 'ANONYMOUS_USER' } },
+          { id: { startsWith: 'test_' } },
+          { id: { not: 'ANONYMOUS_USER' } },
         ],
       },
     });

@@ -1,0 +1,51 @@
+{
+  "startTime": "2025-08-20T22:22:02.644Z",
+  "endTime": "2025-08-20T22:22:08.377Z",
+  "environment": {
+    "node": "v20.19.4",
+    "platform": "darwin",
+    "appUrl": "http://localhost:3000"
+  },
+  "phases": [
+    {
+      "phase": "8.1",
+      "name": "Critical Systems Verification",
+      "status": "failed",
+      "exitCode": 1,
+      "duration": 4216,
+      "output": "\n============================================================\n  PHASE 8.1: CRITICAL SYSTEMS VERIFICATION\n============================================================\n\n\n----------------------------------------\n\u001b[1m🧪 Testing Authentication System (Clerk)\u001b[0m\n\u001b[32m✅ Clerk environment variables configured\u001b[0m\n\u001b[33m⚠️ Clerk webhook returned unexpected status: 500\u001b[0m\n\u001b[31m❌ Protected route /api/trpc/library.getUserSummaries not properly secured\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Payment Processing System (Stripe)\u001b[0m\n\u001b[32m✅ Stripe environment variables configured\u001b[0m\n\u001b[32m✅ Stripe API connected (1 price(s) found)\u001b[0m\n\u001b[32m✅ Stripe webhook processed test event\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Video Summarization Pipeline\u001b[0m\n\u001b[32m✅ Python API healthy: healthy\u001b[0m\n\u001b[32m✅ AI service credentials configured\u001b[0m\n\u001b[32m✅ Transcript services configured: Oxylabs\u001b[0m\n\u001b[32m✅ Progress tracking endpoint operational\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Database Performance\u001b[0m\n\u001b[32m✅ Database connection established in 205ms\u001b[0m\n\u001b[33m⚠️ User count query slow: 54ms\u001b[0m\n\u001b[33m⚠️ Summary count query slow: 52ms\u001b[0m\n\u001b[31m❌ Recent summaries query too slow: 142ms\u001b[0m\n\u001b[33m⚠️ Connection pool slow: 27.70ms avg\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Error Tracking (Sentry)\u001b[0m\n\u001b[33m⚠️ Sentry DSN not configured (optional)\u001b[0m\n\u001b[32m✅ PostHog analytics configured\u001b[0m\n\u001b[32m✅ Error boundary component implemented\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Security Headers\u001b[0m\n\u001b[32m✅ x-frame-options: SAMEORIGIN\u001b[0m\n\u001b[32m✅ x-content-type-options: nosniff\u001b[0m\n\u001b[32m✅ strict-transport-security: max-age=63072000; includeSubDomains; preload\u001b[0m\n\u001b[32m✅ x-xss-protection: 1; mode=block\u001b[0m\n\u001b[32m✅ Content Security Policy configured\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Environment Configuration\u001b[0m\n\u001b[32m✅ Core variables complete\u001b[0m\n\u001b[32m✅ Authentication variables complete\u001b[0m\n\u001b[32m✅ Payments variables complete\u001b[0m\n\u001b[32m✅ AI Services variables complete\u001b[0m\n\u001b[34mℹ️ Optional services configured: 2/5\u001b[0m\n----------------------------------------\n\n============================================================\n  TEST SUMMARY\n============================================================\n\n❌ Authentication System\n✅ Payment Processing\n✅ Summarization Pipeline\n❌ Database Performance\n✅ Error Tracking\n✅ Security Headers\n✅ Environment Configuration\n\n----------------------------------------\nResult: 5/7 systems verified (71%)\n\u001b[31m❌ NOT READY - Critical systems failing\u001b[0m\n============================================================\n\n",
+      "errorOutput": "",
+      "testCount": {
+        "passed": 5,
+        "total": 7
+      },
+      "percentage": 71
+    },
+    {
+      "phase": "8.2",
+      "name": "Usage Limits Verification",
+      "status": "failed",
+      "exitCode": 1,
+      "duration": 1515,
+      "output": "\n============================================================\n  PHASE 8.2: USAGE LIMITS VERIFICATION\n============================================================\n\n\n----------------------------------------\n\u001b[1m🧪 Testing Anonymous User Limits (1 summary ever)\u001b[0m\n\u001b[32m✅ ANONYMOUS_USER account exists\u001b[0m\n\u001b[36m📊 Anonymous user has 2 summaries\u001b[0m\n\u001b[31m❌ Anonymous user has 2 summaries (exceeds 1 limit)\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Free Plan Limits (3 lifetime summaries)\u001b[0m\n\u001b[36m📊 Testing 5 free users\u001b[0m\n\u001b[32m✅ Free user user_30f has 3/3 summaries\u001b[0m\n\u001b[32m✅ Free user now at 3 summary limit\u001b[0m\n\u001b[31m❌ Free user user_30g exceeds limit with 4 summaries\u001b[0m\n\u001b[32m✅ Free user user_30h has 1/3 summaries\u001b[0m\n\u001b[32m✅ Added test summary 1/2\u001b[0m\n\u001b[32m✅ Added test summary 2/2\u001b[0m\n\u001b[32m✅ Free user now at 3 summary limit\u001b[0m\n\u001b[31m❌ Free user user_30k exceeds limit with 5 summaries\u001b[0m\n\u001b[32m✅ Free user user_30o has 3/3 summaries\u001b[0m\n\u001b[32m✅ Free user now at 3 summary limit\u001b[0m\n\u001b[36m📊 Oldest free account is 18 days old (lifetime limit verified)\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Pro Plan Limits (25/month with reset)\u001b[0m\n\u001b[36m📊 Current month: 8/1/2025 - 8/31/2025\u001b[0m\n\u001b[36m📊 Testing 1 pro users\u001b[0m\n\u001b[32m✅ Pro user test_pro has 0/25 summaries this month\u001b[0m\n\u001b[32m✅ Added 3 test summaries for pro user\u001b[0m\n\u001b[36m📊 Pro user total summaries across all time: 3\u001b[0m\n\u001b[34mℹ️ 12 days until next reset (1st of next month)\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Enterprise Plan (Unlimited)\u001b[0m\n\u001b[36m📊 Testing 1 enterprise users\u001b[0m\n\u001b[32m✅ Enterprise user user_30d has 103 summaries (unlimited)\u001b[0m\n\u001b[32m✅ Added 5 summaries, new total: 108 (no limit enforced)\u001b[0m\n\u001b[32m✅ Enterprise user handling high volume (108 summaries)\u001b[0m\n----------------------------------------\n\n----------------------------------------\n\u001b[1m🧪 Testing Limit Enforcement Logic\u001b[0m\n\u001b[36m📊 Rate limit configuration:\u001b[0m\n\u001b[34mℹ️   ANONYMOUS: 1 summaries (lifetime)\u001b[0m\n\u001b[34mℹ️   FREE: 3 summaries (lifetime)\u001b[0m\n\u001b[34mℹ️   PRO: 25 summaries (monthly)\u001b[0m\n\u001b[34mℹ️   ENTERPRISE: unlimited summaries (unlimited)\u001b[0m\n\u001b[32m✅ Found 15 database constraints on Summary table\u001b[0m\n\u001b[32m✅ All users have valid subscription plans\u001b[0m\n----------------------------------------\n\n============================================================\n  TEST SUMMARY\n============================================================\n\n❌ Anonymous User Limits\n❌ Free Plan Limits\n✅ Pro Plan Limits\n✅ Enterprise Plan\n✅ Limit Enforcement\n\n----------------------------------------\nResult: 3/5 tests passed (60%)\n\u001b[31m❌ LIMITS NOT ENFORCED - Critical issues found\u001b[0m\n============================================================\n\n💡 Tip: Run with --cleanup flag to remove test data\n",
+      "errorOutput": "",
+      "testCount": {
+        "passed": 3,
+        "total": 5
+      },
+      "percentage": 60
+    },
+    {
+      "phase": "8.3",
+      "name": "Load Testing",
+      "status": "skipped",
+      "duration": 0
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 2,
+    "skipped": 1
+  }
+}

@@ -366,8 +366,11 @@ async function testDatabasePerformance() {
       {
         name: 'Aggregation',
         fn: () => prisma.summary.groupBy({
-          by: ['status'],
-          _count: true,
+          by: ['userId'],
+          _count: {
+            _all: true
+          },
+          take: 10,
         }),
       },
     ];

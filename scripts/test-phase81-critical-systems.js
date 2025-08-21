@@ -241,7 +241,7 @@ async function testSummarizationPipeline() {
   
   try {
     // Test 1: Check Python API health
-    const apiHealth = await makeRequest(`${CONFIG.API_URL}/health`);
+    const apiHealth = await makeRequest(`${CONFIG.API_URL}/api/health`);
     
     if (apiHealth.status === 200) {
       const healthData = JSON.parse(apiHealth.body);
