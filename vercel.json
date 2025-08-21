@@ -56,12 +56,7 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/python/:path*",
-      "destination": "${PYTHON_API_URL}/:path*"
-    }
-  ],
+  "rewrites": [],
   "redirects": [],
   "trailingSlash": false,
   "cleanUrls": true
