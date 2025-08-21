@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { 
   CreditCard, 
@@ -16,7 +16,7 @@ import { api } from '@/components/providers/TRPCProvider'
 import { formatPrice } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 
-export default function BillingPage() {
+function BillingPageContent() {
   const searchParams = useSearchParams()
   const [showAlert, setShowAlert] = useState(false)
   const [alertType, setAlertType] = useState<'success' | 'error'>('success')
@@ -248,5 +248,17 @@ export default function BillingPage() {
         <PricingPlans currentPlan={currentPlan} />
       </div>
     </div>
+  )
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+      </div>
+    }>
+      <BillingPageContent />
+    </Suspense>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { PostHogProvider as PostHogProviderSDK } from 'posthog-js/react'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import posthog from 'posthog-js'
 import { useAuth } from '@clerk/nextjs'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -55,7 +55,7 @@ if (typeof window !== 'undefined' && POSTHOG_KEY) {
   })
 }
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogProviderInner({ children }: { children: React.ReactNode }) {
   const { userId, isSignedIn } = useAuth()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -114,6 +114,19 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   }
 
   return <PostHogProviderSDK client={posthog}>{children}</PostHogProviderSDK>
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  // Skip provider if PostHog is not configured
+  if (!POSTHOG_KEY) {
+    return <>{children}</>
+  }
+
+  return (
+    <Suspense fallback={<>{children}</>}>
+      <PostHogProviderInner>{children}</PostHogProviderInner>
+    </Suspense>
+  )
 }
 
 // Export posthog instance for direct usage

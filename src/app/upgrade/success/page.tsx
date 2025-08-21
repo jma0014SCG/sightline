@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Loader2, Home, FileText } from 'lucide-react'
 import Link from 'next/link'
 
-export default function UpgradeSuccessPage() {
+function UpgradeSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isProcessing, setIsProcessing] = useState(true)
@@ -142,5 +142,17 @@ export default function UpgradeSuccessPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function UpgradeSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+      </div>
+    }>
+      <UpgradeSuccessContent />
+    </Suspense>
   )
 }
