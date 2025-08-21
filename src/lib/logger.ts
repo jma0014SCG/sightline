@@ -2,7 +2,11 @@
  * Structured logging system with correlation ID support
  */
 
-import { correlationStore } from './api/correlation'
+// import { correlationStore } from './api/correlation' // Temporarily disabled for deployment
+const correlationStore = { 
+  getId: () => undefined, 
+  getContext: () => ({ correlationId: undefined, requestId: undefined, userId: undefined }) 
+} // Temporary stub
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 

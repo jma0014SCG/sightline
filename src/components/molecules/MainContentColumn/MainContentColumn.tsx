@@ -7,7 +7,8 @@ import rehypeHighlight from "rehype-highlight";
 import { Clock, Calendar, User, ChevronDown, Copy, Check, ChevronUp, Eye, ThumbsUp, MessageSquare, RefreshCw, Info, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SummaryViewerProps } from "@/components/organisms/SummaryViewer/SummaryViewer.types";
-import { api } from "@/lib/api/trpc";
+// import { api } from "@/lib/api/trpc"; // Temporarily disabled for deployment
+import { api } from "@/components/providers/TRPCProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { calculateReadingTime } from "@/utils/readingTime";
 

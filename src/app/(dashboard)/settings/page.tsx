@@ -11,7 +11,8 @@ import {
   CheckCircle,
   Loader2
 } from 'lucide-react'
-import { api } from '@/lib/api/trpc'
+// import { api } from '@/lib/api/trpc' // Temporarily disabled for deployment
+import { api } from '@/components/providers/TRPCProvider'
 import { cn } from '@/lib/utils'
 
 export default function SettingsPage() {
