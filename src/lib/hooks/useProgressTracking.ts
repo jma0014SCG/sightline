@@ -154,6 +154,8 @@ export function useProgressTracking({
           return
         }
 
+        // Use the public backend URL for client-side requests
+        // This needs to be exposed as NEXT_PUBLIC_ to work in the browser
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
         const response = await fetch(`${backendUrl}/api/progress/${taskId}`)
         

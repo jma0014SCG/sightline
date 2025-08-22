@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,96 +7,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication (now with Clerk)
 model User {
-  id                     String    @id // Clerk user ID
-  email                  String    @unique
+  id                     String       @id
+  email                  String       @unique
   name                   String?
   image                  String?
-  role                   Role      @default(USER)
-  plan                   Plan      @default(FREE)
+  role                   Role         @default(USER)
+  plan                   Plan         @default(FREE)
   emailVerified          DateTime?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-
-  // Stripe subscription data
-  stripeCustomerId       String?   @unique
-  stripeSubscriptionId   String?   @unique
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  stripeCustomerId       String?      @unique
+  stripeSubscriptionId   String?      @unique
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
-  
-  // Usage tracking
-  summariesUsed          Int       @default(0)
-  summariesLimit         Int       @default(3) // Free tier limit - 3 summaries ever
+  summariesUsed          Int          @default(0)
+  summariesLimit         Int          @default(3)
+  sharedLinks            ShareLink[]
+  summaries              Summary[]
+  usageEvents            UsageEvent[]
 
-  // Relations (removed NextAuth tables)
-  summaries    Summary[]
-  sharedLinks  ShareLink[]
-  usageEvents  UsageEvent[]
+  @@index([plan], map: "idx_user_plan")
 }
 
-// NextAuth models removed - Clerk handles authentication
-
-// Video summaries
 model Summary {
-  id           String   @id @default(cuid())
-  userId       String
-  videoId      String
-  videoUrl     String
-  videoTitle   String
-  channelName  String
-  channelId    String
-  duration     Int // in seconds
-  thumbnailUrl String?
-  content      String   @db.Text // Markdown content or TL;DR
-  keyPoints    Json? // Array of key points
-  metadata     Json? // Additional metadata (keeping for flexibility)
-  
-  // Enhanced YouTube metadata columns
-  viewCount       Int?      // Make searchable/sortable
-  likeCount       Int?      // Make searchable/sortable  
-  commentCount    Int?      // Make searchable/sortable
-  uploadDate      DateTime? // Make searchable/sortable
-  description     String?   @db.Text // Full video description
-  
-  // === GUMLOOP RICH CONTENT SECTIONS ===
-  // Video context and speakers
-  speakers        String[]  @default([]) // Multiple speakers possible
-  synopsis        String?   @db.Text     // Video synopsis from Gumloop
-  
-  // Rich structured content from Gumloop
-  keyMoments      Json?     // Array of {timestamp, insight} objects
-  frameworks      Json?     // Strategic frameworks and mental models
-  debunkedAssumptions Json? // Common misconceptions addressed
-  inPractice      Json?     // Real-world applications and use cases
-  playbooks       Json?     // Trigger-action pairs and heuristics
-  
-  // Learning and educational content
-  learningPack    Json?     // {flashcards, glossary, quiz, novelIdeas}
-  thinkingStyle   Json?     // How to think like the speaker/expert
-  
-  // Enrichment and meta-analysis
-  enrichment      Json?     // {tools, prereqs, risks, sentiment, links}
-  
-  // Processing metadata
-  language        String    @default("en")
-  processingSource String?  // "gumloop", "standard", "enhanced"
-  processingVersion String? // Version of AI processing used
-  
-  // === USER INTERACTION ===
-  userNotes       String?   @db.Text
-  rating          Int?      // 1-5 star rating
-  isFavorite      Boolean   @default(false)
-  lastViewedAt    DateTime?
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sharedLinks ShareLink[]
-  categories  Category[]  @relation("SummaryCategories")
-  tags        Tag[]       @relation("SummaryTags")
+  id                  String      @id @default(cuid())
+  userId              String
+  videoId             String
+  videoUrl            String
+  videoTitle          String
+  channelName         String
+  channelId           String
+  duration            Int
+  thumbnailUrl        String?
+  content             String
+  keyPoints           Json?
+  metadata            Json?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  commentCount        Int?
+  description         String?
+  likeCount           Int?
+  uploadDate          DateTime?
+  viewCount           Int?
+  debunkedAssumptions Json?
+  enrichment          Json?
+  frameworks          Json?
+  inPractice          Json?
+  isFavorite          Boolean     @default(false)
+  keyMoments          Json?
+  language            String      @default("en")
+  lastViewedAt        DateTime?
+  learningPack        Json?
+  playbooks           Json?
+  processingSource    String?
+  processingVersion   String?
+  rating              Int?
+  speakers            String[]    @default([])
+  synopsis            String?
+  thinkingStyle       Json?
+  userNotes           String?
+  sharedLinks         ShareLink[]
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories          Category[]  @relation("SummaryCategories")
+  tags                Tag[]       @relation("SummaryTags")
 
   @@unique([userId, videoId])
   @@index([userId])
@@ -112,9 +83,12 @@ model Summary {
   @@index([userId, rating])
   @@index([processingSource])
   @@index([userId, processingSource])
+  @@index([createdAt(sort: Desc)], map: "idx_summary_created")
+  @@index([userId], map: "idx_summary_user")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_summary_user_created")
+  @@index([userId, createdAt], map: "idx_summary_user_date_range")
 }
 
-// Shareable links for summaries
 model ShareLink {
   id        String    @id @default(cuid())
   slug      String    @unique
@@ -124,74 +98,66 @@ model ShareLink {
   expiresAt DateTime?
   views     Int       @default(0)
   createdAt DateTime  @default(now())
-
-  // Relations
-  summary Summary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summary   Summary   @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([slug])
 }
 
-// Enums
-enum Role {
-  USER
-  ADMIN
-}
-
-// Categories for organizing summaries
 model Category {
   id        String    @id @default(cuid())
   name      String    @unique
-  summaries Summary[] @relation("SummaryCategories")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  summaries Summary[] @relation("SummaryCategories")
 }
 
-// Tags for labeling entities in summaries
 model Tag {
   id        String    @id @default(cuid())
   name      String    @unique
-  type      String    // e.g., "PERSON", "COMPANY", "TECHNOLOGY", "TOPIC"
-  summaries Summary[] @relation("SummaryTags")
+  type      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  summaries Summary[] @relation("SummaryTags")
 
   @@index([type])
+}
+
+model Progress {
+  taskId    String   @id @map("task_id")
+  data      Json
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  @@index([expiresAt])
+  @@index([expiresAt], map: "idx_progress_expires")
+  @@map("progress")
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  eventType String
+  summaryId String?
+  videoId   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([userId, eventType])
+  @@index([createdAt])
+  @@index([userId, eventType, createdAt])
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum Plan {
   FREE
   PRO
   ENTERPRISE
-}
-
-// Progress tracking for async summary generation
-model Progress {
-  taskId    String   @id @map("task_id")
-  data      Json     // Contains: progress, stage, status, cid, etc.
-  createdAt DateTime @default(now()) @map("created_at")
-  expiresAt DateTime @map("expires_at") // Set to createdAt + 4 hours
-  
-  @@index([expiresAt]) // For efficient cleanup queries
-  @@map("progress")
-}
-
-// Usage tracking for preventing limit bypass via deletion
-model UsageEvent {
-  id        String   @id @default(cuid())
-  userId    String
-  eventType String   // "summary_created", "summary_deleted", "plan_upgraded", etc.
-  summaryId String?  // Reference to summary if applicable
-  videoId   String?  // YouTube video ID if applicable
-  metadata  Json?    // Additional context data
-  createdAt DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-@@index([userId])
-  @@index([eventType])
-  @@index([userId, eventType])
-  @@index([createdAt])
-  @@index([userId, eventType, createdAt])
 }

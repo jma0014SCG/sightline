@@ -10,7 +10,9 @@ import { classifySummaryContent } from '@/lib/classificationService'
 import { monitoring } from '@/lib/monitoring'
 import { checkBusinessMetric } from '@/lib/performance-budgets'
 import { emailService } from '@/lib/emailService'
-import { backendClient } from '@/lib/api/backend-client'
+// Use fallback client while backend issues are being resolved
+import { backendClientWithFallback as backendClient } from '@/lib/api/backend-client-with-fallback'
+// import { backendClient } from '@/lib/api/backend-client' // Original (switch back when fixed)
 import { 
   enforceAnonymousUsageLimit, 
   recordAnonymousUsage,
@@ -1256,7 +1258,7 @@ export const summaryRouter = createTRPCRouter({
 
       try {
         // Call the Python API to fetch fresh metadata
-        const response = await fetch(`${process.env.PYTHON_API_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
+        const response = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1396,7 +1398,7 @@ export const summaryRouter = createTRPCRouter({
       for (const summary of summaries) {
         try {
           // Call the Python API to fetch fresh metadata
-          const response = await fetch(`${process.env.PYTHON_API_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
+          const response = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/refresh-metadata`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

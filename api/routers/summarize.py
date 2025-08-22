@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 import re
@@ -329,6 +330,12 @@ async def summarize_video(
         })
         raise
     except Exception as e:
+        # Log detailed error for debugging
+        import traceback
+        error_detail = f"Summarization failed: {str(e)}"
+        print(f"❌ {error_detail}")
+        print(f"Traceback: {traceback.format_exc()}")
+        
         # Update progress with error state
         await progress_storage.set_progress(task_id, {
             "progress": 0,
@@ -337,7 +344,17 @@ async def summarize_video(
             "task_id": task_id,
             "cid": cid
         })
-        raise HTTPException(status_code=500, detail=str(e))
+        
+        # Return more detailed error information
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": str(e),
+                "type": type(e).__name__,
+                "task_id": task_id,
+                "message": "Summarization failed. Please check Railway logs for details."
+            }
+        )
 
 @router.post("/refresh-metadata")
 async def refresh_metadata(
@@ -379,7 +396,7 @@ async def refresh_metadata(
             "cid": cid
         }
         
-        return result
+        return JSONResponse(content=result)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to refresh metadata: {str(e)}")

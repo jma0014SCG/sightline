@@ -29,18 +29,53 @@ from middleware.correlation import CorrelationMiddleware
 # Add correlation middleware first
 app.add_middleware(CorrelationMiddleware)
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://sightline.ai",
-        os.getenv("NEXTAUTH_URL", "http://localhost:3000")
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure CORS with more flexible configuration
+allowed_origins = [
+    "http://localhost:3000",
+    "https://sightlineai.io",
+    "https://www.sightlineai.io",
+    "https://sightline.ai",  # Keep for any old references
+    "https://www.sightline.ai",
+]
+
+# Add production URL from environment if available
+if os.getenv("NEXT_PUBLIC_APP_URL"):
+    allowed_origins.append(os.getenv("NEXT_PUBLIC_APP_URL"))
+
+# Add custom allowed origins from environment (comma-separated)
+if os.getenv("ALLOWED_ORIGINS"):
+    custom_origins = os.getenv("ALLOWED_ORIGINS").split(",")
+    allowed_origins.extend([origin.strip() for origin in custom_origins])
+
+# In production, also allow Vercel preview deployments
+if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("PRODUCTION"):
+    # This will allow all Vercel preview URLs
+    allowed_origins.append("https://*.vercel.app")
+    allowed_origins.append("https://sightline-ai-*.vercel.app")
+
+# Remove duplicates while preserving order
+seen = set()
+allowed_origins = [x for x in allowed_origins if not (x in seen or seen.add(x))]
+
+print(f"🔒 CORS allowed origins: {allowed_origins}")
+
+# Use regex pattern in production to match all Vercel deployments
+if os.getenv("RAILWAY_ENVIRONMENT"):
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"https://.*\.vercel\.app$|https://sightlineai\.io|https://www\.sightlineai\.io|https://sightline\.ai|https://www\.sightline\.ai|http://localhost:3000",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Health check endpoint
 @app.get("/api/health")
