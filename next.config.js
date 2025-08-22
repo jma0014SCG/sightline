@@ -25,8 +25,8 @@ const nextConfig = {
   },
   // Incremental Static Regeneration
   staticPageGenerationTimeout: 90,
-  // Output optimization
-  output: 'standalone', // Creates smaller deployments
+  // Output optimization - removed 'standalone' as it's incompatible with Vercel
+  // output: 'standalone', // REMOVED - incompatible with Vercel serverless functions
   // Module resolution optimizations
   modularizeImports: {
     'lucide-react': {

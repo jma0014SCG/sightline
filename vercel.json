@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm vercel-build",
+  "buildCommand": "pnpm build",
   "installCommand": "corepack enable && pnpm install --frozen-lockfile",
   "regions": ["iad1"],
   "crons": [],
