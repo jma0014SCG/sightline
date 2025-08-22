@@ -16,7 +16,7 @@ Go to [Vercel Dashboard](https://vercel.com) → Your Project → Settings → E
 
 Add this variable:
 ```
-NEXT_PUBLIC_BACKEND_URL = https://sightline-api-production.up.railway.app
+NEXT_PUBLIC_BACKEND_URL = https://sightline-ai-backend-production.up.railway.app
 ```
 
 **IMPORTANT**: Make sure there are NO quotes around the URL value!
@@ -24,7 +24,7 @@ NEXT_PUBLIC_BACKEND_URL = https://sightline-api-production.up.railway.app
 ### Step 3: Verify Railway Backend is Accessible
 Test this URL in your browser:
 ```
-https://sightline-api-production.up.railway.app/api/health
+https://sightline-ai-backend-production.up.railway.app/api/health
 ```
 
 Should return:
@@ -45,13 +45,13 @@ After deployment:
 1. Open sightlineai.io
 2. Press Ctrl+Shift+R (or Cmd+Shift+R on Mac)
 3. Open browser console (F12)
-4. Look for: `🔗 Backend URL: https://sightline-api-production.up.railway.app`
+4. Look for: `🔗 Backend URL: https://sightline-ai-backend-production.up.railway.app`
 
 ## Quick Verification
 
 Run this in your browser console on sightlineai.io:
 ```javascript
-fetch('https://sightline-api-production.up.railway.app/api/health')
+fetch('https://sightline-ai-backend-production.up.railway.app/api/health')
   .then(r => r.json())
   .then(d => console.log('✅ Backend is working:', d))
   .catch(e => console.log('❌ Backend is down:', e))
