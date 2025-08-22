@@ -182,11 +182,6 @@ except ImportError as e:
         from logging_config import set_correlation_context
         set_correlation_context(task_id=task_id)
         
-        # Structured logging with correlation ID
-        logger.info("Starting summarization", 
-                   url=body.get("url"),
-                   task_id=task_id)
-        
         try:
             # Import required modules here to avoid import issues
             import sys
@@ -198,6 +193,11 @@ except ImportError as e:
             
             # Get request body
             body = await request.json()
+            
+            # Structured logging with correlation ID
+            logger.info("Starting summarization", 
+                       url=body.get("url"),
+                       task_id=task_id)
             url = body.get("url", "")
             if not url:
                 await progress_storage.set_progress(task_id, {"progress": 0, "stage": "Error: URL is required", "status": "error", "task_id": task_id, "cid": cid})
