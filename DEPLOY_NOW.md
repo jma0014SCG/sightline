@@ -62,7 +62,7 @@ OXYLABS_PASSWORD=... # Optional
 ```bash
 cd ..  # Back to project root
 
-# Get your Railway URL (e.g., https://sightline-api.railway.app)
+# Get your Railway URL (e.g.,
 # Add it to Vercel:
 vercel env add BACKEND_URL
 # Paste: https://your-api.railway.app

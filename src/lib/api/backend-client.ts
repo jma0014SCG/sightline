@@ -15,10 +15,10 @@ class BackendClient {
       // Server-side: Can use both BACKEND_URL and NEXT_PUBLIC_BACKEND_URL
       this.baseUrl = process.env.BACKEND_URL || 
                      process.env.NEXT_PUBLIC_BACKEND_URL || 
-                     'http://localhost:8000'
+                     'https://sightline-ai-backend-production.up.railway.app'
     } else {
       // Client-side: Can only use NEXT_PUBLIC_ variables
-      this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+      this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sightline-ai-backend-production.up.railway.app'
     }
     
     // Log the backend URL in development for debugging

@@ -10,9 +10,7 @@ import { classifySummaryContent } from '@/lib/classificationService'
 import { monitoring } from '@/lib/monitoring'
 import { checkBusinessMetric } from '@/lib/performance-budgets'
 import { emailService } from '@/lib/emailService'
-// Use fallback client while backend issues are being resolved
-import { backendClientWithFallback as backendClient } from '@/lib/api/backend-client-with-fallback'
-// import { backendClient } from '@/lib/api/backend-client' // Original (switch back when fixed)
+import { backendClient } from '@/lib/api/backend-client'
 import { 
   enforceAnonymousUsageLimit, 
   recordAnonymousUsage,

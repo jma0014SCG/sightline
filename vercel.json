@@ -33,7 +33,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://sightline.ai"
+          "value": "https://sightlineai.io"
         },
         {
           "key": "Access-Control-Allow-Methods",
