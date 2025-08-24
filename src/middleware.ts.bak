@@ -1,0 +1,96 @@
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimitMiddleware } from "@/lib/middleware/rateLimit";
+import { corsMiddleware, shouldApplyCors } from "@/lib/middleware/cors";
+
+const isPublic = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/trpc/health",  // Keep health check public
+  "/api/health",       // Health check endpoint
+  "/api/diagnostic",   // Diagnostic endpoint
+  "/api/webhooks(.*)",
+  "/share/(.*)", // Public share pages
+]);
+
+/**
+ * Combined middleware that applies rate limiting, CORS, and authentication
+ * Order: Rate Limiting -> CORS -> Authentication
+ */
+async function middleware(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+
+  // Skip middleware entirely for tRPC, webhook, health, and diagnostic routes - let them handle their own auth
+  if (
+    path.startsWith("/api/trpc") || 
+    path.startsWith("/api/webhooks") ||
+    path.startsWith("/api/health") ||
+    path.startsWith("/api/diagnostic")
+  ) {
+    return NextResponse.next();
+  }
+
+  // 1. Apply rate limiting first (to prevent DDoS)
+  const rateLimitResponse = await rateLimitMiddleware(req);
+  if (rateLimitResponse?.status === 429) {
+    // Request is rate limited, return 429 response
+    return rateLimitResponse;
+  }
+
+  // 2. Apply CORS for API routes
+  let response = NextResponse.next();
+  if (shouldApplyCors(path)) {
+    response = corsMiddleware(req);
+    
+    // Handle preflight requests
+    if (req.method === "OPTIONS") {
+      return response;
+    }
+  }
+
+  // 3. Apply Clerk authentication for non-API routes only
+  if (!path.startsWith("/api/")) {
+    const authMiddleware = clerkMiddleware(async (auth, request) => {
+      // Only protect non-public app routes
+      if (!isPublic(request)) {
+        await auth.protect();
+      }
+    });
+    
+    const authResponse = await authMiddleware(req, {
+      // Pass the response with CORS headers
+      next: () => response,
+    } as any);
+
+    // Merge rate limit headers if they exist
+    if (rateLimitResponse && authResponse) {
+      const rateLimitHeaders = rateLimitResponse.headers;
+      rateLimitHeaders.forEach((value, key) => {
+        if (key.startsWith("X-RateLimit-")) {
+          authResponse.headers.set(key, value);
+        }
+      });
+    }
+
+    return authResponse || response;
+  }
+
+  // For other API routes, just return the response with rate limit headers
+  if (rateLimitResponse) {
+    const rateLimitHeaders = rateLimitResponse.headers;
+    rateLimitHeaders.forEach((value, key) => {
+      if (key.startsWith("X-RateLimit-")) {
+        response.headers.set(key, value);
+      }
+    });
+  }
+
+  return response;
+}
+
+export default middleware;
+
+// export const config = {
+//   matcher: ['/((?!.*\\.).*)'],
+// };
