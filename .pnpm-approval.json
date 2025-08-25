@@ -1,0 +1,13 @@
+{
+  "approvedBuilds": [
+    "@prisma/client",
+    "@prisma/engines",
+    "prisma",
+    "@clerk/shared",
+    "@sentry/cli",
+    "esbuild",
+    "core-js",
+    "msw",
+    "unrs-resolver"
+  ]
+}
