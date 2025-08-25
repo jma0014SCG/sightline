@@ -1,0 +1,31 @@
+{
+  "images": {
+    "logos": {},
+    "podcasts": {},
+    "previews": {},
+    "responsive": {
+      "sizes": [
+        320,
+        640,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "formats": [
+        "webp",
+        "jpg",
+        "png"
+      ],
+      "quality": 85
+    }
+  },
+  "generated": "2025-08-25T12:38:20.015Z",
+  "stats": {
+    "processed": 29,
+    "failed": 2,
+    "sizeBefore": 7113,
+    "sizeAfter": 317,
+    "reduction": 96
+  }
+}
