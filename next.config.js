@@ -20,13 +20,9 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "react-markdown", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
     instrumentationHook: true,
-    webpackBuildWorker: true, // Enable webpack build worker for faster builds
-    serverMinification: true, // Minify server-side code
   },
   // Incremental Static Regeneration
   staticPageGenerationTimeout: 90,
-  // Output optimization
-  output: 'standalone', // Creates smaller deployments
   // Module resolution optimizations
   modularizeImports: {
     'lucide-react': {
@@ -104,7 +100,7 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://i.ytimg.com https://img.youtube.com https://img.clerk.com https://*.clerk.com; media-src 'self' https://www.youtube.com; connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://api.openai.com https://api.stripe.com wss://*.clerk.com https://clerk.com; frame-src 'self' https://www.youtube.com https://youtube.com https://accounts.google.com https://clerk.com https://*.clerk.accounts.dev https://js.stripe.com https://www.loom.com https://*.loom.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.com https://clerk.sightlineai.io https://*.clerk.accounts.dev https://challenges.cloudflare.com https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://i.ytimg.com https://img.youtube.com https://img.clerk.com https://*.clerk.com; media-src 'self' https://www.youtube.com; connect-src 'self' https://*.clerk.com https://clerk.sightlineai.io https://*.clerk.accounts.dev https://api.openai.com https://api.stripe.com wss://*.clerk.com https://clerk.com; frame-src 'self' https://www.youtube.com https://youtube.com https://accounts.google.com https://clerk.com https://clerk.sightlineai.io https://*.clerk.accounts.dev https://js.stripe.com https://www.loom.com https://*.loom.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;",
           },
         ],
       },
