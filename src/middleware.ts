@@ -1,26 +1,37 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimitMiddleware } from "@/lib/middleware/rateLimit";
 import { corsMiddleware, shouldApplyCors } from "@/lib/middleware/cors";
 
+// Define public routes that don't require authentication
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/health(.*)",
+  "/api/diagnostic(.*)",
+  "/api/ping(.*)",
+  "/api/webhooks(.*)",
+  "/api/test(.*)",
+  "/api/test-backend(.*)",
+  "/api/backend-health(.*)",
+  "/api/direct-summary(.*)",
+  "/api/trpc/summary.createAnonymous(.*)",
+  "/api/trpc/summary.getAnonymous(.*)",
+  "/api/trpc/share.getBySlug(.*)",
+  "/share/(.*)", // Public share pages
+]);
+
 /**
- * Combined middleware that applies rate limiting, CORS, and authentication
- * Order: Rate Limiting -> CORS -> Authentication
+ * Clerk middleware v6 with integrated rate limiting and CORS
+ * Order: Clerk Auth -> Rate Limiting -> CORS
+ * 
+ * Note: Clerk middleware must be the default export and run on all routes
+ * for auth() to work properly in server components and API routes
  */
-async function middleware(req: NextRequest) {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   const path = req.nextUrl.pathname;
-
-  // Skip middleware entirely for tRPC, webhook, health, and diagnostic routes - let them handle their own auth
-  if (
-    path.startsWith("/api/trpc") || 
-    path.startsWith("/api/webhooks") ||
-    path.startsWith("/api/health") ||
-    path.startsWith("/api/diagnostic") ||
-    path.startsWith("/api/ping")
-  ) {
-    return NextResponse.next();
-  }
-
+  
   // 1. Apply rate limiting first (to prevent DDoS)
   const rateLimitResponse = await rateLimitMiddleware(req);
   if (rateLimitResponse?.status === 429) {
@@ -39,28 +50,24 @@ async function middleware(req: NextRequest) {
     }
   }
 
-  // 3. Apply Clerk authentication (only for non-API routes and routes not skipped above)
-  // We need to pass through the response with CORS headers
-  const authMiddleware = clerkMiddleware();
-  const authResponse = await authMiddleware(req, {
-    // Pass the response with CORS headers
-    next: () => response,
-  } as any);
+  // 3. Apply authentication protection for non-public routes
+  // This ensures auth() is available in all routes while only protecting non-public ones
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
 
   // Merge rate limit headers if they exist
-  if (rateLimitResponse && authResponse) {
+  if (rateLimitResponse) {
     const rateLimitHeaders = rateLimitResponse.headers;
     rateLimitHeaders.forEach((value, key) => {
       if (key.startsWith("X-RateLimit-")) {
-        authResponse.headers.set(key, value);
+        response.headers.set(key, value);
       }
     });
   }
 
-  return authResponse || response;
-}
-
-export default middleware;
+  return response;
+});
 
 export const config = {
   matcher: [
