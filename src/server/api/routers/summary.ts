@@ -196,7 +196,12 @@ export const summaryRouter = createTRPCRouter({
           })
         }
 
-        console.log('📡 Anonymous response received')
+        console.log('📡 Anonymous response received', {
+          task_id: data.task_id,
+          cid,
+          has_summary: !!data.summary,
+          has_video_title: !!data.video_title
+        })
         
         // Check if we got an error response
         if (data.error) {
@@ -524,7 +529,13 @@ export const summaryRouter = createTRPCRouter({
               timeout: 300000, // 300 second timeout for summarization (5 minutes)
             }
           )
-          console.log('✅ Received response from FastAPI:', data)
+          console.log('✅ Received response from FastAPI:', {
+            task_id: data.task_id,
+            cid,
+            has_summary: !!data.summary,
+            has_video_title: !!data.video_title,
+            userId
+          })
         } catch (error) {
           logger.error('Backend API error', {
             error: error instanceof Error ? error.message : 'Unknown error',

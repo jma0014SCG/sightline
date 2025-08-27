@@ -21,14 +21,19 @@ class BackendClient {
       this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sightline-ai-backend-production.up.railway.app'
     }
     
-    // Log the backend URL in development for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔗 Backend URL:', this.baseUrl, '(isServer:', isServer, ')')
-    }
+    // Always log the backend URL for debugging (even in production)
+    // This is critical for debugging production issues
+    console.log('🔗 Backend URL Configuration:', {
+      url: this.baseUrl,
+      isServer,
+      env: process.env.NODE_ENV,
+      backend_url: process.env.BACKEND_URL || 'not set',
+      next_public_backend_url: process.env.NEXT_PUBLIC_BACKEND_URL || 'not set',
+    })
     
     // Warn in production if backend URL is not configured
     if (process.env.NODE_ENV === 'production' && this.baseUrl === 'http://localhost:8000') {
-      console.error('⚠️ WARNING: Backend URL not configured in production! Set NEXT_PUBLIC_BACKEND_URL environment variable.')
+      console.error('⚠️ CRITICAL: Backend URL not configured in production! Set NEXT_PUBLIC_BACKEND_URL environment variable.')
     }
     
     this.defaultTimeout = 300000 // 300 seconds (5 minutes) - increased for longer videos
@@ -44,8 +49,9 @@ class BackendClient {
     const url = `${this.baseUrl}${path}`
     const timeout = options.timeout || this.defaultTimeout
     
-    // Log the actual request being made
-    console.log(`🔗 Backend Request: ${options.method || 'GET'} ${url}`)
+    // Log the actual request being made with correlation ID for debugging
+    const correlationId = options.headers?.['X-Correlation-Id'] || 'none'
+    console.log(`🔗 Backend Request: ${options.method || 'GET'} ${url} [CID: ${correlationId}]`)
     
     // Create abort controller for timeout
     const controller = new AbortController()
@@ -63,8 +69,8 @@ class BackendClient {
       
       clearTimeout(timeoutId)
       
-      // Log response status
-      console.log(`📡 Backend Response: ${response.status} ${response.statusText}`)
+      // Log response status with correlation ID
+      console.log(`📡 Backend Response: ${response.status} ${response.statusText} [CID: ${correlationId}]`)
       
       // Get response text first (so we can log it if parsing fails)
       const responseText = await response.text()

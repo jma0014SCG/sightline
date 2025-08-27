@@ -162,23 +162,25 @@ export function useProgressTracking({
         if (!response.ok) {
           // If real progress tracking fails, handle different scenarios
           if (response.status === 404) {
-            // For the first few 404s, show "Queued..." status
-            if (consecutiveFailuresRef.current < 3) {
+            // For the first several 404s, show "Queued..." status - be more patient
+            if (consecutiveFailuresRef.current < 8) {  // Increased from 3 to 8
               console.log('⏳ Task queued, waiting for processing to start...')
               setProgress(0)
               setStage('Queued...')
               setStatus('queued')
               consecutiveFailuresRef.current += 1
               
-              // Increase polling interval with exponential backoff
-              currentIntervalRef.current = Math.min(
-                currentIntervalRef.current * 2,
-                BACKOFF_MAX
-              )
+              // More gradual backoff - don't increase as aggressively
+              if (consecutiveFailuresRef.current >= 3) {
+                currentIntervalRef.current = Math.min(
+                  currentIntervalRef.current * 1.5,  // Reduced from 2x to 1.5x
+                  BACKOFF_MAX
+                )
+              }
               return
             }
             
-            // After 3 consecutive 404s, fall back to simulation
+            // After 8 consecutive 404s, fall back to simulation
             console.log('⚠️ Backend progress not found after retries, using fallback simulation')
             const elapsed = Date.now() - (startTimeRef.current || Date.now())
             const maxTime = 50000 // 50 seconds
@@ -191,7 +193,7 @@ export function useProgressTracking({
             // Only update if progress is moving forward
             if (simulatedProgress >= progress) {
               setProgress(simulatedProgress)
-              setStage('Processing your video...')
+              setStage('Processing your video (backend active)...')  // Clearer message
               setStatus('processing')
             }
             return
