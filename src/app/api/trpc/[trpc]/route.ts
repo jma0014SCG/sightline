@@ -3,10 +3,10 @@ import { type NextRequest } from 'next/server'
 import { appRouter } from '@/server/api/root'
 import { createTRPCContext } from '@/server/api/trpc'
 
-// Use edge runtime for better Vercel compatibility
-export const runtime = 'edge'
-// Force dynamic for auth-less calls
+// Force dynamic rendering for auth-less calls
 export const dynamic = 'force-dynamic'
+// Let Vercel auto-detect the best runtime
+// export const runtime = 'edge'
 
 const handler = async (req: NextRequest) => {
   try {
