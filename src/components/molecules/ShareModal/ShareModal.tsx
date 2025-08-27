@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Share2, Copy, Check, ExternalLink, Eye, Trash2, Globe, Lock } from 'lucide-react'
-import { api } from '@/lib/api/trpc'
+import { api } from '@/components/providers/TRPCProvider'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/providers/ToastProvider'
 

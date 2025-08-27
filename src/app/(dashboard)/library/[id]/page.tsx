@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { SummaryViewer, SummaryViewerImproved } from '@/components/organisms/SummaryViewer'
 import { SummaryHeader, SummaryHeaderCompact } from '@/components/molecules/SummaryHeader'
-import { api } from '@/lib/api/trpc'
+import { api } from '@/components/providers/TRPCProvider'
 import { useToast } from '@/components/providers/ToastProvider'
 import { useFeatureFlag } from '@/lib/feature-flags'
 

@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useToast } from '@/components/providers/ToastProvider'
-import { api } from '@/lib/api/trpc'
+import { api } from '@/components/providers/TRPCProvider'
 // import { DebugPanel } from '@/components/debug/DebugPanel' // Temporarily disabled for deployment
 import { SignInModal } from '@/components/modals/SignInModal'
 import { AuthPromptModal } from '@/components/modals/AuthPromptModal'

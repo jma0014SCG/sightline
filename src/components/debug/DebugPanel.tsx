@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
-import { api } from '@/lib/api/trpc'
+import { api } from '@/components/providers/TRPCProvider'
 import { LogViewer } from './LogViewer'
 import { correlationStore, generateCorrelationId } from '@/lib/api/correlation'
 import { createLogger } from '@/lib/logger'

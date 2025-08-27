@@ -2,13 +2,12 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink, loggerLink } from '@trpc/client'
+import { createTRPCReact } from '@trpc/react-query'
 import { useState } from 'react'
 import superjson from 'superjson'
-// Use centralized tRPC client with explicit types
-import { api } from '@/lib/api/trpc'
+import { type AppRouter } from '@/server/api/root'
 
-// Re-export for backward compatibility
-export { api }
+export const api = createTRPCReact<AppRouter>()
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
