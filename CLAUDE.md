@@ -157,7 +157,7 @@ summaries for intelligent organization and filtering. See /Users/jeffaxelrod/Doc
 ### Summary Limits
 
 - **Anonymous**: 1 summary ever (tracked by browser fingerprint + IP)
-- **Free Plan**: 3 summaries total (lifetime limit)
+- **Free Plan**: 3 summaries/month (resets on 1st)
 - **Pro Plan**: 25 summaries/month (resets on 1st)
 - **Enterprise Plan**: Unlimited summaries
 

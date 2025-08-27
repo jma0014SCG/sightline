@@ -433,7 +433,7 @@ export const summaryRouter = createTRPCRouter({
         // Determine actual limit based on plan (using defaults if not set in DB)
         let effectiveLimit = user.summariesLimit
         if (user.plan === 'FREE') {
-          effectiveLimit = 1 // 1 per month for FREE
+          effectiveLimit = 3 // 3 per month for FREE
         } else if (user.plan === 'PRO') {
           effectiveLimit = 25 // 25 per month for PRO
         } else if (user.plan === 'ENTERPRISE') {

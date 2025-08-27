@@ -13,7 +13,7 @@ export const RATE_LIMITS = {
 
   // Authenticated user limits by plan
   FREE: {
-    CREATE_SUMMARY: { limit: 3, window: 'lifetime' },
+    CREATE_SUMMARY: { limit: 3, window: '30d' },  // 3 per month for FREE users
     GET_LIBRARY: { limit: 100, window: '1h' },
     GET_SUMMARY: { limit: 300, window: '1h' },
     UPDATE_SUMMARY: { limit: 60, window: '1h' },
