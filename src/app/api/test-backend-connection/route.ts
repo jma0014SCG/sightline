@@ -19,7 +19,7 @@ export async function GET() {
   // Test 1: Direct fetch to health endpoint
   try {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sightline-ai-backend-production.up.railway.app'
-    const healthUrl = `${backendUrl}/health`
+    const healthUrl = `${backendUrl}/api/health`
     
     console.log(`Testing direct fetch to: ${healthUrl}`)
     
@@ -48,7 +48,7 @@ export async function GET() {
   // Test 2: Using backend client
   try {
     console.log('Testing backend client...')
-    const healthData = await backendClient.get('/health')
+    const healthData = await backendClient.get('/api/health')
     diagnostics.tests.backendClient = {
       status: 'success',
       response: healthData,
@@ -68,7 +68,7 @@ export async function GET() {
     const testUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     
     // Don't actually process, just test connectivity
-    const response = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sightline-ai-backend-production.up.railway.app'}/health`, {
+    const response = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sightline-ai-backend-production.up.railway.app'}/api/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
