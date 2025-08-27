@@ -1,13 +1,16 @@
 {
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
   "functions": {
-    "src/app/api/trpc/[trpc]/route.ts": {
+    "app/api/trpc/[trpc]/route.ts": {
       "maxDuration": 30
     },
-    "src/app/api/**/*.ts": {
+    "app/api/**/*.ts": {
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
 }

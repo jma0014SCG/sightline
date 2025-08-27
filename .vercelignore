@@ -45,7 +45,8 @@ scripts/migration-*
 # ============================================================================
 
 # Python files and directories
-api/
+# NOTE: Only exclude the root api/ directory, NOT src/app/api/
+/api/
 venv/
 *.py
 *.pyc
@@ -384,11 +385,11 @@ credentials/
 # Specific Project Exclusions
 # ============================================================================
 
-# Debug routes
-src/app/debug/
-src/app/test/
-src/app/api/dev/
-src/app/api/ping/
+# Debug routes (commented out to keep for testing)
+# src/app/debug/
+# src/app/test/
+# src/app/api/dev/
+# src/app/api/ping/
 
 # Unused components
 src/components/deprecated/
