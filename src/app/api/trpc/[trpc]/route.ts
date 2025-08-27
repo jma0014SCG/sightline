@@ -5,7 +5,7 @@ import { createTRPCContext } from '@/server/api/trpc'
 
 // Force dynamic rendering for auth-less calls
 export const dynamic = 'force-dynamic'
-// Let Vercel auto-detect the best runtime
+// Prisma requires Node.js runtime, cannot use edge runtime
 // export const runtime = 'edge'
 
 const handler = async (req: NextRequest) => {
@@ -16,10 +16,14 @@ const handler = async (req: NextRequest) => {
       router: appRouter,
       createContext: createTRPCContext,
       onError: ({ path, error }) => {
-        // Always log errors, not just in development
+        // Always log errors with more context
         console.error(
           `❌ tRPC failed on ${path ?? '<no-path>'}: ${error.message}`,
-          error.stack
+          {
+            stack: error.stack,
+            code: error.code,
+            cause: error.cause,
+          }
         )
       },
     })

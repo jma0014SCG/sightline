@@ -44,6 +44,16 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
               'x-trpc-source': 'client',
             }
           },
+          // Add timeout handling to prevent hanging requests
+          fetch: (url, options) => {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+            
+            return fetch(url, {
+              ...options,
+              signal: controller.signal,
+            } as RequestInit).finally(() => clearTimeout(timeoutId))
+          },
         }),
       ],
     })
