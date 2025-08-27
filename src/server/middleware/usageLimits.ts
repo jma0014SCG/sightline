@@ -3,7 +3,7 @@
  * Enforces subscription tier limits for summaries
  */
 
-import { prisma } from '~/server/db';
+import { prisma } from '@/lib/db/prisma';
 
 export interface UsageLimitResult {
   allowed: boolean;

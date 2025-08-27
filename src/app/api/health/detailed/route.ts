@@ -161,7 +161,7 @@ export async function GET(request: Request) {
         component: 'health_check',
         service: 'database',
       },
-      level: 'critical',
+      level: 'error',
     })
   }
 
@@ -321,7 +321,7 @@ export async function GET(request: Request) {
         component: 'health_check',
         status: 'unhealthy',
       },
-      extra: response,
+      extra: { ...response },
     })
   }
 

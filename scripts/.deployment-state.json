@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-08-26T07:51:50.575Z",
+  "environment": "production",
+  "steps": [
+    {
+      "command": "vercel --version",
+      "description": "Vercel CLI check",
+      "status": "success",
+      "timestamp": "2025-08-26T07:51:50.795Z"
+    },
+    {
+      "command": "pnpm vercel:link",
+      "description": "Vercel project link",
+      "status": "failed",
+      "error": "Command failed: pnpm vercel:link\nVercel CLI 44.4.3\nRetrieving project…\nError: Command `vercel link` requires confirmation. Use option \"--yes\" to confirm.\n",
+      "timestamp": "2025-08-26T07:51:51.637Z"
+    },
+    {
+      "command": "pnpm deploy:preview | tail -n 1",
+      "description": "Preview deployment",
+      "status": "success",
+      "timestamp": "2025-08-26T07:51:52.209Z"
+    },
+    {
+      "command": "pnpm deploy",
+      "description": "Production deployment",
+      "status": "failed",
+      "error": "Command failed: pnpm deploy",
+      "timestamp": "2025-08-26T07:51:52.456Z"
+    }
+  ],
+  "errors": [
+    {
+      "step": "Production deployment",
+      "error": "Command failed: pnpm deploy",
+      "timestamp": "2025-08-26T07:51:52.457Z"
+    }
+  ],
+  "warnings": [
+    {
+      "step": "Vercel project link",
+      "warning": "Command failed: pnpm vercel:link\nVercel CLI 44.4.3\nRetrieving project…\nError: Command `vercel link` requires confirmation. Use option \"--yes\" to confirm.\n",
+      "timestamp": "2025-08-26T07:51:51.638Z"
+    }
+  ],
+  "rollbackPoints": []
+}

@@ -4,6 +4,20 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Edit3, Trash2, MoreVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { Summary } from '@prisma/client'
+
+// Define category and tag types
+type Category = {
+  id: string
+  name: string
+  summaryId: string
+}
+
+type Tag = {
+  id: string
+  name: string
+  summaryId: string
+}
 
 type SummaryWithRelations = Summary & {
   categories?: Category[]

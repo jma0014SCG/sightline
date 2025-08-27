@@ -71,11 +71,11 @@ class QueryCache {
   invalidate(pattern: string): void {
     const keysToDelete: string[] = [];
     
-    for (const key of this.cache.keys()) {
+    this.cache.forEach((_, key) => {
       if (key.includes(pattern)) {
         keysToDelete.push(key);
       }
-    }
+    });
     
     keysToDelete.forEach(key => this.cache.delete(key));
   }
@@ -125,12 +125,12 @@ class QueryCache {
     const now = Date.now();
     const keysToDelete: string[] = [];
     
-    for (const [key, entry] of this.cache.entries()) {
+    this.cache.forEach((entry, key) => {
       const age = now - entry.timestamp;
       if (age > entry.ttl * 1000) {
         keysToDelete.push(key);
       }
-    }
+    });
     
     keysToDelete.forEach(key => this.cache.delete(key));
   }

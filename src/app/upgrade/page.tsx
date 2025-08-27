@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react'
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 import { useToast } from '@/components/providers/ToastProvider'
 
 const PLANS = [

@@ -46,7 +46,7 @@ pnpm env:setup             # Set up environment variables
 pnpm env:validate          # Validate environment variables
 pnpm env:check             # Quick env check
 ```
-
+1
 ### Code Quality
 
 ```bash
@@ -107,8 +107,7 @@ python tests/test_ytdlp.py
 ## Smart Collections
 
 AI-powered automatic categorization system that extracts entities and assigns categories to video
-summaries for intelligent organization and filtering. See [Architecture Documentation](ARCHITECTURE.md#smart-collections-processing)
-for comprehensive technical details.
+summaries for intelligent organization and filtering. See /Users/jeffaxelrod/Documents/Sightline/PROJECT_INDEX_FINAL.md
 
 ## Architecture Overview
 
@@ -168,11 +167,11 @@ for comprehensive technical details.
 
 Before starting any development task, **ALWAYS** consult these files in order:
 
-/Users/jeffaxelrod/Documents/Sightline/PROJECT_INDEX.md
+/Users/jeffaxelrod/Documents/Sightline/PROJECT_INDEX_FINAL.md
 
 ### Task Execution Protocol
 
-1. **Task Assessment**: Read subtask from `/Docs/Implementation.md`
+1. **Task Assessment**: 
    - **Simple subtask**: Implement directly
    - **Complex subtask**: Create a todo list and break down further
    - Check task dependencies and prerequisites
@@ -180,9 +179,8 @@ Before starting any development task, **ALWAYS** consult these files in order:
 
 2. **Documentation Research**: Check relevant documentation links in the subtask before implementing
 
-3. **UI/UX Implementation**: Consult `/Docs/UI_UX_doc.md` before implementing any UI/UX elements
 
-4. **Project Structure Compliance**: Check `/Docs/project_structure.md` before:
+4. **Project Structure Compliance**: Check `/Users/jeffaxelrod/Documents/Sightline/PROJECT_INDEX_FINAL.md` before:
    - Running commands
    - Creating files/folders
    - Making structural changes
@@ -191,8 +189,6 @@ Before starting any development task, **ALWAYS** consult these files in order:
 5. **Implementation**: Follow established patterns and project structure guidelines
 
 6. **Error Handling**:
-   - Check `/Docs/Bug_tracking.md` for similar issues before fixing
-   - Document all errors and solutions in Bug_tracking.md
    - Include error details, root cause, and resolution steps
 
 7. **Task Completion**: Mark complete only when:
@@ -205,12 +201,8 @@ Before starting any development task, **ALWAYS** consult these files in order:
 ### Critical Rules
 
 - **NEVER** skip documentation consultation
-- **NEVER** mark tasks complete without proper testing
 - **NEVER** ignore project structure guidelines
-
-- **ALWAYS** document errors and solutions
 - **ALWAYS** follow the established workflow process
-
 ### Component Architecture
 
 The codebase follows atomic design pattern with clear component hierarchy:

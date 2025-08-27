@@ -161,9 +161,10 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
     
     if (!user) {
       // Fetch from database
-      user = await ctx.prisma.user.findUnique({
+      const dbUser = await ctx.prisma.user.findUnique({
         where: { id: ctx.userId }
       })
+      user = dbUser || undefined
 
       // If user doesn't exist, create them with minimal data
       // The webhook will update with full data when it fires

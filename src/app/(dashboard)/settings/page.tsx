@@ -12,7 +12,7 @@ import {
   Loader2
 } from 'lucide-react'
 // import { api } from '@/lib/api/trpc' // Temporarily disabled for deployment
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 import { cn } from '@/lib/utils'
 
 export default function SettingsPage() {

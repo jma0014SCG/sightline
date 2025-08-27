@@ -10,6 +10,10 @@ export type MockContext = {
   prisma: typeof prisma
   userId: string | null
   headers: ReturnType<typeof headers>
+  correlationId: string
+  requestId: string
+  userCache: Map<string, any>
+  logger: any // Using any for simplified testing
 }
 
 // Create a mock tRPC context for testing
@@ -31,6 +35,15 @@ export const createMockContext = (overrides?: Partial<MockContext>): MockContext
     prisma: {} as typeof prisma, // Will be mocked in tests
     userId: null,
     headers: Promise.resolve(mockHeaders) as any,
+    correlationId: 'test-correlation-id',
+    requestId: 'test-request-id',
+    userCache: new Map(),
+    logger: {
+      info: () => {},
+      error: () => {},
+      warn: () => {},
+      debug: () => {},
+    },
     ...overrides,
   }
 }

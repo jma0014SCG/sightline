@@ -402,7 +402,7 @@ export function SummaryViewer({
         {/* Sidebar (1/3 width on large screens) - Reduced spacing */}
         <div className="lg:col-span-1 space-y-3">
           {/* Actions Sidebar */}
-          <ActionsSidebar summary={summary} onShare={openShareModal} />
+          <ActionsSidebar summary={summary as any} onShare={openShareModal} />
 
           {/* Key Moments Sidebar */}
           {keyMoments.length > 0 && (

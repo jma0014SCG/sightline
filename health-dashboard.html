@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sightline Backend Health Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .healthy { background: #10b981; color: white; }
+        .degraded { background: #f59e0b; color: white; }
+        .unhealthy { background: #ef4444; color: white; }
+        .loading { background: #6b7280; color: white; }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .refresh-info {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Sightline Backend Health Dashboard</h1>
+        
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <label for="apiUrl">Backend URL:</label>
+            <input type="text" id="apiUrl" placeholder="https://your-app.railway.app or http://localhost:8000" value="http://localhost:8000">
+            <button onclick="updateUrl()">Update & Refresh</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>🏥 Basic Health</h2>
+                <div id="health-status" class="status loading">Loading...</div>
+                <pre id="health-data">Checking...</pre>
+            </div>
+
+            <div class="card">
+                <h2>📊 Detailed Metrics</h2>
+                <div id="detailed-status" class="status loading">Loading...</div>
+                <pre id="detailed-data">Checking...</pre>
+            </div>
+
+            <div class="card">
+                <h2>💾 Database Status</h2>
+                <div id="database-status" class="status loading">Loading...</div>
+                <pre id="database-data">Checking...</pre>
+            </div>
+
+            <div class="card">
+                <h2>🖥️ Resource Usage</h2>
+                <div id="resources-status" class="status loading">Loading...</div>
+                <pre id="resources-data">Checking...</pre>
+            </div>
+
+            <div class="card">
+                <h2>⚡ Circuit Breakers</h2>
+                <div id="circuit-status" class="status loading">Loading...</div>
+                <pre id="circuit-data">Checking...</pre>
+            </div>
+
+            <div class="card">
+                <h2>📈 Summary</h2>
+                <div id="summary-status" class="status loading">Loading...</div>
+                <pre id="summary-data">Calculating...</pre>
+            </div>
+        </div>
+
+        <div class="refresh-info">
+            Auto-refresh every 30 seconds | Last update: <span id="lastUpdate">Never</span>
+        </div>
+    </div>
+
+    <script>
+        let baseUrl = localStorage.getItem('apiUrl') || 'http://localhost:8000';
+        document.getElementById('apiUrl').value = baseUrl;
+
+        function updateUrl() {
+            baseUrl = document.getElementById('apiUrl').value;
+            localStorage.setItem('apiUrl', baseUrl);
+            checkAllEndpoints();
+        }
+
+        async function checkEndpoint(endpoint, elementId, statusId) {
+            try {
+                const response = await fetch(`${baseUrl}/api/${endpoint}`);
+                const data = await response.json();
+                
+                document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
+                
+                const status = data.status || (response.ok ? 'healthy' : 'unhealthy');
+                const statusElement = document.getElementById(statusId);
+                statusElement.textContent = status.toUpperCase();
+                statusElement.className = `status ${status}`;
+                
+                return { endpoint, status, data };
+            } catch (error) {
+                document.getElementById(elementId).textContent = `Error: ${error.message}`;
+                document.getElementById(statusId).textContent = 'ERROR';
+                document.getElementById(statusId).className = 'status unhealthy';
+                return { endpoint, status: 'error', error: error.message };
+            }
+        }
+
+        async function checkAllEndpoints() {
+            const endpoints = [
+                { path: 'health', dataId: 'health-data', statusId: 'health-status' },
+                { path: 'health/detailed', dataId: 'detailed-data', statusId: 'detailed-status' },
+                { path: 'health/database', dataId: 'database-data', statusId: 'database-status' },
+                { path: 'health/resources', dataId: 'resources-data', statusId: 'resources-status' },
+                { path: 'health/circuit-breakers', dataId: 'circuit-data', statusId: 'circuit-status' }
+            ];
+
+            const results = await Promise.all(
+                endpoints.map(e => checkEndpoint(e.path, e.dataId, e.statusId))
+            );
+
+            // Update summary
+            const healthy = results.filter(r => r.status === 'healthy').length;
+            const total = results.length;
+            const summaryStatus = healthy === total ? 'healthy' : healthy > total/2 ? 'degraded' : 'unhealthy';
+            
+            document.getElementById('summary-status').textContent = summaryStatus.toUpperCase();
+            document.getElementById('summary-status').className = `status ${summaryStatus}`;
+            document.getElementById('summary-data').textContent = `${healthy}/${total} services healthy\n\n` +
+                results.map(r => `${r.endpoint}: ${r.status}`).join('\n');
+
+            // Update last update time
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Initial check
+        checkAllEndpoints();
+
+        // Auto-refresh every 30 seconds
+        setInterval(checkAllEndpoints, 30000);
+    </script>
+</body>
+</html>

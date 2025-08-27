@@ -88,6 +88,7 @@ Preview Deployments:
 #### 3.1 Create Webhook Endpoint
 ```yaml
 Endpoint URL: https://sightlineai.io/api/webhooks/clerk
+Frontend API URL: https://clerk.sightlineai.io
 Events:
   - user.created
   - user.updated

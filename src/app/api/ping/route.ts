@@ -1,3 +1,9 @@
+import { NextResponse } from 'next/server'
+
 export async function GET() {
-  return new Response('pong')
+  return NextResponse.json({ 
+    status: 'ok',
+    message: 'pong',
+    timestamp: new Date().toISOString()
+  })
 }

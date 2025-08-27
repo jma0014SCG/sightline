@@ -10,6 +10,17 @@ import { corsMiddleware, shouldApplyCors } from "@/lib/middleware/cors";
 async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
+  // Skip middleware entirely for tRPC, webhook, health, and diagnostic routes - let them handle their own auth
+  if (
+    path.startsWith("/api/trpc") || 
+    path.startsWith("/api/webhooks") ||
+    path.startsWith("/api/health") ||
+    path.startsWith("/api/diagnostic") ||
+    path.startsWith("/api/ping")
+  ) {
+    return NextResponse.next();
+  }
+
   // 1. Apply rate limiting first (to prevent DDoS)
   const rateLimitResponse = await rateLimitMiddleware(req);
   if (rateLimitResponse?.status === 429) {
@@ -28,7 +39,7 @@ async function middleware(req: NextRequest) {
     }
   }
 
-  // 3. Apply Clerk authentication
+  // 3. Apply Clerk authentication (only for non-API routes and routes not skipped above)
   // We need to pass through the response with CORS headers
   const authMiddleware = clerkMiddleware();
   const authResponse = await authMiddleware(req, {

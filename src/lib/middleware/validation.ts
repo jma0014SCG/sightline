@@ -237,10 +237,12 @@ export function validateURLParams(params: URLSearchParams): {
   const sanitized = new URLSearchParams();
   const maxParamLength = 1000;
 
-  for (const [key, value] of params.entries()) {
+  let validationError: { valid: false; error: string } | null = null;
+  
+  params.forEach((value, key) => {
     // Check parameter length
-    if (key.length > maxParamLength || value.length > maxParamLength) {
-      return {
+    if (!validationError && (key.length > maxParamLength || value.length > maxParamLength)) {
+      validationError = {
         valid: false,
         error: `URL parameter too long: ${key}`,
       };
@@ -268,6 +270,11 @@ export function validateURLParams(params: URLSearchParams): {
     }
 
     sanitized.set(sanitizedKey, sanitizedValue);
+  })
+
+  // Return validation error if one was found
+  if (validationError) {
+    return validationError;
   }
 
   return { valid: true, sanitized };

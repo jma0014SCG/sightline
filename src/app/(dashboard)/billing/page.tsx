@@ -12,7 +12,7 @@ import {
   Loader2 
 } from 'lucide-react'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 import { formatPrice } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 
 export default function EditSummaryPage() {
   const params = useParams()

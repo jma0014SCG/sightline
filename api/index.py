@@ -20,8 +20,12 @@ logger = get_logger(__name__)
 app = FastAPI(
     title="Sightline API",
     description="AI-powered YouTube video summarization API",
-    version="0.1.0"
+    version="1.0.0"
 )
+
+# Import and setup enhanced monitoring
+from monitoring import setup_monitoring
+setup_monitoring(app)
 
 # Import correlation middleware
 from middleware.correlation import CorrelationMiddleware

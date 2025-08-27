@@ -2,24 +2,30 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Ensure we're using server mode for API routes (not static export)
+  // Comment out or set to 'standalone' if API routes don't work
+  // output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
   eslint: {
-    // Disable ESLint during builds (run separately in CI/scripts)
-    ignoreDuringBuilds: true,
+    // Enable ESLint during builds to catch issues
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Skip TypeScript errors during production build
-    // !! IMPORTANT: This is temporarily enabled to match local dev behavior
-    // !! You should fix TypeScript errors and disable this in production
-    ignoreBuildErrors: true,
+    // Enable TypeScript checking to identify build errors
+    // This will help identify API route issues
+    ignoreBuildErrors: false,
   },
   // Performance optimizations
   experimental: {
     optimizePackageImports: ["lucide-react", "react-markdown", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
     instrumentationHook: true,
+    // Enable server actions for API routes
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
   // Incremental Static Regeneration
   staticPageGenerationTimeout: 90,

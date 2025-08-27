@@ -32,6 +32,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 next-env.d.ts
 
 # prisma
@@ -64,6 +65,7 @@ env/
 # Logs
 logs/
 *.log
+api/api.log
 
 # Testing
 test-results/

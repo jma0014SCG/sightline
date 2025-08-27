@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useProgressTracking } from '@/lib/hooks/useProgressTracking'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useToast } from '@/components/providers/ToastProvider'
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 // import { DebugPanel } from '@/components/debug/DebugPanel' // Temporarily disabled for deployment
 import { SignInModal } from '@/components/modals/SignInModal'
 import { AuthPromptModal } from '@/components/modals/AuthPromptModal'
@@ -859,7 +859,7 @@ export default function HomePage() {
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-4">
-                "Cut my weekly research prep from 3 hours to 20 minutes. The summaries are incredibly accurate and save me so much time."
+                &ldquo;Cut my weekly research prep from 3 hours to 20 minutes. The summaries are incredibly accurate and save me so much time.&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -882,7 +882,7 @@ export default function HomePage() {
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-4">
-                "As a developer, I watch tons of tutorials. Sightline helps me extract the code examples and key concepts without the fluff."
+                &ldquo;As a developer, I watch tons of tutorials. Sightline helps me extract the code examples and key concepts without the fluff.&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -905,7 +905,7 @@ export default function HomePage() {
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-4">
-                "Perfect for staying updated on industry podcasts. I get all the insights without spending hours listening."
+                &ldquo;Perfect for staying updated on industry podcasts. I get all the insights without spending hours listening.&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm">

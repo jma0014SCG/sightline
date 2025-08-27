@@ -143,7 +143,7 @@ src/app/
 │   │   └── detailed/     # System metrics
 │   ├── trpc/[trpc]/      # tRPC handler
 │   ├── webhooks/         # External webhooks
-│   │   ├── clerk/        # User sync
+│   │   ├── clerk/        # User sync (https://sightlineai.io/api/webhooks/clerk)
 │   │   └── stripe/       # Payment events
 │   └── backend-health/   # Backend status
 ├── share/[slug]/         # Public share pages

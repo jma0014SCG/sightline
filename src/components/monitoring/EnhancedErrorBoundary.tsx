@@ -2,10 +2,10 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import * as Sentry from '@sentry/nextjs'
-import { Button } from '@/components/ui/button'
+// Use native button instead of UI component
 import { AlertCircle, RefreshCw, Home, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
-import { MonitoringService } from '@/lib/monitoring'
+import { monitoring } from '@/lib/monitoring'
 
 interface Props {
   children: ReactNode
@@ -47,7 +47,7 @@ class EnhancedErrorBoundaryBase extends Component<
   State
 > {
   private resetTimeoutId: NodeJS.Timeout | null = null
-  private monitoring = MonitoringService.getInstance()
+  private monitoring = monitoring
   private errorId: string | null = null
 
   constructor(props: Props & { userContext: ReturnType<typeof useUserContext> }) {
@@ -241,44 +241,40 @@ class EnhancedErrorBoundaryBase extends Component<
               )}
 
               <div className="space-y-3">
-                <Button
+                <button
                   onClick={this.resetErrorBoundary}
-                  className="w-full"
-                  variant="default"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw className="h-4 w-4" />
                   Try Again
-                </Button>
+                </button>
 
                 {level === 'page' && (
-                  <Button
+                  <button
                     onClick={() => window.location.href = '/'}
-                    className="w-full"
-                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                   >
-                    <Home className="mr-2 h-4 w-4" />
+                    <Home className="h-4 w-4" />
                     Go to Homepage
-                  </Button>
+                  </button>
                 )}
 
-                <Button
+                <button
                   onClick={this.toggleDetails}
-                  className="w-full"
-                  variant="ghost"
-                  size="sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-sm"
                 >
                   {showDetails ? (
                     <>
-                      <ChevronUp className="mr-2 h-4 w-4" />
+                      <ChevronUp className="h-4 w-4" />
                       Hide Details
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="mr-2 h-4 w-4" />
+                      <ChevronDown className="h-4 w-4" />
                       Show Details
                     </>
                   )}
-                </Button>
+                </button>
               </div>
 
               {showDetails && (
@@ -330,7 +326,7 @@ export const EnhancedErrorBoundary = withUserContext(EnhancedErrorBoundaryBase)
 // Export a hook for imperative error handling
 export function useErrorHandler() {
   return (error: Error, errorInfo?: { componentStack?: string }) => {
-    const monitoring = MonitoringService.getInstance()
+    // Use the monitoring instance directly from import
     
     monitoring.logError({
       error,

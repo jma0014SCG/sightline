@@ -3,7 +3,7 @@
  * Wraps database queries with caching layer for performance
  */
 
-import { prisma } from '@/server/db';
+import { prisma } from '@/lib/db/prisma';
 import { queryCache, getCachedSummaryCount, getCachedMonthlySummaries } from '@/server/cache/queryCache';
 import type { Summary, User } from '@prisma/client';
 

@@ -19,11 +19,7 @@ if (typeof window !== 'undefined' && POSTHOG_KEY) {
     // Enable session recordings for better user experience analysis
     session_recording: {
       maskAllInputs: true, // Mask sensitive input fields
-      maskTextContent: false,
-      recordCanvas: false,
-      recordCrossOriginIframes: false,
       maskTextSelector: '[data-sensitive]', // Mask elements marked as sensitive
-      unmaskTextSelector: '[data-unmask]',
     },
     // Autocapture settings
     autocapture: {

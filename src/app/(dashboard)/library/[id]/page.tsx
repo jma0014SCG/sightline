@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { SummaryViewer, SummaryViewerImproved } from '@/components/organisms/SummaryViewer'
 import { SummaryHeader, SummaryHeaderCompact } from '@/components/molecules/SummaryHeader'
-import { api } from '@/components/providers/TRPCProvider'
+import { api } from '@/lib/api/trpc'
 import { useToast } from '@/components/providers/ToastProvider'
 import { useFeatureFlag } from '@/lib/feature-flags'
 
@@ -77,7 +77,7 @@ export default function SummaryPage() {
       <div className="min-h-screen bg-gray-50">
         {/* Compact Header without duplication */}
         <SummaryHeaderCompact
-          summary={summary}
+          summary={summary as any}
           onBack={() => router.push('/library')}
           onEdit={handleEdit}
           onDelete={handleDelete}
