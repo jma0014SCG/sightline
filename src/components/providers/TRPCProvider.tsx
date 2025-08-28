@@ -52,6 +52,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
             return fetch(url, {
               ...options,
               signal: controller.signal,
+              credentials: 'include', // Include cookies for authentication
             } as RequestInit).finally(() => clearTimeout(timeoutId))
           },
         }),
