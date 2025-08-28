@@ -306,12 +306,23 @@ export const summaryRouter = createTRPCRouter({
           }
         )
 
-        // Classify summary content asynchronously (fire and forget)
-        classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)
+        // Classify summary content asynchronously with timeout protection
+        // Use a timeout wrapper to prevent indefinite hanging
+        const classificationTimeout = 300000 // 5 minutes total timeout
+        const classificationPromise = Promise.race([
+          classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
+          new Promise<null>((_, reject) => 
+            setTimeout(() => reject(new Error('Classification timeout after 5 minutes')), classificationTimeout)
+          )
+        ])
+        
+        classificationPromise
           .catch((error) => {
+            // Log error but don't let it affect the main flow
             logger.error('Classification failed for anonymous summary', { 
               summaryId: summary.id, 
-              error: error instanceof Error ? error.message : 'Unknown error'
+              error: error instanceof Error ? error.message : 'Unknown error',
+              isTimeout: error instanceof Error && error.message.includes('timeout')
             })
           })
 
@@ -763,13 +774,24 @@ export const summaryRouter = createTRPCRouter({
           }
         }
 
-        // Classify summary content asynchronously (fire and forget)
-        classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle)
+        // Classify summary content asynchronously with timeout protection
+        // Use a timeout wrapper to prevent indefinite hanging
+        const classificationTimeout = 300000 // 5 minutes total timeout
+        const classificationPromise = Promise.race([
+          classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
+          new Promise<null>((_, reject) => 
+            setTimeout(() => reject(new Error('Classification timeout after 5 minutes')), classificationTimeout)
+          )
+        ])
+        
+        classificationPromise
           .catch((error) => {
+            // Log error but don't let it affect the main flow
             logger.error('Classification failed for authenticated summary', { 
               summaryId: summary.id, 
               userId,
-              error: error instanceof Error ? error.message : 'Unknown error'
+              error: error instanceof Error ? error.message : 'Unknown error',
+              isTimeout: error instanceof Error && error.message.includes('timeout')
             })
           })
 

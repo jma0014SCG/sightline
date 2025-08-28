@@ -27,7 +27,10 @@ function getOpenAIClient(): OpenAI | null {
   if (!openai && process.env.OPENAI_API_KEY) {
     try {
       openai = new OpenAI({ 
-        apiKey: process.env.OPENAI_API_KEY 
+        apiKey: process.env.OPENAI_API_KEY,
+        // SIGNIFICANTLY increased timeout to 5 minutes for the client
+        timeout: 300000, // 300 seconds (5 minutes)
+        maxRetries: 5, // Increased retries for better resilience
       })
     } catch (error) {
       logger.error('Failed to initialize OpenAI client', { error })
@@ -132,19 +135,22 @@ TASK:
 2. Extract up to 8 specific entities (people, companies, products, technologies, concepts, frameworks, tools) and label their type.
 
 ENTITY TYPES:
-- PERSON: Individual people, influencers, creators, experts
-- COMPANY: Organizations, businesses, brands
-- TECHNOLOGY: Technologies, programming languages, platforms
-- PRODUCT: Specific products, apps, services
-- CONCEPT: Abstract concepts, methodologies, principles
-- FRAMEWORK: Frameworks, libraries, systems
-- TOOL: Tools, software, applications
+- PERSON: Individual people, influencers, creators, experts (ALWAYS use full names, never just first names)
+- COMPANY: Organizations, businesses, brands (use official/complete names)
+- TECHNOLOGY: Technologies, programming languages, platforms, protocols
+- PRODUCT: Specific products, apps, services (use official product names)
+- CONCEPT: Abstract concepts, methodologies, principles, theories
+- FRAMEWORK: Frameworks, libraries, systems (include version if mentioned)
+- TOOL: Tools, software, applications (use official tool names)
 
-RULES:
+CRITICAL RULES:
 - Only use categories from the predefined list
-- Focus on the most relevant and specific entities
-- Prioritize well-known entities over generic terms
-- Use proper capitalization for names
+- For PERSON entities: ALWAYS use complete full names (e.g., "Elon Musk" not "Elon", "Steve Jobs" not "Steve")
+- Focus on the most important and relevant entities mentioned multiple times
+- Prioritize specific, recognizable entities over generic terms
+- Use proper capitalization and official naming conventions
+- Quality over quantity: Better to have 4 high-quality tags than 8 mediocre ones
+- Only extract entities that are substantively discussed, not just mentioned in passing
 
 Respond with ONLY a valid JSON object in this format:
 {
@@ -162,6 +168,9 @@ Respond with ONLY a valid JSON object in this format:
       response_format: { type: "json_object" },
       temperature: 0.1, // Low temperature for consistent classification
       max_tokens: 500
+    }, {
+      // SIGNIFICANTLY increased timeout to 4 minutes for this specific request
+      timeout: 240000, // 240 seconds (4 minutes)
     })
 
     console.log('🏷️ [CLASSIFICATION] Received response from OpenAI')
@@ -207,7 +216,7 @@ Respond with ONLY a valid JSON object in this format:
       tagsCount: validTags.length
     })
 
-    // Store the classification in database
+    // Store the classification in database with increased timeout
     console.log('🏷️ [CLASSIFICATION] Starting database transaction...')
     await prisma.$transaction(async (tx) => {
       // Connect categories
@@ -246,6 +255,9 @@ Respond with ONLY a valid JSON object in this format:
         })
         console.log('🏷️ [CLASSIFICATION] Tags connected successfully')
       }
+    }, {
+      maxWait: 120000, // Maximum time to wait for a transaction slot (2 minutes)
+      timeout: 120000, // Maximum time the transaction can run (2 minutes)
     })
 
     console.log('🏷️ [CLASSIFICATION] Database transaction completed successfully')

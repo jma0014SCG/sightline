@@ -17,7 +17,39 @@ export default function SummaryPage() {
   // Feature flag for improved layout
   const useImprovedLayout = useFeatureFlag('improvedSummaryLayout')
 
-  const { data: summary, isLoading } = api.summary.getById.useQuery({ id })
+  // Poll for tags every 3 seconds if they're not loaded yet
+  // Stop polling after 30 seconds or when tags are found
+  const { data: summary, isLoading } = api.summary.getById.useQuery(
+    { id },
+    {
+      // Refetch every 3 seconds if no tags/categories yet
+      refetchInterval: (data) => {
+        // Stop polling if we have tags/categories or after 30 seconds
+        if (!data) return 3000 // Keep polling while loading
+        
+        const hasTags = data?.tags && data.tags.length > 0
+        const hasCategories = data?.categories && data.categories.length > 0
+        
+        // Stop polling if we have tags/categories
+        if (hasTags || hasCategories) {
+          return false // Stop polling
+        }
+        
+        // Continue polling for up to 30 seconds
+        const createdAt = data?.createdAt ? new Date(data.createdAt).getTime() : Date.now()
+        const now = Date.now()
+        const elapsedSeconds = (now - createdAt) / 1000
+        
+        if (elapsedSeconds > 30) {
+          return false // Stop polling after 30 seconds
+        }
+        
+        return 3000 // Poll every 3 seconds
+      },
+      // Keep data fresh
+      refetchOnWindowFocus: true,
+    }
+  )
   const deleteMutation = api.summary.delete.useMutation({
     onSuccess: () => {
       showSuccess('Summary deleted successfully')

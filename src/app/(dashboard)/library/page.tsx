@@ -95,6 +95,9 @@ export default function LibraryPage() {
     return cleanFilters
   }, [filters])
   
+  // Track recently created summaries that might be getting tags
+  const [recentlyCreatedIds, setRecentlyCreatedIds] = useState<Set<string>>(new Set())
+  
   // Fetch summaries with filters
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = api.library.getAll.useInfiniteQuery(
     {
@@ -103,6 +106,9 @@ export default function LibraryPage() {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      // Refetch periodically if we have recently created summaries without tags
+      refetchInterval: recentlyCreatedIds.size > 0 ? 3000 : false,
+      refetchOnWindowFocus: true,
     }
   )
 
@@ -110,6 +116,18 @@ export default function LibraryPage() {
   const createSummary = api.summary.create.useMutation({
     onSuccess: (summary) => {
       console.log('✅ Summary created successfully:', summary)
+      
+      // Track this summary for polling tags
+      setRecentlyCreatedIds(prev => new Set(prev).add(summary.id))
+      
+      // Remove from tracking after 30 seconds
+      setTimeout(() => {
+        setRecentlyCreatedIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(summary.id)
+          return newSet
+        })
+      }, 30000)
       
       // DON'T clear task ID here - let the progress complete naturally
       // The onComplete callback will clear it when progress reaches 100%
@@ -278,6 +296,25 @@ export default function LibraryPage() {
       handleShare(ids[0])
     }
   }, [handleShare])
+  
+  // Check if recently created summaries now have tags
+  useEffect(() => {
+    if (!data || recentlyCreatedIds.size === 0) return
+    
+    const allSummaries = data.pages.flatMap(page => page.items)
+    
+    recentlyCreatedIds.forEach(id => {
+      const summary = allSummaries.find(s => s.id === id)
+      if (summary && ((summary.tags && summary.tags.length > 0) || (summary.categories && summary.categories.length > 0))) {
+        // This summary now has tags/categories, stop tracking it
+        setRecentlyCreatedIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(id)
+          return newSet
+        })
+      }
+    })
+  }, [data, recentlyCreatedIds])
 
   const handleBulkExport = useCallback((ids: string[]) => {
     if (!ids || ids.length === 0) return
@@ -503,6 +540,7 @@ export default function LibraryPage() {
                 isSelected={selectedIds.includes(summary.id)}
                 onSelect={handleSelectItem}
                 showSelection={effectiveShowSelection}
+                isLoadingTags={recentlyCreatedIds.has(summary.id)}
               />
             ))}
           </div>

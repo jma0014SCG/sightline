@@ -403,23 +403,19 @@ export function LibraryControls({
                     All Tags
                   </span>
                   <span className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
-                    {availableTags.length - 6}
+                    {availableTags.length}
                   </span>
                 </div>
                 
                 {/* Grouped Tags by Type */}
                 <div className="space-y-3">
                   {Object.entries(groupedTags).map(([type, tags]) => {
-                    // Skip the first 6 tags that are shown in the popular section
-                    const remainingTags = tags.filter(tag => 
-                      !availableTags.slice(0, 6).find(t => t.id === tag.id)
-                    )
-                    
-                    if (remainingTags.length === 0) return null
+                    // Show ALL tags in the expanded section, including those in popular
+                    if (tags.length === 0) return null
                     
                     const isExpanded = expandedTagTypes.has(type)
-                    const displayTags = isExpanded ? remainingTags : remainingTags.slice(0, 8)
-                    const hasMore = remainingTags.length > 8
+                    const displayTags = isExpanded ? tags : tags.slice(0, 8)
+                    const hasMore = tags.length > 8
                     
                     return (
                       <div key={type} className="pb-2 border-b border-blue-100 last:border-b-0">
@@ -429,7 +425,7 @@ export function LibraryControls({
                         >
                           {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                           <span className="capitalize">{type}s</span>
-                          <span className="text-blue-600">({remainingTags.length})</span>
+                          <span className="text-blue-600">({tags.length})</span>
                         </button>
                         
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -451,7 +447,7 @@ export function LibraryControls({
                             onClick={() => toggleTagTypeExpansion(type)}
                             className="mt-2 text-xs text-blue-600 hover:text-blue-700"
                           >
-                            Show {remainingTags.length - 8} more {type}s
+                            Show {tags.length - 8} more {type}s
                           </button>
                         )}
                       </div>

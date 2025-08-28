@@ -24,6 +24,7 @@ interface SummaryCardProps {
   isSelected?: boolean
   onSelect?: (id: string, selected: boolean) => void
   showSelection?: boolean
+  isLoadingTags?: boolean
 }
 
 export function SummaryCard({ 
@@ -34,7 +35,8 @@ export function SummaryCard({
   viewMode = 'grid',
   isSelected = false,
   onSelect,
-  showSelection = false
+  showSelection = false,
+  isLoadingTags = false
 }: SummaryCardProps) {
   const [showActions, setShowActions] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
@@ -272,12 +274,17 @@ export function SummaryCard({
               )}
 
               {/* Tags and Categories - inline */}
-              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
+              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) ? (
                 <div className="mb-1.5 flex flex-wrap gap-1">
                   {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 1)}
                   {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 2)}
                 </div>
-              )}
+              ) : isLoadingTags ? (
+                <div className="mb-1.5 flex items-center gap-2 text-xs text-gray-500">
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                  <span>Loading tags...</span>
+                </div>
+              ) : null}
 
               {/* Footer - Enhanced engagement bar */}
               <div className="flex items-center justify-between">
@@ -494,12 +501,17 @@ export function SummaryCard({
               )}
 
               {/* Tags and Categories - inline without labels */}
-              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) && (
+              {((summary.categories && summary.categories.length > 0) || (summary.tags && summary.tags.length > 0)) ? (
                 <div className="mb-2 flex flex-wrap gap-1">
                   {summary.categories && summary.categories.length > 0 && renderCategories(summary.categories, 2)}
                   {summary.tags && summary.tags.length > 0 && renderTags(summary.tags, 2)}
                 </div>
-              )}
+              ) : isLoadingTags ? (
+                <div className="mb-2 flex items-center gap-2 text-xs text-gray-500">
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                  <span>Loading tags...</span>
+                </div>
+              ) : null}
             </div>
 
             {/* Footer - Compact engagement bar */}

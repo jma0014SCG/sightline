@@ -107,11 +107,11 @@ export async function enforceAnonymousUsageLimit(
  * @param metadata - Additional metadata to store
  */
 export async function recordAnonymousUsage(
-  prisma: PrismaClient, // eslint-disable-line @typescript-eslint/no-unused-vars
-  fingerprint: string, // eslint-disable-line @typescript-eslint/no-unused-vars
-  clientIP: string, // eslint-disable-line @typescript-eslint/no-unused-vars
-  summaryId: string, // eslint-disable-line @typescript-eslint/no-unused-vars
-  metadata?: Record<string, any> // eslint-disable-line @typescript-eslint/no-unused-vars
+  _prisma: PrismaClient,
+  _fingerprint: string,
+  _clientIP: string,
+  _summaryId: string,
+  _metadata?: Record<string, any>
 ): Promise<void> {
   // Anonymous usage is now tracked via the Summary table itself
   // with userId=null and metadata containing fingerprint and IP
