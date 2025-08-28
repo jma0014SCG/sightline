@@ -216,9 +216,9 @@ export function SummaryCard({
           </div>
         )}
         <Link href={`/library/${summary.id}`} className="block">
-          <div className="flex gap-4 p-4">
-            {/* Thumbnail - 16:9 aspect ratio with enhanced display */}
-            <div className="relative h-[96px] w-[170px] flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shadow-md group-hover:shadow-lg transition-shadow duration-300">
+          <div className="flex gap-3 sm:gap-4 p-3 sm:p-4">
+            {/* Thumbnail - Responsive sizing for mobile */}
+            <div className="relative h-[72px] w-[128px] sm:h-[96px] sm:w-[170px] flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shadow-md sm:group-hover:shadow-lg transition-shadow duration-300">
               {summary.thumbnailUrl ? (
                 <>
                   <Image
@@ -242,33 +242,33 @@ export function SummaryCard({
                 </div>
               )}
               
-              {/* Enhanced duration badge */}
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                <Clock className="h-3 w-3" />
+              {/* Duration badge - Smaller on mobile */}
+              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 flex items-center gap-0.5 sm:gap-1 rounded-full bg-black/80 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-white backdrop-blur-sm">
+                <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 {formatDuration(summary.duration)}
               </div>
             </div>
 
-            {/* Content */}
+            {/* Content - Compact on mobile */}
             <div className="flex-1 min-w-0">
-              {/* Header with channel info - enhanced visual hierarchy */}
-              <div className="mb-2 flex items-center gap-2 text-xs">
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 truncate max-w-[150px] inline-block align-bottom">{summary.channelName}</span>
-                <span className="text-gray-300">•</span>
-                <time className="flex items-center gap-1 text-gray-600 font-medium">
-                  <Calendar className="h-3 w-3 text-gray-400" />
+              {/* Header with channel info - Mobile optimized */}
+              <div className="mb-1 sm:mb-2 flex flex-wrap items-center gap-1 sm:gap-2 text-[11px] sm:text-xs">
+                <span className="font-bold text-blue-600 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r sm:from-blue-600 sm:to-blue-700 truncate max-w-[120px] sm:max-w-[150px] inline-block">{summary.channelName}</span>
+                <span className="text-gray-300 hidden sm:inline">•</span>
+                <time className="flex items-center gap-0.5 sm:gap-1 text-gray-600 font-medium">
+                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-400 hidden sm:inline-block" />
                   {formatDate(summary.createdAt)}
                 </time>
               </div>
 
-              {/* Title - Enhanced typography with smooth hover and better text wrapping */}
-              <h3 className="mb-2 text-base font-bold text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300 break-words">
+              {/* Title - Smaller font on mobile */}
+              <h3 className="mb-1 sm:mb-2 text-sm sm:text-base font-semibold sm:font-bold text-gray-900 sm:group-hover:text-transparent sm:group-hover:bg-clip-text sm:group-hover:bg-gradient-to-r sm:group-hover:from-blue-600 sm:group-hover:to-blue-700 transition-all duration-300 break-words">
                 <span className="line-clamp-2">{summary.videoTitle}</span>
               </h3>
 
-              {/* Key insights preview - improved readability and text wrapping */}
+              {/* Key insights preview - Hidden on mobile for space */}
               {keyInsights.length > 0 && (
-                <p className="text-xs text-gray-500 mb-1.5 leading-relaxed break-words">
+                <p className="hidden sm:block text-xs text-gray-500 mb-1.5 leading-relaxed break-words">
                   <span className="line-clamp-1">{keyInsights[0]}</span>
                 </p>
               )}
@@ -591,9 +591,9 @@ export function SummaryCard({
                 </div>
               )}
               
-              {/* Enhanced duration badge */}
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                <Clock className="h-3 w-3" />
+              {/* Duration badge - Smaller on mobile */}
+              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 flex items-center gap-0.5 sm:gap-1 rounded-full bg-black/80 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-white backdrop-blur-sm">
+                <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 {formatDuration(summary.duration)}
               </div>
             </div>

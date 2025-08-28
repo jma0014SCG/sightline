@@ -231,25 +231,26 @@ export function LibraryControls({
     <div className="space-y-4">
       {/* Enhanced Search with Quick Filters */}
       <div className="space-y-3">
-        {/* Search Bar */}
+        {/* Mobile-Optimized Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-gray-500" />
           <input
             ref={searchRef}
             type="text"
-            placeholder="Search your summaries... (⌘K)"
+            placeholder="Search... (⌘K)"
             value={filters.search}
             onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-            className="w-full rounded-lg border-2 border-gray-200 bg-gray-50/50 pl-11 pr-12 py-3 text-sm text-gray-700 placeholder:text-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-300/30 transition-all"
+            className="w-full rounded-full sm:rounded-lg border-2 border-gray-200 bg-gray-50/50 pl-10 sm:pl-11 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm text-gray-700 placeholder:text-gray-500 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-300/30 transition-all"
           />
           {filters.search && (
             <button
               onClick={() => handleSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+              aria-label="Clear search"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           )}
           
@@ -298,11 +299,11 @@ export function LibraryControls({
           )}
         </div>
 
-        {/* Quick Filters with Popular Tags */}
+        {/* Mobile-Optimized Quick Filters with Popular Tags */}
         <div className="space-y-2">
-          {/* Quick Filters Row */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-gray-700 hidden sm:block">Filters:</span>
+          {/* Quick Filters Row - Horizontal scroll on mobile */}
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <span className="text-sm font-medium text-gray-700 hidden sm:block flex-shrink-0">Filters:</span>
             
             {quickFilters.map((filter) => {
               const Icon = filter.icon
@@ -334,12 +335,12 @@ export function LibraryControls({
             )}
           </div>
 
-          {/* Popular Tags Row */}
+          {/* Popular Tags Row - Horizontal scroll on mobile */}
           {availableTags && availableTags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Popular:</span>
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <span className="text-sm font-medium text-gray-700 hidden sm:block flex-shrink-0">Popular:</span>
               
-              {availableTags.slice(0, 6).map((tag) => (
+              {availableTags.slice(0, 8).map((tag) => (
                 <TagBadge
                   key={tag.id}
                   name={tag.name}
@@ -348,15 +349,16 @@ export function LibraryControls({
                   selected={filters.tags?.includes(tag.name)}
                   onClick={() => handleTagToggle(tag.name)}
                   size="sm"
+                  className="flex-shrink-0"
                 />
               ))}
               
-              {availableTags.length > 6 && (
+              {availableTags.length > 8 && (
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
                 >
-                  +{availableTags.length - 6} more
+                  +{availableTags.length - 8} more
                 </button>
               )}
             </div>
@@ -460,57 +462,68 @@ export function LibraryControls({
         )}
       </div>
 
-      {/* Main Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Stats and Results */}
-        <div className="flex items-center gap-4">
+      {/* Mobile-Optimized Main Controls */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Stats - Compact on mobile */}
+        <div className="flex-1 min-w-0">
           {totalCount !== undefined && (
-            <span className="text-sm text-gray-600">
-              <span className="font-medium">{totalCount}</span> {totalCount === 1 ? 'summary' : 'summaries'}
-              {filters.search && ` matching "${filters.search}"`}
+            <span className="text-xs sm:text-sm text-gray-600 truncate block">
+              <span className="font-medium">{totalCount}</span>
+              <span className="hidden sm:inline"> {totalCount === 1 ? 'summary' : 'summaries'}</span>
+              {filters.search && (
+                <span className="hidden sm:inline"> matching "{filters.search}"</span>
+              )}
             </span>
           )}
         </div>
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        {/* Right Controls - Compact on mobile */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Advanced Filter Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
-              "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-1.5 rounded-full sm:rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
               showFilters 
                 ? "border-blue-500 bg-blue-50 text-blue-700"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
             )}
+            aria-label="Toggle advanced filters"
           >
-            <Filter className="h-4 w-4" />
-            Advanced
+            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Advanced</span>
+            {hasActiveFilters && (
+              <span className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white sm:hidden">
+                {(filters.categories?.length || 0) + (filters.tags?.length || 0)}
+              </span>
+            )}
           </button>
 
           {/* View Mode Toggle */}
-          <div className="flex rounded-lg border border-gray-300 bg-white">
+          <div className="flex rounded-full sm:rounded-lg border border-gray-300 bg-white">
             <button
               onClick={() => onViewModeChange('grid')}
               className={cn(
-                "p-2 text-sm transition-colors",
+                "p-1.5 sm:p-2 text-sm transition-colors rounded-l-full sm:rounded-l-lg",
                 viewMode === 'grid'
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
               )}
+              aria-label="Grid view"
             >
-              <Grid className="h-4 w-4" />
+              <Grid className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
             <button
               onClick={() => onViewModeChange('list')}
               className={cn(
-                "p-2 text-sm transition-colors",
+                "p-1.5 sm:p-2 text-sm transition-colors rounded-r-full sm:rounded-r-lg",
                 viewMode === 'list'
                   ? "bg-blue-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
               )}
+              aria-label="List view"
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           </div>
         </div>

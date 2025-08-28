@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { Plus, Loader2, Trash2, AlertCircle, Search } from 'lucide-react'
+import { Plus, Loader2, Trash2, AlertCircle, Search, ChevronDown } from 'lucide-react'
 import { URLInput } from '@/components/molecules/URLInput'
 import { SummaryCard } from '@/components/molecules/SummaryCard'
 import { LibraryControls, type LibraryFilters } from '@/components/molecules/LibraryControls'
@@ -372,15 +372,20 @@ export default function LibraryPage() {
 
   return (
     <div>
-      {/* Page Header */}
+      {/* Mobile-Optimized Page Header */}
       <div className="mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">Library</h1>
-            {usage && usage.monthlyLimit > 0 && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>{usage.currentMonthUsage}/{usage.monthlyLimit}</span>
-                <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Title */}
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Library</h1>
+          
+          {/* Usage Stats - Compact mobile design */}
+          {usage && usage.monthlyLimit > 0 && (
+            <div className="flex items-center gap-3 bg-gray-50 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 self-start sm:self-auto">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">
+                  {usage.currentMonthUsage}/{usage.monthlyLimit}
+                </span>
+                <div className="w-12 sm:w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <div 
                     className={cn(
                       "h-1.5 rounded-full transition-all duration-300",
@@ -391,23 +396,46 @@ export default function LibraryPage() {
                     }}
                   />
                 </div>
-                {usage.isLimitReached && (
-                  <button 
-                    onClick={() => router.push('/billing')}
-                    className="text-xs text-amber-600 hover:text-amber-700 underline hover:no-underline"
-                  >
-                    Upgrade
-                  </button>
-                )}
               </div>
-            )}
-          </div>
+              {usage.isLimitReached && (
+                <button 
+                  onClick={() => router.push('/billing')}
+                  className="flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                  aria-label="Upgrade plan"
+                >
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Upgrade</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Create New Summary Section */}
-      <div ref={createSummaryRef} className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
-        <div className="flex items-center gap-3 mb-3">
+      {/* Mobile-Collapsible Create New Summary Section */}
+      <details 
+        ref={createSummaryRef} 
+        className="mb-4 group"
+        open={typeof window !== 'undefined' && window.innerWidth >= 640}
+      >
+        {/* Mobile toggle header */}
+        <summary className="sm:hidden flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl cursor-pointer list-none">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-7 h-7 bg-blue-600 rounded-lg">
+              <Plus className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <span className="font-semibold text-gray-900">Create Summary</span>
+              {isCreatingSummary && (
+                <span className="ml-2 text-xs text-blue-600">Processing...</span>
+              )}
+            </div>
+          </div>
+          <ChevronDown className="h-4 w-4 text-blue-600 transition-transform group-open:rotate-180" />
+        </summary>
+        
+        {/* Desktop always visible header */}
+        <div className="hidden sm:flex items-center gap-3 mb-3 p-4 pb-0 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-t-xl">
           <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-lg">
             <Plus className="h-5 w-5 text-white" />
           </div>
@@ -417,44 +445,46 @@ export default function LibraryPage() {
           </div>
         </div>
         
-        <URLInput 
-          onSubmit={handleCreateSummary}
-          onSuccess={() => {
-            console.log('URL input cleared after successful submission')
-          }}
-          isLoading={isCreatingSummary || createSummary.isPending}
-          disabled={usage?.isLimitReached}
-          placeholder="Paste YouTube URL here..."
-          className="create-summary"
-        />
+        {/* Collapsible content */}
+        <div className="sm:p-4 sm:pt-3 sm:bg-gradient-to-r sm:from-blue-50 sm:to-indigo-50 sm:border sm:border-blue-200 sm:border-t-0 sm:rounded-b-xl p-3 mt-2 sm:mt-0 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+          <URLInput 
+            onSubmit={handleCreateSummary}
+            onSuccess={() => {
+              console.log('URL input cleared after successful submission')
+            }}
+            isLoading={isCreatingSummary || createSummary.isPending}
+            disabled={usage?.isLimitReached}
+            placeholder="Paste YouTube URL here..."
+            className="create-summary"
+          />
 
-        {/* Usage warning message only if limit reached */}
+        {/* Usage warning message only if limit reached - more compact on mobile */}
         {usage?.isLimitReached && (
-          <div className="flex items-center gap-2 p-3 mt-3 rounded-lg bg-amber-50 border border-amber-200 text-sm">
+          <div className="flex items-center gap-2 p-2.5 sm:p-3 mt-3 rounded-lg bg-amber-50 border border-amber-200">
             <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-            <p className="text-amber-700">
-              Monthly limit reached. Upgrade for unlimited summaries.
+            <p className="text-xs sm:text-sm text-amber-700">
+              Monthly limit reached. <button onClick={() => router.push('/billing')} className="underline font-medium">Upgrade</button> for unlimited.
             </p>
           </div>
         )}
 
-        {/* Progress indicator */}
+        {/* Progress indicator - Slimmer on mobile */}
         {(createSummary.isPending || currentTaskId) && (
-          <div className="mt-4 p-4 bg-white/70 border border-blue-300 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="flex space-x-1">
+          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white/70 border border-blue-300 rounded-lg">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden sm:flex space-x-1">
                 <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse"></div>
                 <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse animation-delay-200"></div>
                 <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse animation-delay-400"></div>
               </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between text-sm text-blue-700 mb-2">
-                  <span className="font-medium">{processingStage}</span>
-                  <span>{Math.round(progress)}%</span>
+                <div className="flex items-center justify-between text-xs sm:text-sm text-blue-700 mb-1.5 sm:mb-2">
+                  <span className="font-medium truncate mr-2">{processingStage}</span>
+                  <span className="font-semibold">{Math.round(progress)}%</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="w-full bg-blue-200 rounded-full h-1.5 sm:h-2">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+                    className="bg-blue-600 h-1.5 sm:h-2 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -462,17 +492,11 @@ export default function LibraryPage() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Search and Filter Section */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center justify-center w-6 h-6 bg-gray-100 rounded">
-            <Search className="h-4 w-4 text-gray-600" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Search & Filter</h3>
         </div>
-        
+      </details>
+
+      {/* Mobile-Optimized Search and Filter Section */}
+      <div className="mb-4">
         <LibraryControls
           filters={filters}
           onFiltersChange={setFilters}
