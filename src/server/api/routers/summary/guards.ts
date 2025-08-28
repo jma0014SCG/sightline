@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import type { PrismaClient } from '@prisma/client'
 
-export const ANONYMOUS_USER_ID = 'ANONYMOUS_USER'
+export const ANONYMOUS_USER_ID = null  // Use null for anonymous summaries
 
 /**
  * Check if an anonymous user has exceeded their usage limit
@@ -19,47 +19,23 @@ export async function checkAnonymousUsageLimit(
   fingerprint: string,
   clientIP: string
 ): Promise<boolean> {
-  // Check UsageEvent records for this fingerprint
-  const existingUsageByFingerprint = await prisma.usageEvent.findFirst({
-    where: {
-      userId: ANONYMOUS_USER_ID,
-      eventType: 'summary_created',
-      metadata: {
-        path: ['browserFingerprint'],
-        equals: fingerprint,
-      },
-    },
-  })
-
-  if (existingUsageByFingerprint) {
-    return true
-  }
-
-  // Check UsageEvent records for this IP
-  const existingUsageByIP = await prisma.usageEvent.findFirst({
-    where: {
-      userId: ANONYMOUS_USER_ID,
-      eventType: 'summary_created',
-      metadata: {
-        path: ['clientIP'],
-        equals: clientIP,
-      },
-    },
-  })
-
-  if (existingUsageByIP) {
-    return true
-  }
-
-  // Also check Summary records as a backup
-  // This handles cases where summaries were created before UsageEvent tracking
+  // Check Summary records for anonymous users by fingerprint
   const existingSummaryByFingerprint = await prisma.summary.findFirst({
     where: {
-      userId: ANONYMOUS_USER_ID,
-      metadata: {
-        path: ['browserFingerprint'],
-        equals: fingerprint,
-      },
+      AND: [
+        {
+          metadata: {
+            path: ['browserFingerprint'],
+            equals: fingerprint,
+          },
+        },
+        {
+          metadata: {
+            path: ['isAnonymous'],
+            equals: true,
+          },
+        },
+      ],
     },
   })
 
@@ -70,11 +46,20 @@ export async function checkAnonymousUsageLimit(
   // Check Summary records by IP
   const existingSummaryByIP = await prisma.summary.findFirst({
     where: {
-      userId: ANONYMOUS_USER_ID,
-      metadata: {
-        path: ['clientIP'],
-        equals: clientIP,
-      },
+      AND: [
+        {
+          metadata: {
+            path: ['clientIP'],
+            equals: clientIP,
+          },
+        },
+        {
+          metadata: {
+            path: ['isAnonymous'],
+            equals: true,
+          },
+        },
+      ],
     },
   })
 
@@ -122,25 +107,15 @@ export async function enforceAnonymousUsageLimit(
  * @param metadata - Additional metadata to store
  */
 export async function recordAnonymousUsage(
-  prisma: PrismaClient,
-  fingerprint: string,
-  clientIP: string,
-  summaryId: string,
-  metadata?: Record<string, any>
+  prisma: PrismaClient, // eslint-disable-line @typescript-eslint/no-unused-vars
+  fingerprint: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+  clientIP: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+  summaryId: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+  metadata?: Record<string, any> // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<void> {
-  await prisma.usageEvent.create({
-    data: {
-      userId: ANONYMOUS_USER_ID,
-      eventType: 'summary_created',
-      metadata: {
-        browserFingerprint: fingerprint,
-        clientIP,
-        summaryId,
-        timestamp: new Date().toISOString(),
-        ...metadata,
-      },
-    },
-  })
+  // Anonymous usage is now tracked via the Summary table itself
+  // with userId=null and metadata containing fingerprint and IP
+  // No need to create UsageEvent records for anonymous users
 }
 
 /**
@@ -158,50 +133,35 @@ export async function getAnonymousUsageCount(
   fingerprint: string,
   clientIP: string
 ): Promise<number> {
-  const [usageEventCount, summaryCount] = await Promise.all([
-    // Count UsageEvents
-    prisma.usageEvent.count({
-      where: {
-        userId: ANONYMOUS_USER_ID,
-        eventType: 'summary_created',
-        OR: [
-          {
-            metadata: {
-              path: ['browserFingerprint'],
-              equals: fingerprint,
-            },
+  // Count Summaries with null userId (anonymous)
+  const summaryCount = await prisma.summary.count({
+    where: {
+      AND: [
+        {
+          metadata: {
+            path: ['isAnonymous'],
+            equals: true,
           },
-          {
-            metadata: {
-              path: ['clientIP'],
-              equals: clientIP,
+        },
+        {
+          OR: [
+            {
+              metadata: {
+                path: ['browserFingerprint'],
+                equals: fingerprint,
+              },
             },
-          },
-        ],
-      },
-    }),
-    // Count Summaries
-    prisma.summary.count({
-      where: {
-        userId: ANONYMOUS_USER_ID,
-        OR: [
-          {
-            metadata: {
-              path: ['browserFingerprint'],
-              equals: fingerprint,
+            {
+              metadata: {
+                path: ['clientIP'],
+                equals: clientIP,
+              },
             },
-          },
-          {
-            metadata: {
-              path: ['clientIP'],
-              equals: clientIP,
-            },
-          },
-        ],
-      },
-    }),
-  ])
+          ],
+        },
+      ],
+    },
+  })
 
-  // Return the maximum count from either source
-  return Math.max(usageEventCount, summaryCount)
+  return summaryCount
 }

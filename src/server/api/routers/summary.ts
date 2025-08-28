@@ -13,8 +13,7 @@ import { emailService } from '@/lib/emailService'
 import { backendClient } from '@/lib/api/backend-client'
 import { 
   enforceAnonymousUsageLimit, 
-  recordAnonymousUsage,
-  ANONYMOUS_USER_ID 
+  recordAnonymousUsage
 } from './summary/guards'
 
 // Create an event emitter for streaming
@@ -55,9 +54,6 @@ function extractVideoId(url: string): string | null {
   
   return null
 }
-
-// Constants for anonymous user
-// ANONYMOUS_USER_ID is now imported from ./summary/guards
 
 export const summaryRouter = createTRPCRouter({
   /**
@@ -245,10 +241,10 @@ export const summaryRouter = createTRPCRouter({
         const sanitizedTitle = sanitizeText(data.video_title || 'Untitled Video')
         const sanitizedChannelName = sanitizeText(data.channel_name || 'Unknown Channel')
 
-        // Create anonymous summary in database (using ANONYMOUS_USER_ID)
+        // Create anonymous summary in database (with null userId)
         const summary = await ctx.prisma.summary.create({
           data: {
-            userId: ANONYMOUS_USER_ID, // Use special anonymous user
+            userId: null, // Anonymous summaries have null userId
             videoId: data.video_id || videoId,
             videoUrl: sanitizedUrl,
             videoTitle: sanitizedTitle,
@@ -1089,7 +1085,7 @@ export const summaryRouter = createTRPCRouter({
       }
 
       // Verify it's an anonymous summary and can be claimed
-      if (anonymousSummary.userId !== ANONYMOUS_USER_ID) {
+      if (anonymousSummary.userId !== null) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: 'This is not an anonymous summary or is already owned by a user',
@@ -1202,7 +1198,7 @@ export const summaryRouter = createTRPCRouter({
       }
 
       // Verify it's an anonymous summary
-      if (summary.userId !== ANONYMOUS_USER_ID) {
+      if (summary.userId !== null) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'This summary requires authentication',

@@ -32,7 +32,7 @@ model User {
 
 model Summary {
   id                  String      @id @default(cuid())
-  userId              String
+  userId              String?     // Made nullable for anonymous summaries
   videoId             String
   videoUrl            String
   videoTitle          String
@@ -68,7 +68,7 @@ model Summary {
   thinkingStyle       Json?
   userNotes           String?
   sharedLinks         ShareLink[]
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories          Category[]  @relation("SummaryCategories")
   tags                Tag[]       @relation("SummaryTags")
 
