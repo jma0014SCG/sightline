@@ -23,6 +23,7 @@ model User {
   stripeCurrentPeriodEnd DateTime?
   summariesUsed          Int          @default(0)
   summariesLimit         Int          @default(3)
+  version                Int          @default(0) // For optimistic locking
   sharedLinks            ShareLink[]
   summaries              Summary[]
   usageEvents            UsageEvent[]
@@ -149,6 +150,33 @@ model UsageEvent {
   @@index([userId, eventType])
   @@index([createdAt])
   @@index([userId, eventType, createdAt])
+}
+
+model Lock {
+  id         String   @id @default(uuid())
+  key        String   @unique
+  expiresAt  DateTime
+  acquiredAt DateTime @default(now())
+  
+  @@index([key, expiresAt])
+  @@index([expiresAt])
+}
+
+model WebhookQueue {
+  id           String    @id
+  payload      Json
+  attempts     Int       @default(0)
+  maxAttempts  Int       @default(5)
+  status       String    @default("pending")
+  error        String?
+  nextRetryAt  DateTime?
+  createdAt    DateTime  @default(now())
+  processedAt  DateTime?
+  completedAt  DateTime?
+  failedAt     DateTime?
+  
+  @@index([status, nextRetryAt])
+  @@index([createdAt])
 }
 
 enum Role {

@@ -82,6 +82,20 @@ export class MemoryCache<T = any> {
       }
     })
   }
+
+  /**
+   * Get all cache keys
+   */
+  keys(): string[] {
+    return Array.from(this.cache.keys())
+  }
+
+  /**
+   * Get cache size
+   */
+  size(): number {
+    return this.cache.size
+  }
 }
 
 // Global cache instances

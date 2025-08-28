@@ -2,13 +2,14 @@
 
 import { useAuth as useClerkAuth, useUser, useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef } from 'react'
 
 interface AuthModalState {
   isOpen: boolean
   mode: 'sign-in' | 'sign-up'
   afterSignInUrl?: string
   afterSignUpUrl?: string
+  isTransitioning?: boolean
 }
 
 export function useAuth() {
@@ -17,26 +18,65 @@ export function useAuth() {
   const { signOut, openSignIn, openSignUp } = useClerk()
   const router = useRouter()
   
-  // Modal state management
+  // Modal state management with transition flag
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
-    mode: 'sign-in'
+    mode: 'sign-in',
+    isTransitioning: false
   })
+  
+  // Debounce timer ref to prevent rapid modal operations
+  const modalDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Lock to prevent concurrent modal operations
+  const modalLockRef = useRef(false)
 
   const openAuthModal = useCallback((mode: 'sign-in' | 'sign-up' = 'sign-in', options?: {
     afterSignInUrl?: string
     afterSignUpUrl?: string
   }) => {
-    setAuthModal({
-      isOpen: true,
-      mode,
-      afterSignInUrl: options?.afterSignInUrl || '/library',
-      afterSignUpUrl: options?.afterSignUpUrl || '/library'
-    })
-  }, [])
+    // Clear any pending debounce
+    if (modalDebounceRef.current) {
+      clearTimeout(modalDebounceRef.current)
+    }
+    
+    // Prevent opening if already transitioning or locked
+    if (modalLockRef.current || authModal.isTransitioning) {
+      return
+    }
+    
+    modalDebounceRef.current = setTimeout(() => {
+      modalLockRef.current = true
+      
+      setAuthModal({
+        isOpen: true,
+        mode,
+        afterSignInUrl: options?.afterSignInUrl || '/library',
+        afterSignUpUrl: options?.afterSignUpUrl || '/library',
+        isTransitioning: false
+      })
+      
+      // Release lock after animation completes
+      setTimeout(() => {
+        modalLockRef.current = false
+      }, 300)
+    }, 100) // 100ms debounce
+  }, [authModal.isTransitioning])
 
   const closeAuthModal = useCallback(() => {
-    setAuthModal(prev => ({ ...prev, isOpen: false }))
+    // Clear any pending operations
+    if (modalDebounceRef.current) {
+      clearTimeout(modalDebounceRef.current)
+      modalDebounceRef.current = null
+    }
+    
+    // Prevent closing if locked
+    if (modalLockRef.current) {
+      return
+    }
+    
+    setAuthModal(prev => ({ ...prev, isOpen: false, isTransitioning: false }))
+    modalLockRef.current = false
   }, [])
 
   const login = useCallback(async (options?: {

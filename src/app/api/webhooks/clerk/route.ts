@@ -65,8 +65,18 @@ export async function POST(req: Request) {
         const { id: userId, email_addresses, first_name, last_name, image_url } = evt.data
         const primaryEmail = email_addresses?.find(email => email.id === evt.data.primary_email_address_id)
         
-        await prisma.user.create({
-          data: {
+        // Use upsert to handle race conditions where user might already exist
+        // from protectedProcedure auto-creation
+        await prisma.user.upsert({
+          where: { id: userId },
+          update: {
+            // Only update if we have real data from Clerk
+            email: primaryEmail?.email_address || undefined,
+            name: `${first_name || ''} ${last_name || ''}`.trim() || undefined,
+            image: image_url || undefined,
+            emailVerified: primaryEmail?.verification?.status === 'verified' ? new Date() : undefined,
+          },
+          create: {
             id: userId,
             email: primaryEmail?.email_address || '',
             name: `${first_name || ''} ${last_name || ''}`.trim() || null,
@@ -75,7 +85,7 @@ export async function POST(req: Request) {
           },
         })
         
-        console.log(`User created: ${userId}`)
+        console.log(`User created/updated: ${userId}`)
         break
 
       case 'user.updated':
