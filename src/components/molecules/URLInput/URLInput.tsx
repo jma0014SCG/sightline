@@ -76,8 +76,16 @@ export function URLInput({
 
   const validateYouTubeUrl = (url: string): boolean => {
     const patterns = [
-      /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]{11}$/,
-      /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?.*v=[\w-]{11}/,
+      // Standard YouTube URLs with optional parameters
+      /^(https?:\/\/)?(www\.|m\.)?youtube\.com\/watch\?.*v=[\w-]{11}/,
+      // YouTube Shorts URLs
+      /^(https?:\/\/)?(www\.|m\.)?youtube\.com\/shorts\/[\w-]{11}/,
+      // Youtu.be short URLs
+      /^(https?:\/\/)?youtu\.be\/[\w-]{11}/,
+      // YouTube embed URLs
+      /^(https?:\/\/)?(www\.|m\.)?youtube\.com\/embed\/[\w-]{11}/,
+      // YouTube live URLs
+      /^(https?:\/\/)?(www\.|m\.)?youtube\.com\/live\/[\w-]{11}/,
     ];
     return patterns.some((pattern) => pattern.test(url));
   };

@@ -41,8 +41,16 @@ const ee = new EventEmitter()
  */
 function extractVideoId(url: string): string | null {
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+    // Standard watch URLs (including mobile)
+    /(?:www\.|m\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+    // YouTube Shorts
+    /(?:www\.|m\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    // Youtu.be short URLs
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    // Embed URLs
+    /(?:www\.|m\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    // YouTube Live URLs
+    /(?:www\.|m\.)?youtube\.com\/live\/([a-zA-Z0-9_-]{11})/
   ]
   
   for (const pattern of patterns) {
@@ -89,11 +97,13 @@ export const summaryRouter = createTRPCRouter({
         .min(1, 'URL is required')
         .max(2048, 'URL too long')
         .refine((url) => {
-          // Only allow YouTube URLs
+          // Only allow YouTube URLs (including mobile and shorts)
           const youtubePatterns = [
-            /^https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
             /^https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11})/,
-            /^https?:\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/live\/([a-zA-Z0-9_-]{11})/
           ]
           return youtubePatterns.some(pattern => pattern.test(url))
         }, 'Only YouTube URLs are allowed'),
@@ -380,11 +390,13 @@ export const summaryRouter = createTRPCRouter({
         .min(1, 'URL is required')
         .max(2048, 'URL too long')
         .refine((url) => {
-          // Only allow YouTube URLs
+          // Only allow YouTube URLs (including mobile and shorts)
           const youtubePatterns = [
-            /^https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
             /^https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11})/,
-            /^https?:\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+            /^https?:\/\/(?:www\.|m\.)?youtube\.com\/live\/([a-zA-Z0-9_-]{11})/
           ]
           return youtubePatterns.some(pattern => pattern.test(url))
         }, 'Only YouTube URLs are allowed'),
