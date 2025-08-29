@@ -537,7 +537,7 @@ export default function HomePage() {
                 </button>
               )}
               <button
-                onClick={focusUrlInput}
+                onClick={() => openAuthModal('sign-up')}
                 className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-primary-700 transition-all duration-200 shadow-md hover:shadow-lg min-h-[36px] touch-manipulation"
               >
                 Get Started Free →
@@ -562,7 +562,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
-                  onClick={focusUrlInput}
+                  onClick={() => openAuthModal('sign-up')}
                   className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-primary-700 transition-all duration-200 min-h-[40px] touch-manipulation shadow-md hover:shadow-lg"
                 >
                   <span className="hidden sm:inline">Get Started Free →</span>
