@@ -139,6 +139,25 @@ export function useAnalytics() {
   }) => {
     track('error_occurred', properties)
   }
+  
+  // Conversion tracking
+  const trackAnonymousConversion = (properties: {
+    summary_id: string
+    time_to_convert_seconds: number
+    trigger: 'value_modal' | 'limit_reached' | 'manual'
+    converted_to_plan: 'FREE' | 'PRO'
+  }) => {
+    track('anonymous_user_converted', properties)
+  }
+  
+  const trackModalInteraction = (properties: {
+    modal_type: 'auth_value' | 'auth_prompt' | 'sign_in'
+    action: 'shown' | 'dismissed' | 'sign_up_clicked' | 'sign_in_clicked' | 'continue_guest'
+    anonymous_summary_id?: string
+    time_on_page_seconds?: number
+  }) => {
+    track('modal_interaction', properties)
+  }
 
   // Page tracking
   const trackPageView = (pageName: string, properties?: AnalyticsEventProperties) => {
@@ -177,6 +196,8 @@ export function useAnalytics() {
     trackFeatureUsed,
     trackSmartCollectionInteraction,
     trackErrorOccurred,
+    trackAnonymousConversion,
+    trackModalInteraction,
     
     // Feature flags
     getFeatureFlag,

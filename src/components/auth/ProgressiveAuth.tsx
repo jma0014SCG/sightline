@@ -362,7 +362,7 @@ export function ProgressiveAuth({
 
             <button
               type="submit"
-              disabled={!password || isLoading || (mode === 'sign-up' && passwordStrength && passwordStrength.score < 3)}
+              disabled={!password || isLoading || (mode === 'sign-up' && passwordStrength !== null && passwordStrength.score < 3)}
               className={cn(
                 "w-full bg-primary-600 text-white py-3 rounded-xl font-medium",
                 "transition-all duration-200",
@@ -396,7 +396,7 @@ export function ProgressiveAuth({
                 <Mail className="h-8 w-8 text-primary-600" />
               </div>
               <p className="text-sm text-gray-600">
-                We've sent a verification code to
+                We&apos;ve sent a verification code to
               </p>
               <p className="font-medium text-gray-900">{email}</p>
             </div>
@@ -451,7 +451,7 @@ export function ProgressiveAuth({
               onClick={() => {/* Resend code logic */}}
               className="w-full text-sm text-primary-600 hover:text-primary-700"
             >
-              Didn't receive the code? Resend
+              Didn&apos;t receive the code? Resend
             </button>
           </form>
         )}
@@ -488,7 +488,7 @@ export function ProgressiveAuth({
           onClick={onCancel}
           className="w-full text-center text-sm text-gray-500 hover:text-gray-700 mt-4"
         >
-          I'll do this later
+          I&apos;ll do this later
         </button>
       )}
     </div>

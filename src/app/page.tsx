@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { URLInput } from '@/components/molecules/URLInput'
+import { URLInput, type URLInputHandle } from '@/components/molecules/URLInput'
 import { SummaryViewer } from '@/components/organisms/SummaryViewer'
 import { PricingPlans } from '@/components/organisms/PricingPlans'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -14,6 +14,7 @@ import { api } from '@/components/providers/TRPCProvider'
 // import { DebugPanel } from '@/components/debug/DebugPanel' // Temporarily disabled for deployment
 import { SignInModal } from '@/components/modals/SignInModal'
 import { AuthPromptModal } from '@/components/modals/AuthPromptModal'
+import { AuthValueModal } from '@/components/modals/AuthValueModal'
 import { getBrowserFingerprint, markFreeSummaryUsed } from '@/lib/browser-fingerprint'
 import { getSimpleFingerprint, hasReachedFreeLimit, incrementFreeSummariesUsed } from '@/lib/anonUsage'
 import { 
@@ -72,10 +73,12 @@ export default function HomePage() {
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
+  const [showAuthValueModal, setShowAuthValueModal] = useState(false)
   const [anonymousSummaryId, setAnonymousSummaryId] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [currentSocialProof, setCurrentSocialProof] = useState(0)
   const [showSocialProof, setShowSocialProof] = useState(false)
+  const urlInputRef = useRef<URLInputHandle>(null)
 
   // Real-time progress tracking
   const { progress, stage: processingStage, status: progressStatus } = useProgressTracking({
@@ -134,10 +137,8 @@ export default function HomePage() {
   const focusUrlInput = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setTimeout(() => {
-      const urlInput = document.querySelector('input[type="url"]') as HTMLInputElement
-      if (urlInput) {
-        urlInput.focus()
-      }
+      // Use the ref to focus the URL input
+      urlInputRef.current?.focus()
     }, 500) // Wait for scroll to complete
   }
   
@@ -266,10 +267,10 @@ export default function HomePage() {
         }
       }, 100)
       
-      // Show auth prompt after a short delay
+      // Show enhanced auth value modal after a short delay
       setTimeout(() => {
-        setShowAuthPrompt(true)
-      }, 2000)
+        setShowAuthValueModal(true)
+      }, 3000) // 3 seconds to let them see the value
     },
     onError: (error) => {
       console.error('❌ Anonymous summarization failed:', error)
@@ -537,7 +538,7 @@ export default function HomePage() {
                 </button>
               )}
               <button
-                onClick={() => openAuthModal('sign-up')}
+                onClick={focusUrlInput}
                 className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-primary-700 transition-all duration-200 shadow-md hover:shadow-lg min-h-[36px] touch-manipulation"
               >
                 Get Started Free →
@@ -562,7 +563,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
-                  onClick={() => openAuthModal('sign-up')}
+                  onClick={focusUrlInput}
                   className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-primary-700 transition-all duration-200 min-h-[40px] touch-manipulation shadow-md hover:shadow-lg"
                 >
                   <span className="hidden sm:inline">Get Started Free →</span>
@@ -712,6 +713,7 @@ export default function HomePage() {
                   )}
 
                   <URLInput 
+                    ref={urlInputRef}
                     onSubmit={handleUrlSubmit}
                     onSuccess={() => {
                       // Optional: Add any additional success handling here
@@ -1682,7 +1684,30 @@ Don&apos;t Miss Out - Try Sightline Free
         afterSignUpUrl={authModal.afterSignUpUrl}
       />
 
-      {/* Auth Prompt Modal for Anonymous Users */}
+      {/* Enhanced Auth Value Modal for Anonymous Users */}
+      <AuthValueModal
+        isOpen={showAuthValueModal}
+        onClose={() => setShowAuthValueModal(false)}
+        onSignIn={() => {
+          setShowAuthValueModal(false)
+          openAuthModal('sign-in', {
+            afterSignInUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library',
+            afterSignUpUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library'
+          })
+        }}
+        onSignUp={() => {
+          setShowAuthValueModal(false)
+          openAuthModal('sign-up', {
+            afterSignInUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library',
+            afterSignUpUrl: anonymousSummaryId ? `/library/${anonymousSummaryId}` : '/library'
+          })
+        }}
+        anonymousSummaryId={anonymousSummaryId}
+        videoTitle={currentSummary?.videoTitle || undefined}
+        timeSaved={Math.round((currentSummary?.duration || 0) / 60 * 0.75)} // Assume 75% time saved
+      />
+
+      {/* Legacy Auth Prompt Modal for limit reached */}
       <AuthPromptModal
         isOpen={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}

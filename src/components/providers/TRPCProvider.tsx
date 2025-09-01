@@ -47,7 +47,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           // Add timeout handling to prevent hanging requests
           fetch: (url, options) => {
             const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+            const timeoutId = setTimeout(() => controller.abort(), 55000) // 55 second timeout (within Vercel's 60s limit)
             
             return fetch(url, {
               ...options,

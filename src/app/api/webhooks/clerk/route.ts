@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/db/prisma'
 import { preventWebhookReplay, trackWebhookRetry } from '@/lib/services/webhookSecurity'
+import { autoClaimAnonymousSummaries } from '@/server/api/routers/summary/claim'
 
 export async function POST(req: Request) {
   // Get the headers
@@ -86,6 +87,16 @@ export async function POST(req: Request) {
         })
         
         console.log(`User created/updated: ${userId}`)
+        
+        // Auto-claim any anonymous summaries for this user
+        // Get fingerprint from user's metadata if available
+        const fingerprint = (evt.data as any).public_metadata?.fingerprint
+        if (fingerprint) {
+          const claimedIds = await autoClaimAnonymousSummaries(prisma, userId, fingerprint)
+          if (claimedIds.length > 0) {
+            console.log(`Auto-claimed ${claimedIds.length} anonymous summaries for user ${userId}`)
+          }
+        }
         break
 
       case 'user.updated':

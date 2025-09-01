@@ -1,1 +1,1 @@
-export { URLInput } from './URLInput'
+export { URLInput, type URLInputHandle } from './URLInput'

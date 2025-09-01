@@ -7,8 +7,9 @@ export const PRICING_PLANS = {
     price: 0,
     paymentLink: null,
     features: [
-      '1 summary/month',
+      '3 summaries/month',
       'Personal library access',
+      'Save summaries permanently',
     ],
   },
   PRO: {

@@ -471,7 +471,7 @@ export function LibraryControls({
               <span className="font-medium">{totalCount}</span>
               <span className="hidden sm:inline"> {totalCount === 1 ? 'summary' : 'summaries'}</span>
               {filters.search && (
-                <span className="hidden sm:inline"> matching "{filters.search}"</span>
+                <span className="hidden sm:inline"> matching &ldquo;{filters.search}&rdquo;</span>
               )}
             </span>
           )}

@@ -28,9 +28,9 @@ function getOpenAIClient(): OpenAI | null {
     try {
       openai = new OpenAI({ 
         apiKey: process.env.OPENAI_API_KEY,
-        // SIGNIFICANTLY increased timeout to 5 minutes for the client
-        timeout: 300000, // 300 seconds (5 minutes)
-        maxRetries: 5, // Increased retries for better resilience
+        // Reduced timeout to work within Vercel's 60-second limit
+        timeout: 45000, // 45 seconds (leaving 15 seconds buffer for Vercel)
+        maxRetries: 2, // Reduced retries to stay within time limit
       })
     } catch (error) {
       logger.error('Failed to initialize OpenAI client', { error })
@@ -78,6 +78,9 @@ const TAG_TYPES = {
  * Uses OpenAI's GPT-4o-mini model to analyze video content and automatically extract
  * relevant categories and entity tags. Handles the complete workflow from AI analysis
  * to database storage. Gracefully handles failures without breaking summary creation.
+ * 
+ * NOTE: Timeouts are limited to 45 seconds due to Vercel's 60-second function execution limit.
+ * If classification takes longer, it will timeout gracefully without affecting summary creation.
  * 
  * @param {string} summaryId - The unique identifier of the summary to classify
  * @param {string} content - The video summary content to analyze
@@ -169,8 +172,8 @@ Respond with ONLY a valid JSON object in this format:
       temperature: 0.1, // Low temperature for consistent classification
       max_tokens: 500
     }, {
-      // SIGNIFICANTLY increased timeout to 4 minutes for this specific request
-      timeout: 240000, // 240 seconds (4 minutes)
+      // Reduced timeout to work within Vercel's 60-second limit
+      timeout: 40000, // 40 seconds (leaving buffer for Vercel)
     })
 
     console.log('🏷️ [CLASSIFICATION] Received response from OpenAI')
@@ -256,8 +259,8 @@ Respond with ONLY a valid JSON object in this format:
         console.log('🏷️ [CLASSIFICATION] Tags connected successfully')
       }
     }, {
-      maxWait: 120000, // Maximum time to wait for a transaction slot (2 minutes)
-      timeout: 120000, // Maximum time the transaction can run (2 minutes)
+      maxWait: 10000, // Maximum time to wait for a transaction slot (10 seconds)
+      timeout: 10000, // Maximum time the transaction can run (10 seconds)
     })
 
     console.log('🏷️ [CLASSIFICATION] Database transaction completed successfully')

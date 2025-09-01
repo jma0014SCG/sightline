@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Link2, Loader2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -16,7 +16,11 @@ interface URLInputProps {
   className?: string;
 }
 
-export function URLInput({
+export interface URLInputHandle {
+  focus: () => void;
+}
+
+export const URLInput = forwardRef<URLInputHandle, URLInputProps>(({
   onSubmit,
   onSuccess,
   onAuthRequired,
@@ -24,14 +28,22 @@ export function URLInput({
   disabled = false,
   placeholder = "Paste a YouTube URL to summarize...",
   className,
-}: URLInputProps) {
+}, ref) => {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [clientAnonymousUsed, setClientAnonymousUsed] = useState(false);
   const wasLoadingRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Expose focus method to parent components
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    }
+  }));
 
   // Handle client-side hydration
   useEffect(() => {
@@ -151,6 +163,7 @@ export function URLInput({
               )}
             />
             <input
+              ref={inputRef}
               type="url"
               value={url}
               onChange={(e) => {
@@ -217,4 +230,6 @@ export function URLInput({
       </div>
     </form>
   );
-}
+});
+
+URLInput.displayName = 'URLInput';

@@ -308,11 +308,11 @@ export const summaryRouter = createTRPCRouter({
 
         // Classify summary content asynchronously with timeout protection
         // Use a timeout wrapper to prevent indefinite hanging
-        const classificationTimeout = 300000 // 5 minutes total timeout
+        const classificationTimeout = 45000 // 45 seconds to work within Vercel limit
         const classificationPromise = Promise.race([
           classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
           new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('Classification timeout after 5 minutes')), classificationTimeout)
+            setTimeout(() => reject(new Error('Classification timeout after 45 seconds')), classificationTimeout)
           )
         ])
         
@@ -776,11 +776,11 @@ export const summaryRouter = createTRPCRouter({
 
         // Classify summary content asynchronously with timeout protection
         // Use a timeout wrapper to prevent indefinite hanging
-        const classificationTimeout = 300000 // 5 minutes total timeout
+        const classificationTimeout = 45000 // 45 seconds to work within Vercel limit
         const classificationPromise = Promise.race([
           classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
           new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('Classification timeout after 5 minutes')), classificationTimeout)
+            setTimeout(() => reject(new Error('Classification timeout after 45 seconds')), classificationTimeout)
           )
         ])
         
