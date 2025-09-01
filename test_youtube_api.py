@@ -33,9 +33,17 @@ def test_youtube_api_key():
         
         print(f"\n📺 Testing API with video ID: {test_video_id}")
         
-        # Make API request
+        # Test OLD way (7 units)
+        print("\n📊 Testing OLD API call (7 quota units)...")
+        response_old = youtube.videos().list(
+            part='snippet,statistics,contentDetails',  # 7 units total
+            id=test_video_id
+        ).execute()
+        
+        # Test NEW optimized way (3 units)
+        print("\n📊 Testing NEW API call (3 quota units)...")
         response = youtube.videos().list(
-            part='snippet,statistics',
+            part='snippet',  # Only 3 units total
             id=test_video_id
         ).execute()
         
@@ -180,3 +188,13 @@ if __name__ == "__main__":
         print("2. Verify API key is valid and has quota remaining")
         print("3. Check API key restrictions (IP, referrer, etc.)")
         print("4. Make sure YOUTUBE_API_KEY is set in production environment")
+    
+    print("\n📊 QUOTA OPTIMIZATION SUMMARY:")
+    print("-" * 50)
+    print("OLD Implementation: 7 units per video")
+    print("  → 10,000 quota ÷ 7 = ~1,428 videos/day")
+    print("\nNEW Implementation: 3 units per video") 
+    print("  → 10,000 quota ÷ 3 = ~3,333 videos/day")
+    print("\n✅ IMPROVEMENT: 133% more videos per day!")
+    print("\nWith yt-dlp as primary: 0 units per video")
+    print("  → UNLIMITED videos (no quota usage)")

@@ -29,6 +29,16 @@ except ImportError:
 
 from config import settings
 
+# Import quota tracker
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+try:
+    from utils.quota_tracker import quota_tracker
+    QUOTA_TRACKING = True
+except ImportError:
+    QUOTA_TRACKING = False
+    
 logger = logging.getLogger(__name__)
 
 class YouTubeMetadataService:
@@ -83,45 +93,58 @@ class YouTubeMetadataService:
         """
         Get comprehensive video metadata with caching
         
+        OPTIMIZATION: Uses yt-dlp as primary source (no quota cost)
+        Falls back to YouTube API with minimal parts (3 units instead of 7)
+        
         Returns normalized metadata dictionary with fields:
         - title
         - description
         - channel_name
-        - view_count
-        - like_count
-        - comment_count
+        - view_count (from yt-dlp only)
+        - like_count (from yt-dlp only)
+        - comment_count (from yt-dlp only)
         - upload_date
-        - duration
+        - duration (from yt-dlp only)
         - thumbnail_url
         """
         # Check cache first
         cached_data = await self._get_from_cache(video_id)
         if cached_data:
-            logger.info(f"✅ Metadata cache hit for video {video_id}")
+            logger.info(f"✅ Metadata cache hit for video {video_id} (0 quota units)")
             return cached_data
         
         metadata = None
+        yt_dlp_metadata = None
+        api_metadata = None
         
-        # TEMPORARY FIX: Try yt-dlp first since YouTube API key is invalid
-        # yt-dlp doesn't require an API key and is more reliable
+        # PRIMARY: Try yt-dlp first (NO QUOTA COST)
+        # yt-dlp provides all data including duration, views, likes
         if YTDLP_AVAILABLE:
             try:
-                logger.info(f"🔄 Fetching metadata via yt-dlp for {video_id}")
-                metadata = await self._fetch_via_ytdlp(video_id)
-                if metadata:
-                    logger.info(f"✅ Successfully fetched metadata via yt-dlp")
+                logger.info(f"🔄 Fetching metadata via yt-dlp for {video_id} (0 quota units)")
+                yt_dlp_metadata = await self._fetch_via_ytdlp(video_id)
+                if yt_dlp_metadata:
+                    logger.info(f"✅ Successfully fetched ALL metadata via yt-dlp (0 quota units used)")
+                    metadata = yt_dlp_metadata
             except Exception as e:
                 logger.warning(f"⚠️ yt-dlp failed: {str(e)}")
         
-        # Fallback to YouTube Data API (currently broken due to invalid API key)
+        # FALLBACK: YouTube Data API with MINIMAL parts (3 units only)
+        # Only use if yt-dlp completely fails
         if not metadata and self.youtube_client:
             try:
-                logger.info(f"🔄 Attempting YouTube Data API for {video_id} (may fail due to invalid key)")
-                metadata = await self._fetch_via_youtube_api(video_id)
-                if metadata:
-                    logger.info(f"✅ Successfully fetched metadata via YouTube Data API")
+                logger.info(f"🔄 Attempting YouTube Data API for {video_id} (3 quota units)")
+                api_metadata = await self._fetch_via_youtube_api(video_id)
+                if api_metadata:
+                    logger.info(f"✅ Got basic metadata via YouTube API (3 quota units used)")
+                    # If we have both, merge them (prefer yt-dlp for stats/duration)
+                    if yt_dlp_metadata:
+                        api_metadata['duration'] = yt_dlp_metadata.get('duration', 0)
+                        api_metadata['view_count'] = yt_dlp_metadata.get('view_count', 0)
+                        api_metadata['like_count'] = yt_dlp_metadata.get('like_count', 0)
+                    metadata = api_metadata
             except Exception as e:
-                logger.warning(f"⚠️ YouTube Data API failed (expected): {str(e)}")
+                logger.warning(f"⚠️ YouTube Data API failed: {str(e)}")
         
         # If we got metadata, cache it
         if metadata:
@@ -149,22 +172,30 @@ class YouTubeMetadataService:
         
         def _api_call():
             try:
+                # Check quota before making API call
+                if QUOTA_TRACKING:
+                    if not quota_tracker.can_use(3):
+                        logger.error(f"❌ Quota exhausted! Cannot make API call")
+                        return None
+                
+                # OPTIMIZED: Only request 'snippet' to reduce quota usage from 7 to 3 units
+                # Removed 'statistics' (2 units) - not displayed in UI
+                # Removed 'contentDetails' (2 units) - duration fetched via yt-dlp
                 response = self.youtube_client.videos().list(
-                    part='snippet,statistics,contentDetails',
+                    part='snippet',  # Only 3 units total (1 base + 2 snippet)
                     id=video_id,
-                    fields='items(id,snippet(title,description,channelTitle,publishedAt,thumbnails),statistics(viewCount,likeCount,commentCount),contentDetails(duration))'
+                    fields='items(id,snippet(title,description,channelTitle,publishedAt,thumbnails))'
                 ).execute()
+                
+                # Track quota usage
+                if QUOTA_TRACKING:
+                    quota_tracker.add_usage(3, f"videos.list(snippet) for {video_id}")
                 
                 if not response.get('items'):
                     return None
                 
                 item = response['items'][0]
                 snippet = item.get('snippet', {})
-                statistics = item.get('statistics', {})
-                content_details = item.get('contentDetails', {})
-                
-                # Parse duration from ISO 8601 format (PT15M33S)
-                duration = self._parse_iso8601_duration(content_details.get('duration', 'PT0S'))
                 
                 # Parse upload date
                 upload_date = None
@@ -188,11 +219,11 @@ class YouTubeMetadataService:
                     'title': snippet.get('title', 'Unknown Title'),
                     'description': snippet.get('description', ''),
                     'channel_name': snippet.get('channelTitle', 'Unknown Channel'),
-                    'view_count': int(statistics.get('viewCount', 0)),
-                    'like_count': int(statistics.get('likeCount', 0)),
-                    'comment_count': int(statistics.get('commentCount', 0)),
+                    'view_count': 0,  # Not fetched to save quota (statistics part = 2 units)
+                    'like_count': 0,  # Not fetched to save quota
+                    'comment_count': 0,  # Not fetched to save quota
                     'upload_date': upload_date,
-                    'duration': duration,
+                    'duration': 0,  # Will be fetched via yt-dlp
                     'thumbnail_url': thumbnail_url
                 }
             except HttpError as e:
