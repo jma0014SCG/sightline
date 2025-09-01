@@ -64,14 +64,19 @@ class YouTubeMetadataService:
             except Exception as e:
                 logger.warning(f"⚠️ Redis initialization failed, using in-memory cache: {str(e)}")
         
-        # Configure yt-dlp options
+        # Configure yt-dlp options with better error handling
         self.ydl_opts = {
             'quiet': True,
-            'no_warnings': True,
+            'no_warnings': False,  # Enable warnings to see issues
             'extract_flat': False,
             'skip_download': True,
-            'retries': 3,
-            'fragment_retries': 3,
+            'retries': 5,  # Increase retries
+            'fragment_retries': 5,
+            'ignoreerrors': False,
+            'no_check_certificate': True,  # Skip certificate verification for reliability
+            'prefer_insecure': True,  # Use HTTP if HTTPS fails
+            'geo_bypass': True,  # Bypass geographic restrictions
+            'nocheckcertificate': True,
         }
     
     async def get_metadata(self, video_id: str) -> Dict[str, Any]:
@@ -97,18 +102,9 @@ class YouTubeMetadataService:
         
         metadata = None
         
-        # Try YouTube Data API first
-        if self.youtube_client:
-            try:
-                logger.info(f"🔄 Fetching metadata via YouTube Data API for {video_id}")
-                metadata = await self._fetch_via_youtube_api(video_id)
-                if metadata:
-                    logger.info(f"✅ Successfully fetched metadata via YouTube Data API")
-            except Exception as e:
-                logger.warning(f"⚠️ YouTube Data API failed: {str(e)}")
-        
-        # Fallback to yt-dlp
-        if not metadata and YTDLP_AVAILABLE:
+        # TEMPORARY FIX: Try yt-dlp first since YouTube API key is invalid
+        # yt-dlp doesn't require an API key and is more reliable
+        if YTDLP_AVAILABLE:
             try:
                 logger.info(f"🔄 Fetching metadata via yt-dlp for {video_id}")
                 metadata = await self._fetch_via_ytdlp(video_id)
@@ -116,6 +112,16 @@ class YouTubeMetadataService:
                     logger.info(f"✅ Successfully fetched metadata via yt-dlp")
             except Exception as e:
                 logger.warning(f"⚠️ yt-dlp failed: {str(e)}")
+        
+        # Fallback to YouTube Data API (currently broken due to invalid API key)
+        if not metadata and self.youtube_client:
+            try:
+                logger.info(f"🔄 Attempting YouTube Data API for {video_id} (may fail due to invalid key)")
+                metadata = await self._fetch_via_youtube_api(video_id)
+                if metadata:
+                    logger.info(f"✅ Successfully fetched metadata via YouTube Data API")
+            except Exception as e:
+                logger.warning(f"⚠️ YouTube Data API failed (expected): {str(e)}")
         
         # If we got metadata, cache it
         if metadata:
@@ -192,6 +198,11 @@ class YouTubeMetadataService:
             except HttpError as e:
                 if e.resp.status == 403:
                     logger.error(f"❌ YouTube API quota exceeded or API key invalid")
+                    logger.error(f"   Details: {e.error_details if hasattr(e, 'error_details') else 'No details'}")
+                elif e.resp.status == 400:
+                    logger.error(f"❌ YouTube API key is invalid or not configured properly")
+                    logger.error(f"   Error: {str(e)}")
+                    logger.error(f"   Solution: Get a new API key from Google Cloud Console")
                 else:
                     logger.error(f"❌ YouTube API error: {str(e)}")
                 return None
