@@ -306,25 +306,36 @@ export const summaryRouter = createTRPCRouter({
           }
         )
 
-        // Classify summary content asynchronously with timeout protection
-        // Use a timeout wrapper to prevent indefinite hanging
-        const classificationTimeout = 45000 // 45 seconds to work within Vercel limit
-        const classificationPromise = Promise.race([
-          classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
-          new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('Classification timeout after 45 seconds')), classificationTimeout)
-          )
-        ])
+        // Classify summary content with proper await and timeout protection
+        // Run classification in background but ensure it completes
+        const classificationTimeout = 40000 // 40 seconds to work within Vercel limit
         
-        classificationPromise
-          .catch((error) => {
-            // Log error but don't let it affect the main flow
-            logger.error('Classification failed for anonymous summary', { 
-              summaryId: summary.id, 
-              error: error instanceof Error ? error.message : 'Unknown error',
-              isTimeout: error instanceof Error && error.message.includes('timeout')
-            })
+        // Start classification immediately after summary creation
+        const classificationPromise = classifySummaryContent(
+          summary.id, 
+          sanitizedContent, 
+          sanitizedTitle
+        )
+        
+        // Set up timeout wrapper
+        const timeoutPromise = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('Classification timeout after 40 seconds')), classificationTimeout)
+        )
+        
+        // Wait for classification to complete (with timeout)
+        try {
+          await Promise.race([classificationPromise, timeoutPromise])
+          logger.info('Classification completed successfully for anonymous summary', { 
+            summaryId: summary.id 
           })
+        } catch (error) {
+          // Log error but don't let it affect the main flow
+          logger.error('Classification failed for anonymous summary', { 
+            summaryId: summary.id, 
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isTimeout: error instanceof Error && error.message.includes('timeout')
+          })
+        }
 
         // Track successful summary creation metrics
         const summaryEndTime = Date.now()
@@ -774,26 +785,38 @@ export const summaryRouter = createTRPCRouter({
           }
         }
 
-        // Classify summary content asynchronously with timeout protection
-        // Use a timeout wrapper to prevent indefinite hanging
-        const classificationTimeout = 45000 // 45 seconds to work within Vercel limit
-        const classificationPromise = Promise.race([
-          classifySummaryContent(summary.id, sanitizedContent, sanitizedTitle),
-          new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('Classification timeout after 45 seconds')), classificationTimeout)
-          )
-        ])
+        // Classify summary content with proper await and timeout protection
+        // Run classification in background but ensure it completes
+        const classificationTimeout = 40000 // 40 seconds to work within Vercel limit
         
-        classificationPromise
-          .catch((error) => {
-            // Log error but don't let it affect the main flow
-            logger.error('Classification failed for authenticated summary', { 
-              summaryId: summary.id, 
-              userId,
-              error: error instanceof Error ? error.message : 'Unknown error',
-              isTimeout: error instanceof Error && error.message.includes('timeout')
-            })
+        // Start classification immediately after summary creation
+        const classificationPromise = classifySummaryContent(
+          summary.id, 
+          sanitizedContent, 
+          sanitizedTitle
+        )
+        
+        // Set up timeout wrapper
+        const timeoutPromise = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('Classification timeout after 40 seconds')), classificationTimeout)
+        )
+        
+        // Wait for classification to complete (with timeout)
+        try {
+          await Promise.race([classificationPromise, timeoutPromise])
+          logger.info('Classification completed successfully for authenticated summary', { 
+            summaryId: summary.id,
+            userId 
           })
+        } catch (error) {
+          // Log error but don't let it affect the main flow
+          logger.error('Classification failed for authenticated summary', { 
+            summaryId: summary.id, 
+            userId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isTimeout: error instanceof Error && error.message.includes('timeout')
+          })
+        }
 
         // Track successful summary creation metrics
         const summaryEndTime = Date.now()

@@ -93,18 +93,18 @@ class YouTubeMetadataService:
         """
         Get comprehensive video metadata with caching
         
-        OPTIMIZATION: Uses yt-dlp as primary source (no quota cost)
-        Falls back to YouTube API with minimal parts (3 units instead of 7)
+        PRIMARY: YouTube Data API with minimal parts (3 units)
+        FALLBACK: yt-dlp (no quota cost but may be slower/less reliable)
         
         Returns normalized metadata dictionary with fields:
         - title
         - description
         - channel_name
-        - view_count (from yt-dlp only)
-        - like_count (from yt-dlp only)
-        - comment_count (from yt-dlp only)
+        - view_count (0 if not fetched to save quota)
+        - like_count (0 if not fetched to save quota)
+        - comment_count (0 if not fetched to save quota)
         - upload_date
-        - duration (from yt-dlp only)
+        - duration (from yt-dlp if available)
         - thumbnail_url
         """
         # Check cache first
@@ -114,37 +114,47 @@ class YouTubeMetadataService:
             return cached_data
         
         metadata = None
-        yt_dlp_metadata = None
         api_metadata = None
+        yt_dlp_metadata = None
         
-        # PRIMARY: Try yt-dlp first (NO QUOTA COST)
-        # yt-dlp provides all data including duration, views, likes
-        if YTDLP_AVAILABLE:
+        # PRIMARY: YouTube Data API with MINIMAL parts (3 units only)
+        if self.youtube_client:
             try:
-                logger.info(f"🔄 Fetching metadata via yt-dlp for {video_id} (0 quota units)")
-                yt_dlp_metadata = await self._fetch_via_ytdlp(video_id)
-                if yt_dlp_metadata:
-                    logger.info(f"✅ Successfully fetched ALL metadata via yt-dlp (0 quota units used)")
-                    metadata = yt_dlp_metadata
-            except Exception as e:
-                logger.warning(f"⚠️ yt-dlp failed: {str(e)}")
-        
-        # FALLBACK: YouTube Data API with MINIMAL parts (3 units only)
-        # Only use if yt-dlp completely fails
-        if not metadata and self.youtube_client:
-            try:
-                logger.info(f"🔄 Attempting YouTube Data API for {video_id} (3 quota units)")
+                logger.info(f"🔄 Fetching metadata via YouTube Data API for {video_id} (3 quota units)")
                 api_metadata = await self._fetch_via_youtube_api(video_id)
                 if api_metadata:
-                    logger.info(f"✅ Got basic metadata via YouTube API (3 quota units used)")
-                    # If we have both, merge them (prefer yt-dlp for stats/duration)
-                    if yt_dlp_metadata:
-                        api_metadata['duration'] = yt_dlp_metadata.get('duration', 0)
-                        api_metadata['view_count'] = yt_dlp_metadata.get('view_count', 0)
-                        api_metadata['like_count'] = yt_dlp_metadata.get('like_count', 0)
+                    logger.info(f"✅ Successfully fetched metadata via YouTube API (3 quota units used)")
                     metadata = api_metadata
             except Exception as e:
                 logger.warning(f"⚠️ YouTube Data API failed: {str(e)}")
+        
+        # FALLBACK: Try yt-dlp if YouTube API fails or is unavailable
+        if not metadata and YTDLP_AVAILABLE:
+            try:
+                logger.info(f"🔄 Falling back to yt-dlp for {video_id} (0 quota units)")
+                yt_dlp_metadata = await self._fetch_via_ytdlp(video_id)
+                if yt_dlp_metadata:
+                    logger.info(f"✅ Successfully fetched metadata via yt-dlp fallback (0 quota units used)")
+                    metadata = yt_dlp_metadata
+            except Exception as e:
+                logger.warning(f"⚠️ yt-dlp fallback also failed: {str(e)}")
+        
+        # If YouTube API worked but we want duration/stats from yt-dlp, try to enrich
+        if metadata and api_metadata and YTDLP_AVAILABLE:
+            try:
+                # Try to get additional data from yt-dlp without blocking
+                logger.info(f"🔄 Attempting to enrich metadata with yt-dlp for {video_id}")
+                yt_dlp_enrichment = await self._fetch_via_ytdlp(video_id)
+                if yt_dlp_enrichment:
+                    # Add duration and stats from yt-dlp if available
+                    metadata['duration'] = yt_dlp_enrichment.get('duration', metadata.get('duration', 0))
+                    metadata['view_count'] = yt_dlp_enrichment.get('view_count', metadata.get('view_count', 0))
+                    metadata['like_count'] = yt_dlp_enrichment.get('like_count', metadata.get('like_count', 0))
+                    metadata['comment_count'] = yt_dlp_enrichment.get('comment_count', metadata.get('comment_count', 0))
+                    logger.info(f"✅ Enriched metadata with yt-dlp data")
+            except Exception as e:
+                # Don't fail if enrichment fails, we already have basic metadata
+                logger.warning(f"⚠️ yt-dlp enrichment failed, using API data only: {str(e)}")
         
         # If we got metadata, cache it
         if metadata:
@@ -179,8 +189,8 @@ class YouTubeMetadataService:
                         return None
                 
                 # OPTIMIZED: Only request 'snippet' to reduce quota usage from 7 to 3 units
-                # Removed 'statistics' (2 units) - not displayed in UI
-                # Removed 'contentDetails' (2 units) - duration fetched via yt-dlp
+                # Removed 'statistics' (2 units) - can be fetched via yt-dlp enrichment
+                # Removed 'contentDetails' (2 units) - can be fetched via yt-dlp enrichment
                 response = self.youtube_client.videos().list(
                     part='snippet',  # Only 3 units total (1 base + 2 snippet)
                     id=video_id,

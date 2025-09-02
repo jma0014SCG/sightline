@@ -86,6 +86,44 @@ else:
 async def health_check():
     return {"status": "healthy", "service": "sightline-api"}
 
+# Get server IP endpoint (for debugging)
+@app.get("/api/server-ip")
+async def get_server_ip():
+    """Get the server's public IP address for API key restriction"""
+    try:
+        import requests
+        # Try multiple services for redundancy
+        try:
+            response = requests.get('https://api.ipify.org?format=json', timeout=5)
+            ip_data = response.json()
+            public_ip = ip_data['ip']
+            source = "ipify"
+        except:
+            try:
+                response = requests.get('https://ifconfig.me/ip', timeout=5)
+                public_ip = response.text.strip()
+                source = "ifconfig.me"
+            except:
+                response = requests.get('https://ipinfo.io/json', timeout=5)
+                ip_data = response.json()
+                public_ip = ip_data.get('ip')
+                source = "ipinfo.io"
+        
+        return {
+            "public_ip": public_ip,
+            "source": source,
+            "instructions": {
+                "1": "Go to https://console.cloud.google.com/apis/credentials",
+                "2": "Click on your YouTube API key",
+                "3": "Under 'Application restrictions', select 'IP addresses'",
+                "4": f"Add this IP: {public_ip}",
+                "5": "Click 'Save'"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Failed to get server IP: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Could not determine server IP: {str(e)}")
+
 # Root endpoint
 @app.get("/api")
 async def root():
@@ -141,6 +179,17 @@ async def debug_progress(task_id: str):
 async def startup_event():
     """Initialize progress storage and schedule cleanup."""
     await progress_storage.init()
+    
+    # Log server IP address for API key restriction
+    try:
+        import requests
+        public_ip = requests.get('https://api.ipify.org?format=json', timeout=5).json()['ip']
+        print(f"🌐 Server Public IP: {public_ip}")
+        print(f"   Use this IP for YouTube API key restrictions in Google Cloud Console")
+        logger.info(f"Server Public IP: {public_ip}")
+    except Exception as e:
+        print(f"⚠️ Could not detect public IP: {str(e)}")
+        logger.warning(f"Could not detect public IP: {str(e)}")
     
     # Run cleanup on startup
     deleted_count = await progress_storage.cleanup_expired()

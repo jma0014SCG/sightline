@@ -29,8 +29,8 @@ function getOpenAIClient(): OpenAI | null {
       openai = new OpenAI({ 
         apiKey: process.env.OPENAI_API_KEY,
         // Reduced timeout to work within Vercel's 60-second limit
-        timeout: 45000, // 45 seconds (leaving 15 seconds buffer for Vercel)
-        maxRetries: 2, // Reduced retries to stay within time limit
+        timeout: 35000, // 35 seconds (leaving buffer for Vercel and database operations)
+        maxRetries: 1, // Single retry to stay within time limit
       })
     } catch (error) {
       logger.error('Failed to initialize OpenAI client', { error })
@@ -165,6 +165,7 @@ Respond with ONLY a valid JSON object in this format:
 }`
 
     console.log('🏷️ [CLASSIFICATION] Sending request to OpenAI...')
+    const startTime = Date.now()
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini", // Using the faster, cheaper model for classification
       messages: [{ role: "user", content: prompt }],
@@ -173,8 +174,11 @@ Respond with ONLY a valid JSON object in this format:
       max_tokens: 500
     }, {
       // Reduced timeout to work within Vercel's 60-second limit
-      timeout: 40000, // 40 seconds (leaving buffer for Vercel)
+      timeout: 35000, // 35 seconds (leaving buffer for Vercel and database operations)
     })
+    
+    const apiDuration = Date.now() - startTime
+    console.log(`🏷️ [CLASSIFICATION] OpenAI API call took ${apiDuration}ms`)
 
     console.log('🏷️ [CLASSIFICATION] Received response from OpenAI')
 
@@ -259,8 +263,8 @@ Respond with ONLY a valid JSON object in this format:
         console.log('🏷️ [CLASSIFICATION] Tags connected successfully')
       }
     }, {
-      maxWait: 10000, // Maximum time to wait for a transaction slot (10 seconds)
-      timeout: 10000, // Maximum time the transaction can run (10 seconds)
+      maxWait: 5000, // Maximum time to wait for a transaction slot (5 seconds)
+      timeout: 5000, // Maximum time the transaction can run (5 seconds)
     })
 
     console.log('🏷️ [CLASSIFICATION] Database transaction completed successfully')
