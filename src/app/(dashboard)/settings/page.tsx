@@ -9,7 +9,8 @@ import {
   Save, 
   AlertTriangle,
   CheckCircle,
-  Loader2
+  Loader2,
+  XCircle
 } from 'lucide-react'
 // import { api } from '@/components/providers/TRPCProvider' // Temporarily disabled for deployment
 import { api } from '@/components/providers/TRPCProvider'
@@ -21,6 +22,8 @@ export default function SettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // Queries
   const { data: user, isLoading: userLoading } = api.auth.getCurrentUser.useQuery()
@@ -66,6 +69,12 @@ export default function SettingsPage() {
     setTimeout(() => setShowSuccess(false), 3000)
   }
 
+  const showErrorMessage = (message: string) => {
+    setSuccessMessage(message)
+    setShowSuccess(true)
+    setTimeout(() => setShowSuccess(false), 5000)
+  }
+
   const handleProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -80,21 +89,34 @@ export default function SettingsPage() {
 
   const handleExportData = async () => {
     try {
-      const data = await exportData.refetch()
-      if (data.data) {
-        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `sightline-data-export-${new Date().toISOString().split('T')[0]}.json`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-        showSuccessMessage('Data exported successfully!')
+      const result = await exportData.refetch()
+      
+      if (result.error) {
+        console.error('Export error:', result.error)
+        showErrorMessage('Failed to export data. Please try again or contact support.')
+        return
       }
+      
+      if (!result.data) {
+        console.error('No data returned from export')
+        showErrorMessage('No data available to export. Please try again later.')
+        return
+      }
+      
+      // Create and download the file
+      const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `sightline-data-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      showSuccessMessage('Data exported successfully!')
     } catch (error) {
       console.error('Failed to export data:', error)
+      showErrorMessage('An error occurred while exporting your data. Please try again.')
     }
   }
 
@@ -130,6 +152,16 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <p className="text-sm text-green-800">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Alert */}
+      {showError && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="flex items-center gap-3">
+            <XCircle className="h-5 w-5 text-red-600" />
+            <p className="text-sm text-red-800">{errorMessage}</p>
           </div>
         </div>
       )}

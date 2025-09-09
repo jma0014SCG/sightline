@@ -181,12 +181,26 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
           })
           
           console.log(`Auto-created minimal user in database: ${ctx.userId}`)
-        } catch (error) {
-          console.error('Failed to create user in database:', error)
-          throw new TRPCError({ 
-            code: 'INTERNAL_SERVER_ERROR', 
-            message: 'Failed to initialize user account' 
-          })
+        } catch (error: any) {
+          // If user already exists (race condition), fetch it
+          if (error.code === 'P2002') {
+            user = await ctx.prisma.user.findUnique({
+              where: { id: ctx.userId }
+            })
+            if (!user) {
+              console.error('Failed to create or find user:', error)
+              throw new TRPCError({ 
+                code: 'INTERNAL_SERVER_ERROR', 
+                message: 'Failed to initialize user account' 
+              })
+            }
+          } else {
+            console.error('Failed to create user in database:', error)
+            throw new TRPCError({ 
+              code: 'INTERNAL_SERVER_ERROR', 
+              message: 'Failed to initialize user account' 
+            })
+          }
         }
       }
       

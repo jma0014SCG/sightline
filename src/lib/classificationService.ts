@@ -28,8 +28,8 @@ function getOpenAIClient(): OpenAI | null {
     try {
       openai = new OpenAI({ 
         apiKey: process.env.OPENAI_API_KEY,
-        // Reduced timeout to work within Vercel's 60-second limit
-        timeout: 35000, // 35 seconds (leaving buffer for Vercel and database operations)
+        // Increased timeout to allow more time for classification
+        timeout: 55000, // 55 seconds (within Vercel's 60s limit)
         maxRetries: 1, // Single retry to stay within time limit
       })
     } catch (error) {
@@ -173,8 +173,8 @@ Respond with ONLY a valid JSON object in this format:
       temperature: 0.1, // Low temperature for consistent classification
       max_tokens: 500
     }, {
-      // Reduced timeout to work within Vercel's 60-second limit
-      timeout: 35000, // 35 seconds (leaving buffer for Vercel and database operations)
+      // Increased timeout to allow more time for classification
+      timeout: 55000, // 55 seconds (within Vercel's 60s limit)
     })
     
     const apiDuration = Date.now() - startTime
@@ -263,8 +263,8 @@ Respond with ONLY a valid JSON object in this format:
         console.log('🏷️ [CLASSIFICATION] Tags connected successfully')
       }
     }, {
-      maxWait: 5000, // Maximum time to wait for a transaction slot (5 seconds)
-      timeout: 5000, // Maximum time the transaction can run (5 seconds)
+      maxWait: 10000, // Maximum time to wait for a transaction slot (10 seconds)
+      timeout: 10000, // Maximum time the transaction can run (10 seconds)
     })
 
     console.log('🏷️ [CLASSIFICATION] Database transaction completed successfully')

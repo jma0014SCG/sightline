@@ -308,7 +308,7 @@ export const summaryRouter = createTRPCRouter({
 
         // Classify summary content with proper await and timeout protection
         // Run classification in background but ensure it completes
-        const classificationTimeout = 40000 // 40 seconds to work within Vercel limit
+        const classificationTimeout = 58000 // 58 seconds to work within Vercel's 60s limit
         
         // Start classification immediately after summary creation
         const classificationPromise = classifySummaryContent(
@@ -787,7 +787,7 @@ export const summaryRouter = createTRPCRouter({
 
         // Classify summary content with proper await and timeout protection
         // Run classification in background but ensure it completes
-        const classificationTimeout = 40000 // 40 seconds to work within Vercel limit
+        const classificationTimeout = 58000 // 58 seconds to work within Vercel's 60s limit
         
         // Start classification immediately after summary creation
         const classificationPromise = classifySummaryContent(
@@ -810,10 +810,9 @@ export const summaryRouter = createTRPCRouter({
           })
         } catch (error) {
           // Log error but don't let it affect the main flow
-          logger.error('Classification failed for authenticated summary', { 
+          logger.error('Classification failed for authenticated summary', error, { 
             summaryId: summary.id, 
             userId,
-            error: error instanceof Error ? error.message : 'Unknown error',
             isTimeout: error instanceof Error && error.message.includes('timeout')
           })
         }
